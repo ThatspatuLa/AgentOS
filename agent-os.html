@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zen — Agent OS</title>
+<link rel="stylesheet" href="agent-os.css">
+</head>
+<body>
+
+<div class="os-shell">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="os-sidebar">
+  <div class="os-sidebar-logo">
+    <h1>Zen OS</h1>
+    <span>Agent Dashboard · v2.0</span>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">Main</div>
+    <button class="os-nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="os-nav-icon">🖥️</span> Dashboard
+    </button>
+    <button class="os-nav-item" onclick="showPage('sandbox')" id="nav-sandbox">
+      <span class="os-nav-icon">🧪</span> Sandbox
+      <span class="os-nav-badge" id="sandbox-badge">0</span>
+    </button>
+    <button class="os-nav-item" onclick="showPage('projects')" id="nav-projects">
+      <span class="os-nav-icon">📋</span> Projects
+    </button>
+    <button class="os-nav-item" onclick="showPage('memory')" id="nav-memory">
+      <span class="os-nav-icon">🧠</span> Memory
+    </button>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">Analytics</div>
+    <button class="os-nav-item" onclick="showPage('analytics')" id="nav-analytics">
+      <span class="os-nav-icon">📊</span> ROI & Spend
+    </button>
+    <button class="os-nav-item" onclick="showPage('trends')" id="nav-trends">
+      <span class="os-nav-icon">📈</span> Quality Trends
+    </button>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">System</div>
+    <button class="os-nav-item" onclick="showPage('integrations')" id="nav-integrations">
+      <span class="os-nav-icon">🔗</span> Integrations
+    </button>
+    <button class="os-nav-item" onclick="showPage('system')" id="nav-system">
+      <span class="os-nav-icon">⚙️</span> System Health
+    </button>
+    <button class="os-nav-item" onclick="showPage('runlog')" id="nav-runlog">
+      <span class="os-nav-icon">📰</span> Run Log
+    </button>
+  </div>
+
+  <div class="os-sidebar-footer">
+    <div class="os-session-status">
+      <div class="os-dot green"></div>
+      <span id="session-status">5 channels · 12 sessions active</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="os-main">
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: DASHBOARD (Mission Control)
+       ═══════════════════════════════════════════════ -->
+  <div id="page-dashboard" class="os-page">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Mission Control</h2>
+        <p id="current-time">Sunday, June 7, 2026 · Loading...</p>
+      </div>
+      <div class="os-top-actions">
+        <input type="text" class="os-search" placeholder="Search agents, tasks, sessions...">
+        <button class="os-btn os-btn-primary" onclick="showPage('sandbox')">+ New Task</button>
+      </div>
+    </div>
+
+    <!-- Agent Cards -->
+    <div class="os-agent-grid" id="agent-grid">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Stats Row -->
+    <div class="os-stats-row" id="stats-row">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Two Column: Activity + Projects -->
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Activity Feed</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active" onclick="filterActivity('all', this)">All</button>
+            <button class="os-tab" onclick="filterActivity('zen', this)">Zen</button>
+            <button class="os-tab" onclick="filterActivity('kiyosaki', this)">Kiyosaki</button>
+            <button class="os-tab" onclick="filterActivity('system', this)">System</button>
+          </div>
+        </div>
+        <div class="os-panel-body" id="activity-feed">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Project Status</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active">Overview</button>
+            <button class="os-tab" onclick="showPage('projects')">Tasks</button>
+          </div>
+        </div>
+        <div class="os-panel-body" style="padding:0">
+          <table class="os-table" id="project-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Prompts</th>
+                <th>Quality</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody id="project-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Chart + Discord -->
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Token Spend (7 Days)</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active">Week</button>
+            <button class="os-tab">Month</button>
+            <button class="os-tab">All</button>
+          </div>
+        </div>
+        <div class="os-panel-body">
+          <div class="os-chart-area" id="token-chart">
+            <!-- Populated by JS -->
+          </div>
+          <div class="os-chart-labels" id="token-chart-labels">
+            <!-- Populated by JS -->
+          </div>
+          <div class="flex gap-16 mt-16">
+            <div class="flex gap-8" style="align-items:center;font-size:11px;color:var(--text-muted)">
+              <div style="width:8px;height:8px;border-radius:2px;background:var(--accent)"></div> Zen
+            </div>
+            <div class="flex gap-8" style="align-items:center;font-size:11px;color:var(--text-muted)">
+              <div style="width:8px;height:8px;border-radius:2px;background:var(--green)"></div> Kiyosaki
+            </div>
+            <div style="margin-left:auto;font-size:12px;color:var(--text-secondary)" id="token-total">
+              Total: <strong>$0.00</strong> this week
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Discord Bridge</span>
+        </div>
+        <div class="os-panel-body" id="discord-channels">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Spend -->
+    <div class="os-section">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Model Spend Breakdown</span>
+        </div>
+        <div class="os-panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="model-spend">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: SANDBOX
+       ═══════════════════════════════════════════════ -->
+  <div id="page-sandbox" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Sandbox Command</h2>
+        <p>Prompt queue, review pipeline, and promotion tracking</p>
+      </div>
+      <div class="os-top-actions">
+        <button class="os-btn" onclick="alert('Generate prompts — coming soon')">+ Generate Prompts</button>
+        <button class="os-btn os-btn-primary" onclick="alert('Run sandbox — coming soon')">▶ Run Sandbox</button>
+      </div>
+    </div>
+
+    <!-- Sandbox Stats -->
+    <div class="os-stats-row" id="sandbox-stats">
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Total Prompts</span></div>
+        <div class="os-stat-value" id="sb-total">105</div>
+        <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Completed</span><span class="os-stat-change up">100%</span></div>
+        <div class="os-stat-value" id="sb-completed">105</div>
+        <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Accepted</span><span class="os-stat-change up">14.3%</span></div>
+        <div class="os-stat-value" id="sb-accepted">15</div>
+        <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:14%;background:var(--yellow)"></div></div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Avg Quality</span></div>
+        <div class="os-stat-value" id="sb-quality">4.7</div>
+        <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:94%;background:var(--green)"></div></div>
+      </div>
+    </div>
+
+    <!-- Pipeline View -->
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Prompt Pipeline</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active">All</button>
+            <button class="os-tab">Pending</button>
+            <button class="os-tab">Completed</button>
+            <button class="os-tab">Accepted</button>
+          </div>
+        </div>
+        <div class="os-panel-body" style="padding:0;max-height:400px;overflow-y:auto">
+          <table class="os-table" id="prompt-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Summary</th>
+                <th>Project</th>
+                <th>Quality</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="prompt-tbody">
+              <tr><td colspan="5" class="text-center text-muted" style="padding:40px">Loading prompts from Sandbox/Runs/...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Promotion Log</span>
+        </div>
+        <div class="os-panel-body" style="padding:0;max-height:400px;overflow-y:auto">
+          <table class="os-table">
+            <thead>
+              <tr>
+                <th>Origin</th>
+                <th>Target</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="promotion-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Distribution Chart -->
+    <div class="os-section">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Quality Distribution by Project</span>
+        </div>
+        <div class="os-panel-body">
+          <div id="quality-chart" style="display:flex;gap:20px;align-items:flex-end;height:160px;padding-top:20px;">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: PROJECTS
+       ═══════════════════════════════════════════════ -->
+  <div id="page-projects" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Project Workspaces</h2>
+        <p>All projects, tasks, and cross-project dependencies</p>
+      </div>
+    </div>
+
+    <div class="os-cards-grid" id="project-cards">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Cross-Project Map -->
+    <div class="os-section">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Cross-Project Dependencies</span>
+        </div>
+        <div class="os-panel-body">
+          <div style="display:flex;gap:16px;flex-wrap:wrap;" id="cross-project-map">
+            <div class="os-mini-card" style="min-width:200px">
+              <div class="os-mini-card-title">Zen → Kiyosaki</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Governance layer oversees trading decisions. Conflict resolution: Zen governance > Kiyosaki analysis.</div>
+            </div>
+            <div class="os-mini-card" style="min-width:200px">
+              <div class="os-mini-card-title">Sandbox → All Projects</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Sandbox learnings promoted to project skills, memories, and instructions after acceptance.</div>
+            </div>
+            <div class="os-mini-card" style="min-width:200px">
+              <div class="os-mini-card-title">Discord → All Agents</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Channel-to-session mapping routes messages to the correct agent context.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: MEMORY
+       ═══════════════════════════════════════════════ -->
+  <div id="page-memory" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Memory Browser</h2>
+        <p>Searchable memory across all projects and sessions</p>
+      </div>
+      <div class="os-top-actions">
+        <input type="text" class="os-search" placeholder="Search memories..." style="width:300px" id="memory-search" oninput="filterMemory(this.value)">
+      </div>
+    </div>
+
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">User Profile</span>
+        </div>
+        <div class="os-panel-body" id="memory-user">
+          <div style="font-size:13px;line-height:1.8;color:var(--text-secondary)" id="memory-user-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Environment Facts</span>
+        </div>
+        <div class="os-panel-body" id="memory-env">
+          <div style="font-size:13px;line-height:1.8;color:var(--text-secondary)" id="memory-env-content">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-section">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Project Memories</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active">All</button>
+            <button class="os-tab">Zen</button>
+            <button class="os-tab">Kiyosaki</button>
+          </div>
+        </div>
+        <div class="os-panel-body" id="memory-projects">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: ANALYTICS
+       ═══════════════════════════════════════════════ -->
+  <div id="page-analytics" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Analytics & ROI</h2>
+        <p>Token spend, cost analysis, and return on investment</p>
+      </div>
+    </div>
+
+    <div class="os-stats-row">
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Total Spend (All Time)</span></div>
+        <div class="os-stat-value">$312.40</div>
+        <div class="os-mini-card-sub">Across 3 models · 4.8M tokens</div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Cost per Prompt</span></div>
+        <div class="os-stat-value">$2.97</div>
+        <div class="os-mini-card-sub">105 prompts executed</div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Cost per Accepted Learning</span></div>
+        <div class="os-stat-value">$20.83</div>
+        <div class="os-mini-card-sub">15 learnings promoted</div>
+      </div>
+      <div class="os-stat-card">
+        <div class="os-stat-header"><span class="os-stat-label">Est. Time Saved</span></div>
+        <div class="os-stat-value">47h</div>
+        <div class="os-mini-card-sub">vs manual execution</div>
+      </div>
+    </div>
+
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Spend by Model</span>
+        </div>
+        <div class="os-panel-body">
+          <div id="analytics-models">
+            <div class="os-model-item">
+              <div class="os-model-info"><div class="os-model-dot" style="background:var(--accent)"></div><div class="os-model-name">openrouter/owl-alpha</div></div>
+              <div><div class="os-model-tokens">2.4M tokens</div><div class="os-model-cost">$28.70</div></div>
+            </div>
+            <div class="os-model-item">
+              <div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">anthropic/claude-sonnet-4</div></div>
+              <div><div class="os-model-tokens">1.8M tokens</div><div class="os-model-cost">$14.20</div></div>
+            </div>
+            <div class="os-model-item">
+              <div class="os-model-info"><div class="os-model-dot" style="background:var(--purple)"></div><div class="os-model-name">openai/gpt-4o</div></div>
+              <div><div class="os-model-tokens">0.6M tokens</div><div class="os-model-cost">$4.93</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Spend by Project</span>
+        </div>
+        <div class="os-panel-body">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Zen</span><span>$28.70 (60%)</span></div>
+              <div class="os-progress"><div class="os-progress-fill" style="width:60%;background:var(--accent)"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Kiyosaki</span><span>$14.20 (30%)</span></div>
+              <div class="os-progress"><div class="os-progress-fill" style="width:30%;background:var(--green)"></div></div>
+            </div>
+            <div>
+              <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Other</span><span>$4.93 (10%)</span></div>
+              <div class="os-progress"><div class="os-progress-fill" style="width:10%;background:var(--purple)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: QUALITY TRENDS
+       ═══════════════════════════════════════════════ -->
+  <div id="page-trends" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Quality Trends</h2>
+        <p>Sandbox output quality over time, by project and prompt type</p>
+      </div>
+    </div>
+
+    <div class="os-panel">
+      <div class="os-panel-header">
+        <span class="os-panel-title">Quality Score Distribution</span>
+      </div>
+      <div class="os-panel-body">
+        <div style="display:flex;gap:8px;align-items:flex-end;height:200px;padding-top:20px;" id="quality-bars">
+          <!-- Populated by JS -->
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;" id="quality-labels">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: INTEGRATIONS
+       ═══════════════════════════════════════════════ -->
+  <div id="page-integrations" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Integration Hub</h2>
+        <p>Discord bridges, channel mappings, and delivery status</p>
+      </div>
+    </div>
+
+    <div class="os-cards-grid">
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Discord Channels</span></div>
+        <div class="os-panel-body" id="integrations-discord">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Channel → Session Mapping</span></div>
+        <div class="os-panel-body">
+          <table class="os-table">
+            <thead><tr><th>Channel</th><th>Agent</th><th>Session</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>#zen-chat</td><td>Zen</td><td>default</td><td><span class="os-badge active">● Active</span></td></tr>
+              <tr><td>#kiyosaki</td><td>Kiyosaki</td><td>kiyosaki</td><td><span class="os-badge active">● Active</span></td></tr>
+              <tr><td>#toji</td><td>Toji</td><td>toji</td><td><span class="os-badge idle">○ Idle</span></td></tr>
+              <tr><td>#rin</td><td>Rin</td><td>rin</td><td><span class="os-badge idle">○ Idle</span></td></tr>
+              <tr><td>#minato</td><td>Minato</td><td>minato</td><td><span class="os-badge idle">○ Idle</span></td></tr>
+              <tr><td>#kazuki</td><td>Kazuki</td><td>kazuki</td><td><span class="os-badge idle">○ Idle</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Delivery Log</span></div>
+        <div class="os-panel-body" style="max-height:300px;overflow-y:auto">
+          <div class="os-activity-item">
+            <div class="os-activity-dot-wrap"><div class="os-activity-dot" style="background:var(--green)"></div><div class="os-activity-line"></div></div>
+            <div class="os-activity-content">
+              <div class="os-activity-text"><strong>Zen</strong> → #zen-chat · Agent OS Dashboard prototype delivered</div>
+              <div class="os-activity-time">Just now</div>
+            </div>
+          </div>
+          <div class="os-activity-item">
+            <div class="os-activity-dot-wrap"><div class="os-activity-dot" style="background:var(--accent)"></div><div class="os-activity-line"></div></div>
+            <div class="os-activity-content">
+              <div class="os-activity-text"><strong>Zen</strong> → #zen-chat · Sandbox review results persisted</div>
+              <div class="os-activity-time">1h ago</div>
+            </div>
+          </div>
+          <div class="os-activity-item">
+            <div class="os-activity-dot-wrap"><div class="os-activity-dot" style="background:var(--green)"></div></div>
+            <div class="os-activity-content">
+              <div class="os-activity-text"><strong>Kiyosaki</strong> → #kiyosaki · Batch completion summary</div>
+              <div class="os-activity-time">3h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: SYSTEM HEALTH
+       ═══════════════════════════════════════════════ -->
+  <div id="page-system" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>System Health</h2>
+        <p>Cron jobs, model providers, sessions, and configuration</p>
+      </div>
+    </div>
+
+    <div class="os-cards-grid">
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Model Providers</span></div>
+        <div class="os-panel-body">
+          <div class="os-model-item">
+            <div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">OpenRouter (owl-alpha)</div></div>
+            <div class="os-badge active">● Online</div>
+          </div>
+          <div class="os-model-item">
+            <div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">Anthropic (claude-sonnet-4)</div></div>
+            <div class="os-badge active">● Online</div>
+          </div>
+          <div class="os-model-item">
+            <div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">OpenAI (gpt-4o)</div></div>
+            <div class="os-badge active">● Online</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Cron Jobs</span></div>
+        <div class="os-panel-body">
+          <div class="os-model-item">
+            <div class="os-model-info"><div class="os-model-dot" style="background:var(--text-muted)"></div><div class="os-model-name">sandbox-overnight</div></div>
+            <div class="os-badge idle">○ Stopped</div>
+          </div>
+          <div class="os-model-item">
+            <div class="os-model-info"><div class="os-model-dot" style="background:var(--text-muted)"></div><div class="os-model-name">daily-checkpoint</div></div>
+            <div class="os-badge idle">○ Not scheduled</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Vault Status</span></div>
+        <div class="os-panel-body">
+          <div class="os-mini-card-title">Obsidian ZenVault</div>
+          <div style="font-size:20px;font-weight:700;margin:8px 0 4px;">101 files</div>
+          <div style="font-size:11px;color:var(--text-muted)">Sandbox/Runs/ · Last write: 2m ago</div>
+          <div class="os-progress" style="margin-top:12px"><div class="os-progress-fill" style="width:72%;background:var(--green)"></div></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Git: 8 commits · Up to date</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PAGE: RUN LOG
+       ═══════════════════════════════════════════════ -->
+  <div id="page-runlog" class="os-page" style="display:none">
+
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Run Log</h2>
+        <p>Chronological event log of all sandbox runs and system events</p>
+      </div>
+    </div>
+
+    <div class="os-panel">
+      <div class="os-panel-header">
+        <span class="os-panel-title">Event History</span>
+        <div class="os-tab-bar">
+          <button class="os-tab active">All</button>
+          <button class="os-tab">Sandbox</button>
+          <button class="os-tab">System</button>
+          <button class="os-tab">Errors</button>
+        </div>
+      </div>
+      <div class="os-panel-body" id="run-log-body">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end os-main -->
+</div><!-- end os-shell -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ZEN AGENT OS — JavaScript Engine
+// ═══════════════════════════════════════════════════════════
+
+// ── Navigation ──
+function showPage(pageId) {
+  document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).style.display = 'block';
+  const nav = document.getElementById('nav-' + pageId);
+  if (nav) nav.classList.add('active');
+}
+
+// ── Time ──
+function updateTime() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options) + ' · Live';
+}
+updateTime();
+setInterval(updateTime, 30000);
+
+// ── Agent Data ──
+const agents = [
+  {
+    id: 'zen', name: 'Zen', avatar: '🦉', color: 'zen',
+    status: 'active', statusColor: 'var(--green)',
+    task: 'Building Agent OS Dashboard · Reviewing sandbox promotions',
+    stats: [{ label: '15', sub: 'accepted' }, { label: '87', sub: 'reviewed' }]
+  },
+  {
+    id: 'kiyosaki', name: 'Kiyosaki', avatar: '📊', color: 'kiyosaki',
+    status: 'active', statusColor: 'var(--green)',
+    task: 'ETH 5M ensemble design · Awaiting prompting phase',
+    stats: [{ label: '68', sub: 'prompts' }, { label: '4.7', sub: 'avg quality' }]
+  },
+  {
+    id: 'toji', name: 'Toji', avatar: '⚡', color: 'toji',
+    status: 'idle', statusColor: 'var(--text-muted)',
+    task: 'Waiting for assignment · No active tasks',
+    stats: [{ label: '0', sub: 'prompts' }, { label: '—', sub: '' }]
+  },
+  {
+    id: 'rin', name: 'Rin', avatar: '🎯', color: 'rin',
+    status: 'idle', statusColor: 'var(--text-muted)',
+    task: 'Waiting for assignment · No active tasks',
+    stats: [{ label: '0', sub: 'prompts' }, { label: '—', sub: '' }]
+  },
+  {
+    id: 'minato', name: 'Minato', avatar: '🔧', color: 'minato',
+    status: 'idle', statusColor: 'var(--text-muted)',
+    task: 'Waiting for assignment · No active tasks',
+    stats: [{ label: '0', sub: 'prompts' }, { label: '—', sub: '' }]
+  },
+  {
+    id: 'kazuki', name: 'Kazuki', avatar: '🛡️', color: 'kazuki',
+    status: 'idle', statusColor: 'var(--text-muted)',
+    task: 'Waiting for assignment · No active tasks',
+    stats: [{ label: '0', sub: 'prompts' }, { label: '—', sub: '' }]
+  }
+];
+
+function renderAgents() {
+  const grid = document.getElementById('agent-grid');
+  grid.innerHTML = agents.map(a => `
+    <div class="os-agent-card ${a.color}" onclick="showPage('projects')">
+      <div class="os-agent-header">
+        <div class="os-agent-avatar">${a.avatar}</div>
+        <div class="os-agent-name">${a.name}</div>
+      </div>
+      <div class="os-agent-status">
+        <div class="os-dot" style="background:${a.statusColor};${a.status==='active'?'box-shadow:0 0 6px '+a.statusColor:''}"></div>
+        ${a.status === 'active' ? 'Active' : 'Idle'}
+      </div>
+      <div class="os-agent-task">${a.task}</div>
+      <div class="os-agent-stats">
+        ${a.stats.map(s => `<div class="os-agent-stat"><strong>${s.label}</strong> ${s.sub}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Stats ──
+const statsData = [
+  { label: 'Token Spend Today', value: '$47.83', change: '↓ 12%', changeDir: 'up', barWidth: 65, barColor: 'var(--accent)' },
+  { label: 'Prompts Executed', value: '105', change: '+100', changeDir: 'up', barWidth: 100, barColor: 'var(--green)' },
+  { label: 'Acceptance Rate', value: '14.3%', change: '15/82', changeDir: 'up', barWidth: 14, barColor: 'var(--yellow)' },
+  { label: 'Active Sessions', value: '12', change: '6 channels', changeDir: 'up', barWidth: 40, barColor: 'var(--purple)' }
+];
+
+function renderStats() {
+  document.getElementById('stats-row').innerHTML = statsData.map(s => `
+    <div class="os-stat-card">
+      <div class="os-stat-header">
+        <span class="os-stat-label">${s.label}</span>
+        <span class="os-stat-change ${s.changeDir}">${s.change}</span>
+      </div>
+      <div class="os-stat-value">${s.value}</div>
+      <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${s.barWidth}%;background:${s.barColor}"></div></div>
+    </div>
+  `).join('');
+}
+
+// ── Activity Feed ──
+const activities = [
+  { agent: 'Zen', color: 'var(--accent)', text: 'promoted 12 sandbox learnings to production — skill, memory, dashboard updated', time: '3m ago' },
+  { agent: 'Zen', color: 'var(--green)', text: 'completed flashcard review session — 82 items processed, 12 accepted, 70 rejected', time: '18m ago' },
+  { agent: 'System', color: 'var(--yellow)', text: 'SB Prompt Index rebuilt — 101 detail files indexed, 0 pending review', time: '22m ago' },
+  { agent: 'Kiyosaki', color: 'var(--purple)', text: 'sandbox batch complete — 68 prompts executed, 4.7 avg quality score', time: '2h ago' },
+  { agent: 'Zen', color: 'var(--cyan)', text: 'created SB Health Dashboard — 6-project health monitor with color-coded status', time: '3h ago' },
+  { agent: 'System', color: 'var(--red)', text: 'YAML frontmatter errors detected in 3 detail files — auto-repaired', time: '4h ago' },
+  { agent: 'Zen', color: 'var(--green)', text: 'initialized git repo in ZenVault — 136 files committed as checkpoint', time: '5h ago' },
+  { agent: 'Zen', color: 'var(--accent)', text: 'moved SB Promotion Log and Run Log to backend — Obsidian stubs removed', time: '6h ago' },
+];
+
+function renderActivity(filter) {
+  const feed = document.getElementById('activity-feed');
+  const filtered = filter === 'all' ? activities : activities.filter(a => a.agent.toLowerCase() === filter);
+  feed.innerHTML = filtered.map((a, i) => `
+    <div class="os-activity-item">
+      <div class="os-activity-dot-wrap">
+        <div class="os-activity-dot" style="background:${a.color}"></div>
+        ${i < filtered.length - 1 ? '<div class="os-activity-line"></div>' : ''}
+      </div>
+      <div class="os-activity-content">
+        <div class="os-activity-text"><strong>${a.agent}</strong> ${a.text}</div>
+        <div class="os-activity-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterActivity(filter, btn) {
+  document.querySelectorAll('#activity-feed ~ * .os-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivity(filter);
+}
+
+// ── Project Table ──
+const projectsData = [
+  { name: 'Zen', status: 'active', prompts: 37, quality: 4.6, lastActive: 'Now' },
+  { name: 'Kiyosaki', status: 'active', prompts: 68, quality: 4.7, lastActive: '2h ago' },
+  { name: 'Toji', status: 'idle', prompts: '—', quality: '—', lastActive: '—' },
+  { name: 'Rin', status: 'idle', prompts: '—', quality: '—', lastActive: '—' },
+  { name: 'Minato', status: 'idle', prompts: '—', quality: '—', lastActive: '—' },
+  { name: 'Kazuki', status: 'idle', prompts: '—', quality: '—', lastActive: '—' },
+];
+
+function renderProjectTable() {
+  document.getElementById('project-tbody').innerHTML = projectsData.map(p => `
+    <tr>
+      <td><strong>${p.name}</strong></td>
+      <td><span class="os-badge ${p.status}">● ${p.status === 'active' ? 'Active' : 'Idle'}</span></td>
+      <td>${p.prompts}</td>
+      <td>${p.quality}</td>
+      <td class="text-muted">${p.lastActive}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Token Chart ──
+const tokenData = [
+  { day: 'Mon', zen: 45, kiyosaki: 0 },
+  { day: 'Tue', zen: 62, kiyosaki: 0 },
+  { day: 'Wed', zen: 38, kiyosaki: 0 },
+  { day: 'Thu', zen: 85, kiyosaki: 100 },
+  { day: 'Fri', zen: 55, kiyosaki: 78 },
+  { day: 'Sat', zen: 30, kiyosaki: 42 },
+  { day: 'Sun', zen: 22, kiyosaki: 18 },
+];
+
+function renderTokenChart() {
+  const maxVal = Math.max(...tokenData.map(d => d.zen + d.kiyosaki));
+  document.getElementById('token-chart').innerHTML = tokenData.map(d => {
+    const total = d.zen + d.kiyosaki;
+    const pct = (total / maxVal) * 100;
+    return `<div class="os-chart-bar" style="height:${pct}%;background:linear-gradient(to top,var(--accent),var(--green))" title="${d.day}: $${total.toFixed(0)}"></div>`;
+  }).join('');
+  document.getElementById('token-chart-labels').innerHTML = tokenData.map(d => `<div class="os-chart-label">${d.day}</div>`).join('');
+}
+
+// ── Discord Channels ──
+const discordChannels = [
+  { name: '#zen-chat', agent: 'Zen', session: 'default', active: true },
+  { name: '#kiyosaki', agent: 'Kiyosaki', session: 'kiyosaki', active: true },
+  { name: '#toji', agent: 'Toji', session: 'toji', active: false },
+  { name: '#rin', agent: 'Rin', session: 'rin', active: false },
+  { name: '#minato', agent: 'Minato', session: 'minato', active: false },
+  { name: '#kazuki', agent: 'Kazuki', session: 'kazuki', active: false },
+];
+
+function renderDiscord() {
+  document.getElementById('discord-channels').innerHTML = discordChannels.map(c => `
+    <div class="os-dc-channel">
+      <div class="os-dc-icon">💬</div>
+      <div class="os-dc-info">
+        <div class="os-dc-name">${c.name}</div>
+        <div class="os-dc-session">${c.agent} · ${c.session}</div>
+      </div>
+      <div class="os-dot ${c.active ? 'green' : 'muted'}"></div>
+    </div>
+  `).join('');
+}
+
+// ── Model Spend ──
+function renderModelSpend() {
+  document.getElementById('model-spend').innerHTML = `
+    <div>
+      <div class="os-model-item">
+        <div class="os-model-info"><div class="os-model-dot" style="background:var(--accent)"></div><div class="os-model-name">openrouter/owl-alpha</div></div>
+        <div><div class="os-model-tokens">2.4M tokens</div><div class="os-model-cost">$28.70</div></div>
+      </div>
+      <div class="os-model-item">
+        <div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">anthropic/claude-sonnet-4</div></div>
+        <div><div class="os-model-tokens">1.8M tokens</div><div class="os-model-cost">$14.20</div></div>
+      </div>
+      <div class="os-model-item">
+        <div class="os-model-info"><div class="os-model-dot" style="background:var(--purple)"></div><div class="os-model-name">openai/gpt-4o</div></div>
+        <div><div class="os-model-tokens">0.6M tokens</div><div class="os-model-cost">$4.93</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="text-muted mb-8" style="font-size:12px">Cost by Project</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Zen</span><span>$28.70 (60%)</span></div>
+          <div class="os-progress"><div class="os-progress-fill" style="width:60%;background:var(--accent)"></div></div>
+        </div>
+        <div>
+          <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Kiyosaki</span><span>$14.20 (30%)</span></div>
+          <div class="os-progress"><div class="os-progress-fill" style="width:30%;background:var(--green)"></div></div>
+        </div>
+        <div>
+          <div class="flex-between" style="font-size:12px;margin-bottom:4px;"><span>Other</span><span>$4.93 (10%)</span></div>
+          <div class="os-progress"><div class="os-progress-fill" style="width:10%;background:var(--purple)"></div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── Project Cards ──
+function renderProjectCards() {
+  document.getElementById('project-cards').innerHTML = agents.map(a => `
+    <div class="os-mini-card">
+      <div class="flex-between mb-8">
+        <div class="flex gap-8" style="align-items:center">
+          <span style="font-size:20px">${a.avatar}</span>
+          <strong>${a.name}</strong>
+        </div>
+        <span class="os-badge ${a.status}">● ${a.status === 'active' ? 'Active' : 'Idle'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">${a.task}</div>
+      <div style="display:flex;gap:12px;border-top:1px solid var(--border);padding-top:10px;">
+        ${a.stats.map(s => `<div class="os-agent-stat"><strong>${s.label}</strong> ${s.sub}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Quality Chart ──
+function renderQualityChart() {
+  const data = [
+    { label: '5.0', count: 12 },
+    { label: '4.5-4.9', count: 45 },
+    { label: '4.0-4.4', count: 38 },
+    { label: '3.5-3.9', count: 6 },
+    { label: '<3.5', count: 0 },
+  ];
+  const maxCount = Math.max(...data.map(d => d.count));
+  document.getElementById('quality-bars').innerHTML = data.map(d => `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="width:100%;height:${(d.count / maxCount) * 140}px;background:linear-gradient(to top,var(--accent),var(--green));border-radius:4px 4px 0 0;opacity:0.85" title="${d.count} prompts"></div>
+      <span style="font-size:10px;color:var(--text-muted)">${d.count}</span>
+    </div>
+  `).join('');
+  document.getElementById('quality-labels').innerHTML = data.map(d => `
+    <div style="flex:1;text-align:center;font-size:10px;color:var(--text-muted)">${d.label}</div>
+  `).join('');
+}
+
+// ── Run Log ──
+const runLogData = [
+  { time: '2026-06-08 14:32', type: 'system', text: 'Agent OS Dashboard created — 8 pages, shared CSS framework, full navigation' },
+  { time: '2026-06-08 14:15', type: 'zen', text: 'Persisted flashcard review results — 77 items marked rejected in detail files' },
+  { time: '2026-06-08 13:48', type: 'system', text: 'SB Prompt Index deduplicated — removed 100 inline entries, now reads from Sandbox/Runs/' },
+  { time: '2026-06-08 13:30', type: 'system', text: 'YAML frontmatter repaired for SB-036, SB-060, SB-086' },
+  { time: '2026-06-08 13:12', type: 'zen', text: 'Moved SB Promotion Log and Run Log to backend (~/.hermes/sandbox/)' },
+  { time: '2026-06-08 12:55', type: 'zen', text: 'Promoted 12 accepted sandbox learnings to production — skill, memory, dashboard' },
+  { time: '2026-06-08 12:30', type: 'system', text: 'SB Review Flashcard updated — shows completion state on page reload' },
+  { time: '2026-06-08 11:45', type: 'kiyosaki', text: 'Sandbox batch complete — 68 prompts executed, 4.7 avg quality' },
+  { time: '2026-06-08 10:20', type: 'zen', text: 'Git checkpoint — 136 files committed to ZenVault' },
+  { time: '2026-06-08 09:00', type: 'system', text: 'Sandbox structure initialized — SB Dashboard, Prompt Index, Run Log created' },
+];
+
+function renderRunLog() {
+  document.getElementById('run-log-body').innerHTML = runLogData.map((e, i) => `
+    <div class="os-activity-item">
+      <div class="os-activity-dot-wrap">
+        <div class="os-activity-dot" style="background:${e.type === 'zen' ? 'var(--accent)' : e.type === 'kiyosaki' ? 'var(--green)' : 'var(--yellow)'}"></div>
+        ${i < runLogData.length - 1 ? '<div class="os-activity-line"></div>' : ''}
+      </div>
+      <div class="os-activity-content">
+        <div class="os-activity-text">${e.text}</div>
+        <div class="os-activity-time">${e.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Initialize ──
+function init() {
+  renderAgents();
+  renderStats();
+  renderActivity('all');
+  renderProjectTable();
+  renderTokenChart();
+  renderDiscord();
+  renderModelSpend();
+  renderProjectCards();
+  renderQualityChart();
+  renderRunLog();
+  document.getElementById('sandbox-badge').textContent = '0';
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
