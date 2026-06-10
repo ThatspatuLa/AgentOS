@@ -1,0 +1,3 @@
+{
+  "code": "from pathlib import Path\np=Path('/home/spatula/Projects/ZenNew/agent-os.html')\ns=p.read_text()\ns=s.replace('\ud83d\udcca Local Worker Value Graph','\ud83d\udcc8 Token Flow Over Time')\nstart=s.index(\"  const localGraphEl = ...[truncated]"
+}

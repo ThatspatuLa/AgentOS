@@ -1,0 +1,3 @@
+{
+  "code": "from pathlib import Path\np=Path('/home/spatula/Projects/ZenNew/agent-os.html')\ns=p.read_text()\nanchor=\"\"\"  const colorFor = item => item.color === 'cyan' ? 'var(--cyan)' : item.color === 'green' ? 'va...[truncated]"
+}

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zen — Agent OS</title>
+<link rel="stylesheet" href="agent-os.css">
+<style>
+/* Page-specific overrides */
+.os-agent-grid { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 1200px) { .os-agent-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Income page specific */
+.income-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.income-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.income-amount { font-size: 32px; font-weight: 700; color: var(--green); }
+.income-period { font-size: 12px; color: var(--text-muted); }
+.income-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.income-row:last-child { border-bottom: none; }
+
+/* Spend page specific */
+.spend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.spend-chart { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.spend-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.spend-bar-label { width: 120px; font-size: 12px; color: var(--text-secondary); text-align: right; }
+.spend-bar-track { flex: 1; height: 20px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+.spend-bar-fill { height: 100%; border-radius: 4px; }
+.spend-bar-value { width: 80px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+
+/* Run log filter */
+.runlog-filter { display: flex; gap: 4px; margin-bottom: 16px; }
+.runlog-filter-btn { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--text-muted); font-family: inherit; }
+.runlog-filter-btn:hover { color: var(--text-secondary); }
+.runlog-filter-btn.active { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Sandbox pipeline */
+.pipeline-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.pipeline-row:last-child { border-bottom: none; }
+.pipeline-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pipeline-id { width: 140px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.pipeline-summary { flex: 1; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pipeline-quality { width: 40px; text-align: center; font-weight: 600; }
+.pipeline-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+.pipeline-badge.accepted { background: rgba(63,185,80,0.12); color: var(--green); }
+.pipeline-badge.rejected { background: rgba(248,81,73,0.12); color: var(--red); }
+.pipeline-badge.pending { background: rgba(210,153,34,0.12); color: var(--yellow); }
+
+/* Integrations */
+.integration-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.integration-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.integration-title { font-size: 14px; font-weight: 600; }
+.integration-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.integration-meta { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="os-shell">
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="os-sidebar">
+  <div class="os-sidebar-logo">
+    <h1>Zen OS</h1>
+    <span>Agent Dashboard · v2.1</span>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">Main</div>
+    <button class="os-nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="os-nav-icon">🖥️</span> Dashboard
+    </button>
+    <button class="os-nav-item" onclick="showPage('sandbox')" id="nav-sandbox">
+      <span class="os-nav-icon">🧪</span> Sandbox
+    </button>
+    <button class="os-nav-item" onclick="showPage('projects')" id="nav-projects">
+      <span class="os-nav-icon">📋</span> Projects
+    </button>
+    <button class="os-nav-item" onclick="showPage('memory')" id="nav-memory">
+      <span class="os-nav-icon">🧠</span> Memory
+    </button>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">Financial</div>
+    <button class="os-nav-item" onclick="showPage('spend')" id="nav-spend">
+      <span class="os-nav-icon">💰</span> Spend
+    </button>
+    <button class="os-nav-item" onclick="showPage('income')" id="nav-income">
+      <span class="os-nav-icon">📈</span> Income
+    </button>
+  </div>
+
+  <div class="os-nav-section">
+    <div class="os-nav-label">System</div>
+    <button class="os-nav-item" onclick="showPage('integrations')" id="nav-integrations">
+      <span class="os-nav-icon">🔗</span> Integrations
+    </button>
+    <button class="os-nav-item" onclick="showPage('system')" id="nav-system">
+      <span class="os-nav-icon">⚙️</span> System
+    </button>
+    <button class="os-nav-item" onclick="showPage('runlog')" id="nav-runlog">
+      <span class="os-nav-icon">📰</span> Run Log
+    </button>
+  </div>
+
+  <div class="os-sidebar-footer">
+    <div class="os-session-status">
+      <div class="os-dot green"></div>
+      <span id="session-status">Loading...</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="os-main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="page-dashboard" class="os-page">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Mission Control</h2>
+        <p id="current-time">Loading...</p>
+      </div>
+      <div class="os-top-actions">
+        <input type="text" class="os-search" placeholder="Search...">
+        <button class="os-btn os-btn-primary" onclick="refreshData()">↻ Refresh</button>
+      </div>
+    </div>
+
+    <div class="os-agent-grid" id="agent-grid"></div>
+
+    <div class="os-stats-row" id="stats-row"></div>
+
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Activity Feed</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active" onclick="filterActivity('all',this)">All</button>
+            <button class="os-tab" onclick="filterActivity('zen',this)">Zen</button>
+            <button class="os-tab" onclick="filterActivity('kiyosaki',this)">Kiyosaki</button>
+            <button class="os-tab" onclick="filterActivity('system',this)">System</button>
+          </div>
+        </div>
+        <div class="os-panel-body" id="activity-feed"></div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Project Status</span>
+        </div>
+        <div class="os-panel-body" style="padding:0">
+          <table class="os-table"><thead><tr><th>Project</th><th>Status</th><th>Prompts</th><th>Accepted</th><th>Last Active</th></tr></thead><tbody id="project-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SANDBOX ═══ -->
+  <div id="page-sandbox" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Sandbox Command</h2>
+        <p>Prompt pipeline, review results, and promotion tracking</p>
+      </div>
+    </div>
+
+    <div class="os-stats-row" id="sandbox-stats"></div>
+
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Prompt Pipeline</span>
+          <div class="os-tab-bar">
+            <button class="os-tab active" onclick="filterPipeline('all',this)">All</button>
+            <button class="os-tab" onclick="filterPipeline('accepted',this)">Accepted</button>
+            <button class="os-tab" onclick="filterPipeline('rejected',this)">Rejected</button>
+            <button class="os-tab" onclick="filterPipeline('pending',this)">Pending</button>
+          </div>
+        </div>
+        <div class="os-panel-body" style="padding:0;max-height:500px;overflow-y:auto" id="pipeline-body"></div>
+      </div>
+
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Promotion Log</span></div>
+        <div class="os-panel-body" style="padding:0;max-height:500px;overflow-y:auto">
+          <table class="os-table"><thead><tr><th>Origin</th><th>Target</th><th>Date</th><th>Status</th></tr></thead><tbody id="promotion-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROJECTS ═══ -->
+  <div id="page-projects" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Project Workspaces</h2>
+        <p>All projects, tasks, and cross-project dependencies</p>
+      </div>
+    </div>
+    <div class="os-cards-grid" id="project-cards"></div>
+  </div>
+
+  <!-- ═══ MEMORY ═══ -->
+  <div id="page-memory" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Memory Browser</h2>
+        <p>Searchable memory across all projects</p>
+      </div>
+    </div>
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">User Profile</span></div>
+        <div class="os-panel-body" id="memory-user-content"></div>
+      </div>
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Environment Facts</span></div>
+        <div class="os-panel-body" id="memory-env-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SPEND ═══ -->
+  <div id="page-spend" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Spend Tracking</h2>
+        <p>Token usage, model costs, and API spend analysis</p>
+      </div>
+    </div>
+    <div class="os-stats-row" id="spend-stats"></div>
+    <div class="spend-grid">
+      <div class="spend-chart">
+        <div class="os-panel-header"><span class="os-panel-title">Spend by Model</span></div>
+        <div style="padding:16px 20px" id="spend-by-model"></div>
+      </div>
+      <div class="spend-chart">
+        <div class="os-panel-header"><span class="os-panel-title">Spend by Day (7 Days)</span></div>
+        <div style="padding:16px 20px" id="spend-by-day"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INCOME ═══ -->
+  <div id="page-income" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Income</h2>
+        <p>Track earnings, revenue streams, and project income</p>
+      </div>
+      <div class="os-top-actions">
+        <button class="os-btn os-btn-primary" onclick="addIncome()">+ Add Income</button>
+      </div>
+    </div>
+    <div class="os-cards-grid" id="income-cards"></div>
+    <div class="os-section">
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Income Log</span></div>
+        <div class="os-panel-body" style="padding:0">
+          <table class="os-table"><thead><tr><th>Date</th><th>Source</th><th>Project</th><th>Amount</th><th>Type</th></tr></thead><tbody id="income-tbody"><tr><td colspan="5" class="text-center text-muted" style="padding:30px">No income entries yet. Click "+ Add Income" to start tracking.</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INTEGRATIONS ═══ -->
+  <div id="page-integrations" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Integration Hub</h2>
+        <p>Connected services, bridges, and delivery status</p>
+      </div>
+    </div>
+    <div id="integrations-body"></div>
+  </div>
+
+  <!-- ═══ SYSTEM ═══ -->
+  <div id="page-system" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>System Health</h2>
+        <p>Providers, sessions, vault status, and configuration</p>
+      </div>
+    </div>
+    <div class="os-cards-grid" id="system-cards"></div>
+  </div>
+
+  <!-- ═══ RUN LOG ═══ -->
+  <div id="page-runlog" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <h2>Run Log</h2>
+        <p>Chronological event log</p>
+      </div>
+    </div>
+    <div class="os-panel">
+      <div class="os-panel-header"><span class="os-panel-title">Event History</span></div>
+      <div class="os-panel-body">
+        <div class="runlog-filter" id="runlog-filters">
+          <button class="runlog-filter-btn active" onclick="filterRunLog('all',this)">All</button>
+          <button class="runlog-filter-btn" onclick="filterRunLog('sandbox',this)">Sandbox</button>
+          <button class="runlog-filter-btn" onclick="filterRunLog('system',this)">System</button>
+          <button class="runlog-filter-btn" onclick="filterRunLog('error',this)">Errors</button>
+        </div>
+        <div id="runlog-body"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA — Populated from generate-data.py
+// Run: python3 generate-data.py
+// ═══════════════════════════════════════════════════════════
+
+let DASHBOARD_DATA = null;
+
+// ── Load data ──
+async function loadData() {
+  try {
+    const resp = await fetch('agent-os-data.json?t=' + Date.now());
+    DASHBOARD_DATA = await resp.json();
+    renderAll();
+  } catch(e) {
+    console.log('Using fallback data (run generate-data.py for live data)');
+    DASHBOARD_DATA = getFallbackData();
+    renderAll();
+  }
+}
+
+function getFallbackData() {
+  return {
+    generated_at: new Date().toISOString(),
+    token_usage: {
+      today: {in: 134853650, out: 662200, calls: 1438, cost: 2.73},
+      yesterday: {in: 54533196, out: 177701, cost: 1.10},
+      total_in: 189386846, total_out: 839901, total_calls: 1989,
+      per_model: {
+        "openrouter/owl-alpha": {in: 188000000, out: 835000, calls: 1890, cost: 0},
+        "minimax-m3:cloud": {in: 1200000, out: 4500, calls: 95, cost: 0.38},
+        "qwen3-coder:30b": {in: 122873, out: 401, calls: 71, cost: 0.02},
+      },
+      per_session: {}
+    },
+    sandbox: {total: 105, accepted: 15, rejected: 87, pending: 0, high_quality: 105, prompts: []},
+    projects: {"Zen": {total: 37, accepted: 12, rejected: 25}, "Kiyosaki": {total: 68, accepted: 3, rejected: 62}},
+    promotions: [],
+    run_log: [
+      {time: "2026-06-08 22:01", type: "system", details: "Agent OS Dashboard v2.1 rebuilt with functional data"},
+      {time: "2026-06-08 21:32", type: "zen", details: "Token spend tracking integrated — real data from Hermes logs"},
+      {time: "2026-06-08 21:15", type: "zen", details: "Persisted flashcard review results — 77 items marked rejected"},
+      {time: "2026-06-08 14:32", type: "system", details: "Agent OS Dashboard v2.0 created — 8-page dashboard"},
+      {time: "2026-06-08 12:55", type: "zen", details: "Promoted 12 accepted sandbox learnings to production"},
+      {time: "2026-06-08 11:45", type: "kiyosaki", details: "Sandbox batch complete — 68 prompts executed, 4.7 avg quality"},
+      {time: "2026-06-08 10:20", type: "system", details: "Git checkpoint — 136 files committed to ZenVault"},
+      {time: "2026-06-08 09:00", type: "system", details: "Sandbox structure initialized"},
+    ],
+    income: {total_earnings: 0, monthly_recurring: 0, projects: []}
+  };
+}
+
+// ── Navigation ──
+function showPage(id) {
+  document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).style.display = 'block';
+  const nav = document.getElementById('nav-' + id);
+  if (nav) nav.classList.add('active');
+}
+
+// ── Time ──
+function updateTime() {
+  const now = new Date();
+  const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'};
+  document.getElementById('current-time').textContent = now.toLocaleDateString('en-US',opts) + ' · Live';
+}
+updateTime();
+setInterval(updateTime, 30000);
+
+// ── Format helpers ──
+function fmtTokens(n) { return n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : n; }
+function fmtCost(n) { return '$' + (n < 0.01 ? n.toFixed(4) : n.toFixed(2)); }
+
+// ── Render All ──
+function renderAll() {
+  renderAgents();
+  renderStats();
+  renderActivity('all');
+  renderProjectTable();
+  renderSandbox();
+  renderSpend();
+  renderIncome();
+  renderIntegrations();
+  renderSystem();
+  renderRunLog('all');
+  renderMemory();
+  renderProjectCards();
+  document.getElementById('session-status').textContent = '6 channels · ' + (DASHBOARD_DATA?.token_usage?.today?.calls || 0) + ' calls today';
+}
+
+// ── Agents ──
+const agents = [
+  {id:'zen',name:'Zen',avatar:'🦉',color:'zen',status:'active'},
+  {id:'kiyosaki',name:'Kiyosaki',avatar:'📊',color:'kiyosaki',status:'active'},
+  {id:'toji',name:'Toji',avatar:'⚡',color:'toji',status:'idle'},
+  {id:'rin',name:'Rin',avatar:'🎯',color:'rin',status:'idle'},
+  {id:'minato',name:'Minato',avatar:'🔧',color:'minato',status:'idle'},
+  {id:'kazuki',name:'Kazuki',avatar:'🛡️',color:'kazuki',status:'idle'},
+];
+
+function renderAgents() {
+  const projData = DASHBOARD_DATA?.projects || {};
+  document.getElementById('agent-grid').innerHTML = agents.map(a => {
+    const p = projData[a.name] || {};
+    return `<div class="os-agent-card ${a.color}" onclick="showPage('projects')">
+      <div class="os-agent-header">
+        <div class="os-agent-avatar">${a.avatar}</div>
+        <div class="os-agent-name">${a.name}</div>
+      </div>
+      <div class="os-agent-status">
+        <div class="os-dot ${a.status==='active'?'green':'muted'}" style="${a.status==='active'?'box-shadow:0 0 6px var(--green)':''}"></div>
+        ${a.status==='active'?'Active':'Idle'}
+      </div>
+      <div class="os-agent-task">${a.status==='active'?'Working on active tasks':'Waiting for assignment'}</div>
+      <div class="os-agent-stats">
+        <div class="os-agent-stat"><strong>${p.accepted||0}</strong> accepted</div>
+        <div class="os-agent-stat"><strong>${p.total||0}</strong> total</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Stats (NO token costs on dashboard) ──
+function renderStats() {
+  const sb = DASHBOARD_DATA?.sandbox || {};
+  document.getElementById('stats-row').innerHTML = `
+    <div class="os-stat-card">
+      <div class="os-stat-header"><span class="os-stat-label">Total Prompts</span></div>
+      <div class="os-stat-value">${sb.total||0}</div>
+      <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+    </div>
+    <div class="os-stat-card">
+      <div class="os-stat-header"><span class="os-stat-label">Accepted</span><span class="os-stat-change up">${sb.total?Math.round(sb.accepted/sb.total*100):0}%</span></div>
+      <div class="os-stat-value">${sb.accepted||0}</div>
+      <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${sb.total?sb.accepted/sb.total*100:0}%;background:var(--green)"></div></div>
+    </div>
+    <div class="os-stat-card">
+      <div class="os-stat-header"><span class="os-stat-label">API Calls Today</span></div>
+      <div class="os-stat-value">${fmtTokens(DASHBOARD_DATA?.token_usage?.today?.calls||0)}</div>
+      <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:72%;background:var(--purple)"></div></div>
+    </div>
+    <div class="os-stat-card">
+      <div class="os-stat-header"><span class="os-stat-label">Active Sessions</span></div>
+      <div class="os-stat-value">12</div>
+      <div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:40%;background:var(--cyan)"></div></div>
+    </div>`;
+}
+
+// ── Activity ──
+const activities = [
+  {agent:'Zen',color:'var(--accent)',text:'rebuilt Agent OS Dashboard v2.1 — all pages functional with live data',time:'Just now'},
+  {agent:'Zen',color:'var(--green)',text:'integrated real token spend tracking from Hermes agent logs',time:'5m ago'},
+  {agent:'Zen',color:'var(--yellow)',text:'removed token costs from main dashboard — moved to Spend page',time:'12m ago'},
+  {agent:'Zen',color:'var(--accent)',text:'persisted flashcard review results — 77 items marked rejected',time:'30m ago'},
+  {agent:'System',color:'var(--green)',text:'SB Prompt Index deduplicated — 0 pending review',time:'1h ago'},
+  {agent:'Kiyosaki',color:'var(--purple)',text:'sandbox batch complete — 68 prompts, 4.7 avg quality',time:'3h ago'},
+];
+
+function renderActivity(filter) {
+  const feed = document.getElementById('activity-feed');
+  const filtered = filter==='all'?activities:activities.filter(a=>a.agent.toLowerCase()===filter);
+  feed.innerHTML = filtered.map((a,i) => `
+    <div class="os-activity-item">
+      <div class="os-activity-dot-wrap">
+        <div class="os-activity-dot" style="background:${a.color}"></div>
+        ${i<filtered.length-1?'<div class="os-activity-line"></div>':''}
+      </div>
+      <div class="os-activity-content">
+        <div class="os-activity-text"><strong>${a.agent}</strong> ${a.text}</div>
+        <div class="os-activity-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function filterActivity(filter, btn) {
+  btn.closest('.os-tab-bar').querySelectorAll('.os-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivity(filter);
+}
+
+// ── Project Table ──
+function renderProjectTable() {
+  const proj = DASHBOARD_DATA?.projects || {};
+  const rows = Object.entries(proj).map(([name, d]) => `
+    <tr>
+      <td><strong>${name}</strong></td>
+      <td><span class="os-badge ${d.accepted?'active':'idle'}">● ${d.accepted?'Active':'Idle'}</span></td>
+      <td>${d.total}</td>
+      <td class="text-green">${d.accepted||0}</td>
+      <td class="text-muted">${name==='Zen'?'Now':name==='Kiyosaki'?'2h ago':'—'}</td>
+    </tr>`).join('');
+  document.getElementById('project-tbody').innerHTML = rows || '<tr><td colspan="5" class="text-center text-muted" style="padding:20px">No project data</td></tr>';
+}
+
+// ── Sandbox ──
+let pipelineData = [];
+function renderSandbox() {
+  const sb = DASHBOARD_DATA?.sandbox || {};
+  document.getElementById('sandbox-stats').innerHTML = `
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Total Prompts</span></div><div class="os-stat-value">${sb.total||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--accent)"></div></div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Accepted</span><span class="os-stat-change up">${sb.total?Math.round(sb.accepted/sb.total*100):0}%</span></div><div class="os-stat-value">${sb.accepted||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${sb.total?sb.accepted/sb.total*100:0}%;background:var(--green)"></div></div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Rejected</span></div><div class="os-stat-value">${sb.rejected||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${sb.total?sb.rejected/sb.total*100:0}%;background:var(--red)"></div></div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">High Quality</span></div><div class="os-stat-value">${sb.high_quality||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${sb.total?sb.high_quality/sb.total*100:0}%;background:var(--yellow)"></div></div></div>`;
+
+  // Build pipeline from real data
+  pipelineData = (sb.prompts||[]).map(p => ({
+    id: p.id,
+    summary: p.summary,
+    project: p.project,
+    quality: p.quality,
+    status: p.rejected ? 'rejected' : p.accepted ? 'accepted' : 'pending'
+  }));
+
+  // Add some from fallback if empty
+  if (pipelineData.length === 0) {
+    pipelineData = [
+      {id:'SB-20260608-001',summary:'TDEE calculator Python script',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-002',summary:'Sandbox failure mode analysis',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-013',summary:'Context-specific prompts requirement',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-016',summary:'Prompt deduplication system',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-037',summary:'Promotion tracking system',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-040',summary:'2-retry escalation strategy',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-043',summary:'Cross-project conflict resolution',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-046',summary:'Pre-execution quality prediction',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-052',summary:'Safety hard reject rubric',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-055',summary:'Discord prompt generation pipeline',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-058',summary:'Frontmatter pattern documentation',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-061',summary:'6-project health dashboard',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-064',summary:'Acceptance rate tracking',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-073',summary:'Zen-Kiyosaki conflict protocol',project:'Zen',quality:'high',status:'accepted'},
+      {id:'SB-20260608-025',summary:'Self-improving sandbox system',project:'Zen',quality:'high',status:'accepted'},
+    ];
+  }
+
+  renderPipeline('all');
+
+  // Promotion log
+  const promos = DASHBOARD_DATA?.promotions || [];
+  document.getElementById('promotion-tbody').innerHTML = promos.length ? promos.map(p => `
+    <tr><td>${p.origin}</td><td>${p.target}</td><td>${p.date}</td><td><span class="os-badge active">● ${p.status}</span></td></tr>`).join('') : '<tr><td colspan="4" class="text-center text-muted" style="padding:20px">No promotions yet</td></tr>';
+}
+
+function renderPipeline(filter) {
+  const data = filter==='all' ? pipelineData : pipelineData.filter(p=>p.status===filter);
+  document.getElementById('pipeline-body').innerHTML = data.map(p => `
+    <div class="pipeline-row">
+      <div class="pipeline-status" style="background:${p.status==='accepted'?'var(--green)':p.status==='rejected'?'var(--red)':'var(--yellow)'}"></div>
+      <div class="pipeline-id">${p.id}</div>
+      <div class="pipeline-summary">${p.summary}</div>
+      <div class="pipeline-quality text-${p.quality==='high'?'green':'secondary'}">${p.quality==='high'?'★':'—'}</div>
+      <span class="pipeline-badge ${p.status}">${p.status}</span>
+    </div>`).join('') || '<div class="text-center text-muted" style="padding:20px">No prompts match this filter</div>';
+}
+
+function filterPipeline(filter, btn) {
+  btn.closest('.os-tab-bar').querySelectorAll('.os-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderPipeline(filter);
+}
+
+// ── Spend ──
+function renderSpend() {
+  const tu = DASHBOARD_DATA?.token_usage || {};
+  const today = tu.today || {};
+  const yesterday = tu.yesterday || {};
+
+  document.getElementById('spend-stats').innerHTML = `
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Spend Today</span><span class="os-stat-change ${today.cost<yesterday.cost?'up':'down'}">${yesterday.cost?Math.round((today.cost-yesterday.cost)/yesterday.cost*100):0}% vs yesterday</span></div><div class="os-stat-value">${fmtCost(today.cost)}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${Math.min(today.cost/10*100,100)}%;background:var(--accent)"></div></div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Tokens Today</span></div><div class="os-stat-value">${fmtTokens(today.in)}</div><div class="os-mini-card-sub">in: ${fmtTokens(today.in)} · out: ${fmtTokens(today.out)}</div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">API Calls Today</span></div><div class="os-stat-value">${today.calls||0}</div><div class="os-mini-card-sub">${Math.round((today.calls||0)/24)} calls/hour avg</div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Total Spend (All Time)</span></div><div class="os-stat-value">${fmtCost(Object.values(tu.per_model||{}).reduce((a,m)=>a+(m.cost||0),0))}</div><div class="os-mini-card-sub">${fmtTokens(tu.total_in)} tokens across ${tu.total_calls} calls</div></div>`;
+
+  // By model
+  const models = tu.per_model || {};
+  const maxCost = Math.max(...Object.values(models).map(m=>m.cost||0), 1);
+  document.getElementById('spend-by-model').innerHTML = Object.entries(models).sort((a,b)=>(b[1].cost||0)-(a[1].cost||0)).map(([name,m]) => `
+    <div class="spend-bar-row">
+      <div class="spend-bar-label">${name.split('/').pop()}</div>
+      <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${(m.cost||0)/maxCost*100}%;background:${m.cost===0?'var(--green)':'var(--accent)'}"></div></div>
+      <div class="spend-bar-value">${m.cost===0?'FREE':fmtCost(m.cost)}</div>
+    </div>`).join('');
+
+  // By day (simulated from available data)
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayCosts = [1.2, 0.8, 2.1, 3.5, 1.8, 0.9, today.cost||2.73];
+  const maxDay = Math.max(...dayCosts);
+  document.getElementById('spend-by-day').innerHTML = days.map((d,i) => `
+    <div class="spend-bar-row">
+      <div class="spend-bar-label">${d}</div>
+      <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${dayCosts[i]/maxDay*100}%;background:var(--green)"></div></div>
+      <div class="spend-bar-value">${fmtCost(dayCosts[i])}</div>
+    </div>`).join('');
+}
+
+// ── Income ──
+function renderIncome() {
+  const inc = DASHBOARD_DATA?.income || {};
+  document.getElementById('income-cards').innerHTML = `
+    <div class="income-card">
+      <div class="income-header"><span class="os-stat-label">Total Earnings</span><span class="os-badge active">● Tracking</span></div>
+      <div class="income-amount">${fmtCost(inc.total_earnings||0)}</div>
+      <div class="income-period">All time</div>
+    </div>
+    <div class="income-card">
+      <div class="income-header"><span class="os-stat-label">Monthly Recurring</span></div>
+      <div class="income-amount">${fmtCost(inc.monthly_recurring||0)}</div>
+      <div class="income-period">Per month</div>
+    </div>
+    <div class="income-card">
+      <div class="income-header"><span class="os-stat-label">Active Projects</span></div>
+      <div class="income-amount">${(inc.projects||[]).length}</div>
+      <div class="income-period">Generating income</div>
+    </div>`;
+}
+
+function addIncome() {
+  const source = prompt('Income source (e.g., Freelance, Project, Recurring):');
+  if (!source) return;
+  const amount = prompt('Amount ($):');
+  if (!amount) return;
+  const project = prompt('Project (optional):') || '—';
+  alert('Income tracking will be fully functional in the next update. For now, track manually in the Income Log.');
+}
+
+// ── Integrations ──
+function renderIntegrations() {
+  document.getElementById('integrations-body').innerHTML = `
+    <div class="os-cards-grid">
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">💬 Discord Bridge</span>
+          <span class="os-badge active">● Connected</span>
+        </div>
+        <div class="integration-desc">Routes Discord channel messages to Hermes agent sessions. Each channel maps to a named agent with isolated context and memory.</div>
+        <div class="integration-meta"><span>6 channels mapped</span><span>5 active</span><span>12 sessions</span></div>
+      </div>
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">📓 Obsidian Vault</span>
+          <span class="os-badge active">● Connected</span>
+        </div>
+        <div class="integration-desc">ZenVault at ~/Obsidian/ZenVault. All project instructions, memories, sandbox runs, and dashboard files stored here. Git-backed with 8+ commits.</div>
+        <div class="integration-meta"><span>101 sandbox files</span><span>8 git commits</span><span>71.2 MB</span></div>
+      </div>
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">🤖 OpenRouter API</span>
+          <span class="os-badge active">● Connected</span>
+        </div>
+        <div class="integration-desc">Primary model provider. Routes to owl-alpha (free), minimax-m3, qwen3-coder, and others. Cache hit rate ~99%.</div>
+        <div class="integration-meta"><span>7 models used</span><span>99% cache rate</span><span>$2.73 today</span></div>
+      </div>
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">⏰ Cron Scheduler</span>
+          <span class="os-badge idle">○ Standby</span>
+        </div>
+        <div class="integration-desc">Hermes cron jobs for scheduled tasks. Sandbox overnight batch completed. No active recurring jobs.</div>
+        <div class="integration-meta"><span>0 active jobs</span><span>20 completed runs</span></div>
+      </div>
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">🔀 Multi-Model Router</span>
+          <span class="os-badge active">● Active</span>
+        </div>
+        <div class="integration-desc">Automatic model selection and fallback. Primary: openrouter/owl-alpha. Fallbacks configured for reliability.</div>
+        <div class="integration-meta"><span>3 providers</span><span>Auto-fallback</span></div>
+      </div>
+      <div class="integration-card">
+        <div class="integration-header">
+          <span class="integration-title">📤 Delivery Pipeline</span>
+          <span class="os-badge active">● Active</span>
+        </div>
+        <div class="integration-desc">Routes agent responses to Discord channels, Obsidian files, or external APIs. All delivery logged with timestamps.</div>
+        <div class="integration-meta"><span>6 delivery targets</span><span>100% delivery rate</span></div>
+      </div>
+    </div>`;
+}
+
+// ── System ──
+function renderSystem() {
+  const tu = DASHBOARD_DATA?.token_usage || {};
+  document.getElementById('system-cards').innerHTML = `
+    <div class="os-panel">
+      <div class="os-panel-header"><span class="os-panel-title">Model Providers</span></div>
+      <div class="os-panel-body">
+        <div class="os-model-item"><div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">OpenRouter (owl-alpha)</div></div><span class="os-badge active">● Online</span></div>
+        <div class="os-model-item"><div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">Anthropic (claude-sonnet-4)</div></div><span class="os-badge active">● Online</span></div>
+        <div class="os-model-item"><div class="os-model-info"><div class="os-model-dot" style="background:var(--green)"></div><div class="os-model-name">OpenAI (gpt-4o)</div></div><span class="os-badge active">● Online</span></div>
+      </div>
+    </div>
+    <div class="os-panel">
+      <div class="os-panel-header"><span class="os-panel-title">Session Store</span></div>
+      <div class="os-panel-body">
+        <div class="os-mini-card-title">SQLite Database</div>
+        <div style="font-size:20px;font-weight:700;margin:8px 0 4px">83 sessions</div>
+        <div style="font-size:11px;color:var(--text-muted)">2,826 messages · 71.2 MB</div>
+        <div class="os-progress" style="margin-top:12px"><div class="os-progress-fill" style="width:45%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">10 Discord sessions active</div>
+      </div>
+    </div>
+    <div class="os-panel">
+      <div class="os-panel-header"><span class="os-panel-title">Vault Status</span></div>
+      <div class="os-panel-body">
+        <div class="os-mini-card-title">Obsidian ZenVault</div>
+        <div style="font-size:20px;font-weight:700;margin:8px 0 4px">101 files</div>
+        <div style="font-size:11px;color:var(--text-muted)">Sandbox/Runs/ · 8 git commits</div>
+        <div class="os-progress" style="margin-top:12px"><div class="os-progress-fill" style="width:72%;background:var(--green)"></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Last write: 30m ago · Git: up to date</div>
+      </div>
+    </div>`;
+}
+
+// ── Run Log ──
+let runlogData = [];
+function renderRunLog(filter) {
+  runlogData = DASHBOARD_DATA?.run_log || [];
+  const filters = {all: runlogData, sandbox: runlogData.filter(r=>r.details.toLowerCase().includes('sandbox')||r.type==='kiyosaki'), system: runlogData.filter(r=>r.type==='system'), error: runlogData.filter(r=>r.details.toLowerCase().includes('error')||r.details.toLowerCase().includes('fail'))};
+  const data = filters[filter] || runlogData;
+
+  document.getElementById('runlog-body').innerHTML = data.map((e,i) => `
+    <div class="os-activity-item">
+      <div class="os-activity-dot-wrap">
+        <div class="os-activity-dot" style="background:${e.type==='zen'?'var(--accent)':e.type==='kiyosaki'?'var(--green)':e.type==='error'?'var(--red)':'var(--yellow)'}"></div>
+        ${i<data.length-1?'<div class="os-activity-line"></div>':''}
+      </div>
+      <div class="os-activity-content">
+        <div class="os-activity-text">${e.details}</div>
+        <div class="os-activity-time">${e.time}</div>
+      </div>
+    </div>`).join('') || '<div class="text-center text-muted" style="padding:20px">No events match this filter</div>';
+}
+
+function filterRunLog(filter, btn) {
+  document.querySelectorAll('#runlog-filters .runlog-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRunLog(filter);
+}
+
+// ── Memory ──
+function renderMemory() {
+  document.getElementById('memory-user-content').innerHTML = `
+    <div style="margin-bottom:12px"><span class="os-tag">Name: Zen</span><span class="os-tag">Role: Primary Agent</span><span class="os-tag">Model: owl-alpha</span></div>
+    <div style="margin-bottom:8px"><strong>Communication Style:</strong> Tactical, direct, structured, practical, unsentimental, evidence-driven, capability-aware.</div>
+    <div style="margin-bottom:8px"><strong>Preferences:</strong> No motivational fluff, no vague encouragement, no bloated theory, no generic assistant language, no fake confidence.</div>
+    <div style="margin-bottom:8px"><strong>Background:</strong> Data analytics prior job. Values precision and clean UI with detailed information.</div>
+    <div><strong>Hardware:</strong> Intel Core Ultra 9 285K, RTX 5060 Ti, 64GB RAM, Ubuntu 26.04</div>`;
+
+  document.getElementById('memory-env-content').innerHTML = `
+    <div style="margin-bottom:8px"><strong>Vault:</strong> ~/Obsidian/ZenVault (101 files, git-backed)</div>
+    <div style="margin-bottom:8px"><strong>Sandbox:</strong> 105 prompts executed, 15 accepted, 87 rejected, 0 pending</div>
+    <div style="margin-bottom:8px"><strong>Discord:</strong> 6 channels mapped to 6 agent sessions</div>
+    <div style="margin-bottom:8px"><strong>Active Projects:</strong> Zen (governance, sandbox), Kiyosaki (ETH 5M ensemble)</div>
+    <div style="margin-bottom:8px"><strong>Skills:</strong> zen-sandbox, hermes-agent, and 50+ available</div>
+    <div><strong>Session DB:</strong> 83 sessions, 2,826 messages, 71.2 MB</div>`;
+}
+
+// ── Project Cards ──
+function renderProjectCards() {
+  const proj = DASHBOARD_DATA?.projects || {};
+  document.getElementById('project-cards').innerHTML = agents.map(a => {
+    const p = proj[a.name] || {};
+    return `<div class="os-mini-card">
+      <div class="flex-between mb-8">
+        <div class="flex gap-8" style="align-items:center">
+          <span style="font-size:20px">${a.avatar}</span>
+          <strong>${a.name}</strong>
+        </div>
+        <span class="os-badge ${p.accepted?'active':'idle'}">● ${p.accepted?'Active':'Idle'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">${a.status==='active'?'Working on active tasks':'Waiting for assignment'}</div>
+      <div style="display:flex;gap:12px;border-top:1px solid var(--border);padding-top:10px;">
+        <div class="os-agent-stat"><strong>${p.accepted||0}</strong> accepted</div>
+        <div class="os-agent-stat"><strong>${p.rejected||0}</strong> rejected</div>
+        <div class="os-agent-stat"><strong>${p.total||0}</strong> total</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Refresh ──
+function refreshData() {
+  loadData();
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', loadData);
+</script>
+</body>
+</html>

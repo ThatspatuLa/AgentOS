@@ -46,6 +46,21 @@ SESSION_INSTRUCTIONS = {
 QUEUE_DIR = Path("/tmp/zennew_queue")
 QUEUE_DIR.mkdir(exist_ok=True)
 
+# Friendly Discord shortcuts for Hermes gateway model switching.
+# These are session-scoped by default; they do not rewrite global config.yaml.
+LLM_SWITCH_COMMANDS = {
+    "owl": "/model openrouter/owl-alpha --provider openrouter",
+    "owl-alpha": "/model openrouter/owl-alpha --provider openrouter",
+    "owla": "/model openrouter/owl-alpha --provider openrouter",
+    "codex": "/model gpt-5.5 --provider openai-codex",
+    "gpt-5.5": "/model gpt-5.5 --provider openai-codex",
+}
+
+LLM_DISPLAY = {
+    "owl": "Owl Alpha via OpenRouter (`openrouter/owl-alpha`)",
+    "codex": "Codex (`gpt-5.5` via `openai-codex`)",
+}
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -125,6 +140,12 @@ async def on_message(message: discord.Message):
     if not message.content.strip():
         return
 
+    # Let Discord commands (!ping, !status, !llm, etc.) run locally instead of
+    # forwarding them to Hermes as ordinary chat messages first.
+    if message.content.strip().startswith(COMMAND_PREFIX):
+        await bot.process_commands(message)
+        return
+
     session = get_session(message.channel.id)
 
     async with message.channel.typing():
@@ -190,6 +211,67 @@ async def sessions(ctx):
         ch_name = ch.name if ch else "???"
         embed.add_field(name=f"#{ch_name}", value=f"→ {session}", inline=True)
     await ctx.reply(embed=embed)
+
+
+@bot.command(name="llm")
+async def llm(ctx, choice: str = "help"):
+    """Switch the active Hermes model for this Discord session.
+
+    Usage:
+      !llm owl      -> openrouter/owl-alpha via OpenRouter
+      !llm codex    -> gpt-5.5 via OpenAI Codex
+      !llm current  -> ask Hermes to show the current model picker/status
+      !llm help     -> show options
+    """
+    normalized = (choice or "help").strip().lower()
+
+    if normalized in {"help", "?", "list", "options"}:
+        embed = discord.Embed(title="🧠 LLM Switcher", color=0x7c3aed)
+        embed.add_field(name="Owl Alpha", value="`!llm owl`", inline=True)
+        embed.add_field(name="Codex", value="`!llm codex`", inline=True)
+        embed.add_field(name="Current / picker", value="`!llm current`", inline=True)
+        embed.add_field(
+            name="Scope",
+            value="Switches this Discord/Hermes session only. Use Hermes `/model ... --global` separately if you want to persist globally.",
+            inline=False,
+        )
+        await ctx.reply(embed=embed)
+        return
+
+    if normalized in {"current", "status", "show"}:
+        hermes_command = "/model"
+        label = "current model / picker"
+    else:
+        hermes_command = LLM_SWITCH_COMMANDS.get(normalized)
+        label = LLM_DISPLAY.get("owl" if normalized.startswith("owl") else normalized, normalized)
+
+    if not hermes_command:
+        await ctx.reply(
+            f"Unknown LLM choice: `{choice}`\n"
+            "Use `!llm owl`, `!llm codex`, or `!llm current`."
+        )
+        return
+
+    async with ctx.typing():
+        queue_file = queue_message_for_hermes(
+            channel_id=ctx.channel.id,
+            channel_name=ctx.channel.name,
+            user=str(ctx.author),
+            message=hermes_command,
+        )
+
+        response = None
+        for _ in range(60):
+            await asyncio.sleep(1)
+            response = await check_hermes_response(queue_file)
+            if response:
+                break
+
+    if response is None:
+        await ctx.reply(f"⏱️ Queued LLM switch to {label}; Hermes has not responded yet.")
+        return
+
+    await ctx.reply(f"🧠 Requested {label}.\n\n{response[:1800]}")
 
 
 def main():

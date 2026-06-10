@@ -277,6 +277,21 @@ if __name__ == "__main__":
     # Also write to file for HTML to read
     output_path = Path("/home/spatula/Projects/ZenNew/agent-os-data.json")
     output_path.write_text(output)
+
+    # Update embedded JSON in agent-os.html
+    html_path = Path("/home/spatula/Projects/ZenNew/agent-os.html")
+    html = html_path.read_text()
+    marker_start = '<script type="application/json" id="embedded-data">'
+    marker_end = '</script>'
+    idx_start = html.find(marker_start)
+    idx_end = html.find(marker_end, idx_start + len(marker_start))
+    if idx_start > 0 and idx_end > 0:
+        new_block = marker_start + '\n' + json.dumps(data, default=str) + '\n' + marker_end
+        html = html[:idx_start] + new_block + html[idx_end + len(marker_end):]
+        html_path.write_text(html)
+        print("✅ Embedded data updated in agent-os.html")
+    else:
+        print("⚠️ Could not find embedded data markers in HTML")
     print(f"\n✅ Data written to {output_path}")
     print(f"📊 Token usage today: {data['token_usage']['today']['in']:,} in / {data['token_usage']['today']['out']:,} out")
     print(f"📊 Sandbox: {data['sandbox']['total']} total, {data['sandbox']['accepted']} accepted, {data['sandbox']['rejected']} rejected")

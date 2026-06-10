@@ -1,0 +1,3 @@
+{
+  "code": "from pathlib import Path\np=Path('/home/spatula/Projects/ZenNew/agent-os.html')\ns=p.read_text()\nold=s[s.index('    <div class=\"os-top-bar\">', s.index('<div id=\"page-tokens\"')):s.index('    <!-- Main st...[truncated]"
+}

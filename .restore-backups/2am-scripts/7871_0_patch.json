@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "let DASHBOARD_DATA = null;\nlet tokenRoutingRange = 'intraday';\nlet incomeEntries = JSON.parse(localStorage.getItem('zen_income') || '[]');",
+  "old_string": "let DASHBOARD_DATA = null;\nlet incomeEntries = JSON.parse(localStorage.getItem('zen_income') || '[]');",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

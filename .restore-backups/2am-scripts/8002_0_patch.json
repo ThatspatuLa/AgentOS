@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "  if (nav) nav.classList.add('active');\n  closeSearch();\n  if (id === 'tokens') requestAnimationFrame(animateTokensPage);\n}",
+  "old_string": "  if (nav) nav.classList.add('active');\n  closeSearch();\n}",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

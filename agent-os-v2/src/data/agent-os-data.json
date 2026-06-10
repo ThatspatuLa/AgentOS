@@ -1,0 +1,2990 @@
+{
+  "generated_at": "2026-06-10T03:01:27.633157",
+  "token_usage": {
+    "today": {
+      "in": 22959635,
+      "out": 69055,
+      "calls": 243,
+      "cost": 0.4626
+    },
+    "yesterday": {
+      "in": 177512713,
+      "out": 555672,
+      "cost": 3.578
+    },
+    "total_in": 393683920,
+    "total_out": 1485679,
+    "total_calls": 3681,
+    "per_model": {
+      "qwen3-coder:30b": {
+        "in": 196583,
+        "out": 6468,
+        "calls": 48,
+        "cost": 0.0175
+      },
+      "claude-opus-4.8": {
+        "in": 4096,
+        "out": 15,
+        "calls": 1,
+        "cost": 0.0626
+      },
+      "minimax-m3:cloud": {
+        "in": 1601390,
+        "out": 14540,
+        "calls": 48,
+        "cost": 0.4635
+      },
+      "nemotron-3-ultra:cloud": {
+        "in": 812254,
+        "out": 10327,
+        "calls": 15,
+        "cost": 0.1249
+      },
+      "qwen2.5-coder:14b": {
+        "in": 4095,
+        "out": 20,
+        "calls": 1,
+        "cost": 0.0004
+      },
+      "openrouter/owl-alpha": {
+        "in": 330085427,
+        "out": 1215106,
+        "calls": 2906,
+        "cost": 0.0
+      },
+      "nvidia/nemotron-3-ultra-550b-a55b:free": {
+        "in": 24871,
+        "out": 36,
+        "calls": 1,
+        "cost": 0.0037
+      },
+      "gpt-5.5": {
+        "in": 60955204,
+        "out": 239167,
+        "calls": 661,
+        "cost": 9.215
+      }
+    },
+    "per_day_model": {
+      "2026-06-07": {
+        "qwen3-coder:30b": {
+          "in": 122873,
+          "out": 3172,
+          "calls": 30
+        },
+        "claude-opus-4.8": {
+          "in": 4096,
+          "out": 15,
+          "calls": 1
+        },
+        "ollama/minimax-m3:cloud": {
+          "in": 1601390,
+          "out": 14540,
+          "calls": 48
+        },
+        "ollama/nemotron-3-ultra:cloud": {
+          "in": 812254,
+          "out": 10327,
+          "calls": 15
+        },
+        "qwen2.5-coder:14b": {
+          "in": 4095,
+          "out": 20,
+          "calls": 1
+        },
+        "openrouter/owl-alpha": {
+          "in": 51988488,
+          "out": 149627,
+          "calls": 456
+        }
+      },
+      "2026-06-08": {
+        "openrouter/owl-alpha": {
+          "in": 138674281,
+          "out": 682950,
+          "calls": 1464
+        },
+        "qwen3-coder:30b": {
+          "in": 4095,
+          "out": 301,
+          "calls": 1
+        }
+      },
+      "2026-06-09": {
+        "qwen3-coder:30b": {
+          "in": 69615,
+          "out": 2995,
+          "calls": 17
+        },
+        "ollama/nemotron-3-ultra:cloud": {
+          "in": 24871,
+          "out": 36,
+          "calls": 1
+        },
+        "openai-codex": {
+          "in": 37995569,
+          "out": 170112,
+          "calls": 418
+        },
+        "openrouter/owl-alpha": {
+          "in": 139422658,
+          "out": 382529,
+          "calls": 986
+        }
+      },
+      "2026-06-10": {
+        "openai-codex": {
+          "in": 22959635,
+          "out": 69055,
+          "calls": 243
+        }
+      }
+    },
+    "per_session": {
+      "20260607_193056_683caea5": {
+        "in": 130089643,
+        "out": 376264,
+        "calls": 905,
+        "cost": 19.6263
+      },
+      "20260609_105418_ae512ca0": {
+        "in": 96783798,
+        "out": 247338,
+        "calls": 800,
+        "cost": 14.5918
+      },
+      "20260609_113730_45e6f63f": {
+        "in": 48407704,
+        "out": 162503,
+        "calls": 256,
+        "cost": 7.3099
+      },
+      "20260607_193646_a685023b": {
+        "in": 22049565,
+        "out": 92274,
+        "calls": 266,
+        "cost": 3.3351
+      },
+      "20260607_042720_1d3341": {
+        "in": 16149966,
+        "out": 69936,
+        "calls": 255,
+        "cost": 2.4435
+      },
+      "20260610_012737_0ff89b": {
+        "in": 8791326,
+        "out": 25280,
+        "calls": 92,
+        "cost": 1.3263
+      },
+      "cron_197d792b3e41_20260608_034707": {
+        "in": 8474505,
+        "out": 111479,
+        "calls": 70,
+        "cost": 1.3046
+      },
+      "20260609_194328_675cee": {
+        "in": 6611343,
+        "out": 18175,
+        "calls": 62,
+        "cost": 0.9972
+      },
+      "20260609_224129_be9dcb": {
+        "in": 5978301,
+        "out": 30191,
+        "calls": 68,
+        "cost": 0.9058
+      },
+      "20260609_231828_70cc59": {
+        "in": 5862738,
+        "out": 22902,
+        "calls": 62,
+        "cost": 0.8863
+      }
+    }
+  },
+  "pipeline_tokens": {
+    "total_cost": 0,
+    "total_in": 11296,
+    "total_out": 141486,
+    "total_calls": 40,
+    "cloud_in": 0,
+    "cloud_out": 0,
+    "local_in": 11296,
+    "local_out": 141486,
+    "per_model": {
+      "ollama/gpt-oss:20b": {
+        "in": 11296,
+        "out": 141486,
+        "cost": 0,
+        "calls": 40
+      }
+    },
+    "recent_runs": [
+      {
+        "id": "47c1c837-5ee7-4dc1-8d15-c10fdbaa3c87",
+        "timestamp": "2026-06-10T02:48:52+10:00",
+        "ended_at": "2026-06-10T02:49:25+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 409,
+        "tokens_out": 6095,
+        "cost": 0,
+        "duration_seconds": 33,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "b7269cd8-5f79-4744-80da-b741acb4f07e",
+        "timestamp": "2026-06-10T02:49:25+10:00",
+        "ended_at": "2026-06-10T02:49:56+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 412,
+        "tokens_out": 5756,
+        "cost": 0,
+        "duration_seconds": 31,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "fa63dcbe-6c38-4083-b6f5-c37ec8c4d1fb",
+        "timestamp": "2026-06-10T02:49:57+10:00",
+        "ended_at": "2026-06-10T02:50:23+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 404,
+        "tokens_out": 4270,
+        "cost": 0,
+        "duration_seconds": 26,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "9a353362-2b20-4420-a4f0-ec100bfafa41",
+        "timestamp": "2026-06-10T02:50:23+10:00",
+        "ended_at": "2026-06-10T02:50:52+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 403,
+        "tokens_out": 4736,
+        "cost": 0,
+        "duration_seconds": 29,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "5e0bc1e3-1df1-4f1f-9c26-901316925c3d",
+        "timestamp": "2026-06-10T02:50:52+10:00",
+        "ended_at": "2026-06-10T02:51:26+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 393,
+        "tokens_out": 5484,
+        "cost": 0,
+        "duration_seconds": 34,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "d3f33516-dbb2-42d7-90e1-f05892f29b64",
+        "timestamp": "2026-06-10T02:51:26+10:00",
+        "ended_at": "2026-06-10T02:51:58+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 400,
+        "tokens_out": 5601,
+        "cost": 0,
+        "duration_seconds": 32,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "af93d4b1-4446-4efa-ab34-1e14dc6c98c7",
+        "timestamp": "2026-06-10T02:51:58+10:00",
+        "ended_at": "2026-06-10T02:52:27+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 394,
+        "tokens_out": 5304,
+        "cost": 0,
+        "duration_seconds": 29,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "6c460528-4d8f-4a59-94e3-a776cfed5db1",
+        "timestamp": "2026-06-10T02:52:27+10:00",
+        "ended_at": "2026-06-10T02:52:54+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 396,
+        "tokens_out": 4178,
+        "cost": 0,
+        "duration_seconds": 27,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "296e16ff-05c5-413e-aa5f-cc01de36341c",
+        "timestamp": "2026-06-10T02:52:54+10:00",
+        "ended_at": "2026-06-10T02:53:25+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Obsidian/ZenVault",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 411,
+        "tokens_out": 8272,
+        "cost": 0,
+        "duration_seconds": 32,
+        "result": "pass",
+        "exit_code": 0
+      },
+      {
+        "id": "270246a1-d283-4b16-bed3-e59e7f4935fc",
+        "timestamp": "2026-06-10T02:55:16+10:00",
+        "ended_at": "2026-06-10T03:00:50+10:00",
+        "stage": "local-execution",
+        "source": "zen-worker",
+        "project_dir": "/home/spatula/Projects/ZenNew",
+        "model": "ollama/gpt-oss:20b",
+        "tokens_in": 160,
+        "tokens_out": 7909,
+        "cost": 0,
+        "duration_seconds": 334,
+        "result": "pass",
+        "exit_code": 0
+      }
+    ]
+  },
+  "cloud_capacity": {
+    "updated_at": "2026-06-09",
+    "timezone": {
+      "local": "AEST",
+      "offset": "+10:00",
+      "note": "Midnight UTC maps to 10:00 AEST while local timezone remains +10."
+    },
+    "models": {
+      "codex": {
+        "refresh_cycle": "5h",
+        "next_observed_refresh": "12:11",
+        "weekly_reset_observed": "2026-06-11",
+        "source": "user_observed_in_codex_prompt_context",
+        "confidence": "observed_by_user",
+        "tracking_note": "Use as the current baseline for 5-hour and weekly Codex capacity windows."
+      },
+      "owl-alpha_openrouter_free": {
+        "refresh_basis": "current UTC day / midnight UTC",
+        "local_reset_time_aest": "10:00",
+        "free_limits": {
+          "requests_per_minute": 20,
+          "daily_requests_if_credits_lt_10": 50,
+          "daily_requests_if_credits_gte_10": 1000
+        },
+        "source": "OpenRouter docs: API Rate Limits and FAQ",
+        "confidence": "confirmed_for_openrouter_free_request_day; owl_alpha_exact_usable_capacity_still_requires_exhaustion_baselines",
+        "tracking_note": "Treat 10:00 AEST as the expected reset time, then measure real Owl Alpha usable capacity by recording exhaustion-to-exhaustion baselines."
+      }
+    },
+    "tracking_rule": "Use exhaustion baselines: record when a cloud model runs out, then compare with the next exhaustion point after reset to estimate usable capacity.",
+    "sb_policy_link": "During run SB, do not spend Owl Alpha/Codex except explicit expiry/capacity checkpoints. Run cloud review only after the local batch completion gate."
+  },
+  "token_model_groups": {
+    "regular_cloud": {
+      "openrouter/owl-alpha": {
+        "in": 330085427,
+        "out": 1215106,
+        "calls": 2906,
+        "cost": 0.0
+      },
+      "openai-codex": {
+        "in": 60955204,
+        "out": 239167,
+        "calls": 661,
+        "cost": 9.215
+      }
+    },
+    "free_tier_cloud": {
+      "ollama/minimax-m3:cloud": {
+        "in": 1601390,
+        "out": 14540,
+        "calls": 48,
+        "cost": 0.4635
+      },
+      "ollama/nemotron-3-ultra:cloud": {
+        "in": 837125,
+        "out": 10363,
+        "calls": 16,
+        "cost": 0.1286
+      }
+    },
+    "routing_mix": [
+      {
+        "label": "Local Worker",
+        "value": 198,
+        "tokens": 152782,
+        "color": "cyan",
+        "models": "gpt-oss:20b",
+        "breakdown": [
+          {
+            "label": "gpt-oss:20b",
+            "value": 198,
+            "tokens": 152782
+          }
+        ],
+        "percent": 5.2
+      },
+      {
+        "label": "Regular Cloud",
+        "value": 3567,
+        "tokens": 392494904,
+        "color": "purple",
+        "models": "Owl Alpha, Codex",
+        "breakdown": [
+          {
+            "label": "Owl Alpha",
+            "value": 2906,
+            "tokens": 331300533
+          },
+          {
+            "label": "Codex",
+            "value": 661,
+            "tokens": 61194371
+          }
+        ],
+        "percent": 93.2
+      },
+      {
+        "label": "Free Tier Cloud",
+        "value": 64,
+        "tokens": 2463418,
+        "color": "green",
+        "models": "minimax-m3, nemotron-3-ultra",
+        "breakdown": [
+          {
+            "label": "minimax-m3:cloud",
+            "value": 48,
+            "tokens": 1615930
+          },
+          {
+            "label": "nemotron-3-ultra:cloud",
+            "value": 16,
+            "tokens": 847488
+          }
+        ],
+        "percent": 1.7
+      }
+    ],
+    "routing_mix_ranges": {
+      "intraday": [
+        {
+          "label": "Local Worker",
+          "value": 40,
+          "tokens": 152782,
+          "color": "cyan",
+          "models": "gpt-oss:20b",
+          "breakdown": [
+            {
+              "label": "gpt-oss:20b",
+              "value": 40,
+              "tokens": 152782
+            }
+          ],
+          "percent": 14.1
+        },
+        {
+          "label": "Regular Cloud",
+          "value": 243,
+          "tokens": 23028690,
+          "color": "purple",
+          "models": "Owl Alpha, Codex",
+          "breakdown": [
+            {
+              "label": "Owl Alpha",
+              "value": 0,
+              "tokens": 0
+            },
+            {
+              "label": "Codex",
+              "value": 243,
+              "tokens": 23028690
+            }
+          ],
+          "percent": 85.9
+        },
+        {
+          "label": "Free Tier Cloud",
+          "value": 0,
+          "tokens": 0,
+          "color": "green",
+          "models": "minimax-m3, nemotron-3-ultra",
+          "breakdown": [
+            {
+              "label": "minimax-m3:cloud",
+              "value": 0,
+              "tokens": 0
+            },
+            {
+              "label": "nemotron-3-ultra:cloud",
+              "value": 0,
+              "tokens": 0
+            }
+          ],
+          "percent": 0.0
+        }
+      ],
+      "weekly": [
+        {
+          "label": "Local Worker",
+          "value": 198,
+          "tokens": 152782,
+          "color": "cyan",
+          "models": "gpt-oss:20b",
+          "breakdown": [
+            {
+              "label": "gpt-oss:20b",
+              "value": 198,
+              "tokens": 152782
+            }
+          ],
+          "percent": 5.2
+        },
+        {
+          "label": "Regular Cloud",
+          "value": 3567,
+          "tokens": 392494904,
+          "color": "purple",
+          "models": "Owl Alpha, Codex",
+          "breakdown": [
+            {
+              "label": "Owl Alpha",
+              "value": 2906,
+              "tokens": 331300533
+            },
+            {
+              "label": "Codex",
+              "value": 661,
+              "tokens": 61194371
+            }
+          ],
+          "percent": 93.2
+        },
+        {
+          "label": "Free Tier Cloud",
+          "value": 64,
+          "tokens": 2463418,
+          "color": "green",
+          "models": "minimax-m3, nemotron-3-ultra",
+          "breakdown": [
+            {
+              "label": "minimax-m3:cloud",
+              "value": 48,
+              "tokens": 1615930
+            },
+            {
+              "label": "nemotron-3-ultra:cloud",
+              "value": 16,
+              "tokens": 847488
+            }
+          ],
+          "percent": 1.7
+        }
+      ],
+      "monthly": [
+        {
+          "label": "Local Worker",
+          "value": 198,
+          "tokens": 152782,
+          "color": "cyan",
+          "models": "gpt-oss:20b",
+          "breakdown": [
+            {
+              "label": "gpt-oss:20b",
+              "value": 198,
+              "tokens": 152782
+            }
+          ],
+          "percent": 5.2
+        },
+        {
+          "label": "Regular Cloud",
+          "value": 3567,
+          "tokens": 392494904,
+          "color": "purple",
+          "models": "Owl Alpha, Codex",
+          "breakdown": [
+            {
+              "label": "Owl Alpha",
+              "value": 2906,
+              "tokens": 331300533
+            },
+            {
+              "label": "Codex",
+              "value": 661,
+              "tokens": 61194371
+            }
+          ],
+          "percent": 93.2
+        },
+        {
+          "label": "Free Tier Cloud",
+          "value": 64,
+          "tokens": 2463418,
+          "color": "green",
+          "models": "minimax-m3, nemotron-3-ultra",
+          "breakdown": [
+            {
+              "label": "minimax-m3:cloud",
+              "value": 48,
+              "tokens": 1615930
+            },
+            {
+              "label": "nemotron-3-ultra:cloud",
+              "value": 16,
+              "tokens": 847488
+            }
+          ],
+          "percent": 1.7
+        }
+      ],
+      "all": [
+        {
+          "label": "Local Worker",
+          "value": 198,
+          "tokens": 152782,
+          "color": "cyan",
+          "models": "gpt-oss:20b",
+          "breakdown": [
+            {
+              "label": "gpt-oss:20b",
+              "value": 198,
+              "tokens": 152782
+            }
+          ],
+          "percent": 5.2
+        },
+        {
+          "label": "Regular Cloud",
+          "value": 3567,
+          "tokens": 392494904,
+          "color": "purple",
+          "models": "Owl Alpha, Codex",
+          "breakdown": [
+            {
+              "label": "Owl Alpha",
+              "value": 2906,
+              "tokens": 331300533
+            },
+            {
+              "label": "Codex",
+              "value": 661,
+              "tokens": 61194371
+            }
+          ],
+          "percent": 93.2
+        },
+        {
+          "label": "Free Tier Cloud",
+          "value": 64,
+          "tokens": 2463418,
+          "color": "green",
+          "models": "minimax-m3, nemotron-3-ultra",
+          "breakdown": [
+            {
+              "label": "minimax-m3:cloud",
+              "value": 48,
+              "tokens": 1615930
+            },
+            {
+              "label": "nemotron-3-ultra:cloud",
+              "value": 16,
+              "tokens": 847488
+            }
+          ],
+          "percent": 1.7
+        }
+      ]
+    },
+    "actual_spend": 0,
+    "local_economics": {
+      "cloud_to_local_output_tokens": 1454273,
+      "local_work_completed": 198,
+      "local_token_tracking": "logged",
+      "cost_avoided_baseline": {
+        "model": "openai/gpt-oss-20b",
+        "label": "OpenRouter hosted gpt-oss-20b",
+        "input_per_million": 0.029,
+        "output_per_million": 0.14,
+        "source": "OpenRouter model page/API, checked 2026-06-09"
+      },
+      "estimated_cloud_cost_avoided": 0.0201
+    }
+  },
+  "token_time_series": {
+    "days": [
+      {
+        "date": "2026-06-04",
+        "label": "Thu",
+        "models": {
+          "openrouter/owl-alpha": 0,
+          "openai-codex": 0,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 0,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 0
+      },
+      {
+        "date": "2026-06-05",
+        "label": "Fri",
+        "models": {
+          "openrouter/owl-alpha": 0,
+          "openai-codex": 0,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 0,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 0
+      },
+      {
+        "date": "2026-06-06",
+        "label": "Sat",
+        "models": {
+          "openrouter/owl-alpha": 0,
+          "openai-codex": 0,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 0,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 0
+      },
+      {
+        "date": "2026-06-07",
+        "label": "Sun",
+        "models": {
+          "openrouter/owl-alpha": 52138115,
+          "openai-codex": 0,
+          "ollama/minimax-m3:cloud": 1615930,
+          "ollama/nemotron-3-ultra:cloud": 822581,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 54576626
+      },
+      {
+        "date": "2026-06-08",
+        "label": "Mon",
+        "models": {
+          "openrouter/owl-alpha": 139357231,
+          "openai-codex": 0,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 0,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 139357231
+      },
+      {
+        "date": "2026-06-09",
+        "label": "Tue",
+        "models": {
+          "openrouter/owl-alpha": 139805187,
+          "openai-codex": 38165681,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 24907,
+          "ollama/gpt-oss:20b": 0
+        },
+        "total": 177995775
+      },
+      {
+        "date": "2026-06-10",
+        "label": "Wed",
+        "models": {
+          "openrouter/owl-alpha": 0,
+          "openai-codex": 23028690,
+          "ollama/minimax-m3:cloud": 0,
+          "ollama/nemotron-3-ultra:cloud": 0,
+          "ollama/gpt-oss:20b": 152782
+        },
+        "total": 23181472
+      }
+    ],
+    "models": [
+      {
+        "key": "openrouter/owl-alpha",
+        "label": "Owl Alpha",
+        "color": "purple"
+      },
+      {
+        "key": "openai-codex",
+        "label": "Codex",
+        "color": "blue"
+      },
+      {
+        "key": "ollama/minimax-m3:cloud",
+        "label": "minimax-m3",
+        "color": "green"
+      },
+      {
+        "key": "ollama/nemotron-3-ultra:cloud",
+        "label": "nemotron-3",
+        "color": "yellow"
+      },
+      {
+        "key": "ollama/gpt-oss:20b",
+        "label": "gpt-oss local",
+        "color": "cyan"
+      }
+    ]
+  },
+  "ollama": {
+    "status": "online",
+    "endpoint": "http://127.0.0.1:11434",
+    "version": "0.30.6",
+    "models": [
+      {
+        "name": "gpt-oss:20b",
+        "size": 13793441244,
+        "size_gb": 12.85,
+        "modified_at": "2026-06-09T13:48:03.642391365+10:00",
+        "parameter_size": "20.9B",
+        "quantization_level": "MXFP4",
+        "family": "gptoss",
+        "context_length": 131072,
+        "runtime_context_note": "Ollama logs previously showed runtime -c 4096; model max may be higher.",
+        "show_error": null
+      }
+    ],
+    "note": "Ollama provides installed model metadata but no cumulative token ledger; usage totals require API response capture or journal log parsing."
+  },
+  "sandbox": {
+    "total": 158,
+    "accepted": 18,
+    "rejected": 115,
+    "pending": 0,
+    "needs_review": 25,
+    "high_quality": 158,
+    "prompts": [
+      {
+        "id": "SB-20260608-001",
+        "summary": "TDEE calculator Python script",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-001.md"
+      },
+      {
+        "id": "SB-20260608-002",
+        "summary": "Sandbox failure mode analysis",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-002.md"
+      },
+      {
+        "id": "SB-20260608-003",
+        "summary": "Weekly workout split JSON",
+        "project": "Toji",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-003.md"
+      },
+      {
+        "id": "SB-20260608-004",
+        "summary": "Crypto risk management framework",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-004.md"
+      },
+      {
+        "id": "SB-20260608-005",
+        "summary": "Kiyosaki vs Toji risk comparison",
+        "project": "Rin",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "cross_project",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-005.md"
+      },
+      {
+        "id": "SB-20260608-007",
+        "summary": "Design the market state definition system for ETH 5M ensemble",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-007.md"
+      },
+      {
+        "id": "SB-20260608-008",
+        "summary": "Analyze portfolio heat risk of 20 strategies simultaneously signaling long",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-007.md"
+      },
+      {
+        "id": "SB-20260608-009",
+        "summary": "Explain why ensemble uses confidence scores instead of binary signals",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-009.md"
+      },
+      {
+        "id": "SB-20260608-010",
+        "summary": "Design a checkpoint/resume system for sandbox runs",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-009.md"
+      },
+      {
+        "id": "SB-20260608-011",
+        "summary": "Design the biweekly recalibration system: how to re-weight 20 strategies based o",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-011.md"
+      },
+      {
+        "id": "SB-20260608-012",
+        "summary": "Analyze the overfitting risk of selecting top 50 from 300 strategies on the same",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-012.md"
+      },
+      {
+        "id": "SB-20260608-013",
+        "summary": "Explain why sandbox prompts must reference actual project context, not generic t",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-013.md"
+      },
+      {
+        "id": "SB-20260608-014",
+        "summary": "Propose a position sizing model where aggregate confidence magnitude affects tra",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-014.md"
+      },
+      {
+        "id": "SB-20260608-015",
+        "summary": "Design the bench strategy evaluation system: how paper performance is measured a",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-015.md"
+      },
+      {
+        "id": "SB-20260608-016",
+        "summary": "Design a prompt deduplication system that detects semantic similarity between pr",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-016.md"
+      },
+      {
+        "id": "SB-20260608-017",
+        "summary": "Explain why the bench swap is monthly while weight recalibration is biweekly",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-017.md"
+      },
+      {
+        "id": "SB-20260608-018",
+        "summary": "Design a confidence calibration system so strategy confidence scores are compara",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-018.md"
+      },
+      {
+        "id": "SB-20260608-019",
+        "summary": "Explain the sandbox quality tiers: high, medium, low, and generic",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-019.md"
+      },
+      {
+        "id": "SB-20260608-020",
+        "summary": "Propose how to handle the 300\u219250 initial filter: what metrics and thresholds sel",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-020.md"
+      },
+      {
+        "id": "SB-20260608-022",
+        "summary": "Design a notification system for sandbox run progress that keeps the user inform",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-022.md"
+      },
+      {
+        "id": "SB-20260608-023",
+        "summary": "Design the aggregate score threshold system: how to set long/short/flat boundari",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-023.md"
+      },
+      {
+        "id": "SB-20260608-024",
+        "summary": "Identify the bug risk when multiple strategies fire confidence signals on the sa",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-024.md"
+      },
+      {
+        "id": "SB-20260608-025",
+        "summary": "Design a self-improving sandbox that learns which prompt characteristics predict",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-025.md"
+      },
+      {
+        "id": "SB-20260608-026",
+        "summary": "Explain why the ensemble uses 20 active strategies instead of all 300",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-026.md"
+      },
+      {
+        "id": "SB-20260608-027",
+        "summary": "Propose how ETH session times (Asia/US/Europe) should affect the ensemble's beha",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-027.md"
+      },
+      {
+        "id": "SB-20260608-028",
+        "summary": "Explain why sandbox detail files use frontmatter instead of inline content",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-028.md"
+      },
+      {
+        "id": "SB-20260608-029",
+        "summary": "Design a maximum drawdown hard stop that overrides the ensemble confidence",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-029.md"
+      },
+      {
+        "id": "SB-20260608-030",
+        "summary": "Design a walk-forward validation protocol to test the 300\u219250\u219220 funnel generaliz",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-030.md"
+      },
+      {
+        "id": "SB-20260608-031",
+        "summary": "Design a system for A/B testing sandbox prompt variations",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-031.md"
+      },
+      {
+        "id": "SB-20260608-032",
+        "summary": "Explain why the 50\u219220 selection uses stricter scoring than the 300\u219250 filter",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-032.md"
+      },
+      {
+        "id": "SB-20260608-033",
+        "summary": "Analyze the risk of the ensemble entering during ETH news events",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-033.md"
+      },
+      {
+        "id": "SB-20260608-034",
+        "summary": "Explain why the sandbox blocks terminal, browser, and git tools",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-034.md"
+      },
+      {
+        "id": "SB-20260608-035",
+        "summary": "Propose a strategy diversity analysis to ensure 300 strategies cover distinct ed",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-035.md"
+      },
+      {
+        "id": "SB-20260608-036",
+        "summary": "Design the single EA architecture: how 20 strategies coexist in one MQL5 EA",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "\u2014",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-036.md"
+      },
+      {
+        "id": "SB-20260608-037",
+        "summary": "Design a system for tracking which sandbox learnings have been promoted to produ",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-037.md"
+      },
+      {
+        "id": "SB-20260608-038",
+        "summary": "Explain the purpose of V20's ADX strength filter in router logic",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-038.md"
+      },
+      {
+        "id": "SB-20260608-039",
+        "summary": "Analyze the risk of V20 trading BTCUSD.r specifically vs. other crypto pairs",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-039.md"
+      },
+      {
+        "id": "SB-20260608-040",
+        "summary": "Explain the 2-retry escalation strategy and when it fails",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-040.md"
+      },
+      {
+        "id": "SB-20260608-041",
+        "summary": "Design a multi-symbol adaptation plan for V20 to trade ETHUSD alongside BTCUSD",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-041.md"
+      },
+      {
+        "id": "SB-20260608-042",
+        "summary": "Identify the risk of 'one trade per H4 bar per engine' creating missed opportuni",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-042.md"
+      },
+      {
+        "id": "SB-20260608-043",
+        "summary": "Design a conflict resolution system for when two projects give contradictory adv",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-043.md"
+      },
+      {
+        "id": "SB-20260608-044",
+        "summary": "Explain why V20's stops and targets must honor broker constraints",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-044.md"
+      },
+      {
+        "id": "SB-20260608-045",
+        "summary": "Propose a monthly rebalancing strategy for V20's engine weights based on perform",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-045.md"
+      },
+      {
+        "id": "SB-20260608-046",
+        "summary": "Design an automated testing framework for sandbox prompt quality",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-046.md"
+      },
+      {
+        "id": "SB-20260608-047",
+        "summary": "Analyze the drawdown profile of V20's DCA-Long engine in a sideways market",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-047.md"
+      },
+      {
+        "id": "SB-20260608-048",
+        "summary": "Explain the difference between geometric and arithmetic return in V20's optimiza",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-048.md"
+      },
+      {
+        "id": "SB-20260608-049",
+        "summary": "Design a notification system for sandbox run progress that doesn't spam the user",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-049.md"
+      },
+      {
+        "id": "SB-20260608-050",
+        "summary": "Design a walk-forward optimization protocol for V20 that prevents overfitting",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-050.md"
+      },
+      {
+        "id": "SB-20260608-051",
+        "summary": "Analyze whether V20's 15-20% monthly target is realistic given BTCUSD volatility",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-051.md"
+      },
+      {
+        "id": "SB-20260608-052",
+        "summary": "Explain the sandbox self-evaluation rubric dimensions and scoring",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-052.md"
+      },
+      {
+        "id": "SB-20260608-053",
+        "summary": "Propose a partial profit-taking strategy for V20's MACD-Long engine",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-053.md"
+      },
+      {
+        "id": "SB-20260608-054",
+        "summary": "Design a portfolio heat monitoring system for V20 with real-time alerts",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-054.md"
+      },
+      {
+        "id": "SB-20260608-055",
+        "summary": "Design a system for generating sandbox prompts from real Discord conversations",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-055.md"
+      },
+      {
+        "id": "SB-20260608-056",
+        "summary": "Explain why V20 uses ATR swing structure instead of fixed support/resistance lev",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-056.md"
+      },
+      {
+        "id": "SB-20260608-057",
+        "summary": "Identify the risk of V20's P2 DCA bypassing global cadence creating inconsistent",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-057.md"
+      },
+      {
+        "id": "SB-20260608-058",
+        "summary": "Explain why sandbox detail files use frontmatter instead of inline content",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-058.md"
+      },
+      {
+        "id": "SB-20260608-059",
+        "summary": "Design a market regime filter that disables DCA-Long in choppy markets",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-059.md"
+      },
+      {
+        "id": "SB-20260608-060",
+        "summary": "Analyze the impact of spread widening on V20's stop loss effectiveness",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-060.md"
+      },
+      {
+        "id": "SB-20260608-061",
+        "summary": "Design a dashboard for monitoring all 6 projects' health and activity",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-061.md"
+      },
+      {
+        "id": "SB-20260608-062",
+        "summary": "Explain V20's hard guards",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-062.md"
+      },
+      {
+        "id": "SB-20260608-063",
+        "summary": "Propose an engine isolation protocol for V20",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-062.md"
+      },
+      {
+        "id": "SB-20260608-063",
+        "summary": "Propose a maximum position duration limit for the ensemble's trades",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-063.md"
+      },
+      {
+        "id": "SB-20260608-064",
+        "summary": "Design a self-improving sandbox that learns from its own execution patterns",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-064.md"
+      },
+      {
+        "id": "SB-20260608-065",
+        "summary": "Analyze V20 VPS connectivity risk",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-064.md"
+      },
+      {
+        "id": "SB-20260608-066",
+        "summary": "Explain V20's scoring weights",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-064.md"
+      },
+      {
+        "id": "SB-20260608-067",
+        "summary": "Design an A/B testing system for sandbox prompt variations",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-064.md"
+      },
+      {
+        "id": "SB-20260608-065",
+        "summary": "Explain why the ensemble needs both weighting AND aggregate thresholds (two cont",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-065.md"
+      },
+      {
+        "id": "SB-20260608-066",
+        "summary": "Analyze broker execution risk: how MT5 handles 5M decisions during fast markets",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-066.md"
+      },
+      {
+        "id": "SB-20260608-067",
+        "summary": "Propose how ETH's merger to PoS should have affected 5M strategy behavior",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-067.md"
+      },
+      {
+        "id": "SB-20260608-068",
+        "summary": "Design a dynamic position sizing model that accounts for open DCA exposure",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-068.md"
+      },
+      {
+        "id": "SB-20260608-069",
+        "summary": "Identify the risk of V20's router using closed H4 bars vs. current forming bar",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-068.md"
+      },
+      {
+        "id": "SB-20260608-070",
+        "summary": "Explain the four quality tiers in sandbox self-evaluation",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-068.md"
+      },
+      {
+        "id": "SB-20260608-071",
+        "summary": "Propose a news filter that reduces V20's exposure during high-impact events",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-068.md"
+      },
+      {
+        "id": "SB-20260608-069",
+        "summary": "Design an adaptive threshold system that adjusts long/short boundaries based on ",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-069.md"
+      },
+      {
+        "id": "SB-20260608-070",
+        "summary": "Propose a time-of-day filter: whether the ensemble should adjust behavior by UTC",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-070.md"
+      },
+      {
+        "id": "SB-20260608-071",
+        "summary": "Analyze the ensemble's risk during a major crypto exchange outage or liquidity c",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-071.md"
+      },
+      {
+        "id": "SB-20260608-072",
+        "summary": "Design a maximum adverse excursion analysis for V20's trade management",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-072.md"
+      },
+      {
+        "id": "SB-20260608-073",
+        "summary": "Design a rollback system for sandbox promotions that go wrong",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-072.md"
+      },
+      {
+        "id": "SB-20260608-074",
+        "summary": "Explain why V20's 15-20% monthly target requires evidence beyond backtests",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-072.md"
+      },
+      {
+        "id": "SB-20260608-075",
+        "summary": "Propose a maximum drawdown-based position scaling system for V20",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-072.md"
+      },
+      {
+        "id": "SB-20260608-073",
+        "summary": "Design a conflict resolution system when Zen and Kiyosaki give contradictory adv",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-073.md"
+      },
+      {
+        "id": "SB-20260608-074",
+        "summary": "Propose how to handle strategies that become unprofitable after the 50\u219220 select",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-074.md"
+      },
+      {
+        "id": "SB-20260608-075",
+        "summary": "Design the complete OnTester() integration for the ensemble optimization",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-075.md"
+      },
+      {
+        "id": "SB-20260608-076",
+        "summary": "Explain why sandbox review uses natural language instead of commands",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-076.md"
+      },
+      {
+        "id": "SB-20260608-077",
+        "summary": "Design a complete V20 engine timing preservation protocol",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-076.md"
+      },
+      {
+        "id": "SB-20260608-078",
+        "summary": "Analyze the risk of V20's MACD-Short being the only bearish engine",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-076.md"
+      },
+      {
+        "id": "SB-20260608-079",
+        "summary": "Design a system for tracking sandbox ROI",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-076.md"
+      },
+      {
+        "id": "SB-20260608-080",
+        "summary": "Explain the difference between V20's router profiles P2, P1, M1, M2",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-076.md"
+      },
+      {
+        "id": "SB-20260608-077",
+        "summary": "Propose a periodic 'full reset' evaluation: should the 300\u219250\u219220 funnel ever be ",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-077.md"
+      },
+      {
+        "id": "SB-20260608-078",
+        "summary": "Analyze slippage impact on the ensemble's 5M entries during high-volume periods",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-078.md"
+      },
+      {
+        "id": "SB-20260608-079",
+        "summary": "Propose partial profit-taking rules for the ensemble's winning positions",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-079.md"
+      },
+      {
+        "id": "SB-20260608-080",
+        "summary": "Propose a 'confidence decay' model where stale confidence signals lose influence",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-080.md"
+      },
+      {
+        "id": "SB-20260608-081",
+        "summary": "Propose a V20 optimization target that balances multiple objectives",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-081.md"
+      },
+      {
+        "id": "SB-20260608-082",
+        "summary": "Design a meta-governance layer that monitors Zen's own decision-making quality",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-081.md"
+      },
+      {
+        "id": "SB-20260608-083",
+        "summary": "Identify the risk of V20's margin sanity rule being too conservative",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-081.md"
+      },
+      {
+        "id": "SB-20260608-084",
+        "summary": "Explain why V20's investor material must be anti-hype and evidence-focused",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-081.md"
+      },
+      {
+        "id": "SB-20260608-085",
+        "summary": "Design a complete V20 system documentation template",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-081.md"
+      },
+      {
+        "id": "SB-20260608-082",
+        "summary": "Design a genetic algorithm approach for the initial 300 strategy generation",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-082.md"
+      },
+      {
+        "id": "SB-20260608-083",
+        "summary": "Explain why the single EA architecture prevents signal conflicts between strateg",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-083.md"
+      },
+      {
+        "id": "SB-20260608-084",
+        "summary": "Analyze the ensemble's drawdown profile during the first month after deployment",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-084.md"
+      },
+      {
+        "id": "SB-20260608-085",
+        "summary": "Design a 'strategy health dashboard' showing per-strategy performance in the liv",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-085.md"
+      },
+      {
+        "id": "SB-20260608-086",
+        "summary": "Design a prompt deduplication system for large sandbox batches",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-086.md"
+      },
+      {
+        "id": "SB-20260608-087",
+        "summary": "Analyze V20's risk trading during low-liquidity periods",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-086.md"
+      },
+      {
+        "id": "SB-20260608-088",
+        "summary": "Explain why V20's automation must never remove risk awareness",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-086.md"
+      },
+      {
+        "id": "SB-20260608-089",
+        "summary": "Explain the sandbox execution workflow from prompt to promotion",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-086.md"
+      },
+      {
+        "id": "SB-20260608-090",
+        "summary": "Propose a V20 parameter sensitivity analysis methodology",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-086.md"
+      },
+      {
+        "id": "SB-20260608-087",
+        "summary": "Design a position sizing model that accounts for strategy correlation in the ens",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-087.md"
+      },
+      {
+        "id": "SB-20260608-088",
+        "summary": "Explain why the ensemble uses a confidence SCORE rather than binary buy/sell sig",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-088.md"
+      },
+      {
+        "id": "SB-20260608-089",
+        "summary": "Propose a 'gradual activation' protocol for newly swapped-in bench strategies",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-089.md"
+      },
+      {
+        "id": "SB-20260608-090",
+        "summary": "Design a system for generating sandbox prompts from real Discord conversations",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-090.md"
+      },
+      {
+        "id": "SB-20260608-091",
+        "summary": "Design a V20 adaptation plan for trading GBPUSD alongside BTCUSD",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-091.md"
+      },
+      {
+        "id": "SB-20260608-092",
+        "summary": "Analyze the risk of V20's DCA-Long becoming a blind martingale",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-091.md"
+      },
+      {
+        "id": "SB-20260608-093",
+        "summary": "Design a system for handling sandbox runs that exceed the context window",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-091.md"
+      },
+      {
+        "id": "SB-20260608-094",
+        "summary": "Explain why V20 prefers modular engines over monolithic architecture",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-091.md"
+      },
+      {
+        "id": "SB-20260608-095",
+        "summary": "Propose a V20 backtest reporting standard that prevents cherry-picking",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-091.md"
+      },
+      {
+        "id": "SB-20260608-092",
+        "summary": "Analyze the risk of ETH's upcoming protocol changes affecting 5M strategy validi",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-092.md"
+      },
+      {
+        "id": "SB-20260608-093",
+        "summary": "Propose a maximum consecutive loss circuit breaker at the meta-layer",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-093.md"
+      },
+      {
+        "id": "SB-20260608-094",
+        "summary": "Design a complete ensemble backtesting framework that simulates the meta-decisio",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-094.md"
+      },
+      {
+        "id": "SB-20260608-095",
+        "summary": "Propose an investor-facing report template for the ensemble's backtest results",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-095.md"
+      },
+      {
+        "id": "SB-20260608-096",
+        "summary": "Explain why sandbox blocks writes to ~/.hermes/ and production paths",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-096.md"
+      },
+      {
+        "id": "SB-20260608-097",
+        "summary": "Design a complete V20 live deployment checklist",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-096.md"
+      },
+      {
+        "id": "SB-20260608-098",
+        "summary": "Analyze whether V20's 2% risk per trade is too aggressive for BTCUSD",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-096.md"
+      },
+      {
+        "id": "SB-20260608-099",
+        "summary": "Design a system for categorizing sandbox outputs by promotion readiness",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-096.md"
+      },
+      {
+        "id": "SB-20260608-100",
+        "summary": "Explain the relationship between V20's router and its engines",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-096.md"
+      },
+      {
+        "id": "SB-20260608-097",
+        "summary": "Analyze the risk of the ensemble being 'confidently wrong' during unprecedented ",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-097.md"
+      },
+      {
+        "id": "SB-20260608-098",
+        "summary": "Propose a 'strategy health dashboard' showing per-strategy performance in the li",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-098.md"
+      },
+      {
+        "id": "SB-20260608-099",
+        "summary": "Design the ensemble's complete trade management: entries, exits, trailing, and s",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-099.md"
+      },
+      {
+        "id": "SB-20260608-100",
+        "summary": "Summarize the ETH 5M ensemble design in one paragraph that Kiyosaki would approv",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-100.md"
+      },
+      {
+        "id": "SB-20260608-101",
+        "summary": "Propose how to handle the ensemble entry when aggregate score is exactly at the ",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-101.md"
+      },
+      {
+        "id": "SB-20260608-102",
+        "summary": "Design a memory management system that prevents bloat across 6 projects",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-102.md"
+      },
+      {
+        "id": "SB-20260608-103",
+        "summary": "Analyze the ensemble's behavior if ETH drops 30% in 24 hours",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-103.md"
+      },
+      {
+        "id": "SB-20260608-104",
+        "summary": "Design a 'strategy tournament' system that accelerates bench evaluation",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-104.md"
+      },
+      {
+        "id": "SB-20260608-105",
+        "summary": "Explain why the ensemble design prioritizes survivability over maximum profit",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-08/SB-20260608-105.md"
+      },
+      {
+        "id": "SB-20260609-001",
+        "summary": "Audit the Zen worker routing boundary",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-001.md"
+      },
+      {
+        "id": "SB-20260609-002",
+        "summary": "Design a zen-worker smoke-test checklist",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-002.md"
+      },
+      {
+        "id": "SB-20260609-003",
+        "summary": "Map Agent OS token tracking gaps",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-003.md"
+      },
+      {
+        "id": "SB-20260609-004",
+        "summary": "Define cloud-vs-local decision rules",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-004.md"
+      },
+      {
+        "id": "SB-20260609-005",
+        "summary": "Threat-model cloud token leakage",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "security",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-005.md"
+      },
+      {
+        "id": "SB-20260609-006",
+        "summary": "Draft Agent OS worker status card spec",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-006.md"
+      },
+      {
+        "id": "SB-20260609-007",
+        "summary": "Design Ollama usage extraction pipeline",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-007.md"
+      },
+      {
+        "id": "SB-20260609-008",
+        "summary": "Review sandbox routing policy for consistency",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "code_review",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-008.md"
+      },
+      {
+        "id": "SB-20260609-009",
+        "summary": "Explain Zen pipeline in plain English",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-009.md"
+      },
+      {
+        "id": "SB-20260609-010",
+        "summary": "Specify Owl Alpha/Codex exhaustion baseline tracker",
+        "project": "Zen",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-010.md"
+      },
+      {
+        "id": "SB-20260609-011",
+        "summary": "Design Swarm market-state weighting audit",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-011.md"
+      },
+      {
+        "id": "SB-20260609-012",
+        "summary": "Define Swarm bench-swap risk rules",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-012.md"
+      },
+      {
+        "id": "SB-20260609-013",
+        "summary": "Validate Lean strategy-result schema",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-013.md"
+      },
+      {
+        "id": "SB-20260609-014",
+        "summary": "Analyze aggregate confidence score failure modes",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-014.md"
+      },
+      {
+        "id": "SB-20260609-015",
+        "summary": "Draft Swarm strategy scorecard template",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-015.md"
+      },
+      {
+        "id": "SB-20260609-016",
+        "summary": "Design Swarm drawdown circuit breakers",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-016.md"
+      },
+      {
+        "id": "SB-20260609-017",
+        "summary": "Plan 300-strategy diversity coverage",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-017.md"
+      },
+      {
+        "id": "SB-20260609-018",
+        "summary": "Review Lean code-generation pitfalls",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "code_review",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-018.md"
+      },
+      {
+        "id": "SB-20260609-019",
+        "summary": "Design ETH 5M regime classification tests",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "research",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-019.md"
+      },
+      {
+        "id": "SB-20260609-020",
+        "summary": "Create Swarm overfitting red-team rubric",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-020.md"
+      },
+      {
+        "id": "SB-20260609-021",
+        "summary": "Draft Swarm recalibration runbook",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-021.md"
+      },
+      {
+        "id": "SB-20260609-022",
+        "summary": "Model active-versus-bench selection tradeoffs",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-022.md"
+      },
+      {
+        "id": "SB-20260609-023",
+        "summary": "Define failed-backtest triage for Swarm",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-023.md"
+      },
+      {
+        "id": "SB-20260609-024",
+        "summary": "Design ensemble no-trade discipline",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-024.md"
+      },
+      {
+        "id": "SB-20260609-025",
+        "summary": "Specify Swarm dashboard metrics for Obsidian",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "status": "completed",
+        "review_status": "pending",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none",
+        "path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs/2026-06-09/SB-20260609-025.md"
+      }
+    ]
+  },
+  "projects": {
+    "Kiyosaki": {
+      "total": 112,
+      "accepted": 3,
+      "rejected": 94,
+      "pending": 0,
+      "needs_review": 15
+    },
+    "Zen": {
+      "total": 44,
+      "accepted": 15,
+      "rejected": 19,
+      "pending": 0,
+      "needs_review": 10
+    },
+    "Toji": {
+      "total": 1,
+      "accepted": 0,
+      "rejected": 1,
+      "pending": 0,
+      "needs_review": 0
+    },
+    "Rin": {
+      "total": 1,
+      "accepted": 0,
+      "rejected": 1,
+      "pending": 0,
+      "needs_review": 0
+    }
+  },
+  "promotions": [
+    {
+      "origin": "SB-20260608-002",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-013",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-016",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-037",
+      "target": "skill + file",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md + ~/.hermes/sandbox/SB_Promotion_Log.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-040",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-043",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-046",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-052",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-055",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-058",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-061",
+      "target": "file",
+      "path": "~/Obsidian/ZenVault/Sandbox/SB Health Dashboard.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-064",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    },
+    {
+      "origin": "SB-20260608-073",
+      "target": "skill",
+      "path": "~/.hermes/skills/zen-sandbox/SKILL.md",
+      "date": "2026-06-08",
+      "status": "active"
+    }
+  ],
+  "run_log": [
+    {
+      "time": "2026-06-07",
+      "type": "System initialized",
+      "details": "Sandbox Obsidian structure created. Old data deleted. Ready for first run."
+    },
+    {
+      "time": "2026-06-07",
+      "type": "JS tables restored",
+      "details": "SB Dashboard, SB Prompt Index, SB Review Queue restored with DataviewJS tables."
+    },
+    {
+      "time": "2026-06-07",
+      "type": "Sandbox skill created",
+      "details": "zen-sandbox skill at ~/.hermes/skills/zen-sandbox/SKILL.md"
+    },
+    {
+      "time": "2026-06-07",
+      "type": "Execution model set",
+      "details": "Sandbox runs are triggered manually (user says \"run sandbox\")"
+    },
+    {
+      "time": "2026-06-08",
+      "type": "First sandbox run",
+      "details": "SB-001 (TDEE calculator) \u2014 quality: high, artifact verified, accepted"
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Batch run completed",
+      "details": "4 prompts: SB-002 through SB-005, all high quality"
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Review completed",
+      "details": "SB-002 accepted (promoted to skill). SB-003, SB-004, SB-005 rejected."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Overnight batch queued",
+      "details": "100 prompts (SB-006 through SB-105). Cron: every 5 min, up to 288 repeats."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Overnight batch complete",
+      "details": "All 100 prompts processed. 80 items in review queue."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Review tool created",
+      "details": "SB Review Flashcard.md \u2014 interactive DataviewJS flashcard"
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Review session",
+      "details": "SB-025 accepted \u2192 promoted. SB-042, SB-059, SB-097, SB-099 rejected."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "All batches complete",
+      "details": "20 batches of 5. 100% high quality. 0 failed. 0 retries."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Detail file audit",
+      "details": "26 prompts missing detail files \u2014 all written."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Status sync",
+      "details": "All 100 prompts marked completed in SB Prompt Index."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Flashcard review complete",
+      "details": "User reviewed all 82 flashcard items. 12 accepted, rest rejected."
+    },
+    {
+      "time": "2026-06-08",
+      "type": "Promotions implemented",
+      "details": "12 accepted learnings promoted to skill/memory/dashboard."
+    }
+  ],
+  "income": {
+    "total_earnings": 0,
+    "monthly_recurring": 0,
+    "projects": []
+  }
+}

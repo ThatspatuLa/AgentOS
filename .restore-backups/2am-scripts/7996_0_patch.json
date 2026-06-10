@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "      return `<path class=\"token-line-path\" d=\"${linePath(vals)}\" fill=\"none\" stroke=\"${color}\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><g>${vals.map((v,i)=>`<circle class=\"token-line-point\" cx=\"${x(i).toFixed(1)}\" cy=\"${y(v).toFixed(1)}\" r=\"3.5\" fill=\"${color}\" data-model=\"${model.label}\" data-day=\"${days[i]?.date || ''}\" data-tokens=\"${fmtTok(v)}\"></circle>`).join('')}</g>`;",
+  "old_string": "      return `<path class=\"token-line-path\" d=\"${smoothPath(vals)}\" fill=\"none\" stroke=\"${color}\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><g>${vals.map((v,i)=>`<circle class=\"token-line-point\" cx=\"${x(i).toFixed(1)}\" cy=\"${y(v).toFixed(1)}\" r=\"3.5\" fill=\"${color}\" data-model=\"${model.label}\" data-day=\"${days[i]?.date || ''}\" data-tokens=\"${fmtTok(v)}\"></circle>`).join('')}</g>`;",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

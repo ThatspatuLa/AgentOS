@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "function toggleTokenPanel(bodyId, headerEl) {\n  const body = document.getElementById(bodyId);\n  if (!body) return;\n  const arrow = headerEl?.querySelector('.token-panel-arrow');\n  const open = body.st...[truncated]",
+  "old_string": "function toggleTokenPanel(bodyId, headerEl) {\n  const body = document.getElementById(bodyId);\n  if (!body) return;\n  const arrow = headerEl?.querySelector('.token-panel-arrow');\n  const open = body.st...[truncated]",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

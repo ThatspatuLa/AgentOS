@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "            ${areaPath ? `<path class=\"token-total-area\" d=\"${areaPath}\" fill=\"url(#totalTokenArea)\"/><path class=\"token-total-line\" d=\"${linePath(totalVals)}\" fill=\"none\" stroke=\"rgba(88,166,255,.55)\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/>` : ''}",
+  "old_string": "            ${areaPath ? `<path d=\"${areaPath}\" fill=\"url(#totalTokenArea)\"/><path class=\"token-total-line\" d=\"${smoothPath(totalVals)}\" fill=\"none\" stroke=\"rgba(88,166,255,.55)\" stroke-width=\"2\" stroke-dasharray=\"5 5\"/>` : ''}",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "  const routingRanges = groups.routing_mix_ranges || {};\n  const routing = routingRanges[tokenRoutingRange] || groups.routing_mix || [];",
+  "old_string": "  const routing = groups.routing_mix || [];",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

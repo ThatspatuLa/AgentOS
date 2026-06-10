@@ -1,378 +1,116 @@
 {
-  "generated_at": "2026-06-08T22:07:34.932918",
+  "generated_at": "2026-06-10T21:52:46.703635",
   "token_usage": {
     "today": {
-      "in": 136857879,
-      "out": 680043,
-      "calls": 1453,
-      "cost": 2.7712
+      "in": 96726939,
+      "out": 248337,
+      "calls": 785,
+      "cost": 1.947
     },
     "yesterday": {
-      "in": 54533196,
-      "out": 177701,
-      "cost": 1.0995
+      "in": 0,
+      "out": 0,
+      "cost": 0.0
     },
-    "total_in": 191391075,
-    "total_out": 857744,
-    "total_calls": 2004,
+    "total_in": 96726939,
+    "total_out": 248337,
+    "total_calls": 785,
     "per_model": {
-      "qwen3-coder:30b": {
-        "in": 122873,
-        "out": 3172,
-        "calls": 30,
-        "cost": 0.0107
-      },
-      "claude-opus-4.8": {
-        "in": 4096,
-        "out": 15,
-        "calls": 1,
-        "cost": 0.0626
-      },
-      "minimax-m3:cloud": {
-        "in": 1601390,
-        "out": 14540,
-        "calls": 48,
-        "cost": 0.4635
-      },
-      "nemotron-3-ultra:cloud": {
-        "in": 812254,
-        "out": 10327,
-        "calls": 15,
-        "cost": 0.1249
-      },
-      "qwen2.5-coder:14b": {
-        "in": 4095,
-        "out": 20,
-        "calls": 1,
-        "cost": 0.0004
-      },
       "openrouter/owl-alpha": {
-        "in": 188846367,
-        "out": 829670,
-        "calls": 1909,
+        "in": 22301613,
+        "out": 60853,
+        "calls": 249,
         "cost": 0.0
+      },
+      "gpt-5.5": {
+        "in": 18313244,
+        "out": 84707,
+        "calls": 198,
+        "cost": 2.7724
+      },
+      "gemini-3-flash-preview": {
+        "in": 235698,
+        "out": 350,
+        "calls": 6,
+        "cost": 0.0355
+      },
+      "nvidia/nemotron-3-ultra:free": {
+        "in": 55876384,
+        "out": 102427,
+        "calls": 332,
+        "cost": 8.4122
       }
     },
     "per_session": {
-      "20260607_193056_683caea5": {
-        "in": 127115460,
-        "out": 363941,
-        "calls": 850,
-        "cost": 19.1765
+      "20260610_175225_4d8ac9": {
+        "in": 50853742,
+        "out": 59773,
+        "calls": 276,
+        "cost": 7.646
       },
-      "20260607_042720_1d3341": {
-        "in": 16149966,
-        "out": 69936,
-        "calls": 255,
-        "cost": 2.4435
+      "20260610_032623_e99fa4": {
+        "in": 22037480,
+        "out": 60971,
+        "calls": 226,
+        "cost": 3.3239
       },
-      "20260607_193646_a685023b": {
-        "in": 14423726,
-        "out": 63730,
-        "calls": 197,
-        "cost": 2.1827
+      "20260609_113730_45e6f63f": {
+        "in": 5764190,
+        "out": 49246,
+        "calls": 88,
+        "cost": 0.8794
       },
-      "cron_197d792b3e41_20260608_034707": {
-        "in": 8474505,
-        "out": 111479,
-        "calls": 70,
-        "cost": 1.3046
+      "20260610_170448_ee6097": {
+        "in": 5275499,
+        "out": 29199,
+        "calls": 60,
+        "cost": 0.8001
       },
-      "cron_197d792b3e41_20260608_053408": {
-        "in": 4247054,
-        "out": 49266,
-        "calls": 43,
-        "cost": 0.6518
+      "20260610_173032_b76ed9": {
+        "in": 3860324,
+        "out": 18433,
+        "calls": 40,
+        "cost": 0.5846
       },
-      "cron_197d792b3e41_20260608_082710": {
-        "in": 2820498,
-        "out": 51902,
-        "calls": 44,
-        "cost": 0.4386
+      "20260610_120409_244b6034": {
+        "in": 3325100,
+        "out": 6097,
+        "calls": 19,
+        "cost": 0.5006
       },
-      "20260608_160453_ab4bc2": {
-        "in": 2013217,
-        "out": 7379,
+      "20260610_164146_4108c4": {
+        "in": 2937704,
+        "out": 12415,
         "calls": 31,
-        "cost": 0.3042
+        "cost": 0.4444
       },
-      "cron_197d792b3e41_20260608_122312": {
-        "in": 1804363,
-        "out": 32422,
-        "calls": 25,
-        "cost": 0.2804
+      "20260610_165556_bff540": {
+        "in": 2212688,
+        "out": 9426,
+        "calls": 23,
+        "cost": 0.3347
       },
-      "20260608_163009_ccef98": {
-        "in": 1363892,
-        "out": 11030,
-        "calls": 30,
-        "cost": 0.2079
+      "bg_153235_a169ae": {
+        "in": 258010,
+        "out": 1844,
+        "calls": 10,
+        "cost": 0.0393
       },
-      "20260608_162008_036b52": {
-        "in": 1230441,
-        "out": 13023,
-        "calls": 27,
-        "cost": 0.1885
+      "20260607_193056_683caea5": {
+        "in": 143477,
+        "out": 353,
+        "calls": 2,
+        "cost": 0.0216
       }
     }
   },
   "sandbox": {
-    "total": 101,
-    "accepted": 15,
-    "rejected": 86,
+    "total": 126,
+    "accepted": 24,
+    "rejected": 102,
     "pending": 0,
-    "high_quality": 101,
+    "high_quality": 126,
     "prompts": [
-      {
-        "id": "SB-20260608-056",
-        "summary": "Explain why V20 uses ATR swing structure instead of fixed su",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "reasoning",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-057",
-        "summary": "Identify the risk of V20's P2 DCA bypassing global cadence c",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "debug",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-058",
-        "summary": "Explain why sandbox detail files use frontmatter instead of ",
-        "project": "Zen",
-        "quality": "high",
-        "review_status": "accepted",
-        "task_type": "reasoning",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-059",
-        "summary": "Design a market regime filter that disables DCA-Long in chop",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-060",
-        "summary": "Analyze the impact of spread widening on V20's stop loss eff",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "risk",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-061",
-        "summary": "Design a dashboard for monitoring all 6 projects' health and",
-        "project": "Zen",
-        "quality": "high",
-        "review_status": "accepted",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-062",
-        "summary": "Explain V20's hard guards",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "reasoning",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-063",
-        "summary": "Propose a maximum position duration limit for the ensemble's",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-064",
-        "summary": "Design a self-improving sandbox that learns from its own exe",
-        "project": "Zen",
-        "quality": "high",
-        "review_status": "accepted",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-065",
-        "summary": "Explain why the ensemble needs both weighting AND aggregate ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "reasoning",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-066",
-        "summary": "Analyze broker execution risk: how MT5 handles 5M decisions ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "risk",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-067",
-        "summary": "Propose how ETH's merger to PoS should have affected 5M stra",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-068",
-        "summary": "Design a dynamic position sizing model that accounts for ope",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-069",
-        "summary": "Design an adaptive threshold system that adjusts long/short ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-070",
-        "summary": "Propose a time-of-day filter: whether the ensemble should ad",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "\u2014",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-071",
-        "summary": "Analyze the ensemble's risk during a major crypto exchange o",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "risk",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-072",
-        "summary": "Design a maximum adverse excursion analysis for V20's trade ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "risk",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-073",
-        "summary": "Design a conflict resolution system when Zen and Kiyosaki gi",
-        "project": "Zen",
-        "quality": "high",
-        "review_status": "accepted",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-074",
-        "summary": "Propose how to handle strategies that become unprofitable af",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-075",
-        "summary": "Design the complete OnTester() integration for the ensemble ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-076",
-        "summary": "Explain why sandbox review uses natural language instead of ",
-        "project": "Zen",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "reasoning",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-077",
-        "summary": "Propose a periodic 'full reset' evaluation: should the 300\u21925",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-078",
-        "summary": "Analyze slippage impact on the ensemble's 5M entries during ",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "risk",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-079",
-        "summary": "Propose partial profit-taking rules for the ensemble's winni",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
-      {
-        "id": "SB-20260608-080",
-        "summary": "Propose a 'confidence decay' model where stale confidence si",
-        "project": "Kiyosaki",
-        "quality": "high",
-        "review_status": "rejected",
-        "task_type": "strategy",
-        "genericness": "low",
-        "failure_mode": "none"
-      },
       {
         "id": "SB-20260608-081",
         "summary": "Propose a V20 optimization target that balances multiple obj",
@@ -622,20 +360,270 @@
         "task_type": "reasoning",
         "genericness": "low",
         "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-001",
+        "summary": "Audit the Zen worker routing boundary",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-002",
+        "summary": "Design a zen-worker smoke-test checklist",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-003",
+        "summary": "Map Agent OS token tracking gaps",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-004",
+        "summary": "Define cloud-vs-local decision rules",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-005",
+        "summary": "Threat-model cloud token leakage",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "security",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-006",
+        "summary": "Draft Agent OS worker status card spec",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-007",
+        "summary": "Design Ollama usage extraction pipeline",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-008",
+        "summary": "Review sandbox routing policy for consistency",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "code_review",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-009",
+        "summary": "Explain Zen pipeline in plain English",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-010",
+        "summary": "Specify Owl Alpha/Codex exhaustion baseline tracker",
+        "project": "Zen",
+        "quality": "high",
+        "review_status": "accepted",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-011",
+        "summary": "Design Swarm market-state weighting audit",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-012",
+        "summary": "Define Swarm bench-swap risk rules",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-013",
+        "summary": "Validate Lean strategy-result schema",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-014",
+        "summary": "Analyze aggregate confidence score failure modes",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-015",
+        "summary": "Draft Swarm strategy scorecard template",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-016",
+        "summary": "Design Swarm drawdown circuit breakers",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-017",
+        "summary": "Plan 300-strategy diversity coverage",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-018",
+        "summary": "Review Lean code-generation pitfalls",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "code_review",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-019",
+        "summary": "Design ETH 5M regime classification tests",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "research",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-020",
+        "summary": "Create Swarm overfitting red-team rubric",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "risk",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-021",
+        "summary": "Draft Swarm recalibration runbook",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-022",
+        "summary": "Model active-versus-bench selection tradeoffs",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "reasoning",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-023",
+        "summary": "Define failed-backtest triage for Swarm",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "debug",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-024",
+        "summary": "Design ensemble no-trade discipline",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "strategy",
+        "genericness": "low",
+        "failure_mode": "none"
+      },
+      {
+        "id": "SB-20260609-025",
+        "summary": "Specify Swarm dashboard metrics for Obsidian",
+        "project": "Kiyosaki",
+        "quality": "high",
+        "review_status": "rejected",
+        "task_type": "artifact_creation",
+        "genericness": "low",
+        "failure_mode": "none"
       }
     ]
   },
   "projects": {
     "Kiyosaki": {
-      "total": 74,
+      "total": 89,
       "accepted": 1,
-      "rejected": 73,
+      "rejected": 88,
       "pending": 0
     },
     "Zen": {
-      "total": 25,
-      "accepted": 14,
-      "rejected": 11,
+      "total": 35,
+      "accepted": 23,
+      "rejected": 12,
       "pending": 0
     },
     "Toji": {

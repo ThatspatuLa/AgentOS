@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "let tokenRoutingRange = 'intraday';\nlet manualRefreshAt = null;\nlet incomeEntries",
+  "old_string": "let tokenRoutingRange = 'intraday';\nlet incomeEntries",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

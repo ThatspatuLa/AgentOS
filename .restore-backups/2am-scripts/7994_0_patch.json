@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "    const linePath = vals => vals.map((v,i)=>`${i?'L':'M'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');\n    const totalVals = days.map(day => day.total || 0);\n    const areaPath = totalVals.length ? `${linePath(totalVals)} L ${x(days.length-1).toFixed(1)} ${H-padB} L ${x(0).toFixed(1)} ${H-padB} Z` : '';",
+  "old_string": "    const pointsFor = vals => vals.map((v,i)=>[x(i), y(v), v]);\n    const smoothPath = vals => {\n      const pts = pointsFor(vals);\n      if (!pts.length) return '';\n      if (pts.length === 1) return `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;\n      let dPath = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;\n      for (let i=0; i<pts.length-1; i++) {\n        const [x0,y0] = pts[i]; const [x1,y1] = pts[i+1];\n        const cpX = x0 + (x1 - x0) * 0.5;\n        dPath += ` C ${cpX.toFixed(1)} ${y0.toFixed(1)}, ${cpX.toFixed(1)} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;\n      }\n      return dPath;\n    };\n    const totalVals = days.map(day => day.total || 0);\n    const areaPath = totalVals.length ? `${smoothPath(totalVals)} L ${x(days.length-1).toFixed(1)} ${H-padB} L ${x(0).toFixed(1)} ${H-padB} Z` : '';",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}

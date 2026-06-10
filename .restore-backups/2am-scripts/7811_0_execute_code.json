@@ -1,0 +1,3 @@
+{
+  "code": "from pathlib import Path\np=Path('/home/spatula/Projects/ZenNew/agent-os.html')\ns=p.read_text()\ns=s.replace('''        <div class=\"routing-legend\">\n          ${routing.map(item => `<div class=\"routing-...[truncated]"
+}

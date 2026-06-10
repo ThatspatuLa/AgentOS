@@ -1,0 +1,593 @@
+{
+  "generated_at": "2026-06-10T13:25:18",
+  "exporter_version": "0.1.0",
+  "stats": {
+    "total_nodes": 26,
+    "total_edges": 42,
+    "node_types": {
+      "model": 4,
+      "agent": 6,
+      "rule": 1,
+      "resource": 7,
+      "project": 7,
+      "tool": 1
+    },
+    "edge_types": {
+      "available_to": 2,
+      "governs": 5,
+      "routes_to": 5,
+      "delegates_to": 5,
+      "enforces": 1,
+      "consumes": 1,
+      "configures": 2,
+      "launches": 1,
+      "contributes_to": 1,
+      "oversees": 7,
+      "owns": 7,
+      "manages": 1,
+      "executes": 1,
+      "reports_to": 1,
+      "generates": 1,
+      "invokes": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "model-default-cloud",
+      "type": "model",
+      "label": "owl-alpha",
+      "full_name": "openrouter/owl-alpha",
+      "provider": "openrouter",
+      "role": "cloud",
+      "active": true,
+      "data": {
+        "usage": "planning, research, review",
+        "is_default": true
+      }
+    },
+    {
+      "id": "model-neuphonic-neutts-air-q4-gguf",
+      "type": "model",
+      "label": "neutts-air-q4-gguf",
+      "full_name": "neuphonic/neutts-air-q4-gguf",
+      "provider": "neuphonic",
+      "role": "cloud",
+      "active": false,
+      "data": {
+        "usage": "cloud inference"
+      }
+    },
+    {
+      "id": "model-openrouter-owl-alpha",
+      "type": "model",
+      "label": "owl-alpha",
+      "full_name": "openrouter/owl-alpha",
+      "provider": "openrouter",
+      "role": "cloud",
+      "active": false,
+      "data": {
+        "usage": "cloud inference"
+      }
+    },
+    {
+      "id": "model-worker-local",
+      "type": "model",
+      "label": "gpt-oss:20b",
+      "full_name": "ollama/gpt-oss:20b",
+      "provider": "ollama",
+      "role": "local",
+      "active": true,
+      "data": {
+        "endpoint": "localhost:11434",
+        "usage": "file edits, artifact creation",
+        "via": "zen-worker → Aider"
+      }
+    },
+    {
+      "id": "zen-agent",
+      "type": "agent",
+      "label": "Zen",
+      "domain": "Governance, safety, system law",
+      "authority": "root",
+      "risk": "high",
+      "active": true,
+      "data": {
+        "channel": "zen-chat",
+        "role": "COO — second in command",
+        "instructions_path": "00_System/Project Instructions/Zen Instructions.md",
+        "memory_path": "00_System/Project Memories/Zen Memory.md"
+      }
+    },
+    {
+      "id": "agent-rin",
+      "type": "agent",
+      "label": "Rin",
+      "domain": "Tactical sparring, daily ops, project coordination",
+      "authority": "managed",
+      "risk": "medium",
+      "active": true,
+      "data": {
+        "channel": "rin-chat"
+      }
+    },
+    {
+      "id": "agent-kiyosaki",
+      "type": "agent",
+      "label": "Kiyosaki",
+      "domain": "Trading, system strategy, automation",
+      "authority": "managed",
+      "risk": "high",
+      "active": true,
+      "data": {
+        "channel": "kiyosaki-chat"
+      }
+    },
+    {
+      "id": "agent-toji",
+      "type": "agent",
+      "label": "Toji",
+      "domain": "Body discipline, training, recovery, nutrition",
+      "authority": "managed",
+      "risk": "medium",
+      "active": true,
+      "data": {
+        "channel": "toji-chat"
+      }
+    },
+    {
+      "id": "agent-minato",
+      "type": "agent",
+      "label": "Minato",
+      "domain": "Websites, monetisation, client value, business execution",
+      "authority": "managed",
+      "risk": "medium",
+      "active": true,
+      "data": {
+        "channel": "minato-chat"
+      }
+    },
+    {
+      "id": "agent-kazuki",
+      "type": "agent",
+      "label": "Kazuki",
+      "domain": "Guitar, creative skill, deliberate practice",
+      "authority": "managed",
+      "risk": "medium",
+      "active": true,
+      "data": {
+        "channel": "kazuki-chat"
+      }
+    },
+    {
+      "id": "rule-local-vs-cloud",
+      "type": "rule",
+      "label": "Local vs Cloud Routing",
+      "authority": "system",
+      "data": {
+        "cloud": "Owl Alpha + Codex — planning, research, review",
+        "local": "Aider + Ollama gpt-oss:20b — file edits, artifacts",
+        "boundary": "Local never touches cloud keys. Cloud never processes raw file generation."
+      }
+    },
+    {
+      "id": "resource-token-budget",
+      "type": "resource",
+      "label": "Cloud Token Budget",
+      "risk": "medium",
+      "data": {
+        "description": "Daily cloud token spend tracking",
+        "warning": "Cloud tokens are finite — local worker should handle execution"
+      }
+    },
+    {
+      "id": "resource-worker-config",
+      "type": "resource",
+      "label": "zen-worker",
+      "risk": "low",
+      "data": {
+        "path": "~/.local/bin/zen-worker",
+        "description": "Guarded local-only worker launcher",
+        "safety": "Refuses cloud model args. Ollama only."
+      }
+    },
+    {
+      "id": "resource-token-activity",
+      "type": "resource",
+      "label": "Inference Activity",
+      "risk": "low",
+      "data": {
+        "recent_calls_by_model": {
+          "owl-alpha": 107
+        },
+        "source": "last 500 log lines"
+      }
+    },
+    {
+      "id": "project-kazuki",
+      "type": "project",
+      "label": "Kazuki",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Kazuki"
+      }
+    },
+    {
+      "id": "project-kiyosaki",
+      "type": "project",
+      "label": "Kiyosaki",
+      "active": true,
+      "data": {
+        "file_count": 17,
+        "path": "01_Projects/Kiyosaki"
+      }
+    },
+    {
+      "id": "project-minato",
+      "type": "project",
+      "label": "Minato",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Minato"
+      }
+    },
+    {
+      "id": "project-rin",
+      "type": "project",
+      "label": "Rin",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Rin"
+      }
+    },
+    {
+      "id": "project-swarm",
+      "type": "project",
+      "label": "Swarm",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Swarm"
+      }
+    },
+    {
+      "id": "project-toji",
+      "type": "project",
+      "label": "Toji",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Toji"
+      }
+    },
+    {
+      "id": "project-zen",
+      "type": "project",
+      "label": "Zen",
+      "active": false,
+      "data": {
+        "file_count": 0,
+        "path": "01_Projects/Zen"
+      }
+    },
+    {
+      "id": "resource-sandbox",
+      "type": "resource",
+      "label": "Sandbox",
+      "risk": "low",
+      "data": {
+        "total_runs": 126,
+        "status_breakdown": {
+          "completed": 126
+        },
+        "review_breakdown": {
+          "pending": 0,
+          "accepted": 24,
+          "rejected": 102
+        }
+      }
+    },
+    {
+      "id": "resource-local-worker",
+      "type": "resource",
+      "label": "Local Worker Activity",
+      "risk": "low",
+      "data": {
+        "total_runs": 40,
+        "model": "gpt-oss:20b",
+        "tool": "Aider"
+      }
+    },
+    {
+      "id": "resource-tokens-today",
+      "type": "resource",
+      "label": "Today's Token Usage",
+      "risk": "medium",
+      "data": {
+        "calls": 243,
+        "cost": 0.4626,
+        "in_tokens": 22959635,
+        "out_tokens": 69055
+      }
+    },
+    {
+      "id": "resource-sandbox-summary",
+      "type": "resource",
+      "label": "Sandbox Summary",
+      "risk": "low",
+      "data": {
+        "total": 158,
+        "accepted": 18,
+        "rejected": 115,
+        "pending": 25
+      }
+    },
+    {
+      "id": "resource-zen-worker",
+      "type": "tool",
+      "label": "zen-worker",
+      "risk": "low",
+      "data": {
+        "path": "/home/spatula/.local/bin/zen-worker",
+        "description": "Guarded local-only worker: Aider + Ollama gpt-oss:20b",
+        "safety": "Refuses non-Ollama models and cloud-looking args"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "model-neuphonic-neutts-air-q4-gguf",
+      "target": "zen-agent",
+      "type": "available_to",
+      "label": "configured"
+    },
+    {
+      "source": "model-openrouter-owl-alpha",
+      "target": "zen-agent",
+      "type": "available_to",
+      "label": "configured"
+    },
+    {
+      "source": "zen-agent",
+      "target": "agent-rin",
+      "type": "governs",
+      "label": "authority"
+    },
+    {
+      "source": "agent-rin",
+      "target": "model-default-cloud",
+      "type": "routes_to",
+      "label": "planning & review"
+    },
+    {
+      "source": "agent-rin",
+      "target": "model-worker-local",
+      "type": "delegates_to",
+      "label": "file edits"
+    },
+    {
+      "source": "zen-agent",
+      "target": "agent-kiyosaki",
+      "type": "governs",
+      "label": "authority"
+    },
+    {
+      "source": "agent-kiyosaki",
+      "target": "model-default-cloud",
+      "type": "routes_to",
+      "label": "planning & review"
+    },
+    {
+      "source": "agent-kiyosaki",
+      "target": "model-worker-local",
+      "type": "delegates_to",
+      "label": "file edits"
+    },
+    {
+      "source": "zen-agent",
+      "target": "agent-toji",
+      "type": "governs",
+      "label": "authority"
+    },
+    {
+      "source": "agent-toji",
+      "target": "model-default-cloud",
+      "type": "routes_to",
+      "label": "planning & review"
+    },
+    {
+      "source": "agent-toji",
+      "target": "model-worker-local",
+      "type": "delegates_to",
+      "label": "file edits"
+    },
+    {
+      "source": "zen-agent",
+      "target": "agent-minato",
+      "type": "governs",
+      "label": "authority"
+    },
+    {
+      "source": "agent-minato",
+      "target": "model-default-cloud",
+      "type": "routes_to",
+      "label": "planning & review"
+    },
+    {
+      "source": "agent-minato",
+      "target": "model-worker-local",
+      "type": "delegates_to",
+      "label": "file edits"
+    },
+    {
+      "source": "zen-agent",
+      "target": "agent-kazuki",
+      "type": "governs",
+      "label": "authority"
+    },
+    {
+      "source": "agent-kazuki",
+      "target": "model-default-cloud",
+      "type": "routes_to",
+      "label": "planning & review"
+    },
+    {
+      "source": "agent-kazuki",
+      "target": "model-worker-local",
+      "type": "delegates_to",
+      "label": "file edits"
+    },
+    {
+      "source": "zen-agent",
+      "target": "rule-local-vs-cloud",
+      "type": "enforces",
+      "label": "policy"
+    },
+    {
+      "source": "model-default-cloud",
+      "target": "resource-token-budget",
+      "type": "consumes",
+      "label": "spend"
+    },
+    {
+      "source": "zen-agent",
+      "target": "resource-worker-config",
+      "type": "configures",
+      "label": "owns"
+    },
+    {
+      "source": "resource-worker-config",
+      "target": "model-worker-local",
+      "type": "launches",
+      "label": "executes via Aider"
+    },
+    {
+      "source": "model-owl-alpha",
+      "target": "resource-token-activity",
+      "type": "contributes_to",
+      "label": "activity"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-kazuki",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-kazuki",
+      "target": "project-kazuki",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-kiyosaki",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-kiyosaki",
+      "target": "project-kiyosaki",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-minato",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-minato",
+      "target": "project-minato",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-rin",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-rin",
+      "target": "project-rin",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-swarm",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-swarm",
+      "target": "project-swarm",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-toji",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-toji",
+      "target": "project-toji",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "project-zen",
+      "type": "oversees",
+      "label": "governance"
+    },
+    {
+      "source": "agent-zen",
+      "target": "project-zen",
+      "type": "owns",
+      "label": "domain"
+    },
+    {
+      "source": "zen-agent",
+      "target": "resource-sandbox",
+      "type": "manages",
+      "label": "orchestrator"
+    },
+    {
+      "source": "model-worker-local",
+      "target": "resource-local-worker",
+      "type": "executes",
+      "label": "work"
+    },
+    {
+      "source": "resource-local-worker",
+      "target": "zens-agent",
+      "type": "reports_to",
+      "label": "results"
+    },
+    {
+      "source": "model-default-cloud",
+      "target": "resource-tokens-today",
+      "type": "generates",
+      "label": "usage"
+    },
+    {
+      "source": "zen-agent",
+      "target": "resource-zen-worker",
+      "type": "configures",
+      "label": "owns"
+    },
+    {
+      "source": "resource-zen-worker",
+      "target": "model-worker-local",
+      "type": "invokes",
+      "label": "Aider → Ollama"
+    }
+  ]
+}

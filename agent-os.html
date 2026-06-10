@@ -18,14 +18,14 @@
 .income-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .income-row:last-child { border-bottom: none; }
 
-/* Spend page specific */
-.spend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.spend-chart { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-.spend-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.spend-bar-label { width: 120px; font-size: 12px; color: var(--text-secondary); text-align: right; }
-.spend-bar-track { flex: 1; height: 20px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
-.spend-bar-fill { height: 100%; border-radius: 4px; }
-.spend-bar-value { width: 80px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+/* Tokens page specific */
+.tokens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.tokens-chart { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.tokens-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.tokens-bar-label { width: 120px; font-size: 12px; color: var(--text-secondary); text-align: right; }
+.tokens-bar-track { flex: 1; height: 20px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden; }
+.tokens-bar-fill { height: 100%; border-radius: 4px; }
+.tokens-bar-value { width: 80px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
 
 /* Run log filter */
 .runlog-filter { display: flex; gap: 4px; margin-bottom: 16px; }
@@ -61,7 +61,7 @@
 <nav class="os-sidebar">
   <div class="os-sidebar-logo">
     <h1>Zen OS</h1>
-    <span>Agent Dashboard · v2.1</span>
+    <span>Agent Dashboard · v2.3</span>
   </div>
 
   <div class="os-nav-section">
@@ -72,18 +72,15 @@
     <button class="os-nav-item" onclick="showPage('sandbox')" id="nav-sandbox">
       <span class="os-nav-icon">🧪</span> Sandbox
     </button>
-    <button class="os-nav-item" onclick="showPage('projects')" id="nav-projects">
-      <span class="os-nav-icon">📋</span> Projects
-    </button>
     <button class="os-nav-item" onclick="showPage('memory')" id="nav-memory">
       <span class="os-nav-icon">🧠</span> Memory
     </button>
   </div>
 
   <div class="os-nav-section">
-    <div class="os-nav-label">Financial</div>
-    <button class="os-nav-item" onclick="showPage('spend')" id="nav-spend">
-      <span class="os-nav-icon">💰</span> Spend
+    <div class="os-nav-label">Insights</div>
+    <button class="os-nav-item" onclick="showPage('tokens')" id="nav-tokens">
+      <span class="os-nav-icon">🔢</span> Tokens
     </button>
     <button class="os-nav-item" onclick="showPage('income')" id="nav-income">
       <span class="os-nav-icon">📈</span> Income
@@ -91,22 +88,42 @@
   </div>
 
   <div class="os-nav-section">
-    <div class="os-nav-label">System</div>
-    <button class="os-nav-item" onclick="showPage('integrations')" id="nav-integrations">
-      <span class="os-nav-icon">🔗</span> Integrations
+    <div class="os-nav-label">Projects</div>
+    <button class="os-project-item" onclick="openProject('zen')" id="proj-Zen">
+      <span class="os-project-dot zen"></span> Zen
+      <span class="os-project-meta" id="proj-meta-Zen">—</span>
     </button>
-    <button class="os-nav-item" onclick="showPage('system')" id="nav-system">
-      <span class="os-nav-icon">⚙️</span> System
+    <button class="os-project-item" onclick="openProject('kiyosaki')" id="proj-Kiyosaki">
+      <span class="os-project-dot kiyosaki"></span> Kiyosaki
+      <span class="os-project-meta" id="proj-meta-Kiyosaki">—</span>
     </button>
-    <button class="os-nav-item" onclick="showPage('runlog')" id="nav-runlog">
-      <span class="os-nav-icon">📰</span> Run Log
+    <button class="os-project-item" onclick="openProject('rin')" id="proj-Rin">
+      <span class="os-project-dot rin"></span> Rin
+      <span class="os-project-meta" id="proj-meta-Rin">—</span>
+    </button>
+    <button class="os-project-item" onclick="openProject('minato')" id="proj-Minato">
+      <span class="os-project-dot minato"></span> Minato
+      <span class="os-project-meta" id="proj-meta-Minato">—</span>
+    </button>
+    <button class="os-project-item" onclick="openProject('toji')" id="proj-Toji">
+      <span class="os-project-dot toji"></span> Toji
+      <span class="os-project-meta" id="proj-meta-Toji">—</span>
+    </button>
+    <button class="os-project-item" onclick="openProject('kazuki')" id="proj-Kazuki">
+      <span class="os-project-dot kazuki"></span> Kazuki
+      <span class="os-project-meta" id="proj-meta-Kazuki">—</span>
     </button>
   </div>
 
   <div class="os-sidebar-footer">
-    <div class="os-session-status">
-      <div class="os-dot green"></div>
-      <span id="session-status">Loading...</span>
+    <span class="os-last-updated" id="last-updated">Updated just now</span>
+    <div class="os-sidebar-gear">
+      <button class="os-gear-btn" onclick="toggleGear(event)" title="System">⚙️</button>
+      <div class="os-gear-popup" id="gear-popup">
+        <button class="os-gear-item" onclick="showPage('integrations');toggleGear(event)"><span class="os-gear-item-icon">🔗</span> Integrations</button>
+        <button class="os-gear-item" onclick="showPage('runlog');toggleGear(event)"><span class="os-gear-item-icon">📰</span> Run Log</button>
+        <button class="os-gear-item" onclick="refreshData();toggleGear(event)"><span class="os-gear-item-icon">↻</span> Refresh</button>
+      </div>
     </div>
   </div>
 </nav>
@@ -190,7 +207,7 @@
     </div>
   </div>
 
-  <!-- ═══ PROJECTS ═══ -->
+  <!-- ═══ PROJECTS (Dashboard - Project Grid) ═══ -->
   <div id="page-projects" class="os-page" style="display:none">
     <div class="os-top-bar">
       <div class="os-page-title">
@@ -199,6 +216,40 @@
       </div>
     </div>
     <div class="os-cards-grid" id="project-cards"></div>
+  </div>
+
+  <!-- ═══ PROJECT DETAIL ═══ -->
+  <div id="page-project" class="os-page" style="display:none">
+    <div class="os-top-bar">
+      <div class="os-page-title">
+        <button class="os-btn project-back" onclick="showPage('projects')">← Back to Dashboard</button>
+        <div class="project-header" id="project-header">
+          <div class="project-avatar" id="project-avatar"></div>
+          <div>
+            <h2 id="project-title">Project Name</h2>
+            <p id="project-description">Project description</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="os-stats-row" id="project-stats"></div>
+    <div class="os-two-col">
+      <div class="os-panel">
+        <div class="os-panel-header">
+          <span class="os-panel-title">Runs</span>
+          <div class="os-tab-bar" id="project-run-tabs">
+            <button class="os-tab active" onclick="filterProjectRuns('all',this)">All</button>
+            <button class="os-tab" onclick="filterProjectRuns('accepted',this)">Accepted</button>
+            <button class="os-tab" onclick="filterProjectRuns('rejected',this)">Rejected</button>
+          </div>
+        </div>
+        <div class="os-panel-body" style="padding:0;max-height:500px;overflow-y:auto" id="project-runs-body"></div>
+      </div>
+      <div class="os-panel">
+        <div class="os-panel-header"><span class="os-panel-title">Activity</span></div>
+        <div class="os-panel-body" id="project-activity"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ MEMORY ═══ -->
@@ -221,24 +272,70 @@
     </div>
   </div>
 
-  <!-- ═══ SPEND ═══ -->
-  <div id="page-spend" class="os-page" style="display:none">
-    <div class="os-top-bar">
+  <!-- ═══ TOKENS ═══ -->
+  <div id="page-tokens" class="os-page" style="display:none">
+    <div class="os-top-bar tokens-top-bar">
       <div class="os-page-title">
-        <h2>Spend Tracking</h2>
-        <p>Token usage, model costs, and API spend analysis</p>
+        <h2>Token Tracking</h2>
+        <p>Usage, costs, context limits, and model breakdown</p>
+      </div>
+      <div class="tokens-helper-actions">
+        <button class="os-btn os-btn-sm token-helper-btn" onclick="toggleTokenPanel('tokens-cloud-capacity', this)">⏱️ Cloud Capacity <span class="token-panel-arrow">▸</span></button>
+        <button class="os-btn os-btn-sm token-helper-btn" onclick="toggleTokenPanel('tokens-help-body', this)">📖 How to Read <span class="token-panel-arrow">▸</span></button>
       </div>
     </div>
-    <div class="os-stats-row" id="spend-stats"></div>
-    <div class="spend-grid">
-      <div class="spend-chart">
-        <div class="os-panel-header"><span class="os-panel-title">Spend by Model</span></div>
-        <div style="padding:16px 20px" id="spend-by-model"></div>
+
+    <div class="token-helper-menu os-panel-body" id="tokens-cloud-capacity" style="display:none"></div>
+
+    <div class="token-helper-menu os-panel-body" id="tokens-help-body" style="display:none;font-size:12px;line-height:1.7;color:var(--text-secondary)">
+      <div class="tokens-help-grid">
+        <div><strong style="color:var(--text-primary)">Input tokens</strong> — the words/context you send to the model (your messages, system prompt, file contents). <em>1 token ≈ 4 characters of English text.</em></div>
+        <div><strong style="color:var(--text-primary)">Output tokens</strong> — the words the model generates in response.</div>
+        <div><strong style="color:var(--text-primary)">K</strong> = thousand (1K = 1,000). <strong>M</strong> = million (1M = 1,000,000). Example: 98M = 98,000,000 tokens.</div>
+        <div><strong style="color:var(--text-primary)">Calls</strong> — number of model invocations (each call = 1 prompt + 1 response).</div>
+        <div><strong style="color:var(--text-primary)">Context limit</strong> — max tokens a model can process in one call (input + output). Shown as used / limit with % bar.</div>
+        <div><strong style="color:var(--text-primary)">FREE</strong> = model is on OpenRouter free tier or local. Cost column shows FREE instead of $ amount.</div>
       </div>
-      <div class="spend-chart">
-        <div class="os-panel-header"><span class="os-panel-title">Spend by Day (7 Days)</span></div>
-        <div style="padding:16px 20px" id="spend-by-day"></div>
+    </div>
+
+    <div class="os-stats-row tokens-stats-four" id="tokens-stats"></div>
+
+    <!-- Local Worker Economics -->
+    <div class="os-panel" style="margin-bottom:20px">
+      <div class="os-panel-header"><span class="os-panel-title">Local Worker Economics</span></div>
+      <div class="os-panel-body" id="tokens-local-econ"></div>
+    </div>
+
+    <!-- Token Flow Over Time -->
+    <div class="os-panel" style="margin-bottom:20px">
+      <div class="os-panel-header"><span class="os-panel-title">Token Flow Over Time</span></div>
+      <div class="os-panel-body" id="tokens-time-chart"></div>
+    </div>
+
+    <!-- Model Routing Mix -->
+    <div class="os-panel" style="margin-bottom:20px">
+      <div class="os-panel-header">
+        <span class="os-panel-title">Model Routing Mix</span>
+        <div class="routing-filter-tabs">
+          <button class="os-tab active" onclick="filterRoutingChart('intraday',this)">Intraday</button>
+          <button class="os-tab" onclick="filterRoutingChart('weekly',this)">Weekly</button>
+          <button class="os-tab" onclick="filterRoutingChart('monthly',this)">Monthly</button>
+          <button class="os-tab" onclick="filterRoutingChart('all',this)">All Time</button>
+        </div>
       </div>
+      <div class="os-panel-body" id="tokens-routing-chart"></div>
+    </div>
+
+    <!-- Regular Cloud Models -->
+    <div class="os-panel" style="margin-bottom:20px">
+      <div class="os-panel-header"><span class="os-panel-title">Regular Cloud Models</span></div>
+      <div class="os-panel-body" id="tokens-regular-cloud"></div>
+    </div>
+
+    <!-- Free Tier Models -->
+    <div class="os-panel">
+      <div class="os-panel-header"><span class="os-panel-title">Free Tier Models</span></div>
+      <div class="os-panel-body" id="tokens-free-tier"></div>
     </div>
   </div>
 
@@ -310,6 +407,9 @@
 
 </div>
 
+<script type="application/json" id="embedded-data">
+{"generated_at": "2026-06-10T21:52:46.703635", "token_usage": {"today": {"in": 96726939, "out": 248337, "calls": 785, "cost": 1.947}, "yesterday": {"in": 0, "out": 0, "cost": 0.0}, "total_in": 96726939, "total_out": 248337, "total_calls": 785, "per_model": {"openrouter/owl-alpha": {"in": 22301613, "out": 60853, "calls": 249, "cost": 0.0}, "gpt-5.5": {"in": 18313244, "out": 84707, "calls": 198, "cost": 2.7724}, "gemini-3-flash-preview": {"in": 235698, "out": 350, "calls": 6, "cost": 0.0355}, "nvidia/nemotron-3-ultra:free": {"in": 55876384, "out": 102427, "calls": 332, "cost": 8.4122}}, "per_session": {"20260610_175225_4d8ac9": {"in": 50853742, "out": 59773, "calls": 276, "cost": 7.646}, "20260610_032623_e99fa4": {"in": 22037480, "out": 60971, "calls": 226, "cost": 3.3239}, "20260609_113730_45e6f63f": {"in": 5764190, "out": 49246, "calls": 88, "cost": 0.8794}, "20260610_170448_ee6097": {"in": 5275499, "out": 29199, "calls": 60, "cost": 0.8001}, "20260610_173032_b76ed9": {"in": 3860324, "out": 18433, "calls": 40, "cost": 0.5846}, "20260610_120409_244b6034": {"in": 3325100, "out": 6097, "calls": 19, "cost": 0.5006}, "20260610_164146_4108c4": {"in": 2937704, "out": 12415, "calls": 31, "cost": 0.4444}, "20260610_165556_bff540": {"in": 2212688, "out": 9426, "calls": 23, "cost": 0.3347}, "bg_153235_a169ae": {"in": 258010, "out": 1844, "calls": 10, "cost": 0.0393}, "20260607_193056_683caea5": {"in": 143477, "out": 353, "calls": 2, "cost": 0.0216}}}, "sandbox": {"total": 126, "accepted": 24, "rejected": 102, "pending": 0, "high_quality": 126, "prompts": [{"id": "SB-20260608-081", "summary": "Propose a V20 optimization target that balances multiple obj", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-082", "summary": "Design a genetic algorithm approach for the initial 300 stra", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-083", "summary": "Explain why the single EA architecture prevents signal confl", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-084", "summary": "Analyze the ensemble's drawdown profile during the first mon", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-085", "summary": "Design a 'strategy health dashboard' showing per-strategy pe", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-086", "summary": "Design a prompt deduplication system for large sandbox batch", "project": "Zen", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-087", "summary": "Design a position sizing model that accounts for strategy co", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-088", "summary": "Explain why the ensemble uses a confidence SCORE rather than", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-089", "summary": "Propose a 'gradual activation' protocol for newly swapped-in", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-090", "summary": "Design a system for generating sandbox prompts from real Dis", "project": "Zen", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-091", "summary": "Design a V20 adaptation plan for trading GBPUSD alongside BT", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-092", "summary": "Analyze the risk of ETH's upcoming protocol changes affectin", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-093", "summary": "Propose a maximum consecutive loss circuit breaker at the me", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-094", "summary": "Design a complete ensemble backtesting framework that simula", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-095", "summary": "Propose an investor-facing report template for the ensemble'", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-096", "summary": "Explain why sandbox blocks writes to ~/.hermes/ and producti", "project": "Zen", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-097", "summary": "Analyze the risk of the ensemble being 'confidently wrong' d", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-098", "summary": "Propose a 'strategy health dashboard' showing per-strategy p", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-099", "summary": "Design the ensemble's complete trade management: entries, ex", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-100", "summary": "Summarize the ETH 5M ensemble design in one paragraph that K", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-101", "summary": "Propose how to handle the ensemble entry when aggregate scor", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-102", "summary": "Design a memory management system that prevents bloat across", "project": "Zen", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-103", "summary": "Analyze the ensemble's behavior if ETH drops 30% in 24 hours", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-104", "summary": "Design a 'strategy tournament' system that accelerates bench", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260608-105", "summary": "Explain why the ensemble design prioritizes survivability ov", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-001", "summary": "Audit the Zen worker routing boundary", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-002", "summary": "Design a zen-worker smoke-test checklist", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "debug", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-003", "summary": "Map Agent OS token tracking gaps", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-004", "summary": "Define cloud-vs-local decision rules", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-005", "summary": "Threat-model cloud token leakage", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "security", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-006", "summary": "Draft Agent OS worker status card spec", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-007", "summary": "Design Ollama usage extraction pipeline", "project": "Zen", "quality": "high", "review_status": "rejected", "task_type": "debug", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-008", "summary": "Review sandbox routing policy for consistency", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "code_review", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-009", "summary": "Explain Zen pipeline in plain English", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-010", "summary": "Specify Owl Alpha/Codex exhaustion baseline tracker", "project": "Zen", "quality": "high", "review_status": "accepted", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-011", "summary": "Design Swarm market-state weighting audit", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-012", "summary": "Define Swarm bench-swap risk rules", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-013", "summary": "Validate Lean strategy-result schema", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "debug", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-014", "summary": "Analyze aggregate confidence score failure modes", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-015", "summary": "Draft Swarm strategy scorecard template", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-016", "summary": "Design Swarm drawdown circuit breakers", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-017", "summary": "Plan 300-strategy diversity coverage", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-018", "summary": "Review Lean code-generation pitfalls", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "code_review", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-019", "summary": "Design ETH 5M regime classification tests", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "research", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-020", "summary": "Create Swarm overfitting red-team rubric", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "risk", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-021", "summary": "Draft Swarm recalibration runbook", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-022", "summary": "Model active-versus-bench selection tradeoffs", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "reasoning", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-023", "summary": "Define failed-backtest triage for Swarm", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "debug", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-024", "summary": "Design ensemble no-trade discipline", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "strategy", "genericness": "low", "failure_mode": "none"}, {"id": "SB-20260609-025", "summary": "Specify Swarm dashboard metrics for Obsidian", "project": "Kiyosaki", "quality": "high", "review_status": "rejected", "task_type": "artifact_creation", "genericness": "low", "failure_mode": "none"}]}, "projects": {"Kiyosaki": {"total": 89, "accepted": 1, "rejected": 88, "pending": 0}, "Zen": {"total": 35, "accepted": 23, "rejected": 12, "pending": 0}, "Toji": {"total": 1, "accepted": 0, "rejected": 1, "pending": 0}, "Rin": {"total": 1, "accepted": 0, "rejected": 1, "pending": 0}}, "promotions": [{"origin": "SB-20260608-002", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-013", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-016", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-037", "target": "skill + file", "path": "~/.hermes/skills/zen-sandbox/SKILL.md + ~/.hermes/sandbox/SB_Promotion_Log.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-040", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-043", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-046", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-052", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-055", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-058", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-061", "target": "file", "path": "~/Obsidian/ZenVault/Sandbox/SB Health Dashboard.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-064", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}, {"origin": "SB-20260608-073", "target": "skill", "path": "~/.hermes/skills/zen-sandbox/SKILL.md", "date": "2026-06-08", "status": "active"}], "run_log": [{"time": "2026-06-07", "type": "System initialized", "details": "Sandbox Obsidian structure created. Old data deleted. Ready for first run."}, {"time": "2026-06-07", "type": "JS tables restored", "details": "SB Dashboard, SB Prompt Index, SB Review Queue restored with DataviewJS tables."}, {"time": "2026-06-07", "type": "Sandbox skill created", "details": "zen-sandbox skill at ~/.hermes/skills/zen-sandbox/SKILL.md"}, {"time": "2026-06-07", "type": "Execution model set", "details": "Sandbox runs are triggered manually (user says \"run sandbox\")"}, {"time": "2026-06-08", "type": "First sandbox run", "details": "SB-001 (TDEE calculator) \u2014 quality: high, artifact verified, accepted"}, {"time": "2026-06-08", "type": "Batch run completed", "details": "4 prompts: SB-002 through SB-005, all high quality"}, {"time": "2026-06-08", "type": "Review completed", "details": "SB-002 accepted (promoted to skill). SB-003, SB-004, SB-005 rejected."}, {"time": "2026-06-08", "type": "Overnight batch queued", "details": "100 prompts (SB-006 through SB-105). Cron: every 5 min, up to 288 repeats."}, {"time": "2026-06-08", "type": "Overnight batch complete", "details": "All 100 prompts processed. 80 items in review queue."}, {"time": "2026-06-08", "type": "Review tool created", "details": "SB Review Flashcard.md \u2014 interactive DataviewJS flashcard"}, {"time": "2026-06-08", "type": "Review session", "details": "SB-025 accepted \u2192 promoted. SB-042, SB-059, SB-097, SB-099 rejected."}, {"time": "2026-06-08", "type": "All batches complete", "details": "20 batches of 5. 100% high quality. 0 failed. 0 retries."}, {"time": "2026-06-08", "type": "Detail file audit", "details": "26 prompts missing detail files \u2014 all written."}, {"time": "2026-06-08", "type": "Status sync", "details": "All 100 prompts marked completed in SB Prompt Index."}, {"time": "2026-06-08", "type": "Flashcard review complete", "details": "User reviewed all 82 flashcard items. 12 accepted, rest rejected."}, {"time": "2026-06-08", "type": "Promotions implemented", "details": "12 accepted learnings promoted to skill/memory/dashboard."}], "income": {"total_earnings": 0, "monthly_recurring": 0, "projects": []}}
+</script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // DATA — Populated from generate-data.py
@@ -322,12 +422,27 @@ let DASHBOARD_DATA = null;
 async function loadData() {
   try {
     const resp = await fetch('agent-os-data.json?t=' + Date.now());
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     DASHBOARD_DATA = await resp.json();
+    console.log('Data loaded from fetch:', DASHBOARD_DATA.sandbox?.total);
     renderAll();
   } catch(e) {
-    console.log('Using fallback data (run generate-data.py for live data)');
-    DASHBOARD_DATA = getFallbackData();
-    renderAll();
+    console.log('Fetch failed, using embedded data:', e.message);
+    const embedded = document.getElementById('embedded-data');
+    if (embedded) {
+      try {
+        DASHBOARD_DATA = JSON.parse(embedded.textContent);
+        console.log('Data loaded from embedded:', DASHBOARD_DATA.sandbox?.total);
+        renderAll();
+      } catch(e2) {
+        console.error('Failed to parse embedded data:', e2);
+        DASHBOARD_DATA = getFallbackData();
+        renderAll();
+      }
+    } else {
+      DASHBOARD_DATA = getFallbackData();
+      renderAll();
+    }
   }
 }
 
@@ -350,7 +465,7 @@ function getFallbackData() {
     promotions: [],
     run_log: [
       {time: "2026-06-08 22:01", type: "system", details: "Agent OS Dashboard v2.1 rebuilt with functional data"},
-      {time: "2026-06-08 21:32", type: "zen", details: "Token spend tracking integrated — real data from Hermes logs"},
+      {time: "2026-06-08 21:32", type: "zen", details: "Token usage tracking integrated — real data from Hermes logs"},
       {time: "2026-06-08 21:15", type: "zen", details: "Persisted flashcard review results — 77 items marked rejected"},
       {time: "2026-06-08 14:32", type: "system", details: "Agent OS Dashboard v2.0 created — 8-page dashboard"},
       {time: "2026-06-08 12:55", type: "zen", details: "Promoted 12 accepted sandbox learnings to production"},
@@ -358,9 +473,45 @@ function getFallbackData() {
       {time: "2026-06-08 10:20", type: "system", details: "Git checkpoint — 136 files committed to ZenVault"},
       {time: "2026-06-08 09:00", type: "system", details: "Sandbox structure initialized"},
     ],
-    income: {total_earnings: 0, monthly_recurring: 0, projects: []}
+    income: {total_earnings: 0, monthly_recurring: 0, projects: []},
+    // Fallback routing data for chart display
+    routing: {
+      'intraday': [['Local Worker', 3], ['Regular Cloud', 146], ['Free Tier Cloud', 0]],
+      'weekly': [['Local Worker', 136], ['Regular Cloud', 3470], ['Free Tier Cloud', 64]],
+      'monthly': [['Local Worker', 136], ['Regular Cloud', 3470], ['Free Tier Cloud', 64]],
+      'all': [['Local Worker', 136], ['Regular Cloud', 3470], ['Free Tier Cloud', 64]]
+    },
+    // Fallback token history for time-series chart
+    token_history: {
+      days: [
+        {label: 'Mon', date: '2026-06-02', total: 42000000, models: {local: 1000, regular: 41000000, free: 900000}},
+        {label: 'Tue', date: '2026-06-03', total: 38000000, models: {local: 1000, regular: 37000000, free: 1000000}},
+        {label: 'Wed', date: '2026-06-04', total: 52000000, models: {local: 2000, regular: 50000000, free: 2000000}},
+        {label: 'Thu', date: '2026-06-05', total: 45000000, models: {local: 1500, regular: 43000000, free: 1500000}},
+        {label: 'Fri', date: '2026-06-06', total: 39000000, models: {local: 1000, regular: 37500000, free: 1500000}},
+        {label: 'Sat', date: '2026-06-07', total: 28000000, models: {local: 500, regular: 27000000, free: 1000000}},
+        {label: 'Sun', date: '2026-06-08', total: 35000000, models: {local: 1000, regular: 33000000, free: 2000000}}
+      ],
+      models: [
+        {key: 'local', label: 'Local Worker', color: 'local'},
+        {key: 'regular', label: 'Regular Cloud', color: 'regular'},
+        {key: 'free', label: 'Free Tier Cloud', color: 'free'}
+      ]
+    }
   };
 }
+
+
+function toggleGear(e) {
+  if (e) e.stopPropagation();
+  const p = document.getElementById('gear-popup');
+  if (p) p.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('gear-popup');
+  const b = e.target.closest('.os-sidebar-gear');
+  if (p && !b) p.classList.remove('open');
+});
 
 // ── Navigation ──
 function showPage(id) {
@@ -369,6 +520,10 @@ function showPage(id) {
   document.getElementById('page-' + id).style.display = 'block';
   const nav = document.getElementById('nav-' + id);
   if (nav) nav.classList.add('active');
+  if (id === 'tokens') {
+    renderTokens();
+    animateTokensPage();
+  }
 }
 
 // ── Time ──
@@ -386,19 +541,20 @@ function fmtCost(n) { return '$' + (n < 0.01 ? n.toFixed(4) : n.toFixed(2)); }
 
 // ── Render All ──
 function renderAll() {
-  renderAgents();
-  renderStats();
-  renderActivity('all');
-  renderProjectTable();
-  renderSandbox();
-  renderSpend();
-  renderIncome();
-  renderIntegrations();
-  renderSystem();
-  renderRunLog('all');
-  renderMemory();
-  renderProjectCards();
-  document.getElementById('session-status').textContent = '6 channels · ' + (DASHBOARD_DATA?.token_usage?.today?.calls || 0) + ' calls today';
+  try { renderAgents(); } catch(e) { console.warn('renderAgents failed:', e); }
+  try { renderStats(); } catch(e) { console.warn('renderStats failed:', e); }
+  try { renderActivity('all'); } catch(e) { console.warn('renderActivity failed:', e); }
+  try { renderProjectTable(); } catch(e) { console.warn('renderProjectTable failed:', e); }
+  try { renderSandbox(); } catch(e) { console.warn('renderSandbox failed:', e); }
+  try { renderTokens(); } catch(e) { console.warn('renderTokens failed:', e); }
+  try { renderIncome(); } catch(e) { console.warn('renderIncome failed:', e); }
+  try { renderIntegrations(); } catch(e) { console.warn('renderIntegrations failed:', e); }
+  try { renderSystem(); } catch(e) { console.warn('renderSystem failed:', e); }
+  try { renderRunLog('all'); } catch(e) { console.warn('renderRunLog failed:', e); }
+  try { renderMemory(); } catch(e) { console.warn('renderMemory failed:', e); }
+  try { renderProjectCards(); } catch(e) { console.warn('renderProjectCards failed:', e); }
+  const sessionEl = document.getElementById('session-status');
+  if (sessionEl) sessionEl.textContent = '6 channels · ' + (DASHBOARD_DATA?.token_usage?.today?.calls || 0) + ' calls today';
 }
 
 // ── Agents ──
@@ -415,7 +571,7 @@ function renderAgents() {
   const projData = DASHBOARD_DATA?.projects || {};
   document.getElementById('agent-grid').innerHTML = agents.map(a => {
     const p = projData[a.name] || {};
-    return `<div class="os-agent-card ${a.color}" onclick="showPage('projects')">
+    return `<div class="os-agent-card ${a.color}" onclick="openProject('${a.id}')">
       <div class="os-agent-header">
         <div class="os-agent-avatar">${a.avatar}</div>
         <div class="os-agent-name">${a.name}</div>
@@ -462,8 +618,8 @@ function renderStats() {
 // ── Activity ──
 const activities = [
   {agent:'Zen',color:'var(--accent)',text:'rebuilt Agent OS Dashboard v2.1 — all pages functional with live data',time:'Just now'},
-  {agent:'Zen',color:'var(--green)',text:'integrated real token spend tracking from Hermes agent logs',time:'5m ago'},
-  {agent:'Zen',color:'var(--yellow)',text:'removed token costs from main dashboard — moved to Spend page',time:'12m ago'},
+  {agent:'Zen',color:'var(--green)',text:'integrated real token usage tracking from Hermes agent logs',time:'5m ago'},
+  {agent:'Zen',color:'var(--yellow)',text:'removed token costs from main dashboard — moved to Tokens page',time:'12m ago'},
   {agent:'Zen',color:'var(--accent)',text:'persisted flashcard review results — 77 items marked rejected',time:'30m ago'},
   {agent:'System',color:'var(--green)',text:'SB Prompt Index deduplicated — 0 pending review',time:'1h ago'},
   {agent:'Kiyosaki',color:'var(--purple)',text:'sandbox batch complete — 68 prompts, 4.7 avg quality',time:'3h ago'},
@@ -521,7 +677,7 @@ function renderSandbox() {
     summary: p.summary,
     project: p.project,
     quality: p.quality,
-    status: p.rejected ? 'rejected' : p.accepted ? 'accepted' : 'pending'
+    status: p.review_status === 'accepted' ? 'accepted' : p.review_status === 'rejected' ? 'rejected' : 'pending'
   }));
 
   // Add some from fallback if empty
@@ -571,38 +727,335 @@ function filterPipeline(filter, btn) {
   renderPipeline(filter);
 }
 
-// ── Spend ──
-function renderSpend() {
-  const tu = DASHBOARD_DATA?.token_usage || {};
+// ── Tokens ──
+function renderTokens() {
+  const page = document.getElementById('page-tokens');
+  const isVisible = page && page.style.display !== 'none';
+  
+  const d = DASHBOARD_DATA || {};
+  const tu = d.token_usage || {};
   const today = tu.today || {};
   const yesterday = tu.yesterday || {};
+  const le = d.local_econ || {};
 
-  document.getElementById('spend-stats').innerHTML = `
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Spend Today</span><span class="os-stat-change ${today.cost<yesterday.cost?'up':'down'}">${yesterday.cost?Math.round((today.cost-yesterday.cost)/yesterday.cost*100):0}% vs yesterday</span></div><div class="os-stat-value">${fmtCost(today.cost)}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${Math.min(today.cost/10*100,100)}%;background:var(--accent)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Tokens Today</span></div><div class="os-stat-value">${fmtTokens(today.in)}</div><div class="os-mini-card-sub">in: ${fmtTokens(today.in)} · out: ${fmtTokens(today.out)}</div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">API Calls Today</span></div><div class="os-stat-value">${today.calls||0}</div><div class="os-mini-card-sub">${Math.round((today.calls||0)/24)} calls/hour avg</div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Total Spend (All Time)</span></div><div class="os-stat-value">${fmtCost(Object.values(tu.per_model||{}).reduce((a,m)=>a+(m.cost||0),0))}</div><div class="os-mini-card-sub">${fmtTokens(tu.total_in)} tokens across ${tu.total_calls} calls</div></div>`;
+  // 4 stat cards in one row: Actual Spend, Local Work, Cost Avoided, Cloud→Local
+  const actualSpend = today.cost || 0;
+  document.getElementById('tokens-stats').innerHTML = `
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Actual Spend Today</span></div><div class="os-stat-value text-green token-animate-number" data-kind="cost" data-target="${actualSpend}">${fmtCost(actualSpend)}</div><div class="os-mini-card-sub">Free tier + local usage excluded</div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Local Work Completed</span></div><div class="os-stat-value token-animate-number" data-kind="int" data-target="${le.local_work_completed || 0}">${le.local_work_completed || 0}</div><div class="os-mini-card-sub">completed local/SB work units</div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Cost Avoided</span></div><div class="os-stat-value text-green token-animate-number" data-kind="cost" data-target="${le.estimated_cloud_cost_avoided || 0}">${fmtCost(le.estimated_cloud_cost_avoided || 0)}</div><div class="os-mini-card-sub">vs ${le.cost_avoided_baseline?.label || 'hosted gpt-oss-20b'}</div></div>
+    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Cloud → Local</span></div><div class="os-stat-value token-animate-number" data-kind="tok" data-target="${le.cloud_to_local_output_tokens || 0}">${fmtTokens(le.cloud_to_local_output_tokens || 0)}</div><div class="os-mini-card-sub">regular cloud output tokens</div></div>`;
 
-  // By model
+  // Local Worker Economics details
+  const capEl = document.getElementById('tokens-local-econ');
+  if (capEl && le) {
+    const baseline = le.cost_avoided_baseline || {};
+    capEl.innerHTML = `
+      <div class="os-cards-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div class="os-mini-card">
+          <div class="os-mini-card-title">gpt-oss Specs</div>
+          <table style="width:100%;font-size:11px;color:var(--text-secondary);border-collapse:collapse">
+            <tr><td style="padding:3px 0">Model</td><td style="padding:3px 0;text-align:right;font-weight:600">gpt-oss:20b</td></tr>
+            <tr><td style="padding:3px 0">Size</td><td style="padding:3px 0;text-align:right">~13 GB</td></tr>
+            <tr><td style="padding:3px 0">Params</td><td style="padding:3px 0;text-align:right">20.9B</td></tr>
+            <tr><td style="padding:3px 0">Quant</td><td style="padding:3px 0;text-align:right">Q4_K_M</td></tr>
+            <tr><td style="padding:3px 0">Cost</td><td style="padding:3px 0;text-align:right;color:var(--green)">$0 (local)</td></tr>
+          </table>
+        </div>
+        <div class="os-mini-card">
+          <div class="os-mini-card-title">Economics</div>
+          <div style="font-size:12px;line-height:1.8;color:var(--text-secondary)">
+            <div>Cloud → Local output tokens: <strong style="color:var(--text-primary)">${fmtTokens(le.cloud_to_local_output_tokens || 0)}</strong></div>
+            <div>Local runs completed: <strong style="color:var(--text-primary)">${le.local_work_completed || 0}</strong></div>
+            <div>Estimated cost avoided: <strong style="color:var(--green)">${fmtCost(le.estimated_cloud_cost_avoided || 0)}</strong></div>
+            <div>Baseline: <strong>${baseline.label || 'hosted gpt-oss-20b'}</strong> (in: $${baseline.input_per_million || 0.029}/M, out: $${baseline.output_per_million || 0.14}/M)</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Token Flow Over Time — SVG time-series
+  const localGraphEl = document.getElementById('tokens-time-chart');
+  if (localGraphEl && d.token_history && isVisible) {
+    const days = d.token_history.days || [];
+    const modelsTs = d.token_history.models || [];
+    const W = 760, H = 280;
+    const padL = 60, padR = 20, padT = 20, padB = 40;
+    const maxTok = Math.max(1, ...days.map(day => day.total || 0), ...days.flatMap(day => Object.values(day.models || {})));
+    const x = i => padL + (days.length <= 1 ? 0 : i * ((W - padL - padR) / (days.length - 1)));
+    const y = v => padT + (H - padT - padB) * (1 - (Number(v || 0) / maxTok));
+    
+    // Smooth monotonic cubic spline for curved lines
+    const linePath = vals => {
+      const pts = vals.map((v,i)=>({x:x(i), y:y(v)}));
+      if (!pts.length) return '';
+      if (pts.length === 1) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      const ds = [];
+      for (let i=0; i<pts.length-1; i++) {
+        ds.push((pts[i+1].y - pts[i].y) / Math.max(1, pts[i+1].x - pts[i].x));
+      }
+      const ms = pts.map((_, i) => {
+        if (i === 0) return ds[0] * 0.65;
+        if (i === pts.length - 1) return ds[ds.length - 1] * 0.65;
+        if (ds[i-1] === 0 || ds[i] === 0 || Math.sign(ds[i-1]) !== Math.sign(ds[i])) return 0;
+        return Math.sign(ds[i]) * Math.min(Math.abs(ds[i-1]), Math.abs(ds[i]), Math.abs((ds[i-1] + ds[i]) / 2)) * 0.65;
+      });
+      let dPath = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+      for (let i=0; i<pts.length-1; i++) {
+        const p0 = pts[i], p1 = pts[i+1];
+        const dx = p1.x - p0.x;
+        const c1x = p0.x + dx / 3;
+        const c1y = p0.y + ms[i] * dx / 3;
+        const c2x = p1.x - dx / 3;
+        const c2y = p1.y - ms[i+1] * dx / 3;
+        dPath += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+      }
+      return dPath;
+    };
+    const totalVals = days.map(day => day.total || 0);
+    const areaPath = totalVals.length ? `${linePath(totalVals)} L ${x(days.length-1).toFixed(1)} ${H-padB} L ${x(0).toFixed(1)} ${H-padB} Z` : '';
+    const gridVals = [0.25,0.5,0.75,1].map(p=>Math.round(maxTok*p));
+    const colors = {local: 'var(--green)', regular: 'var(--accent)', free: 'var(--purple)'};
+    const lines = modelsTs.map(model => {
+      const vals = days.map(day => (day.models || {})[model.key] || 0);
+      const color = colors[model.color] || 'var(--accent)';
+      return `<path class="token-line-path" d="${linePath(vals)}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><g>${vals.map((v,i)=>`<circle class="token-line-point" cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3.5" fill="${color}" data-model="${model.label}" data-day="${days[i]?.date || ''}" data-tokens="${fmtTokens(v)}"></circle>`).join('')}</g>`;
+    }).join('');
+    const fmtTok = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : n;
+    localGraphEl.innerHTML = `
+      <div class="token-time-chart-wrap">
+        <div class="token-time-chart-area">
+          <svg class="token-time-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tokens by model over time">
+            <defs><linearGradient id="totalTokenArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#58a6ff" stop-opacity=".28"/><stop offset="100%" stop-color="#58a6ff" stop-opacity=".03"/></linearGradient></defs>
+            ${gridVals.map(v=>`<line x1="${padL}" x2="${W-padR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--border)" stroke-width="1" opacity=".55"/><text x="${padL-10}" y="${(y(v)+4).toFixed(1)}" fill="var(--text-muted)" font-size="10" text-anchor="end">${fmtTok(v)}</text>`).join('')}
+            ${areaPath ? `<path class="token-total-area" d="${areaPath}" fill="url(#totalTokenArea)"/><path class="token-total-line" d="${linePath(totalVals)}" fill="none" stroke="rgba(88,166,255,.55)" stroke-width="2" stroke-dasharray="5 5"/>` : ''}
+            ${lines}
+            <line x1="${padL}" x2="${W-padR}" y1="${H-padB}" y2="${H-padB}" stroke="var(--border)"/>
+            ${days.map((day,i)=>`<text x="${x(i).toFixed(1)}" y="${H-14}" fill="var(--text-muted)" font-size="10" text-anchor="middle">${day.label}</text>`).join('')}
+          </svg>
+        </div>
+        <div class="token-time-legend">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:16px;height:3px;background:rgba(88,166,255,.55);border-radius:2px"></div><span style="font-size:11px;color:var(--text-secondary)">Total tokens (dashed)</span></div>
+          ${modelsTs.map((m,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="width:16px;height:3px;background:${colors[m.color] || 'var(--accent)'};border-radius:2px"></div><span style="font-size:11px;color:var(--text-secondary)">${m.label}</span></div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Model Routing Mix — interactive pie chart
+  const routingEl = document.getElementById('tokens-routing-chart');
+  const routing = d.routing || {};
+  if (routingEl && routing && isVisible) {
+    const renderRouting = (range) => {
+      const data = routing[range] || routing.weekly || [];
+      const total = Math.max(1, data.reduce((s,[,c])=>s+c,0));
+      const segments = [
+        {key:'local', label:'Local Worker', color:'var(--green)', val: data.find(([k])=>k==='Local Worker')?.[1]||0},
+        {key:'regular', label:'Regular Cloud', color:'var(--accent)', val: data.find(([k])=>k==='Regular Cloud')?.[1]||0},
+        {key:'free', label:'Free Tier Cloud', color:'var(--purple)', val: data.find(([k])=>k==='Free Tier Cloud')?.[1]||0},
+      ].filter(s=>s.val>0);
+      let cum = 0;
+      const radius = 90;
+      const cx = 100, cy = 100;
+      const slices = segments.map((s,i) => {
+        const pct = s.val / total;
+        const angle = pct * 2 * Math.PI;
+        const start = cum * 2 * Math.PI - Math.PI/2;
+        const end = start + angle;
+        const largeArc = pct > 0.5 ? 1 : 0;
+        const x1 = cx + radius * Math.cos(start);
+        const y1 = cy + radius * Math.sin(start);
+        const x2 = cx + radius * Math.cos(end);
+        const y2 = cy + radius * Math.sin(end);
+        cum += pct;
+        const breakdown = {
+          local: 'Local: gpt-oss:20b (Ollama)',
+          regular: `Regular: Owl Alpha (${data.find(([k])=>k==='Regular Cloud')?.[1]||0} prompts), Codex`,
+          free: `Free: minimax-m3 (${data.find(([k])=>k==='Free Tier Cloud')?.[1]||0} prompts), nemotron-3-ultra`
+        }[s.key] || '';
+        return `<path class="routing-pie-slice" data-label="${s.label}" data-val="${s.val}" data-pct="${Math.round(pct*100)}" data-breakdown="${breakdown}" d="M ${cx} ${cy} L ${x1.toFixed(1)} ${y1.toFixed(1)} A ${radius} ${radius} 0 ${largeArc} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z" fill="${s.color}" stroke="var(--bg-primary)" stroke-width="2"/>`;
+      }).join('');
+      routingEl.innerHTML = `
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <div style="position:relative;width:200px;height:200px">
+            <svg viewBox="0 0 200 200" style="width:100%;height:100%" role="img" aria-label="Model routing mix">
+              ${slices}
+            </svg>
+            <div class="routing-hover-card" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px;min-width:180px;max-width:260px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10">
+              <strong></strong><div class="routing-breakdown"></div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            ${segments.map(s=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:12px;height:12px;border-radius:3px;background:${s.color}"></div><div style="flex:1"><div style="font-weight:500;color:var(--text-primary)">${s.label}</div><div style="font-size:11px;color:var(--text-muted)">${s.val.toLocaleString()} prompts (${Math.round(s.val/total*100)}%)</div></div></div>`).join('')}
+          </div>
+        </div>`;
+      // Attach hover handlers after DOM is ready
+      const card = routingEl.querySelector('.routing-hover-card');
+      if (card) {
+        routingEl.querySelectorAll('.routing-pie-slice').forEach(slice => {
+          slice.style.cursor = 'pointer';
+          slice.addEventListener('mouseenter', (e) => {
+            const l = slice.dataset.label, v = slice.dataset.val, p = slice.dataset.pct, b = slice.dataset.breakdown;
+            card.querySelector('strong').textContent = l + ' \u2014 ' + v.toLocaleString() + ' prompts (' + p + '%)';
+            card.querySelector('.routing-breakdown').innerHTML = b.split(', ').map(x => '<div class="routing-breakdown-row">' + x + '</div>').join('');
+            card.style.opacity = '1';
+          });
+          slice.addEventListener('mouseleave', () => { card.style.opacity = '0'; });
+          slice.addEventListener('mousemove', (e) => {
+            card.style.left = (e.clientX - card.offsetWidth/2) + 'px';
+            card.style.top = (e.clientY - card.offsetHeight - 10) + 'px';
+          });
+        });
+      }
+    };
+    renderRouting('intraday');
+    window.routingChartData = routing;
+    window.renderRoutingChart = renderRouting;
+  }
+
+  // Regular Cloud Models
+  const regEl = document.getElementById('tokens-regular-cloud');
   const models = tu.per_model || {};
-  const maxCost = Math.max(...Object.values(models).map(m=>m.cost||0), 1);
-  document.getElementById('spend-by-model').innerHTML = Object.entries(models).sort((a,b)=>(b[1].cost||0)-(a[1].cost||0)).map(([name,m]) => `
-    <div class="spend-bar-row">
-      <div class="spend-bar-label">${name.split('/').pop()}</div>
-      <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${(m.cost||0)/maxCost*100}%;background:${m.cost===0?'var(--green)':'var(--accent)'}"></div></div>
-      <div class="spend-bar-value">${m.cost===0?'FREE':fmtCost(m.cost)}</div>
-    </div>`).join('');
+  if (regEl && isVisible) {
+    const regularCloud = ['openrouter/owl-alpha', 'openai-codex'];
+    const regModels = Object.entries(models).filter(([k])=>regularCloud.includes(k));
+    if (regModels.length) {
+      regEl.innerHTML = regModels.map(([name,m]) => {
+        const limit = getModelLimit(name);
+        const pct = limit ? Math.min(100, Math.round((m.in||0)/limit*100)) : 0;
+        const pctColor = pct < 50 ? 'var(--green)' : pct < 80 ? 'var(--yellow)' : 'var(--red)';
+        return `
+          <div class="tokens-model-row">
+            <div class="tokens-model-name">${name.split('/').pop()}</div>
+            <div class="tokens-model-tokens">${fmtTokens(m.in||0)}</div>
+            <div class="tokens-model-tokens">${fmtTokens(m.out||0)}</div>
+            <div class="tokens-model-tokens">${m.calls||0}</div>
+            <div class="tokens-model-cost" style="color:var(--green)">FREE</div>
+            <div class="tokens-model-limit">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:11px;color:var(--text-muted)">${fmtTokens(m.in||0)} / ${fmtTokens(limit)}</span>
+                <div style="flex:1;height:4px;background:var(--bg-tertiary);border-radius:2px"><div style="width:${pct}%;height:100%;background:${pctColor};border-radius:2px"></div></div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      regEl.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center">No regular cloud usage in this period</div>';
+    }
+  }
 
-  // By day (simulated from available data)
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const dayCosts = [1.2, 0.8, 2.1, 3.5, 1.8, 0.9, today.cost||2.73];
-  const maxDay = Math.max(...dayCosts);
-  document.getElementById('spend-by-day').innerHTML = days.map((d,i) => `
-    <div class="spend-bar-row">
-      <div class="spend-bar-label">${d}</div>
-      <div class="spend-bar-track"><div class="spend-bar-fill" style="width:${dayCosts[i]/maxDay*100}%;background:var(--green)"></div></div>
-      <div class="spend-bar-value">${fmtCost(dayCosts[i])}</div>
-    </div>`).join('');
+  // Free Tier Models
+  const freeEl = document.getElementById('tokens-free-tier');
+  if (freeEl && isVisible) {
+    const freeTier = ['minimax-m3:cloud', 'nemotron-3-ultra:cloud'];
+    const freeModels = Object.entries(models).filter(([k])=>freeTier.includes(k));
+    if (freeModels.length) {
+      freeEl.innerHTML = freeModels.map(([name,m]) => {
+        const limit = getModelLimit(name);
+        const pct = limit ? Math.min(100, Math.round((m.in||0)/limit*100)) : 0;
+        const pctColor = pct < 50 ? 'var(--green)' : pct < 80 ? 'var(--yellow)' : 'var(--red)';
+        return `
+          <div class="tokens-model-row">
+            <div class="tokens-model-name">${name.split('/').pop()}</div>
+            <div class="tokens-model-tokens">${fmtTokens(m.in||0)}</div>
+            <div class="tokens-model-tokens">${fmtTokens(m.out||0)}</div>
+            <div class="tokens-model-tokens">${m.calls||0}</div>
+            <div class="tokens-model-cost" style="color:var(--green)">FREE</div>
+            <div class="tokens-model-limit">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:11px;color:var(--text-muted)">${fmtTokens(m.in||0)} / ${fmtTokens(limit)}</span>
+                <div style="flex:1;height:4px;background:var(--bg-tertiary);border-radius:2px"><div style="width:${pct}%;height:100%;background:${pctColor};border-radius:2px"></div></div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    } else {
+      freeEl.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center">No free tier usage in this period</div>';
+    }
+  }
+}
+
+// Helper: model context limits
+const MODEL_LIMITS = {
+  "openrouter/owl-alpha": 128000,
+  "gpt-5.5": 128000,
+  "minimax-m3:cloud": 1000000,
+  "nemotron-3-ultra:cloud": 128000,
+  "claude-opus-4.8": 200000,
+  "qwen3-coder:30b": 131072,
+  "qwen2.5-coder:14b": 131072,
+  "default": 128000
+};
+function getModelLimit(name) { return MODEL_LIMITS[name] || MODEL_LIMITS["default"]; }
+
+// Token helper panel toggles
+function toggleTokenPanel(id, btn) {
+  const panel = document.getElementById(id);
+  const arrow = btn?.querySelector('.token-panel-arrow');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▸' : '▾';
+  if (!isOpen && id === 'tokens-cloud-capacity') {
+    const d = DASHBOARD_DATA || {};
+    const cap = d.cloud_capacity || {};
+    const codex = cap.codex || {};
+    const owl = cap.owl_alpha || {};
+    panel.innerHTML = `
+      <div class="tokens-help-grid">
+        <div><strong style="color:var(--text-primary)">Codex</strong><br>Refresh: ${codex.refresh_cycle || '5h'} · Next observed: ${codex.next_observed_refresh || '12:11'} · Weekly: ${codex.weekly_reset_observed || '2026-06-11'}</div>
+        <div><strong style="color:var(--text-primary)">Owl Alpha / OpenRouter</strong><br>Reset basis: ${owl.reset_basis || 'current UTC day / midnight UTC'} · Local: ${owl.local_reset_time || '10:00 AEST'}</div>
+        <div><strong style="color:var(--text-primary)">SB Rule</strong><br>Cloud waits until a completed-batch review gate, except explicit expiry checks.</div>
+        <div><strong style="color:var(--text-primary)">Tracking</strong><br>${cap.tracking_rule || 'Record exhaustion points to estimate usable capacity.'}</div>
+      </div>`;
+  }
+}
+
+// Routing chart filter
+function filterRoutingChart(range, btn) {
+  btn.closest('.routing-filter-tabs').querySelectorAll('.os-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  if (window.renderRoutingChart) window.renderRoutingChart(range);
+}
+
+// Animate tokens page on show
+function animateTokensPage() {
+  const page = document.getElementById('page-tokens');
+  if (!page || page.style.display === 'none') return;
+  page.classList.remove('tokens-enter');
+  void page.offsetWidth;
+  page.classList.add('tokens-enter');
+
+  page.querySelectorAll('.token-animate-number').forEach(el => {
+    const target = Number(el.dataset.target || 0);
+    const kind = el.dataset.kind || 'int';
+    const start = performance.now();
+    const duration = 850;
+    const render = now => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = target * eased;
+      el.textContent = kind === 'cost' ? fmtCost(value) : kind === 'tok' ? fmtTok(value) : String(Math.round(value));
+      if (t < 1) requestAnimationFrame(render);
+    };
+    requestAnimationFrame(render);
+  });
+
+  page.querySelectorAll('.token-line-path, .token-total-line').forEach((path, idx) => {
+    const len = path.getTotalLength ? path.getTotalLength() : 0;
+    if (!len) return;
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    path.style.animation = `token-line-draw 900ms ${idx * 70}ms cubic-bezier(.22,.61,.36,1) forwards`;
+  });
+  page.querySelectorAll('.token-total-area').forEach(area => {
+    area.style.opacity = '0';
+    area.style.animation = 'token-area-fade 800ms 450ms ease forwards';
+  });
+  page.querySelectorAll('.routing-pie-slice').forEach((slice, idx) => {
+    slice.style.transformOrigin = '100px 100px';
+    slice.style.opacity = '0';
+    slice.style.animation = `token-pie-in 650ms ${idx * 90}ms cubic-bezier(.22,.61,.36,1) forwards`;
+  });
 }
 
 // ── Income ──
@@ -790,6 +1243,125 @@ function renderProjectCards() {
     </div>`;
   }).join('');
 }
+
+// ── Project Detail ──
+let activeProject = null;
+let projectPrompts = [];
+let projectRunFilter = 'all';
+
+function openProject(name) {
+  activeProject = name;
+  const info = projectInfo[name];
+  // Case-insensitive project lookup
+  const projKey = Object.keys(DASHBOARD_DATA?.projects || {}).find(k => k.toLowerCase() === name.toLowerCase());
+  const proj = projKey ? DASHBOARD_DATA.projects[projKey] : {total:0, accepted:0, rejected:0, pending:0};
+  // Case-insensitive prompt filtering
+  const prompts = (DASHBOARD_DATA?.sandbox?.prompts || []).filter(p => p.project?.toLowerCase() === name.toLowerCase());
+  const activity = (DASHBOARD_DATA?.run_log || []).filter(r => r.details.toLowerCase().includes(name.toLowerCase()));
+  
+  projectPrompts = prompts;
+  
+  // Update sidebar active state
+  document.querySelectorAll('.os-project-item').forEach(n => n.classList.remove('active'));
+  const nav = document.getElementById('proj-' + (name.charAt(0).toUpperCase() + name.slice(1)));
+  if (nav) nav.classList.add('active');
+  
+  // Render project detail page
+  renderProjectDetail(info, proj, prompts, activity);
+  
+  // Navigate
+  document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-project').style.display = 'block';
+}
+
+function renderProjectDetail(info, proj, prompts, activity) {
+  const colors = {zen: 'var(--accent)', kiyosaki: 'var(--green)', toji: 'var(--yellow)', rin: 'var(--purple)', minato: 'var(--cyan)', kazuki: 'var(--pink)'};
+  const color = colors[info.id] || 'var(--accent)';
+  
+  // Header
+  document.getElementById('project-avatar').innerHTML = info.avatar;
+  document.getElementById('project-avatar').style.background = 'rgba(0,0,0,0.1)';
+  document.getElementById('project-title').textContent = info.name;
+  document.getElementById('project-description').textContent = info.description || 'No description available';
+  
+  // Stats
+  document.getElementById('project-stats').innerHTML = `
+    <div class="project-stat-card">
+      <div class="project-stat-header"><span class="project-stat-label">Total Runs</span></div>
+      <div class="project-stat-value">${proj.total || 0}</div>
+    </div>
+    <div class="project-stat-card">
+      <div class="project-stat-header"><span class="project-stat-label">Accepted</span>
+      <span class="os-stat-change up">${proj.total ? Math.round((proj.accepted || 0) / proj.total * 100) : 0}%</span></div>
+      <div class="project-stat-value text-green">${proj.accepted || 0}</div>
+    </div>
+    <div class="project-stat-card">
+      <div class="project-stat-header"><span class="project-stat-label">Rejected</span></div>
+      <div class="project-stat-value text-red">${proj.rejected || 0}</div>
+    </div>
+    <div class="project-stat-card">
+      <div class="project-stat-header"><span class="project-stat-label">Pending Review</span></div>
+      <div class="project-stat-value text-yellow">${proj.pending || 0}</div>
+    </div>`;
+  
+  // Runs
+  renderProjectRuns(prompts);
+  
+  // Activity
+  renderProjectActivity(activity);
+}
+
+function renderProjectRuns(prompts) {
+  const filter = projectRunFilter || 'all';
+  let filtered = prompts;
+  if (filter === 'accepted') filtered = prompts.filter(p => p.review_status === 'accepted');
+  else if (filter === 'rejected') filtered = prompts.filter(p => p.review_status === 'rejected');
+  
+  document.getElementById('project-runs-body').innerHTML = filtered.map(p => `
+    <div class="project-run-item">
+      <div class="project-run-status" style="background:${p.review_status === 'accepted' ? 'var(--green)' : p.review_status === 'rejected' ? 'var(--red)' : 'var(--yellow)'}"></div>
+      <div class="project-run-id">${p.id || '—'}</div>
+      <div class="project-run-summary">${p.summary || 'No summary'}</div>
+      <div class="project-run-quality text-${p.quality === 'high' ? 'green' : 'secondary'}">${p.quality === 'high' ? '★' : '—'}</div>
+      <span class="project-run-badge ${p.review_status === 'accepted' ? 'accepted' : p.review_status === 'rejected' ? 'rejected' : 'pending'}">
+        ${p.review_status === 'accepted' ? 'Accepted' : p.review_status === 'rejected' ? 'Rejected' : 'Pending'}
+      </span>
+    </div>
+  `).join('') || '<div class="text-center text-muted" style="padding:20px">No runs match this filter</div>';
+}
+
+function filterProjectRuns(filter, btn) {
+  projectRunFilter = filter;
+  btn.closest('.os-tab-bar').querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjectRuns(projectPrompts);
+}
+
+function renderProjectActivity(activity) {
+  document.getElementById('project-activity').innerHTML = activity.map((e, i) => `
+    <div class="project-activity-item">
+      <div class="os-activity-dot-wrap">
+        <div class="project-activity-dot" style="background:${e.type==='zen'?'var(--accent)':e.type==='kiyosaki'?'var(--green)':e.type==='error'?'var(--red)':'var(--yellow)'}"></div>
+        ${i < activity.length - 1 ? '<div class="project-activity-line"></div>' : ''}
+      </div>
+      <div class="project-activity-content">
+        <div class="project-activity-text">${e.details}</div>
+        <div class="project-activity-time">${e.time}</div>
+      </div>
+    </div>
+  `).join('') || '<div class="text-center text-muted" style="padding:20px">No activity for this project</div>';
+}
+
+// Project info for detail views
+const projectInfo = {
+  zen: {id: 'zen', name: 'Zen', avatar: '🦉', description: 'Primary governance agent — sandbox orchestration, token tracking, agent coordination, system health monitoring. Routes all multi-LLM pipeline tasks.'},
+  kiyosaki: {id: 'kiyosaki', name: 'Kiyosaki', avatar: '📊', description: 'Financial modeling specialist — ETH 5M ensemble strategy, quantitative analysis, portfolio optimization, risk metrics, backtesting pipelines.'},
+  rin: {id: 'rin', name: 'Rin', avatar: '🎯', description: 'Precision task execution — focused prompt engineering, code review, quality gates, acceptance criteria validation.'},
+  minato: {id: 'minato', name: 'Minato', avatar: '🔧', description: 'Infrastructure & tooling — local worker management, Ollama orchestration, build pipelines, deployment automation, system integration.'},
+  toji: {id: 'toji', name: 'Toji', avatar: '⚡', description: 'Rapid prototyping — spike tasks, experimental features, proof-of-concepts, throwaway experiments, speed-optimized delivery.'},
+  kazuki: {id: 'kazuki', name: 'Kazuki', avatar: '🛡️', description: 'Security & compliance — safety reviews, refusal analysis, policy enforcement, red-team evaluation, audit trails.'}
+};
 
 // ── Refresh ──
 function refreshData() {

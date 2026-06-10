@@ -1,0 +1,100 @@
+import React from 'react'
+
+export default function Learning() {
+  const title = 'Continuous Learning Loop'
+  const subtitle = 'Worker failure patterns, prompt improvements, and local execution status'
+
+  // Summary card data
+  const summaryCards = [
+    { label: 'Primary Worker', value: 'Kilo Code CLI' },
+    { label: 'Model', value: 'ollama-local/gpt-oss-kilo:20b' },
+    { label: 'Status', value: 'Verified' },
+    { label: 'Cost', value: '$0 local' }
+  ]
+
+  // Panel data structures
+  const workerStatusRows = [
+    {
+      worker: 'Kilo Code CLI',
+      role: 'Primary / verified',
+      location: 'local Ollama'
+    },
+    {
+      worker: 'Aider zen-worker',
+      role: 'Secondary / limited',
+      location: 'small files only'
+    },
+    {
+      worker: 'Hermes delegate_task',
+      role: 'Not local-safe',
+      location: 'cloud fallback observed'
+    }
+  ]
+
+  const failurePatternsRows = [
+    { label: 'Aider large-file failures' },
+    { label: 'delegate_task cloud routing' },
+    { label: 'Kilo monolith corruption' },
+    { label: 'Ollama 4096 context default' }
+  ]
+
+  const promptImprovementsRows = [
+    { label: 'Narrow file-scoped prompts' },
+    { label: 'Exact observed errors in repair loops' },
+    { label: 'Compile/browser verification after each worker edit' },
+    { label: 'Cloud plans local mutates' }
+  ]
+
+  const knownErrorPatternsRows = [
+    { label: 'Canvas sizing default' },
+    { label: 'TypeScript implicit any' },
+    { label: 'Missing imports' },
+    { label: 'Aider heredoc stdin' }
+  ]
+
+  return (
+    <div className="p-4">
+      <h1 className="text-xl font-semibold mb-2">{title}</h1>
+      <p className="text-sm text-[#8b949e] mb-6">{subtitle}</p>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {summaryCards.map((card, idx) => (
+          <div key={idx} className="bg-[#1c2128] border border-[#30363d] rounded-lg p-4">
+            <div className="text-xs text-[#8b949e] mb-1">{card.label}</div>
+            <div className="text-2xl font-semibold">{card.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Panels */}
+      {[
+        { title: 'Worker Status', rows: workerStatusRows, extraClass: '' },
+        { title: 'Failure Patterns', rows: failurePatternsRows, extraClass: '' },
+        { title: 'Prompt Improvements', rows: promptImprovementsRows, extraClass: '' },
+        { title: 'Known Error Patterns', rows: knownErrorPatternsRows, extraClass: '' }
+      ].map((panel, pIdx) => (
+        <div key={pIdx} className="bg-[#1c2128] border border-[#30363d] rounded-lg p-5 mb-6">
+          <h2 className="text-sm font-semibold mb-4">{panel.title}</h2>
+          <div className="grid gap-3">
+            {panel.rows.map((row, rIdx) => (
+              'label' in row ? (
+                <div key={rIdx} className="text-xs text-[#8b949e]">
+                  - {(row as any).label}
+                </div>
+              ) : (
+                <div key={rIdx} className="flex flex-col gap-1" data-key={Object.keys(row)[0]}>
+                  {Object.entries(row).map(([k,v]) => (
+                    <span key={k} className="text-sm text-[#484f58]">
+                      <span className="font-medium">{v}</span> {' '}<span className="text-[#8b949e]">{k}</span>
+                    </span>
+                  ))}
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

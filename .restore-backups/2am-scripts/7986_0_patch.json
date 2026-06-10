@@ -1,0 +1,6 @@
+{
+  "mode": "replace",
+  "new_string": "    <div class=\"token-helper-menu os-panel-body\" id=\"tokens-help-body\" style=\"display:none;font-size:12px;line-height:1.7;color:var(--text-secondary)\">\n      <div class=\"tokens-help-grid\">",
+  "old_string": "    <div class=\"token-helper-menu os-panel-body\" id=\"tokens-help-body\" style=\"display:none;font-size:12px;line-height:1.7;color:var(--text-secondary)\">\n      <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:12px 24px\">",
+  "path": "/home/spatula/Projects/ZenNew/agent-os.html"
+}
