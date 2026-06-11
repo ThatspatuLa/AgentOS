@@ -311,18 +311,118 @@ body {
 
 /* Project items in sidebar */
 .os-project-item {
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  --project-color: var(--accent);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 50px;
+  margin: var(--space-2) 0;
+  padding: 7px 9px;
+  border-radius: 13px;
   font-size: var(--text-sm);
-  color: var(--text-secondary);
-  cursor: pointer; transition: all var(--duration-fast) var(--ease-out);
-  text-decoration: none; border: none; background: none;
-  width: 100%; text-align: left; font-family: inherit;
+  color: color-mix(in srgb, var(--project-color) 46%, white);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--project-color) 36%, rgba(139,155,179,0.16));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--project-color) 12%, transparent), transparent 54%),
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.008)),
+    rgba(4, 7, 12, 0.68);
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 18px color-mix(in srgb, var(--project-color) 12%, transparent);
 }
 
-.os-project-item:hover { background: var(--bg-raised); color: var(--text-primary); }
-.os-project-item.active { background: var(--bg-raised); color: var(--text-primary); }
+.os-project-item::after {
+  content: '';
+  position: absolute;
+  inset: 0 8px 0 auto;
+  width: 74px;
+  pointer-events: none;
+  opacity: 0.26;
+  background:
+    radial-gradient(circle at 80% 44%, color-mix(in srgb, var(--project-color) 28%, transparent), transparent 42%),
+    linear-gradient(135deg, transparent 22%, color-mix(in srgb, var(--project-color) 20%, transparent) 23%, transparent 24% 42%, color-mix(in srgb, var(--project-color) 13%, transparent) 43%, transparent 44%);
+  mask-image: linear-gradient(90deg, transparent, #000 38%, #000);
+}
+
+.os-project-item:hover {
+  transform: translateY(-1px);
+  color: color-mix(in srgb, var(--project-color) 58%, white);
+  border-color: color-mix(in srgb, var(--project-color) 60%, rgba(139,155,179,0.22));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--project-color) 17%, transparent), transparent 58%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.012)),
+    rgba(6, 10, 15, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 0 24px color-mix(in srgb, var(--project-color) 18%, transparent);
+}
+.os-project-item.active {
+  color: color-mix(in srgb, var(--project-color) 65%, white);
+  border-color: color-mix(in srgb, var(--project-color) 72%, rgba(139,155,179,0.24));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--project-color) 21%, transparent), transparent 62%),
+    rgba(7, 11, 16, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 28px color-mix(in srgb, var(--project-color) 20%, transparent);
+}
+
+#proj-Zen { --project-color: var(--zen); }
+#proj-Kiyosaki { --project-color: var(--kiyosaki); }
+#proj-Rin { --project-color: var(--rin); }
+#proj-Minato { --project-color: var(--minato); }
+#proj-Toji { --project-color: var(--toji); }
+#proj-Kazuki { --project-color: var(--kazuki); }
+
+#proj-Kiyosaki::after { content: ''; background: linear-gradient(160deg, transparent 24%, color-mix(in srgb, var(--project-color) 18%, transparent) 25% 27%, transparent 28% 42%, color-mix(in srgb, var(--project-color) 12%, transparent) 43% 45%, transparent 46%), repeating-linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--project-color) 16%, transparent) 10px 12px); }
+#proj-Rin::after { background: radial-gradient(circle at 78% 38%, color-mix(in srgb, var(--project-color) 28%, transparent), transparent 20%), linear-gradient(150deg, transparent 18%, color-mix(in srgb, var(--project-color) 18%, transparent) 19% 21%, transparent 22%); }
+#proj-Minato::after { background: radial-gradient(circle at 72% 48%, color-mix(in srgb, var(--project-color) 22%, transparent), transparent 26%), repeating-linear-gradient(145deg, transparent 0 13px, color-mix(in srgb, var(--project-color) 15%, transparent) 14px 16px); }
+#proj-Toji::after { background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--project-color) 18%, transparent) 11px 14px, transparent 15px 25px); }
+#proj-Kazuki::after { background: radial-gradient(circle at 70% 45%, color-mix(in srgb, var(--project-color) 22%, transparent), transparent 24%), repeating-linear-gradient(25deg, transparent 0 11px, color-mix(in srgb, var(--project-color) 16%, transparent) 12px 13px, transparent 14px 24px); }
+
+.os-project-icon {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--project-color) 70%, white);
+  font-size: 20px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--project-color) 30%, transparent));
+}
+
+.os-project-icon::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: color-mix(in srgb, var(--project-color) 34%, var(--border-default));
+}
+
+.os-project-icon svg {
+  width: 27px;
+  height: 27px;
+}
+
+.os-project-name {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  font-family: 'Segoe Script', 'Brush Script MT', 'Space Grotesk', var(--font-sans);
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--project-color) 30%, transparent);
+}
 
 .os-project-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .os-project-dot.zen { background: var(--zen); }
@@ -332,7 +432,13 @@ body {
 .os-project-dot.minato { background: var(--minato); }
 .os-project-dot.kazuki { background: var(--kazuki); }
 
-.os-project-meta { margin-left: auto; font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
+.os-project-meta {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--project-color) 34%, var(--text-muted));
+  font-family: var(--font-mono);
+}
 
 /* Sidebar Footer */
 .os-sidebar-footer {
@@ -1600,7 +1706,7 @@ body[data-page="project"] #page-project::before {
   pointer-events: none;
   background:
     radial-gradient(circle at 18% 6%, color-mix(in srgb, var(--project-color, var(--accent)) 17%, transparent), transparent 32%),
-    radial-gradient(circle at 78% 14%, rgba(255, 112, 185, 0.10), transparent 34%),
+    radial-gradient(circle at 78% 14%, rgba(139, 155, 179, 0.055), transparent 34%),
     linear-gradient(180deg, rgba(20, 18, 29, 0.58), rgba(10, 14, 20, 0));
 }
 body[data-page="project"] #page-project > * { position: relative; z-index: 1; }
@@ -2537,9 +2643,17 @@ body[data-page="kanban"] .os-main {
   .os-health-popover { min-width: 240px; max-width: calc(100vw - 24px); }
 
   .os-sidebar { width: 60px; padding: var(--space-3) 0; }
-  .os-sidebar-logo h1, .os-sidebar-logo span, .os-nav-label, .os-nav-item span:not(.os-nav-icon), .os-nav-badge, .os-project-meta, .os-session-status span { display: none; }
+  .os-sidebar-logo h1, .os-sidebar-logo span, .os-nav-label, .os-nav-item span:not(.os-nav-icon), .os-nav-badge, .os-project-name, .os-project-meta, .os-session-status span { display: none; }
   .os-nav-item { justify-content: center; padding: var(--space-2); }
-  .os-project-item { justify_content: center; padding: var(--space-2); }
+  .os-project-item {
+    display: flex;
+    justify-content: center;
+    min-height: 42px;
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+  .os-project-icon::after,
+  .os-project-item::after { display: none; }
   .os-main { margin-left: 60px; margin-top: 40px; padding: var(--space-4); }
   .os-grid-2, .os-grid-3, .os-grid-4, .os-grid-6 { grid-template-columns: 1fr; }
   .os-page-title h2 { font-size: var(--text-2xl); }
