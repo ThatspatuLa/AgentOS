@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-06-10T21:52:46.703635",
+  "generated_at": "2026-06-11T15:59:37.966275",
   "token_usage": {
     "today": {
-      "in": 96726939,
-      "out": 248337,
-      "calls": 785,
-      "cost": 1.947
+      "in": 105443241,
+      "out": 286527,
+      "calls": 518,
+      "cost": 2.1232
     },
     "yesterday": {
-      "in": 0,
-      "out": 0,
-      "cost": 0.0
+      "in": 129112927,
+      "out": 290348,
+      "cost": 2.5968
     },
-    "total_in": 96726939,
-    "total_out": 248337,
-    "total_calls": 785,
+    "total_in": 234556168,
+    "total_out": 576875,
+    "total_calls": 1434,
     "per_model": {
       "openrouter/owl-alpha": {
         "in": 22301613,
@@ -35,18 +35,24 @@
         "cost": 0.0355
       },
       "nvidia/nemotron-3-ultra:free": {
-        "in": 55876384,
-        "out": 102427,
-        "calls": 332,
-        "cost": 8.4122
+        "in": 193705613,
+        "out": 430965,
+        "calls": 981,
+        "cost": 29.1851
       }
     },
     "per_session": {
       "20260610_175225_4d8ac9": {
-        "in": 50853742,
-        "out": 59773,
-        "calls": 276,
-        "cost": 7.646
+        "in": 145579325,
+        "out": 242323,
+        "calls": 623,
+        "cost": 21.9096
+      },
+      "20260609_113730_45e6f63f": {
+        "in": 42102615,
+        "out": 157834,
+        "calls": 292,
+        "cost": 6.3627
       },
       "20260610_032623_e99fa4": {
         "in": 22037480,
@@ -54,11 +60,11 @@
         "calls": 226,
         "cost": 3.3239
       },
-      "20260609_113730_45e6f63f": {
-        "in": 5764190,
-        "out": 49246,
-        "calls": 88,
-        "cost": 0.8794
+      "20260610_120409_244b6034": {
+        "in": 6251387,
+        "out": 22026,
+        "calls": 34,
+        "cost": 0.9443
       },
       "20260610_170448_ee6097": {
         "in": 5275499,
@@ -72,11 +78,11 @@
         "calls": 40,
         "cost": 0.5846
       },
-      "20260610_120409_244b6034": {
-        "in": 3325100,
-        "out": 6097,
-        "calls": 19,
-        "cost": 0.5006
+      "bg_141758_a81f18": {
+        "in": 3501248,
+        "out": 18796,
+        "calls": 69,
+        "cost": 0.5308
       },
       "20260610_164146_4108c4": {
         "in": 2937704,
@@ -95,12 +101,6 @@
         "out": 1844,
         "calls": 10,
         "cost": 0.0393
-      },
-      "20260607_193056_683caea5": {
-        "in": 143477,
-        "out": 353,
-        "calls": 2,
-        "cost": 0.0216
       }
     }
   },
@@ -119,7 +119,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-081.md"
       },
       {
         "id": "SB-20260608-082",
@@ -129,7 +130,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-082.md"
       },
       {
         "id": "SB-20260608-083",
@@ -139,7 +141,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-083.md"
       },
       {
         "id": "SB-20260608-084",
@@ -149,7 +152,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-084.md"
       },
       {
         "id": "SB-20260608-085",
@@ -159,7 +163,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-085.md"
       },
       {
         "id": "SB-20260608-086",
@@ -169,7 +174,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-086.md"
       },
       {
         "id": "SB-20260608-087",
@@ -179,7 +185,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-087.md"
       },
       {
         "id": "SB-20260608-088",
@@ -189,7 +196,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-088.md"
       },
       {
         "id": "SB-20260608-089",
@@ -199,7 +207,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-089.md"
       },
       {
         "id": "SB-20260608-090",
@@ -209,7 +218,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-090.md"
       },
       {
         "id": "SB-20260608-091",
@@ -219,7 +229,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-091.md"
       },
       {
         "id": "SB-20260608-092",
@@ -229,7 +240,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-092.md"
       },
       {
         "id": "SB-20260608-093",
@@ -239,7 +251,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-093.md"
       },
       {
         "id": "SB-20260608-094",
@@ -249,7 +262,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-094.md"
       },
       {
         "id": "SB-20260608-095",
@@ -259,7 +273,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-095.md"
       },
       {
         "id": "SB-20260608-096",
@@ -269,7 +284,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-096.md"
       },
       {
         "id": "SB-20260608-097",
@@ -279,7 +295,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-097.md"
       },
       {
         "id": "SB-20260608-098",
@@ -289,7 +306,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-098.md"
       },
       {
         "id": "SB-20260608-099",
@@ -299,7 +317,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-099.md"
       },
       {
         "id": "SB-20260608-100",
@@ -309,7 +328,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-100.md"
       },
       {
         "id": "SB-20260608-101",
@@ -319,7 +339,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-101.md"
       },
       {
         "id": "SB-20260608-102",
@@ -329,7 +350,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-102.md"
       },
       {
         "id": "SB-20260608-103",
@@ -339,7 +361,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-103.md"
       },
       {
         "id": "SB-20260608-104",
@@ -349,7 +372,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-104.md"
       },
       {
         "id": "SB-20260608-105",
@@ -359,7 +383,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-08/SB-20260608-105.md"
       },
       {
         "id": "SB-20260609-001",
@@ -369,7 +394,8 @@
         "review_status": "accepted",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-001.md"
       },
       {
         "id": "SB-20260609-002",
@@ -379,7 +405,8 @@
         "review_status": "accepted",
         "task_type": "debug",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-002.md"
       },
       {
         "id": "SB-20260609-003",
@@ -389,7 +416,8 @@
         "review_status": "accepted",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-003.md"
       },
       {
         "id": "SB-20260609-004",
@@ -399,7 +427,8 @@
         "review_status": "accepted",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-004.md"
       },
       {
         "id": "SB-20260609-005",
@@ -409,7 +438,8 @@
         "review_status": "accepted",
         "task_type": "security",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-005.md"
       },
       {
         "id": "SB-20260609-006",
@@ -419,7 +449,8 @@
         "review_status": "accepted",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-006.md"
       },
       {
         "id": "SB-20260609-007",
@@ -429,7 +460,8 @@
         "review_status": "rejected",
         "task_type": "debug",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-007.md"
       },
       {
         "id": "SB-20260609-008",
@@ -439,7 +471,8 @@
         "review_status": "accepted",
         "task_type": "code_review",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-008.md"
       },
       {
         "id": "SB-20260609-009",
@@ -449,7 +482,8 @@
         "review_status": "accepted",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-009.md"
       },
       {
         "id": "SB-20260609-010",
@@ -459,7 +493,8 @@
         "review_status": "accepted",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-010.md"
       },
       {
         "id": "SB-20260609-011",
@@ -469,7 +504,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-011.md"
       },
       {
         "id": "SB-20260609-012",
@@ -479,7 +515,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-012.md"
       },
       {
         "id": "SB-20260609-013",
@@ -489,7 +526,8 @@
         "review_status": "rejected",
         "task_type": "debug",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-013.md"
       },
       {
         "id": "SB-20260609-014",
@@ -499,7 +537,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-014.md"
       },
       {
         "id": "SB-20260609-015",
@@ -509,7 +548,8 @@
         "review_status": "rejected",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-015.md"
       },
       {
         "id": "SB-20260609-016",
@@ -519,7 +559,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-016.md"
       },
       {
         "id": "SB-20260609-017",
@@ -529,7 +570,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-017.md"
       },
       {
         "id": "SB-20260609-018",
@@ -539,7 +581,8 @@
         "review_status": "rejected",
         "task_type": "code_review",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-018.md"
       },
       {
         "id": "SB-20260609-019",
@@ -549,7 +592,8 @@
         "review_status": "rejected",
         "task_type": "research",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-019.md"
       },
       {
         "id": "SB-20260609-020",
@@ -559,7 +603,8 @@
         "review_status": "rejected",
         "task_type": "risk",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-020.md"
       },
       {
         "id": "SB-20260609-021",
@@ -569,7 +614,8 @@
         "review_status": "rejected",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-021.md"
       },
       {
         "id": "SB-20260609-022",
@@ -579,7 +625,8 @@
         "review_status": "rejected",
         "task_type": "reasoning",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-022.md"
       },
       {
         "id": "SB-20260609-023",
@@ -589,7 +636,8 @@
         "review_status": "rejected",
         "task_type": "debug",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-023.md"
       },
       {
         "id": "SB-20260609-024",
@@ -599,7 +647,8 @@
         "review_status": "rejected",
         "task_type": "strategy",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-024.md"
       },
       {
         "id": "SB-20260609-025",
@@ -609,7 +658,8 @@
         "review_status": "rejected",
         "task_type": "artifact_creation",
         "genericness": "low",
-        "failure_mode": "none"
+        "failure_mode": "none",
+        "file_path": "Sandbox/Runs/2026-06-09/SB-20260609-025.md"
       }
     ]
   },
@@ -818,5 +868,217 @@
     "total_earnings": 0,
     "monthly_recurring": 0,
     "projects": []
+  },
+  "token_history": {
+    "days": [
+      {
+        "label": "Fri",
+        "date": "2026-06-05",
+        "total": 41549948,
+        "models": {
+          "local": 207749,
+          "regular": 31162462,
+          "free": 10179737
+        }
+      },
+      {
+        "label": "Sat",
+        "date": "2026-06-06",
+        "total": 38869306,
+        "models": {
+          "local": 194346,
+          "regular": 29151980,
+          "free": 9522980
+        }
+      },
+      {
+        "label": "Sun",
+        "date": "2026-06-07",
+        "total": 36188665,
+        "models": {
+          "local": 180943,
+          "regular": 27141499,
+          "free": 8866223
+        }
+      },
+      {
+        "label": "Mon",
+        "date": "2026-06-08",
+        "total": 33508023,
+        "models": {
+          "local": 167540,
+          "regular": 25131018,
+          "free": 8209465
+        }
+      },
+      {
+        "label": "Tue",
+        "date": "2026-06-09",
+        "total": 30827380,
+        "models": {
+          "local": 154136,
+          "regular": 23120536,
+          "free": 7552708
+        }
+      },
+      {
+        "label": "Wed",
+        "date": "2026-06-10",
+        "total": 28146739,
+        "models": {
+          "local": 140733,
+          "regular": 21110055,
+          "free": 6895951
+        }
+      },
+      {
+        "label": "Thu",
+        "date": "2026-06-11",
+        "total": 25466097,
+        "models": {
+          "local": 127330,
+          "regular": 19099573,
+          "free": 6239194
+        }
+      }
+    ],
+    "models": [
+      {
+        "key": "local",
+        "label": "Local Worker",
+        "color": "local"
+      },
+      {
+        "key": "regular",
+        "label": "Regular Cloud",
+        "color": "regular"
+      },
+      {
+        "key": "free",
+        "label": "Free Tier Cloud",
+        "color": "free"
+      }
+    ]
+  },
+  "routing": {
+    "intraday": [
+      [
+        "Local Worker",
+        0
+      ],
+      [
+        "Regular Cloud",
+        447
+      ],
+      [
+        "Free Tier Cloud",
+        0
+      ]
+    ],
+    "weekly": [
+      [
+        "Local Worker",
+        0
+      ],
+      [
+        "Regular Cloud",
+        3129
+      ],
+      [
+        "Free Tier Cloud",
+        0
+      ]
+    ],
+    "monthly": [
+      [
+        "Local Worker",
+        0
+      ],
+      [
+        "Regular Cloud",
+        13410
+      ],
+      [
+        "Free Tier Cloud",
+        0
+      ]
+    ],
+    "all": [
+      [
+        "Local Worker",
+        0
+      ],
+      [
+        "Regular Cloud",
+        40230
+      ],
+      [
+        "Free Tier Cloud",
+        0
+      ]
+    ]
+  },
+  "local_econ": {
+    "local_work_completed": 0,
+    "cloud_to_local_output_tokens": 0,
+    "estimated_cloud_cost_avoided": 0.0,
+    "cost_avoided_baseline": {
+      "label": "hosted gpt-oss-20b",
+      "input_per_million": 0.029,
+      "output_per_million": 0.14
+    }
+  },
+  "cloud_capacity": {
+    "codex": {
+      "refresh_cycle": "5h",
+      "next_observed_refresh": "12:11",
+      "weekly_reset_observed": "2026-06-11"
+    },
+    "owl_alpha": {
+      "reset_basis": "current UTC day / midnight UTC",
+      "local_reset_time": "10:00 AEST"
+    },
+    "tracking_rule": "Record exhaustion points to estimate usable capacity."
+  },
+  "health": {
+    "git": {
+      "clean": false,
+      "modified": 9,
+      "untracked": 0,
+      "staged": 1,
+      "summary": [
+        "M agent-os-data.json",
+        " M agent-os-v2/src/components/Sidebar.tsx",
+        " M agent-os-v2/src/index.css",
+        " M agent-os-v2/src/pages/MemoryWorld.tsx",
+        " M agent-os-v2/src/pages/Projects.tsx"
+      ]
+    },
+    "obsidian": {
+      "live": false,
+      "last_write": "2026-06-10T21:20:56.401720",
+      "last_file": "01_Projects/Kiyosaki/Swarm/Swarm Dashboard.md",
+      "age_seconds": 67121,
+      "file_count": 183
+    },
+    "hermes": {
+      "running": true,
+      "pid_count": 4,
+      "pids": [
+        "12672",
+        "60670",
+        "484814",
+        "546090"
+      ]
+    },
+    "active_models": [
+      "nvidia/nemotron-3-ultra:free"
+    ],
+    "zen_bot": {
+      "connected": false,
+      "last_activity": "unknown"
+    },
+    "data_generated_at": "2026-06-11T15:59:37.966055",
+    "stale_threshold_seconds": 900
   }
 }
