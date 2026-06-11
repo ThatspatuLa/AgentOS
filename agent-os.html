@@ -511,24 +511,47 @@
     </div>
   </section>
 
-  <!-- ═══ MEMORY ═══ -->
+  <!-- ═══ MEMORY WORLD ═══ -->
   <section id="page-memory" class="os-page" style="display:none">
     <header class="os-top-bar">
       <div class="os-page-title">
-        <h2>Memory Browser</h2>
-        <p>Searchable memory across all projects</p>
+        <h2>Memory World</h2>
+        <p>Interactive graph of agents, models, rules, resources, and projects</p>
       </div>
     </header>
-    <div class="os-grid-2">
-      <div class="os-card">
-        <header class="os-card-header"><span class="os-card-title">User Profile</span></header>
-        <div class="os-card-body" id="memory-user-content"></div>
+
+    <div id="memory-world-header" class="memory-world-header">
+      <div class="memory-world-header-left">
+        <h1>Memory World</h1>
+        <p>Zen's inner domain — agents, models, rules, resources, gates, decisions, memories, routes</p>
       </div>
-      <div class="os-card">
-        <header class="os-card-header"><span class="os-card-title">Environment Facts</span></header>
-        <div class="os-card-body" id="memory-env-content"></div>
+      <div id="memory-world-controls" class="memory-world-controls">
+        <button class="os-btn os-btn-secondary os-btn-sm" onclick="resetMemoryWorldView()">↺ Reset View</button>
+        <select id="memory-world-layer-filter" class="os-select" onchange="filterMemoryWorldLayers(this.value)">
+          <option value="all">All Layers</option>
+          <option value="0">Layer 0: Zen Core</option>
+          <option value="1">Layer 1: Infrastructure</option>
+          <option value="2">Layer 2: Agents/Models/Rules/Projects</option>
+          <option value="3">Layer 3: Resources/Risk</option>
+        </select>
       </div>
     </div>
+
+    <div class="memory-world-container">
+      <div class="memory-world-canvas-wrap">
+        <canvas id="memory-world-canvas" class="memory-world-canvas"></canvas>
+        <div id="memory-world-tooltip" class="memory-world-tooltip"></div>
+      </div>
+
+      <div id="memory-world-sidepanel" class="memory-world-sidepanel">
+        <div class="memory-world-placeholder">
+          <div class="memory-world-placeholder-icon">🧠</div>
+          <div class="memory-world-placeholder-text">Click a node to inspect details</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="memory-world-legend" class="memory-world-legend"></div>
   </section>
 
   <!-- ═══ TOKENS ═══ -->
@@ -1970,6 +1993,848 @@ document.addEventListener('visibilitychange', () => {
     loadData();
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// MEMORY WORLD RENDERER — M4 Visual Identity (Power Design)
+// ═══════════════════════════════════════════════════════════════
+
+let memoryWorldData = null;
+let memoryWorldSimNodes = [];
+let memoryWorldEdges = [];
+let memoryWorldCanvas = null;
+let memoryWorldCtx = null;
+let memoryWorldTransform = { x: 0, y: 0, scale: 1 };
+let memoryWorldAnimId = null;
+let memoryWorldHovered = null;
+let memoryWorldSelected = null;
+let memoryWorldDragging = null;
+let memoryWorldPanning = null;
+let memoryWorldLayerFilter = 'all';
+let memoryWorldRunning = false;
+
+// Visual identity tokens (matching schema v1.0 §7)
+const MEMORY_WORLD_CLUSTER_TOKENS = {
+  zen_core:    { color: '#4da3ff', sigil: '🧠', shape: 'hexagon', layer: 0, baseSize: 22, pulse: 'heartbeat' },
+  agents:      { color: '#3fc960', sigil: '👤', shape: 'circle',   layer: 2, baseSize: 18, pulse: 'none' },
+  models:      { color: '#bc8cff', sigil: '☁️', shape: 'diamond',  layer: 2, baseSize: 16, pulse: 'slow' },
+  rules:       { color: '#f0883e', sigil: '⚖️', shape: 'shield',   layer: 2, baseSize: 18, pulse: 'slow' },
+  resources:   { color: '#58d4e8', sigil: '⚙️', shape: 'square',   layer: 3, baseSize: 16, pulse: 'none' },
+  projects:    { color: '#f778ba', sigil: '📁', shape: 'folder',   layer: 2, baseSize: 18, pulse: 'none' },
+  events:      { color: '#e8b84d', sigil: '⚡', shape: 'bolt',     layer: 4, baseSize: 14, pulse: 'fast' },
+  memory:      { color: '#8b9bb3', sigil: '💾', shape: 'cylinder', layer: 3, baseSize: 14, pulse: 'slow' },
+  risk:        { color: '#f06258', sigil: '⚠️', shape: 'triangle', layer: 2, baseSize: 18, pulse: 'fast' }
+};
+
+const MEMORY_WORLD_EDGE_TOKENS = {
+  governs:        { style: 'solid',   color: '#4da3ff', width: 2, animated: false },
+  routes_to:      { style: 'dashed',  color: '#bc8cff', width: 1.5, animated: true },
+  delegates_to:   { style: 'dotted',  color: '#3fc960', width: 1.5, animated: true },
+  enforces:       { style: 'solid',   color: '#f0883e', width: 2, animated: false },
+  consumes:       { style: 'dashed',  color: '#e8b84d', width: 1.5, animated: true },
+  configures:     { style: 'solid',   color: '#58d4e8', width: 1.5, animated: false },
+  launches:       { style: 'solid',   color: '#3fc960', width: 1.5, animated: false },
+  participates_in:{ style: 'dotted',  color: '#8b9bb3', width: 1, animated: true },
+  manages:        { style: 'solid',   color: '#e8b84d', width: 1.5, animated: false },
+  oversees:       { style: 'dashed',  color: '#f778ba', width: 1, animated: false },
+  owns:           { style: 'solid',   color: '#3fc960', width: 1.5, animated: false },
+  produces:       { style: 'solid',   color: '#e8b84d', width: 1.5, animated: false },
+  triggers:       { style: 'dotted',  color: '#58d4e8', width: 1, animated: true },
+  validates:      { style: 'dashed',  color: '#f0883e', width: 1, animated: false },
+  promotes:       { style: 'solid',   color: '#3fc960', width: 2, animated: false },
+  blocks:         { style: 'solid',   color: '#f06258', width: 2, animated: true },
+  derives_from:   { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
+  supersedes:     { style: 'dashed',  color: '#e8b84d', width: 1, animated: false },
+  depends_on:     { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
+  reports_to:     { style: 'solid',   color: '#3fc960', width: 1, animated: true },
+  alerts:         { style: 'solid',   color: '#f06258', width: 2, animated: true },
+  invokes:        { style: 'dotted',  color: '#58d4e8', width: 1, animated: true },
+  generates:      { style: 'dashed',  color: '#e8b84d', width: 1.5, animated: false },
+  executes:       { style: 'solid',   color: '#4da3ff', width: 1.5, animated: false },
+  bridges:        { style: 'dotted',  color: '#8b9bb3', width: 1, animated: true },
+  stores_in:      { style: 'dashed',  color: '#58d4e8', width: 1, animated: false },
+  assigns_to:     { style: 'dotted',  color: '#f0883e', width: 1, animated: false },
+  falls_back_to:  { style: 'dotted',  color: '#bc8cff', width: 1, animated: true },
+  available_to:   { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
+  contributes_to: { style: 'dashed',  color: '#e8b84d', width: 1, animated: true }
+};
+
+const NODE_TYPE_CLUSTER = {
+  zen_core: 'zen_core',
+  hermes_runtime: 'zen_core',
+  discord_gateway: 'zen_core',
+  obsidian_vault: 'zen_core',
+  agent: 'agents',
+  agent_session: 'agents',
+  model_cloud: 'models',
+  model_local: 'models',
+  model_fallback: 'models',
+  routing_rule: 'rules',
+  safety_gate: 'rules',
+  review_gate: 'rules',
+  resource_quota: 'rules',
+  token_budget: 'resources',
+  worker_launcher: 'resources',
+  sandbox_engine: 'resources',
+  skill_registry: 'resources',
+  script_layer: 'resources',
+  cron_scheduler: 'resources',
+  session_store: 'resources',
+  worker_activity: 'resources',
+  project: 'projects',
+  project_memory: 'projects',
+  project_instructions: 'projects',
+  work_unit: 'projects',
+  sandbox_run: 'events',
+  backtest_run: 'events',
+  skill_creation: 'events',
+  promotion_event: 'events',
+  deployment_event: 'events',
+  route_decision: 'events',
+  gate_evaluation: 'events',
+  memory_fact: 'memory',
+  memory_preference: 'memory',
+  learned_pattern: 'memory',
+  failed_route: 'memory',
+  system_risk: 'risk',
+  health_check: 'risk',
+  alert: 'risk'
+};
+
+function initMemoryWorld() {
+  memoryWorldCanvas = document.getElementById('memory-world-canvas');
+  if (!memoryWorldCanvas) return;
+  
+  memoryWorldCtx = memoryWorldCanvas.getContext('2d');
+  resizeMemoryWorldCanvas();
+  
+  // Event listeners
+  memoryWorldCanvas.addEventListener('mousedown', onMemoryWorldMouseDown);
+  memoryWorldCanvas.addEventListener('mousemove', onMemoryWorldMouseMove);
+  memoryWorldCanvas.addEventListener('mouseup', onMemoryWorldMouseUp);
+  memoryWorldCanvas.addEventListener('wheel', onMemoryWorldWheel, { passive: false });
+  memoryWorldCanvas.addEventListener('mouseleave', onMemoryWorldMouseLeave);
+  
+  window.addEventListener('resize', resizeMemoryWorldCanvas);
+  
+  // Load data
+  loadMemoryWorldData();
+}
+
+function resizeMemoryWorldCanvas() {
+  if (!memoryWorldCanvas) return;
+  const wrap = memoryWorldCanvas.parentElement;
+  if (!wrap) return;
+  const dpr = window.devicePixelRatio || 1;
+  memoryWorldCanvas.width = wrap.clientWidth * dpr;
+  memoryWorldCanvas.height = wrap.clientHeight * dpr;
+  memoryWorldCanvas.style.width = wrap.clientWidth + 'px';
+  memoryWorldCanvas.style.height = wrap.clientHeight + 'px';
+  memoryWorldCtx.scale(dpr, dpr);
+  // Re-center on resize
+  if (memoryWorldSimNodes.length) {
+    centerMemoryWorldView();
+  }
+}
+
+async function loadMemoryWorldData() {
+  try {
+    const resp = await fetch('data/memory-world.json?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    memoryWorldData = await resp.json();
+    initMemoryWorldSimulation();
+    buildMemoryWorldLegend();
+    startMemoryWorldAnimation();
+  } catch (e) {
+    console.error('Failed to load memory-world.json:', e);
+    showMemoryWorldError(e.message);
+  }
+}
+
+function initMemoryWorldSimulation() {
+  if (!memoryWorldData) return;
+  
+  const nodes = memoryWorldData.nodes || [];
+  const edges = memoryWorldData.edges || [];
+  
+  // Build node map
+  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  
+  // Apply layer filter
+  const filteredNodes = nodes.filter(n => {
+    if (memoryWorldLayerFilter === 'all') return true;
+    return String(n.layer) === memoryWorldLayerFilter;
+  });
+  
+  // Initialize sim nodes with positions
+  memoryWorldSimNodes = filteredNodes.map((node, i) => {
+    const cluster = NODE_TYPE_CLUSTER[node.type] || 'agents';
+    const tokens = MEMORY_WORLD_CLUSTER_TOKENS[cluster] || MEMORY_WORLD_CLUSTER_TOKENS.agents;
+    
+    // Preserve existing positions if node existed
+    const existing = memoryWorldSimNodes.find(n => n.id === node.id);
+    if (existing) return existing;
+    
+    // Initial circular layout by cluster
+    const clusterNodes = filteredNodes.filter(n => NODE_TYPE_CLUSTER[n.type] === cluster);
+    const clusterIndex = clusterNodes.indexOf(node);
+    const angle = (2 * Math.PI * clusterIndex) / Math.max(1, clusterNodes.length);
+    const radius = 150 + tokens.layer * 80 + Math.random() * 40;
+    const centerX = 0, centerY = 0;
+    
+    return {
+      id: node.id,
+      node: node,
+      cluster: cluster,
+      tokens: tokens,
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+      vx: 0, vy: 0,
+      fixed: false
+    };
+  });
+  
+  // Filter edges to only include those with both endpoints in filtered nodes
+  const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+  memoryWorldEdges = edges.filter(e => 
+    filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
+  );
+  
+  centerMemoryWorldView();
+}
+
+function centerMemoryWorldView() {
+  if (!memoryWorldSimNodes.length || !memoryWorldCanvas) return;
+  const bounds = getMemoryWorldBounds();
+  const cx = (bounds.minX + bounds.maxX) / 2;
+  const cy = (bounds.minY + bounds.maxY) / 2;
+  const w = memoryWorldCanvas.width / (window.devicePixelRatio || 1);
+  const h = memoryWorldCanvas.height / (window.devicePixelRatio || 1);
+  const scale = Math.min(w, h) / (Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY) + 200);
+  memoryWorldTransform = {
+    x: w / 2 - cx * scale,
+    y: h / 2 - cy * scale,
+    scale: Math.max(0.3, Math.min(3, scale))
+  };
+}
+
+function getMemoryWorldBounds() {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of memoryWorldSimNodes) {
+    minX = Math.min(minX, n.x);
+    maxX = Math.max(maxX, n.x);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y);
+  }
+  return { minX: minX === Infinity ? 0 : minX, minY: minY === Infinity ? 0 : minY,
+           maxX: maxX === -Infinity ? 0 : maxX, maxY: maxY === -Infinity ? 0 : maxY };
+}
+
+function startMemoryWorldAnimation() {
+  if (memoryWorldRunning) return;
+  memoryWorldRunning = true;
+  animateMemoryWorld();
+}
+
+function animateMemoryWorld() {
+  if (!memoryWorldRunning) return;
+  
+  const canvas = memoryWorldCanvas;
+  if (!canvas || !memoryWorldCtx) return;
+  
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.width / dpr;
+  const H = canvas.height / dpr;
+  
+  // Physics step
+  stepMemoryWorldPhysics();
+  
+  // Render
+  memoryWorldCtx.setTransform(1, 0, 0, 1, 0, 0);
+  memoryWorldCtx.clearRect(0, 0, canvas.width, canvas.height);
+  memoryWorldCtx.save();
+  memoryWorldCtx.translate(memoryWorldTransform.x * dpr, memoryWorldTransform.y * dpr);
+  memoryWorldCtx.scale(memoryWorldTransform.scale * dpr, memoryWorldTransform.scale * dpr);
+  
+  // Draw edges first
+  drawMemoryWorldEdges();
+  
+  // Draw nodes
+  drawMemoryWorldNodes();
+  
+  // Hover highlight
+  if (memoryWorldHovered) drawMemoryWorldNodeHighlight(memoryWorldHovered);
+  
+  // Selection highlight
+  if (memoryWorldSelected) drawMemoryWorldNodeHighlight(memoryWorldSelected, true);
+  
+  memoryWorldCtx.restore();
+  
+  // Update tooltip
+  updateMemoryWorldTooltip();
+  
+  memoryWorldAnimId = requestAnimationFrame(animateMemoryWorld);
+}
+
+function stepMemoryWorldPhysics() {
+  const alpha = 0.15; // Cooling factor
+  
+  // Repulsion between all nodes
+  for (const a of memoryWorldSimNodes) {
+    let fx = 0, fy = 0;
+    for (const b of memoryWorldSimNodes) {
+      if (a === b) continue;
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (dist < 400) {
+        const repel = 8000 / (dist * dist);
+        fx += (dx / dist) * repel * alpha;
+        fy += (dy / dist) * repel * alpha;
+      }
+    }
+    // Center gravity
+    fx += (-a.x) * 0.0005 * alpha;
+    fy += (-a.y) * 0.0005 * alpha;
+    
+    a.vx = a.vx * 0.85 + fx;
+    a.vy = a.vy * 0.85 + fy;
+  }
+  
+  // Edge springs
+  const posMap = new Map(memoryWorldSimNodes.map(n => [n.id, n]));
+  for (const edge of memoryWorldEdges) {
+    const a = posMap.get(edge.source);
+    const b = posMap.get(edge.target);
+    if (!a || !b) continue;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const targetDist = 120;
+    const force = (dist - targetDist) * 0.002;
+    const fx = (dx / dist) * force;
+    const fy = (dy / dist) * force;
+    a.vx += fx; a.vy += fy;
+    b.vx -= fx; b.vy -= fy;
+  }
+  
+  // Integrate
+  for (const n of memoryWorldSimNodes) {
+    if (memoryWorldDragging === n.id) {
+      n.vx = 0; n.vy = 0;
+      continue;
+    }
+    n.x += n.vx;
+    n.y += n.vy;
+  }
+}
+
+function drawMemoryWorldEdges() {
+  const posMap = new Map(memoryWorldSimNodes.map(n => [n.id, n]));
+  
+  for (const edge of memoryWorldEdges) {
+    const a = posMap.get(edge.source);
+    const b = posMap.get(edge.target);
+    if (!a || !b) continue;
+    
+    const tokens = MEMORY_WORLD_EDGE_TOKENS[edge.type] || { style: 'solid', color: '#8b9bb3', width: 1, animated: false };
+    const animOffset = Date.now() * 0.001;
+    
+    memoryWorldCtx.beginPath();
+    memoryWorldCtx.moveTo(a.x, a.y);
+    
+    // Curved bezier for visual interest
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const cx = a.x + dx * 0.4 + Math.sin(animOffset) * 10;
+    const cy = a.y + dy * 0.4 + Math.cos(animOffset) * 10;
+    memoryWorldCtx.bezierCurveTo(cx, cy, cx, cy, b.x, b.y);
+    
+    memoryWorldCtx.strokeStyle = tokens.color + (tokens.animated ? '80' : '50');
+    memoryWorldCtx.lineWidth = tokens.width;
+    
+    if (tokens.style === 'dashed') {
+      memoryWorldCtx.setLineDash([8 * animOffset % 16, 8]);
+    } else if (tokens.style === 'dotted') {
+      memoryWorldCtx.setLineDash([2, 6]);
+    } else {
+      memoryWorldCtx.setLineDash([]);
+    }
+    
+    // Animated flow
+    if (tokens.animated) {
+      memoryWorldCtx.lineDashOffset = -animOffset * 20;
+    }
+    
+    memoryWorldCtx.stroke();
+    memoryWorldCtx.setLineDash([]);
+  }
+}
+
+function drawMemoryWorldNodes() {
+  for (const sim of memoryWorldSimNodes) {
+    const node = sim.node;
+    const tokens = sim.tokens;
+    const isHover = memoryWorldHovered?.id === sim.id;
+    const isSelected = memoryWorldSelected?.id === sim.id;
+    const isActive = node.active !== false;
+    
+    // Size
+    const baseSize = tokens.baseSize;
+    const size = baseSize * (isHover || isSelected ? 1.2 : 1);
+    
+    // Color
+    const color = tokens.color;
+    const clusterColor = tokens.color;
+    
+    // Glow for selected/active
+    if (isSelected || (isActive && (tokens.pulse === 'heartbeat' || tokens.pulse === 'fast'))) {
+      const pulsePhase = Date.now() * 0.003;
+      const pulse = tokens.pulse === 'heartbeat' ? (Math.sin(pulsePhase) * 4 + 4) :
+                    tokens.pulse === 'fast' ? (Math.sin(pulsePhase * 2) * 3 + 3) : 0;
+      memoryWorldCtx.beginPath();
+      drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size + pulse + 8);
+      memoryWorldCtx.fillStyle = clusterColor + '20';
+      memoryWorldCtx.fill();
+    }
+    
+    // Main node
+    memoryWorldCtx.beginPath();
+    drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size);
+    memoryWorldCtx.fillStyle = isActive ? color : color + '60';
+    memoryWorldCtx.fill();
+    
+    // Border for selected
+    if (isSelected) {
+      memoryWorldCtx.strokeStyle = '#ffffff';
+      memoryWorldCtx.lineWidth = 3;
+      memoryWorldCtx.stroke();
+    } else if (isHover) {
+      memoryWorldCtx.strokeStyle = color + 'cc';
+      memoryWorldCtx.lineWidth = 2;
+      memoryWorldCtx.stroke();
+    }
+    
+    // Sigil/Label
+    memoryWorldCtx.font = 'bold ' + Math.max(10, size * 0.7) + 'px Inter';
+    memoryWorldCtx.fillStyle = '#ffffff';
+    memoryWorldCtx.textAlign = 'center';
+    memoryWorldCtx.textBaseline = 'middle';
+    memoryWorldCtx.fillText(node.sigil || tokens.sigil || '●', sim.x, sim.y);
+    
+    // Label below node
+    if (isHover || isSelected) {
+      memoryWorldCtx.font = 'bold 11px Inter';
+      memoryWorldCtx.fillStyle = '#e8ecf1';
+      memoryWorldCtx.textAlign = 'center';
+      memoryWorldCtx.fillText(node.label, sim.x, sim.y + size + 16);
+    }
+  }
+}
+
+function drawShape(ctx, x, y, shape, size) {
+  switch (shape) {
+    case 'circle':
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      break;
+    case 'hexagon':
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
+        const px = x + size * Math.cos(angle);
+        const py = y + size * Math.sin(angle);
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      break;
+    case 'diamond':
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x - size, y);
+      ctx.closePath();
+      break;
+    case 'shield':
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size * 0.8, y + size * 0.3);
+      ctx.lineTo(x + size * 0.4, y + size);
+      ctx.lineTo(x, y + size * 1.2);
+      ctx.lineTo(x - size * 0.4, y + size);
+      ctx.lineTo(x - size * 0.8, y + size * 0.3);
+      ctx.closePath();
+      break;
+    case 'square':
+      ctx.rect(x - size * 0.7, y - size * 0.7, size * 1.4, size * 1.4);
+      break;
+    case 'folder':
+      ctx.moveTo(x - size, y - size * 0.5);
+      ctx.lineTo(x - size * 0.3, y - size * 1);
+      ctx.lineTo(x + size * 0.3, y - size * 1);
+      ctx.lineTo(x + size, y - size * 0.5);
+      ctx.lineTo(x + size, y + size * 0.7);
+      ctx.lineTo(x - size, y + size * 0.7);
+      ctx.closePath();
+      break;
+    case 'bolt':
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size * 0.3, y);
+      ctx.lineTo(x - size * 0.2, y);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x - size * 0.3, y);
+      ctx.lineTo(x + size * 0.2, y);
+      ctx.closePath();
+      break;
+    case 'cylinder':
+      ctx.moveTo(x - size * 0.7, y - size * 0.8);
+      ctx.bezierCurveTo(x - size * 0.7, y - size, x + size * 0.7, y - size, x + size * 0.7, y - size * 0.8);
+      ctx.lineTo(x + size * 0.7, y + size * 0.8);
+      ctx.bezierCurveTo(x + size * 0.7, y + size, x - size * 0.7, y + size, x - size * 0.7, y + size * 0.8);
+      ctx.closePath();
+      break;
+    case 'triangle':
+      ctx.moveTo(x, y - size);
+      ctx.lineTo(x + size, y + size);
+      ctx.lineTo(x - size, y + size);
+      ctx.closePath();
+      break;
+    default:
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+  }
+}
+
+function drawMemoryWorldNodeHighlight(sim, selected = false) {
+  const node = sim.node;
+  const tokens = sim.tokens;
+  const size = tokens.baseSize * 1.3;
+  
+  memoryWorldCtx.beginPath();
+  drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size);
+  memoryWorldCtx.strokeStyle = selected ? '#ffffff' : tokens.color;
+  memoryWorldCtx.lineWidth = selected ? 4 : 2;
+  memoryWorldCtx.setLineDash([8, 4]);
+  memoryWorldCtx.stroke();
+  memoryWorldCtx.setLineDash([]);
+}
+
+function buildMemoryWorldLegend() {
+  const legend = document.getElementById('memory-world-legend');
+  if (!legend) return;
+  
+  // Filter clusters that actually have nodes
+  const presentClusters = new Set();
+  for (const sim of memoryWorldSimNodes) {
+    presentClusters.add(sim.cluster);
+  }
+  
+  let html = '';
+  
+  // Node types
+  for (const [clusterKey, tokens] of Object.entries(MEMORY_WORLD_CLUSTER_TOKENS)) {
+    if (!presentClusters.has(clusterKey)) continue;
+    
+    const count = memoryWorldSimNodes.filter(s => s.cluster === clusterKey).length;
+    if (count === 0) continue;
+    
+    html += `
+      <div class="memory-world-legend-group">
+        <span class="memory-world-legend-title">${clusterKey.toUpperCase().replace('_', ' ')}</span>
+        ${memoryWorldSimNodes.filter(s => s.cluster === clusterKey).map(sim => {
+          const tokens = sim.tokens;
+          return `
+            <span class="memory-world-legend-item">
+              <span class="memory-world-legend-dot" style="background:${tokens.color}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px;"></span>
+              ${sim.node.label} <span class="text-muted">(${count})</span>
+            </span>`;
+        }).join('')}
+      </div>`;
+  }
+  
+  // Edge types
+  const presentEdges = new Set(memoryWorldEdges.map(e => e.type));
+  if (presentEdges.size) {
+    html += `<div class="memory-world-legend-group"><span class="memory-world-legend-title">CONNECTIONS</span>`;
+    for (const edgeType of presentEdges) {
+      const tokens = MEMORY_WORLD_EDGE_TOKENS[edgeType] || { style: 'solid', color: '#8b9bb3' };
+      html += `
+        <span class="memory-world-legend-edge">
+          <span class="memory-world-legend-edge-line" style="background:${tokens.color}; height:2px; width:20px; display:inline-block; margin-right:6px; opacity:0.6;"></span>
+          ${edgeType.replace('_', ' ')}
+        </span>`;
+    }
+    html += `</div>`;
+  }
+  
+  legend.innerHTML = html;
+}
+
+function showMemoryWorldError(msg) {
+  const canvas = document.getElementById('memory-world-canvas');
+  if (canvas) {
+    canvas.style.display = 'none';
+  }
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'os-error-state';
+  msgDiv.innerHTML = `
+    <span class="os-error-state-icon">⚠️</span>
+    <div class="os-error-state-title">Failed to load Memory World</div>
+    <div class="os-error-state-desc">${msg}</div>
+    <button class="os-btn os-btn-primary os-error-state-retry" onclick="loadMemoryWorldData()">Retry</button>
+  `;
+  document.querySelector('.memory-world-canvas-wrap').appendChild(msgDiv);
+}
+
+// Interaction handlers
+function onMemoryWorldMouseDown(e) {
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const tx = memoryWorldTransform;
+  const x = (e.clientX - rect.left) / dpr;
+  const y = (e.clientY - rect.top) / dpr;
+  const wx = (x - tx.x) / tx.scale;
+  const wy = (y - tx.y) / tx.scale;
+  
+  const hit = findMemoryWorldNode(wx, wy);
+  if (hit) {
+    memoryWorldDragging = hit.id;
+    hit.fixed = true;
+  } else {
+    memoryWorldPanning = { startX: e.clientX, startY: e.clientY, startTx: tx.x, startTy: tx.y };
+  }
+}
+
+function onMemoryWorldMouseMove(e) {
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const tx = memoryWorldTransform;
+  const x = (e.clientX - rect.left) / dpr;
+  const y = (e.clientY - rect.top) / dpr;
+  const wx = (x - tx.x) / tx.scale;
+  const wy = (y - tx.y) / tx.scale;
+  
+  if (memoryWorldDragging) {
+    const sim = memoryWorldSimNodes.find(n => n.id === memoryWorldDragging);
+    if (sim) {
+      sim.x = wx;
+      sim.y = wy;
+      sim.vx = 0;
+      sim.vy = 0;
+    }
+  } else if (memoryWorldPanning) {
+    tx.x = memoryWorldPanning.startTx + (e.clientX - memoryWorldPanning.startX);
+    tx.y = memoryWorldPanning.startTy + (e.clientY - memoryWorldPanning.startY);
+  } else {
+    const hit = findMemoryWorldNode(wx, wy);
+    memoryWorldHovered = hit || null;
+    memoryWorldCanvas.style.cursor = hit ? 'pointer' : 'grab';
+  }
+}
+
+function onMemoryWorldMouseUp(e) {
+  if (memoryWorldDragging) {
+    const sim = memoryWorldSimNodes.find(n => n.id === memoryWorldDragging);
+    if (sim) sim.fixed = false;
+    memoryWorldDragging = null;
+  }
+  memoryWorldPanning = null;
+  
+  // Click to select
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const tx = memoryWorldTransform;
+  const x = (e.clientX - rect.left) / dpr;
+  const y = (e.clientY - rect.top) / dpr;
+  const wx = (x - tx.x) / tx.scale;
+  const wy = (y - tx.y) / tx.scale;
+  
+  const hit = findMemoryWorldNode(wx, wy);
+  if (hit) {
+    memoryWorldSelected = hit;
+    showMemoryWorldSidePanel(hit);
+  } else if (!memoryWorldDragging && !memoryWorldPanning) {
+    memoryWorldSelected = null;
+    hideMemoryWorldSidePanel();
+  }
+}
+
+function onMemoryWorldWheel(e) {
+  e.preventDefault();
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const x = (e.clientX - rect.left) / dpr;
+  const y = (e.clientY - rect.top) / dpr;
+  
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const tx = memoryWorldTransform;
+  
+  // Zoom towards cursor
+  const beforeX = (x - tx.x) / tx.scale;
+  const beforeY = (y - tx.y) / tx.scale;
+  tx.scale = Math.max(0.2, Math.min(4, tx.scale * delta));
+  tx.x = x - beforeX * tx.scale;
+  tx.y = y - beforeY * tx.scale;
+}
+
+function onMemoryWorldMouseLeave(e) {
+  memoryWorldHovered = null;
+  memoryWorldDragging = null;
+  memoryWorldPanning = null;
+  memoryWorldCanvas.style.cursor = 'grab';
+}
+
+function findMemoryWorldNode(wx, wy) {
+  for (const sim of memoryWorldSimNodes) {
+    const dx = wx - sim.x;
+    const dy = wy - sim.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = sim.tokens.baseSize * 1.5;
+    if (dist < radius) return sim;
+  }
+  return null;
+}
+
+function showMemoryWorldSidePanel(sim) {
+  const panel = document.getElementById('memory-world-sidepanel');
+  if (!panel) return;
+  
+  const node = sim.node;
+  const tokens = sim.tokens;
+  const cluster = sim.cluster;
+  
+  // Find connected edges
+  const connected = memoryWorldEdges.filter(e => e.source === node.id || e.target === node.id);
+  
+  panel.innerHTML = `
+    <div class="memory-world-sidepanel-content">
+      <div class="memory-world-sidepanel-header">
+        <div class="memory-world-sidepanel-dot" style="background:${tokens.color}; width:16px; height:16px; border-radius:50%;"></div>
+        <h2 class="memory-world-sidepanel-title">${node.label}</h2>
+      </div>
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-section-title">TYPE</div>
+        <div class="memory-world-sidepanel-field">
+          <div class="memory-world-sidepanel-field-label">${node.type}</div>
+          <div class="memory-world-sidepanel-field-value">${cluster.toUpperCase().replace('_', ' ')}</div>
+        </div>
+      </div>
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-section-title">STATUS</div>
+        <div class="memory-world-sidepanel-field">
+          <div class="memory-world-sidepanel-field-label">Active</div>
+          <div class="memory-world-sidepanel-field-value" style="color:${node.active ? 'var(--success)' : 'var(--text-muted)'}">${node.active ? 'YES' : 'NO'}</div>
+        </div>
+        <div class="memory-world-sidepanel-field">
+          <div class="memory-world-sidepanel-field-label">Risk</div>
+          <div class="memory-world-sidepanel-field-value" style="color:var(--${node.risk === 'high' ? 'danger' : node.risk === 'medium' ? 'warning' : 'success'})">${node.risk.toUpperCase()}</div>
+        </div>
+        <div class="memory-world-sidepanel-field">
+          <div class="memory-world-sidepanel-field-label">Confidence</div>
+          <div class="memory-world-sidepanel-field-value">${Math.round(node.confidence * 100)}%</div>
+        </div>
+        <div class="memory-world-sidepanel-field">
+          <div class="memory-world-sidepanel-field-label">Layer</div>
+          <div class="memory-world-sidepanel-field-value">${node.layer}</div>
+        </div>
+      </div>
+      ${node.summary ? `
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-section-title">SUMMARY</div>
+        <div class="memory-world-sidepanel-field-value">${node.summary}</div>
+      </div>` : ''}
+      ${Object.keys(node.data || {}).length ? `
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-section-title">DATA</div>
+        <div class="memory-world-sidepanel-data">${JSON.stringify(node.data, null, 2)}</div>
+      </div>` : ''}
+      ${connected.length ? `
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-section-title">CONNECTIONS (${connected.length})</div>
+        <div class="memory-world-sidepanel-connections">
+          ${connected.slice(0, 20).map(e => {
+            const otherId = e.source === node.id ? e.target : e.source;
+            const other = memoryWorldSimNodes.find(s => s.id === otherId);
+            const dir = e.source === node.id ? '→' : '←';
+            const edgeTokens = MEMORY_WORLD_EDGE_TOKENS[e.type] || { color: '#8b9bb3' };
+            return `
+              <div class="memory-world-sidepanel-connection">
+                <span class="memory-world-sidepanel-connection-dir" style="color:${edgeTokens.color}">${dir}</span>
+                <span class="memory-world-sidepanel-connection-target">${other?.node?.label || otherId}</span>
+                <span class="memory-world-sidepanel-connection-type">(${e.type})</span>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+      <div class="memory-world-sidepanel-section">
+        <div class="memory-world-sidepanel-field-label">Source</div>
+        <div class="memory-world-sidepanel-field-value font-mono" style="font-size:10px; word-break:break-all">${node.source_path || '—'}</div>
+      </div>
+    </div>
+  `;
+}
+
+function hideMemoryWorldSidePanel() {
+  const panel = document.getElementById('memory-world-sidepanel');
+  if (!panel) return;
+  panel.innerHTML = `
+    <div class="memory-world-placeholder">
+      <div class="memory-world-placeholder-icon">🧠</div>
+      <div class="memory-world-placeholder-text">Click a node to inspect details</div>
+    </div>
+  `;
+}
+
+function updateMemoryWorldTooltip() {
+  const tooltip = document.getElementById('memory-world-tooltip');
+  if (!tooltip || !memoryWorldHovered) {
+    if (tooltip) tooltip.classList.remove('visible');
+    return;
+  }
+  
+  const node = memoryWorldHovered.node;
+  const tokens = memoryWorldHovered.tokens;
+  
+  tooltip.innerHTML = `
+    <div class="memory-world-tooltip-title" style="color:${tokens.color}">${node.label}</div>
+    <div class="memory-world-tooltip-type">${node.type} · ${sim.cluster.toUpperCase()}</div>
+    <div class="memory-world-tooltip-data">${node.summary || 'No summary'}</div>
+  `;
+  
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  tooltip.style.left = (event?.clientX || rect.left + 100) + 'px';
+  tooltip.style.top = (event?.clientY || rect.top + 100) + 'px';
+  tooltip.classList.add('visible');
+}
+
+function findMemoryWorldNode(wx, wy) {
+  // Search in reverse (top-most first)
+  for (let i = memoryWorldSimNodes.length - 1; i >= 0; i--) {
+    const sim = memoryWorldSimNodes[i];
+    const dx = wx - sim.x;
+    const dy = wy - sim.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = sim.tokens.baseSize * 1.5;
+    if (dist < radius) return sim;
+  }
+  return null;
+}
+
+function filterMemoryWorldLayers(value) {
+  memoryWorldLayerFilter = value;
+  initMemoryWorldSimulation();
+  buildMemoryWorldLegend();
+}
+
+function resetMemoryWorldView() {
+  centerMemoryWorldView();
+}
+
+// ═══ PAGE HOOK ═══
+// Hook into showPage to init Memory World when page is shown
+const _originalShowPage = showPage;
+window.showPage = function(id) {
+  _originalShowPage(id);
+  if (id === 'memory') {
+    // Small delay to ensure DOM is ready
+    setTimeout(initMemoryWorld, 50);
+  }
+};
 </script>
 </body>
 </html>
