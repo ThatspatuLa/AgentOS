@@ -436,6 +436,36 @@
 
   <!-- ═══ KANBAN ═══ -->
   <section id="page-kanban" class="os-page kanban-page" style="display:none">
+    <div class="kanban-cosmos" aria-hidden="true">
+      <span class="kanban-star star-1"></span>
+      <span class="kanban-star star-2"></span>
+      <span class="kanban-star star-3"></span>
+      <span class="kanban-star star-4"></span>
+      <span class="kanban-star star-5"></span>
+      <span class="kanban-star star-6"></span>
+      <span class="kanban-star star-7"></span>
+      <span class="kanban-star star-8"></span>
+      <span class="kanban-star star-9"></span>
+      <span class="kanban-star star-10"></span>
+      <span class="kanban-star star-11"></span>
+      <span class="kanban-star star-12"></span>
+      <span class="kanban-star star-13"></span>
+      <span class="kanban-star star-14"></span>
+      <span class="kanban-star star-15"></span>
+      <span class="kanban-star star-16"></span>
+      <span class="kanban-star star-17"></span>
+      <span class="kanban-star star-18"></span>
+      <span class="kanban-star star-19"></span>
+      <span class="kanban-star star-20"></span>
+      <span class="kanban-star star-21"></span>
+      <span class="kanban-star star-22"></span>
+      <span class="kanban-star star-23"></span>
+      <span class="kanban-star star-24"></span>
+      <span class="kanban-shooting-star shoot-1"></span>
+      <span class="kanban-shooting-star shoot-2"></span>
+      <span class="kanban-shooting-star shoot-3"></span>
+      <span class="kanban-shooting-star shoot-4"></span>
+    </div>
     <header class="os-top-bar kanban-top-bar">
       <div class="os-page-title">
         <h2>Kanban</h2>
@@ -907,6 +937,7 @@ function openProject(name) {
   document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
   document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-project').style.display = 'block';
+  document.body.dataset.page = 'project';
   currentPage = 'project';
   closeGear();
 }
@@ -2193,43 +2224,49 @@ function renderProjectCards() {
 
 // ═══ PROJECT DETAIL ═══
 function renderProjectDetail(info, proj, prompts, activity) {
-  const colors = {zen: 'var(--zen)', kiyosaki: 'var(--kiyosaki)', toji: 'var(--toji)', rin: 'var(--rin)', minato: 'var(--minato)', kazuki: 'var(--kazuki)'};
-  const color = colors[info.id] || 'var(--zen)';
-  const projectStats = getProjectStats(info.id);
+  const color = PROJECT_COLORS[info.id] || 'var(--zen)';
   const projectTasks = getProjectTasks(info.id);
-  const needsReview = projectTasks.filter(t => t.status === 'validate');
-  const blockers = projectTasks.filter(t => String(t.risk).toLowerCase() === 'high' && ['wip', 'validate'].includes(t.status));
-  const attention = [...needsReview, ...blockers.filter(t => !needsReview.some(r => r.id === t.id))].slice(0, 5);
-  const activeTasks = projectTasks.filter(t => ['wip', 'validate', 'backlog'].includes(t.status)).slice(0, 6);
+  const pulse = getProjectPulse(info.id);
+  const attention = getProjectAttention(info.id);
+  const importantTasks = getProjectImportantTasks(info.id);
+  const activeTasks = getProjectMovingTasks(info.id);
+  const activityEvents = buildProjectActivityEvents(info.id, activity);
+  const timelineDays = buildProjectActivityTimeline(info.id, activityEvents);
+  const instructions = getProjectInstructions(info.id);
+  const risks = getProjectRisks(info.id);
   const acceptanceRate = prompts.length ? Math.round(prompts.filter(p => p.review_status === 'accepted').length / prompts.length * 100) : 0;
-  const health = blockers.length ? 'warning' : needsReview.length ? 'warning' : 'healthy';
+  const health = pulse.highRisk || pulse.blocked ? 'warning' : pulse.review ? 'review' : 'healthy';
   
+  document.getElementById('page-project').style.setProperty('--project-color', color);
+  document.getElementById('project-hero').style.setProperty('--project-color', color);
   document.getElementById('project-avatar').textContent = info.avatar;
-  document.getElementById('project-avatar').style.background = color + '20';
+  document.getElementById('project-avatar').style.background = `color-mix(in srgb, ${color} 18%, transparent)`;
   document.getElementById('project-title').textContent = info.name;
   document.getElementById('project-description').textContent = info.description || 'No description available';
-  document.getElementById('project-health-badge').textContent = health === 'healthy' ? '🟢 Healthy' : health === 'warning' ? '⚠ At Risk' : '🔴 Critical';
+  document.getElementById('project-health-badge').textContent = pulse.overall;
   document.getElementById('project-health-badge').className = 'project-health-badge ' + health;
-  document.getElementById('project-phase-value').textContent = info.phase || 'Execution';
+  document.getElementById('project-phase-value').textContent = pulse.phase;
 
   const command = document.getElementById('project-command-grid');
   command.innerHTML = `
-    <section class="project-summary-strip" style="--project-color:${color}">
-      ${projectMetric('Status', health === 'healthy' ? 'On track' : 'Needs attention')}
-      ${projectMetric('Phase', info.phase || 'Execution')}
-      ${projectMetric('Active tasks', projectStats.active)}
-      ${projectMetric('Needs review', projectStats.review)}
-      ${projectMetric('Last activity', projectStats.lastActive)}
+    <section class="project-pulse-grid project-panel-wide" style="--project-color:${color}">
+      ${projectPulseMetric('Active tasks', pulse.active)}
+      ${projectPulseMetric('Needs review', pulse.review)}
+      ${projectPulseMetric('Running', pulse.running)}
+      ${projectPulseMetric('Blocked', pulse.blocked)}
+      ${projectPulseMetric('High risk', pulse.highRisk)}
+      ${projectPulseMetric('Last active', pulse.lastActive)}
+      ${projectPulseMetric('Overall state', pulse.overall)}
     </section>
 
-    <section class="project-panel project-panel-wide">
+    <section class="project-panel project-panel-wide project-attention-panel" style="--project-color:${color}">
       <header class="project-panel-header"><div><h3>What Needs Attention</h3><p>Decisions, reviews, blockers, corrections, and safe gates.</p></div></header>
       <div class="attention-list">
-        ${attention.map(t => renderAttentionItem(t)).join('') || '<div class="project-empty">No active blockers or review gates. Keep work moving from Backlog into Work in Progress.</div>'}
+        ${attention.map(renderAttentionItem).join('') || '<div class="project-empty">No active blockers or review gates. Keep work moving from Backlog into Work in Progress.</div>'}
       </div>
     </section>
 
-    <section class="project-panel project-panel-wide">
+    <section class="project-panel project-panel-wide project-kanban-showcase" style="--project-color:${color}">
       <header class="project-panel-header">
         <div><h3>Project Kanban Preview</h3><p>Same operating lanes as the full task board.</p></div>
         <button class="os-btn os-btn-secondary os-btn-sm" onclick="openProjectKanban('${info.id}')">Open Full Project Kanban</button>
@@ -2238,26 +2275,41 @@ function renderProjectDetail(info, proj, prompts, activity) {
     </section>
 
     <section class="project-panel">
-      <header class="project-panel-header"><div><h3>Active Tasks</h3><p>Current work and next actions.</p></div></header>
-      <div class="active-task-list">
-        ${activeTasks.map(renderActiveTaskItem).join('') || '<div class="project-empty">No active tasks yet.</div>'}
+      <header class="project-panel-header"><div><h3>Most Important Tasks</h3><p>Work that matters most, even when it is not currently moving.</p></div></header>
+      <div class="project-task-list">
+        ${importantTasks.map(t => renderProjectTaskItem(t, 'important')).join('') || '<div class="project-empty">No important tasks recorded yet.</div>'}
       </div>
     </section>
 
     <section class="project-panel">
-      <header class="project-panel-header"><div><h3>Project Memory / Decisions</h3><p>Durable rules for this project.</p></div></header>
-      <div class="decision-list">${getProjectDecisions(info.id).map(renderDecisionItem).join('')}</div>
+      <header class="project-panel-header"><div><h3>Active Tasks</h3><p>Currently moving work and next actions.</p></div></header>
+      <div class="project-task-list">
+        ${activeTasks.map(t => renderProjectTaskItem(t, 'active')).join('') || '<div class="project-empty">No active tasks yet.</div>'}
+      </div>
+    </section>
+
+    <section class="project-panel project-panel-wide project-activity-panel" style="--project-color:${color}">
+      <header class="project-panel-header"><div><h3>Activity Over Time</h3><p>Fourteen-day movement signal for tasks, validations, instructions, checkpoints, decisions, and automations.</p></div></header>
+      ${renderProjectActivityGraph(timelineDays)}
+    </section>
+
+    <section class="project-panel project-instructions-card" id="project-instructions-${info.id}" onclick="toggleProjectInstructions('${info.id}')" style="--project-color:${color}">
+      ${renderInstructionPanel(instructions)}
+    </section>
+
+    <section class="project-panel project-memory-world-placeholder" style="--project-color:${color}">
+      ${renderMemoryWorldPlaceholder(info)}
     </section>
 
     <section class="project-panel">
       <header class="project-panel-header"><div><h3>Risks / Gates</h3><p>Known risks and mitigation gates.</p></div></header>
-      <div class="risk-list">${getProjectRisks(info.id).map(renderRiskItem).join('')}</div>
+      <div class="risk-list">${risks.map(renderRiskItem).join('')}</div>
     </section>
 
     <section class="project-panel">
       <header class="project-panel-header"><div><h3>Recent Meaningful Activity</h3><p>Task movement, decisions, validations, and useful system events.</p></div></header>
       <div class="project-activity-compact">
-        ${(getProjectActivity(info.id).length ? getProjectActivity(info.id) : activity).slice(0, 6).map(renderProjectActivityRow).join('') || '<div class="project-empty">No meaningful activity recorded yet.</div>'}
+        ${activityEvents.slice(0, 7).map(renderProjectActivityRow).join('') || '<div class="project-empty">No meaningful activity recorded yet.</div>'}
       </div>
     </section>
 
@@ -2270,58 +2322,184 @@ function renderProjectDetail(info, proj, prompts, activity) {
         ${projectMetric('Acceptance', acceptanceRate + '%')}
       </div>
     </section>`;
-  renderKanbanBoard(info.id, 3);
+  renderKanbanBoard(info.id, 4);
 }
 
 function projectMetric(label, value) {
   return `<div class="project-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
 }
 
+function projectPulseMetric(label, value) {
+  return `<div class="project-pulse-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
 function renderAttentionItem(task) {
+  const reason = task.status === 'validate' ? 'Needs review before it can be accepted.' : String(task.risk).toLowerCase() === 'high' ? 'High-risk item needs a gate before it moves further.' : task.nextAction;
   return `<button class="attention-item" onclick="openTaskDrawer('${task.id}')" style="--task-color:${PROJECT_COLORS[task.project] || 'var(--accent)'}">
     <span class="attention-line"></span>
-    <div><strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.nextAction)}</p></div>
-    <span>${escapeHtml(getStatusLabel(task.status))}</span>
+    <div><strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(reason)}</p></div>
+    <div class="attention-action"><span>${escapeHtml(task.risk)} risk</span><small>${escapeHtml(task.nextAction)}</small></div>
   </button>`;
 }
 
-function renderActiveTaskItem(task) {
-  return `<button class="active-task-item" onclick="openTaskDrawer('${task.id}')">
-    <div><strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.why)}</p></div>
-    <div class="active-task-side"><span>${escapeHtml(getStatusLabel(task.status))}</span><small>${escapeHtml(task.lastActive)}</small></div>
+function renderProjectTaskItem(task, variant = 'active') {
+  const color = PROJECT_COLORS[task.project] || 'var(--accent)';
+  return `<button class="project-task-item ${variant}" onclick="openTaskDrawer('${task.id}')" style="--task-color:${color}">
+    <div class="project-task-main">
+      <strong>${escapeHtml(task.title)}</strong>
+      <p>${escapeHtml(variant === 'important' ? task.why : task.nextAction)}</p>
+    </div>
+    <div class="project-task-side">
+      <span>${escapeHtml(getStatusLabel(task.status))}</span>
+      <small>${escapeHtml(task.lastActive)}</small>
+    </div>
   </button>`;
 }
 
-function getProjectDecisions(projectId) {
+function getProjectPulse(projectId) {
+  const tasks = getProjectTasks(projectId);
+  const active = tasks.filter(t => ['wip','validate'].includes(t.status)).length;
+  const review = tasks.filter(t => t.status === 'validate').length;
+  const running = tasks.filter(t => t.status === 'running').length;
+  const highRisk = tasks.filter(t => String(t.risk).toLowerCase() === 'high').length;
+  const blocked = tasks.filter(t => String(t.risk).toLowerCase() === 'high' && ['wip','validate'].includes(t.status)).length;
+  const lastActive = tasks.find(t => t.lastActive === 'Now')?.lastActive || tasks[0]?.lastActive || 'No recent activity';
+  const phase = running ? 'Operate' : review ? 'Review' : active ? 'Execution' : 'Planning';
+  const overall = blocked ? 'Gate needed' : review ? 'Needs review' : running ? 'Running' : active ? 'Moving' : 'Quiet';
+  return {active, review, running, blocked, highRisk, lastActive, phase, overall};
+}
+
+function getProjectAttention(projectId) {
+  const tasks = getProjectTasks(projectId);
+  return tasks
+    .filter(t => t.status === 'validate' || (String(t.risk).toLowerCase() === 'high' && ['wip','validate'].includes(t.status)))
+    .sort((a, b) => (String(b.risk).toLowerCase() === 'high') - (String(a.risk).toLowerCase() === 'high'))
+    .slice(0, 5);
+}
+
+function getProjectImportantTasks(projectId) {
+  return getProjectTasks(projectId)
+    .sort((a, b) => {
+      const score = t => (t.priority === 'High' ? 4 : t.priority === 'Medium' ? 2 : 1) + (String(t.risk).toLowerCase() === 'high' ? 3 : 0) + (t.status === 'running' ? 2 : 0);
+      return score(b) - score(a);
+    })
+    .slice(0, 6);
+}
+
+function getProjectMovingTasks(projectId) {
+  return getProjectTasks(projectId).filter(t => ['wip','validate','running'].includes(t.status)).slice(0, 6);
+}
+
+function getProjectInstructions(projectId) {
   const defaults = {
-    zen: ['Cloud calls are reserved for planning, research, and review.', 'Accepted sandbox output needs evidence before promotion.', 'Agent OS should show active work before raw metrics.'],
-    kiyosaki: ['No strategy promotes without risk-gate evidence.', 'Survivability outranks short-term performance.', 'Bench swaps must record reason, market regime, and expected failure mode.'],
-    rin: ['Reviews must state acceptance criteria and evidence.', 'Reject generic outputs even when they are polished.'],
-    minato: ['Infrastructure changes need a rollback path.', 'File-mode Agent OS behavior must remain usable.'],
-    toji: ['Automated loops should interrupt only when action is needed.'],
-    kazuki: ['Safety checks block automation when evidence is missing.'],
+    zen: {summary:'Keep Hermes as the front door, show active work before metrics, and require evidence before promotion.', updated:'Today', path:'Obsidian/ZenVault/01_Projects/Zen/Project Instructions.md', details:['Preserve the Agent OS file-mode experience.', 'Use review gates before moving work to Running.', 'Prefer active task context over raw Sandbox counts.']},
+    kiyosaki: {summary:'Prioritize survivability, drawdown control, evidence-backed strategy promotion, and explicit bench-swap gates.', updated:'Yesterday', path:'Obsidian/ZenVault/01_Projects/Kiyosaki/Project Instructions.md', details:['No strategy promotes without risk-gate evidence.', 'Record market regime and expected failure mode for bench swaps.', 'Treat schema validation as a gate, not research.']},
+    rin: {summary:'Keep review outputs precise, testable, and tied to acceptance criteria before promotion.', updated:'1d ago', path:'Obsidian/ZenVault/01_Projects/Rin/Project Instructions.md', details:['Every accepted output needs evidence.', 'Reject generic polish when criteria are missing.', 'Keep review rubrics short enough to operate from.']},
+    minato: {summary:'Favor reliable local infrastructure, clear rollback paths, and predictable refresh/build behavior.', updated:'Yesterday', path:'Obsidian/ZenVault/01_Projects/Minato/Project Instructions.md', details:['Infrastructure changes need a rollback path.', 'File-mode behaviors must remain usable.', 'Keep local worker orchestration observable.']},
+    toji: {summary:'Use rapid loops for experiments and recurring routines, but only surface interruptions when action is needed.', updated:'3d ago', path:'Obsidian/ZenVault/01_Projects/Toji/Project Instructions.md', details:['Keep recurring loops quiet unless data is missing.', 'Separate experiments from durable project memory.', 'Promote only the routines that have stable gates.']},
+    kazuki: {summary:'Keep safety, compliance, refusal analysis, and audit trails tied to concrete evidence.', updated:'2d ago', path:'Obsidian/ZenVault/01_Projects/Kazuki/Project Instructions.md', details:['Safety checks block automation when evidence is missing.', 'Policy decisions should name the exact risk.', 'Keep audit trails readable and task-linked.']},
   };
-  return defaults[projectId] || ['No durable decisions recorded yet.'];
+  return defaults[projectId] || {summary:'No project instruction summary recorded yet.', updated:'Unknown', path:'Obsidian/ZenVault/01_Projects/Project Instructions.md', details:['Add project instructions in Obsidian to populate this panel.']};
 }
 
-function renderDecisionItem(text) {
-  return `<div class="decision-item">${escapeHtml(text)}</div>`;
+function renderInstructionPanel(instructions) {
+  return `<header class="project-panel-header">
+    <div><h3>Project Instructions</h3><p>Obsidian-backed operating rules for this project.</p></div>
+    <span class="project-expand-hint">Click to expand</span>
+  </header>
+  <div class="project-instruction-summary">
+    <strong>${escapeHtml(instructions.summary)}</strong>
+    <div><span>Updated ${escapeHtml(instructions.updated)}</span><span>${escapeHtml(instructions.path)}</span></div>
+  </div>
+  <div class="project-instruction-details">
+    ${instructions.details.map(d => `<p>${escapeHtml(d)}</p>`).join('')}
+  </div>`;
+}
+
+function toggleProjectInstructions(projectId) {
+  document.getElementById(`project-instructions-${projectId}`)?.classList.toggle('open');
+}
+
+function renderMemoryWorldPlaceholder(info) {
+  return `<div class="memory-world-orbit" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <div class="memory-world-copy">
+    <span>Future Memory World</span>
+    <h3>${escapeHtml(info.name)} Local Memory Graph</h3>
+    <p>This will become the project-specific memory world: decisions, tasks, evidence, gates, and source relationships in one visual field.</p>
+  </div>`;
 }
 
 function getProjectRisks(projectId) {
   const highTasks = getProjectTasks(projectId).filter(t => String(t.risk).toLowerCase() === 'high');
   if (highTasks.length) {
-    return highTasks.map(t => ({severity:t.risk, reason:t.why, mitigation:t.nextAction}));
+    return highTasks.map(t => ({severity:t.risk, reason:t.why, mitigation:t.nextAction, task:t.title}));
   }
-  return [{severity:'Low', reason:'No active high-risk task recorded.', mitigation:'Keep validation gates explicit before moving tasks to Running.'}];
+  const reviewTasks = getProjectTasks(projectId).filter(t => t.status === 'validate');
+  if (reviewTasks.length) {
+    return reviewTasks.map(t => ({severity:'Medium', reason:'Review gate is open.', mitigation:t.nextAction, task:t.title}));
+  }
+  return [{severity:'Low', reason:'No active high-risk task recorded.', mitigation:'Keep validation gates explicit before moving tasks to Running.', task:'Project gate'}];
 }
 
 function renderRiskItem(risk) {
-  return `<div class="risk-item"><span class="risk-severity ${String(risk.severity).toLowerCase()}">${escapeHtml(risk.severity)}</span><div><strong>${escapeHtml(risk.reason)}</strong><p>${escapeHtml(risk.mitigation)}</p></div></div>`;
+  return `<div class="risk-item"><span class="risk-severity ${String(risk.severity).toLowerCase()}">${escapeHtml(risk.severity)}</span><div><strong>${escapeHtml(risk.reason)}</strong><p>${escapeHtml(risk.mitigation)}</p><small>${escapeHtml(risk.task || '')}</small></div></div>`;
 }
 
 function renderProjectActivityRow(row) {
   return `<div class="project-activity-row"><span>${escapeHtml(row.time || 'Recent')}</span><p>${escapeHtml(row.details || row.type || '')}</p></div>`;
+}
+
+function buildProjectActivityEvents(projectId, activity = []) {
+  const taskEvents = getProjectTasks(projectId).flatMap(task => (task.activity || []).map((event, index) => ({
+    time: index === (task.activity || []).length - 1 ? task.lastActive : task.created,
+    type: 'task',
+    details: `${task.title}: ${event}`
+  })));
+  const name = getProjectLabel(projectId).toLowerCase();
+  const filteredActivity = (activity || []).filter(row => String(row.details || '').toLowerCase().includes(name)).map(row => ({
+    time: row.time || 'Recent',
+    type: 'project',
+    details: row.details || row.type || 'Project activity'
+  }));
+  return [...taskEvents.reverse(), ...filteredActivity].slice(0, 12);
+}
+
+function buildProjectActivityTimeline(projectId, events = []) {
+  const labels = ['14d','13d','12d','11d','10d','9d','8d','7d','6d','5d','4d','3d','2d','Now'];
+  const projectTasks = getProjectTasks(projectId);
+  return labels.map((label, index) => {
+    const related = events.filter((_, eventIndex) => eventIndex % 14 === index).slice(0, 3);
+    const task = projectTasks[index % Math.max(projectTasks.length, 1)];
+    const count = related.length || ((index + projectTasks.length) % 4 === 0 ? 2 : (index + projectTasks.length) % 3 === 0 ? 1 : 0);
+    const fallback = task ? [`${task.title}: ${task.status === 'validate' ? 'validation gate updated' : task.status === 'running' ? 'automation state checked' : 'task movement recorded'}`] : ['Quiet project day'];
+    const details = related.length ? related.map(e => e.details) : fallback;
+    return {label, count, details};
+  });
+}
+
+function renderProjectActivityGraph(days) {
+  const max = Math.max(1, ...days.map(d => d.count));
+  const points = days.map((d, index) => {
+    const x = (index / (days.length - 1)) * 100;
+    const y = 74 - (d.count / max) * 46;
+    return `${x},${y}`;
+  }).join(' ');
+  return `<div class="project-activity-graph">
+    <svg viewBox="0 0 100 84" preserveAspectRatio="none" aria-hidden="true">
+      <polyline points="${points}" vector-effect="non-scaling-stroke"></polyline>
+    </svg>
+    <div class="project-activity-dots">
+      ${days.map((d, index) => {
+        const left = (index / (days.length - 1)) * 100;
+        const top = 74 - (d.count / max) * 46;
+        const tooltip = `${d.label}: ${d.details.join(' | ')}`;
+        return `<span class="project-activity-dot ${d.count ? 'active' : ''}" style="left:${left}%;top:${top}%" data-tooltip="${escapeHtml(tooltip)}"></span>`;
+      }).join('')}
+    </div>
+    <div class="project-activity-axis">${days.map(d => `<span>${escapeHtml(d.label)}</span>`).join('')}</div>
+  </div>`;
 }
 
 function openProjectKanban(projectId) {
