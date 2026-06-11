@@ -1,16 +1,24 @@
 {
-  "generated_at": "2026-06-10T13:25:18",
-  "exporter_version": "0.1.0",
+  "schema_version": "1.0",
+  "generated_at": "2026-06-11T18:16:48",
+  "exporter_version": "1.0.0",
+  "exporter_git_sha": "03f9a3115489",
   "stats": {
     "total_nodes": 26,
-    "total_edges": 42,
+    "total_edges": 40,
     "node_types": {
-      "model": 4,
-      "agent": 6,
-      "rule": 1,
-      "resource": 7,
+      "model_cloud": 4,
+      "model_local": 1,
+      "zen_core": 1,
+      "agent": 5,
+      "routing_rule": 1,
+      "token_budget": 2,
+      "worker_launcher": 1,
+      "health_check": 1,
       "project": 7,
-      "tool": 1
+      "sandbox_engine": 1,
+      "worker_activity": 1,
+      "script_layer": 1
     },
     "edge_types": {
       "available_to": 2,
@@ -23,260 +31,958 @@
       "launches": 1,
       "contributes_to": 1,
       "oversees": 7,
-      "owns": 7,
+      "owns": 5,
       "manages": 1,
       "executes": 1,
       "reports_to": 1,
       "generates": 1,
       "invokes": 1
+    },
+    "clusters": {
+      "models": 5,
+      "zen_core": 1,
+      "agents": 5,
+      "rules": 1,
+      "resources": 6,
+      "risk": 1,
+      "projects": 7
+    },
+    "layers": {
+      "2": 23,
+      "0": 1,
+      "3": 2
+    },
+    "avg_confidence": 0.9,
+    "orphan_nodes": 0,
+    "validation_warnings": 0,
+    "validation_errors": 0,
+    "extractor_stats": {
+      "models_from_config": {
+        "nodes": 4,
+        "edges": 2
+      },
+      "agent_roster": {
+        "nodes": 6,
+        "edges": 15
+      },
+      "system_facts": {
+        "nodes": 3,
+        "edges": 4
+      },
+      "session_graph": {
+        "nodes": 0,
+        "edges": 0
+      },
+      "token_activity": {
+        "nodes": 2,
+        "edges": 1
+      },
+      "projects": {
+        "nodes": 7,
+        "edges": 12
+      },
+      "sandbox_summary": {
+        "nodes": 1,
+        "edges": 1
+      },
+      "worker_activity": {
+        "nodes": 1,
+        "edges": 2
+      },
+      "agent_os_data": {
+        "nodes": 1,
+        "edges": 1
+      },
+      "worker_config": {
+        "nodes": 1,
+        "edges": 2
+      }
     }
   },
   "nodes": [
     {
       "id": "model-default-cloud",
-      "type": "model",
-      "label": "owl-alpha",
-      "full_name": "openrouter/owl-alpha",
-      "provider": "openrouter",
-      "role": "cloud",
+      "type": "model_cloud",
+      "label": "nemotron-3-ultra:free",
+      "cluster": "models",
+      "layer": 2,
       "active": true,
+      "risk": "none",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/config.yaml",
+          "type": "file",
+          "excerpt": "default: nvidia/nemotron-3-ultra:free, provider: nous",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Default cloud model: nvidia/nemotron-3-ultra:free",
+      "source_path": "/home/spatula/.hermes/config.yaml",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "usage": "planning, research, review",
-        "is_default": true
+        "full_name": "nvidia/nemotron-3-ultra:free",
+        "provider": "nous",
+        "endpoint": "api.nous.com",
+        "cost_per_million_in": 0.0,
+        "cost_per_million_out": 0.0,
+        "context_limit": 128000,
+        "is_default": true,
+        "is_free_tier": false,
+        "calls_24h": 0,
+        "tokens_24h": 0,
+        "cache_hit_rate": 0.0
+      },
+      "visual": {
+        "sigil": "☁️",
+        "color_override": "#bc8cff",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "model-neuphonic-neutts-air-q4-gguf",
-      "type": "model",
+      "type": "model_cloud",
       "label": "neutts-air-q4-gguf",
-      "full_name": "neuphonic/neutts-air-q4-gguf",
-      "provider": "neuphonic",
-      "role": "cloud",
+      "cluster": "models",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/config.yaml",
+          "type": "file",
+          "excerpt": "model: neuphonic/neutts-air-q4-gguf",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Configured cloud model: neuphonic/neutts-air-q4-gguf",
+      "source_path": "/home/spatula/.hermes/config.yaml",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "usage": "cloud inference"
+        "full_name": "neuphonic/neutts-air-q4-gguf",
+        "provider": "neuphonic",
+        "endpoint": "api.neuphonic.com",
+        "cost_per_million_in": 0.0,
+        "cost_per_million_out": 0.0,
+        "context_limit": 128000,
+        "is_default": false,
+        "is_free_tier": false,
+        "calls_24h": 0,
+        "tokens_24h": 0,
+        "cache_hit_rate": 0.0
+      },
+      "visual": {
+        "sigil": "☁️",
+        "color_override": "#bc8cff",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "model-openrouter-owl-alpha",
-      "type": "model",
+      "type": "model_cloud",
       "label": "owl-alpha",
-      "full_name": "openrouter/owl-alpha",
-      "provider": "openrouter",
-      "role": "cloud",
+      "cluster": "models",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/config.yaml",
+          "type": "file",
+          "excerpt": "model: openrouter/owl-alpha",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Configured cloud model: openrouter/owl-alpha",
+      "source_path": "/home/spatula/.hermes/config.yaml",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "usage": "cloud inference"
+        "full_name": "openrouter/owl-alpha",
+        "provider": "openrouter",
+        "endpoint": "api.openrouter.com",
+        "cost_per_million_in": 0.0,
+        "cost_per_million_out": 0.0,
+        "context_limit": 128000,
+        "is_default": false,
+        "is_free_tier": false,
+        "calls_24h": 0,
+        "tokens_24h": 0,
+        "cache_hit_rate": 0.0
+      },
+      "visual": {
+        "sigil": "☁️",
+        "color_override": "#bc8cff",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "model-worker-local",
-      "type": "model",
+      "type": "model_local",
       "label": "gpt-oss:20b",
-      "full_name": "ollama/gpt-oss:20b",
-      "provider": "ollama",
-      "role": "local",
+      "cluster": "models",
+      "layer": 2,
       "active": true,
+      "risk": "none",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/config.yaml",
+          "type": "file",
+          "excerpt": "ollama/gpt-oss:20b for local worker",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Local execution model via Ollama",
+      "source_path": "/home/spatula/.hermes/config.yaml",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "full_name": "ollama/gpt-oss:20b",
+        "provider": "ollama",
         "endpoint": "localhost:11434",
-        "usage": "file edits, artifact creation",
-        "via": "zen-worker → Aider"
+        "cost_per_million_in": 0.0,
+        "cost_per_million_out": 0.0,
+        "context_limit": 128000,
+        "is_default": false,
+        "is_free_tier": true,
+        "calls_24h": 0,
+        "tokens_24h": 0,
+        "cache_hit_rate": 0.0
+      },
+      "visual": {
+        "sigil": "💻",
+        "color_override": "#bc8cff",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
-      "id": "zen-agent",
-      "type": "agent",
-      "label": "Zen",
-      "domain": "Governance, safety, system law",
-      "authority": "root",
-      "risk": "high",
+      "id": "zen-core",
+      "type": "zen_core",
+      "label": "Zen Core",
+      "cluster": "zen_core",
+      "layer": 0,
       "active": true,
+      "risk": "high",
+      "confidence": 0.99,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Zen",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Governance/COO agent — supreme authority, system law, safety",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
         "channel": "zen-chat",
-        "role": "COO — second in command",
+        "domain": "Governance, safety, system law",
+        "authority": "root",
         "instructions_path": "00_System/Project Instructions/Zen Instructions.md",
-        "memory_path": "00_System/Project Memories/Zen Memory.md"
+        "memory_path": "00_System/Project Memories/Zen Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "🧠",
+        "color_override": "#4da3ff",
+        "size_modifier": 1.5,
+        "glow": true,
+        "pulse": "heartbeat"
       }
     },
     {
       "id": "agent-rin",
       "type": "agent",
       "label": "Rin",
-      "domain": "Tactical sparring, daily ops, project coordination",
-      "authority": "managed",
-      "risk": "medium",
+      "cluster": "agents",
+      "layer": 2,
       "active": true,
+      "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Rin",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Agent: Rin — Tactical sparring, daily ops, project coordination",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "channel": "rin-chat"
+        "channel": "rin-chat",
+        "domain": "Tactical sparring, daily ops, project coordination",
+        "authority": "managed",
+        "instructions_path": "00_System/Project Instructions/Rin Instructions.md",
+        "memory_path": "00_System/Project Memories/Rin Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "👤",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "agent-kiyosaki",
       "type": "agent",
       "label": "Kiyosaki",
-      "domain": "Trading, system strategy, automation",
-      "authority": "managed",
-      "risk": "high",
+      "cluster": "agents",
+      "layer": 2,
       "active": true,
+      "risk": "high",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Kiyosaki",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Agent: Kiyosaki — Trading, system strategy, automation",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "channel": "kiyosaki-chat"
+        "channel": "kiyosaki-chat",
+        "domain": "Trading, system strategy, automation",
+        "authority": "managed",
+        "instructions_path": "00_System/Project Instructions/Kiyosaki Instructions.md",
+        "memory_path": "00_System/Project Memories/Kiyosaki Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "👤",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "agent-toji",
       "type": "agent",
       "label": "Toji",
-      "domain": "Body discipline, training, recovery, nutrition",
-      "authority": "managed",
-      "risk": "medium",
+      "cluster": "agents",
+      "layer": 2,
       "active": true,
+      "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Toji",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Agent: Toji — Body discipline, training, recovery, nutrition",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "channel": "toji-chat"
+        "channel": "toji-chat",
+        "domain": "Body discipline, training, recovery, nutrition",
+        "authority": "managed",
+        "instructions_path": "00_System/Project Instructions/Toji Instructions.md",
+        "memory_path": "00_System/Project Memories/Toji Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "👤",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "agent-minato",
       "type": "agent",
       "label": "Minato",
-      "domain": "Websites, monetisation, client value, business execution",
-      "authority": "managed",
-      "risk": "medium",
+      "cluster": "agents",
+      "layer": 2,
       "active": true,
+      "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Minato",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Agent: Minato — Websites, monetisation, client value, business execution",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "channel": "minato-chat"
+        "channel": "minato-chat",
+        "domain": "Websites, monetisation, client value, business execution",
+        "authority": "managed",
+        "instructions_path": "00_System/Project Instructions/Minato Instructions.md",
+        "memory_path": "00_System/Project Memories/Minato Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "👤",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "agent-kazuki",
       "type": "agent",
       "label": "Kazuki",
-      "domain": "Guitar, creative skill, deliberate practice",
-      "authority": "managed",
-      "risk": "medium",
+      "cluster": "agents",
+      "layer": 2,
       "active": true,
+      "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+          "type": "file",
+          "excerpt": "SOUL.md Agent Roster: Kazuki",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Agent: Kazuki — Guitar, creative skill, deliberate practice",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "channel": "kazuki-chat"
+        "channel": "kazuki-chat",
+        "domain": "Guitar, creative skill, deliberate practice",
+        "authority": "managed",
+        "instructions_path": "00_System/Project Instructions/Kazuki Instructions.md",
+        "memory_path": "00_System/Project Memories/Kazuki Memory.md",
+        "last_active": "2026-06-11T18:16:48",
+        "message_count_24h": 0
+      },
+      "visual": {
+        "sigil": "👤",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "rule-local-vs-cloud",
-      "type": "rule",
+      "type": "routing_rule",
       "label": "Local vs Cloud Routing",
-      "authority": "system",
+      "cluster": "rules",
+      "layer": 2,
+      "active": true,
+      "risk": "medium",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+          "type": "file",
+          "excerpt": "Zen Memory: Local vs Cloud Routing rule",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Routes planning/review to cloud (Owl Alpha + Codex); execution to local (Aider + Ollama gpt-oss:20b)",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "cloud": "Owl Alpha + Codex — planning, research, review",
-        "local": "Aider + Ollama gpt-oss:20b — file edits, artifacts",
-        "boundary": "Local never touches cloud keys. Cloud never processes raw file generation."
+        "cloud_models": [
+          "openrouter/owl-alpha",
+          "openai-codex"
+        ],
+        "local_models": [
+          "ollama/gpt-oss:20b"
+        ],
+        "boundary_description": "Local never touches cloud keys. Cloud never processes raw file generation.",
+        "decision_logic": "Cloud for planning/research/review; Local for file edits/artifact creation",
+        "enforcement_level": "strict"
+      },
+      "visual": {
+        "sigil": "⚖️",
+        "color_override": "#f0883e",
+        "size_modifier": 1.1,
+        "glow": true,
+        "pulse": "slow"
       }
     },
     {
       "id": "resource-token-budget",
-      "type": "resource",
+      "type": "token_budget",
       "label": "Cloud Token Budget",
+      "cluster": "resources",
+      "layer": 2,
+      "active": true,
       "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+          "type": "file",
+          "excerpt": "Zen Memory: Token budget",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Daily cloud token spend tracking and cost avoidance",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
         "description": "Daily cloud token spend tracking",
         "warning": "Cloud tokens are finite — local worker should handle execution"
+      },
+      "visual": {
+        "sigil": "💰",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "resource-worker-config",
-      "type": "resource",
+      "type": "worker_launcher",
       "label": "zen-worker",
+      "cluster": "resources",
+      "layer": 2,
+      "active": true,
       "risk": "low",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+          "type": "file",
+          "excerpt": "Zen Memory: zen-worker config",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Guarded local-only worker launcher at ~/.local/bin/zen-worker",
+      "source_path": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
         "path": "~/.local/bin/zen-worker",
         "description": "Guarded local-only worker launcher",
         "safety": "Refuses cloud model args. Ollama only."
+      },
+      "visual": {
+        "sigil": "🚀",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "resource-token-activity",
-      "type": "resource",
+      "type": "health_check",
       "label": "Inference Activity",
+      "cluster": "risk",
+      "layer": 2,
+      "active": true,
       "risk": "low",
+      "confidence": 0.8,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/logs/agent.log",
+          "type": "log",
+          "excerpt": "Model usage: {'nemotron': 131}",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Recent model calls from agent log: 131 total",
+      "source_path": "/home/spatula/.hermes/logs/agent.log",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "recent_calls_by_model": {
-          "owl-alpha": 107
+        "component": "inference_activity",
+        "status": "ok",
+        "details": {
+          "recent_calls_by_model": {
+            "nemotron": 131
+          },
+          "source": "last 500 log lines"
         },
-        "source": "last 500 log lines"
+        "last_check": "2026-06-11T18:16:48",
+        "stale": false
+      },
+      "visual": {
+        "sigil": "💚",
+        "color_override": "#3fc960",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
+      }
+    },
+    {
+      "id": "model-nemotron",
+      "type": "model_cloud",
+      "label": "nemotron",
+      "cluster": "models",
+      "layer": 2,
+      "active": false,
+      "risk": "none",
+      "confidence": 0.7,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/logs/agent.log",
+          "type": "log",
+          "excerpt": "Detected in agent log: 131 calls",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Detected model from log activity: nemotron",
+      "source_path": "/home/spatula/.hermes/logs/agent.log",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
+      "data": {
+        "full_name": "nemotron",
+        "provider": "unknown",
+        "endpoint": "unknown",
+        "cost_per_million_in": 0.0,
+        "cost_per_million_out": 0.0,
+        "context_limit": 128000,
+        "is_default": false,
+        "is_free_tier": false,
+        "calls_24h": 131,
+        "tokens_24h": 0,
+        "cache_hit_rate": 0.0
+      },
+      "visual": {
+        "sigil": "☁️",
+        "color_override": "#bc8cff",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-kazuki",
       "type": "project",
       "label": "Kazuki",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Kazuki",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Kazuki — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Kazuki",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Kazuki",
         "file_count": 0,
-        "path": "01_Projects/Kazuki"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-kiyosaki",
       "type": "project",
       "label": "Kiyosaki",
+      "cluster": "projects",
+      "layer": 2,
       "active": true,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Kiyosaki",
+          "type": "file",
+          "excerpt": "17 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Kiyosaki — 17 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Kiyosaki",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Kiyosaki",
         "file_count": 17,
-        "path": "01_Projects/Kiyosaki"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-minato",
       "type": "project",
       "label": "Minato",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Minato",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Minato — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Minato",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Minato",
         "file_count": 0,
-        "path": "01_Projects/Minato"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-rin",
       "type": "project",
       "label": "Rin",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Rin",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Rin — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Rin",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Rin",
         "file_count": 0,
-        "path": "01_Projects/Rin"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-swarm",
       "type": "project",
       "label": "Swarm",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Swarm",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Swarm — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Swarm",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Swarm",
         "file_count": 0,
-        "path": "01_Projects/Swarm"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-toji",
       "type": "project",
       "label": "Toji",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Toji",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Toji — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Toji",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Toji",
         "file_count": 0,
-        "path": "01_Projects/Toji"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "project-zen",
       "type": "project",
       "label": "Zen",
+      "cluster": "projects",
+      "layer": 2,
       "active": false,
+      "risk": "none",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/01_Projects/Zen",
+          "type": "file",
+          "excerpt": "0 markdown files",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Project: Zen — 0 files",
+      "source_path": "/home/spatula/Obsidian/ZenVault/01_Projects/Zen",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
+        "path": "01_Projects/Zen",
         "file_count": 0,
-        "path": "01_Projects/Zen"
+        "active_work_units": 0,
+        "acceptance_rate": 0.0,
+        "last_activity": "2026-06-11T18:16:48"
+      },
+      "visual": {
+        "sigil": "📁",
+        "color_override": "#f778ba",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
-      "id": "resource-sandbox",
-      "type": "resource",
-      "label": "Sandbox",
+      "id": "resource-sandbox-engine",
+      "type": "sandbox_engine",
+      "label": "Sandbox Engine",
+      "cluster": "resources",
+      "layer": 2,
+      "active": true,
       "risk": "low",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs",
+          "type": "file",
+          "excerpt": "126 runs, review: {'pending': 0, 'accepted': 24, 'rejected': 102}",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Sandbox orchestration: 126 runs, 24 accepted, 102 rejected",
+      "source_path": "/home/spatula/Obsidian/ZenVault/Sandbox/Runs",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
         "total_runs": 126,
         "status_breakdown": {
@@ -287,307 +993,882 @@
           "accepted": 24,
           "rejected": 102
         }
+      },
+      "visual": {
+        "sigil": "🧪",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "resource-local-worker",
-      "type": "resource",
+      "type": "worker_activity",
       "label": "Local Worker Activity",
+      "cluster": "resources",
+      "layer": 3,
+      "active": true,
       "risk": "low",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/.hermes/sandbox/local-worker-usage.json",
+          "type": "file",
+          "excerpt": "42 local worker runs",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Local worker: 42 Aider runs via Ollama gpt-oss:20b",
+      "source_path": "/home/spatula/.hermes/sandbox/local-worker-usage.json",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "total_runs": 40,
+        "total_runs": 42,
         "model": "gpt-oss:20b",
         "tool": "Aider"
+      },
+      "visual": {
+        "sigil": "💻",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "resource-tokens-today",
-      "type": "resource",
+      "type": "token_budget",
       "label": "Today's Token Usage",
+      "cluster": "resources",
+      "layer": 2,
+      "active": true,
       "risk": "medium",
+      "confidence": 0.9,
+      "evidence": [
+        {
+          "source": "/home/spatula/Projects/ZenNew/agent-os-data.json",
+          "type": "file",
+          "excerpt": "Agent OS Data: today's token usage",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Today: 518 calls, $2.1232, 105,443,241 in / 286,527 out",
+      "source_path": "/home/spatula/Projects/ZenNew/agent-os-data.json",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
-        "calls": 243,
-        "cost": 0.4626,
-        "in_tokens": 22959635,
-        "out_tokens": 69055
-      }
-    },
-    {
-      "id": "resource-sandbox-summary",
-      "type": "resource",
-      "label": "Sandbox Summary",
-      "risk": "low",
-      "data": {
-        "total": 158,
-        "accepted": 18,
-        "rejected": 115,
-        "pending": 25
+        "calls": 518,
+        "cost": 2.1232,
+        "in_tokens": 105443241,
+        "out_tokens": 286527
+      },
+      "visual": {
+        "sigil": "💰",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     },
     {
       "id": "resource-zen-worker",
-      "type": "tool",
+      "type": "script_layer",
       "label": "zen-worker",
+      "cluster": "resources",
+      "layer": 3,
+      "active": true,
       "risk": "low",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "/home/spatula/.local/bin/zen-worker",
+          "type": "file",
+          "excerpt": "zen-worker script content",
+          "timestamp": "2026-06-11T18:16:48"
+        }
+      ],
+      "summary": "Guarded local-only worker: Aider + Ollama gpt-oss:20b at ~/.local/bin/zen-worker",
+      "source_path": "/home/spatula/.local/bin/zen-worker",
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "expires_at": null,
       "data": {
         "path": "/home/spatula/.local/bin/zen-worker",
-        "description": "Guarded local-only worker: Aider + Ollama gpt-oss:20b",
+        "description": "Guarded local-only worker launcher",
         "safety": "Refuses non-Ollama models and cloud-looking args"
+      },
+      "visual": {
+        "sigil": "🐍",
+        "color_override": "#58d4e8",
+        "size_modifier": 1.0,
+        "glow": false,
+        "pulse": "none"
       }
     }
   ],
   "edges": [
     {
+      "id": "model-neuphonic-neutts-air-q4-gguf-available_to-model-default-cloud",
+      "type": "available_to",
       "source": "model-neuphonic-neutts-air-q4-gguf",
-      "target": "zen-agent",
-      "type": "available_to",
-      "label": "configured"
+      "target": "model-default-cloud",
+      "label": "configured",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#8b9bb3",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "model-openrouter-owl-alpha-available_to-model-default-cloud",
+      "type": "available_to",
       "source": "model-openrouter-owl-alpha",
-      "target": "zen-agent",
-      "type": "available_to",
-      "label": "configured"
+      "target": "model-default-cloud",
+      "label": "configured",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#8b9bb3",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-governs-agent-rin",
+      "type": "governs",
+      "source": "zen-core",
       "target": "agent-rin",
-      "type": "governs",
-      "label": "authority"
+      "label": "authority",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-rin-routes_to-model-default-cloud",
+      "type": "routes_to",
       "source": "agent-rin",
       "target": "model-default-cloud",
-      "type": "routes_to",
-      "label": "planning & review"
+      "label": "planning & review",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#bc8cff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-rin-delegates_to-model-worker-local",
+      "type": "delegates_to",
       "source": "agent-rin",
       "target": "model-worker-local",
-      "type": "delegates_to",
-      "label": "file edits"
+      "label": "file edits",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-governs-agent-kiyosaki",
+      "type": "governs",
+      "source": "zen-core",
       "target": "agent-kiyosaki",
-      "type": "governs",
-      "label": "authority"
+      "label": "authority",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kiyosaki-routes_to-model-default-cloud",
+      "type": "routes_to",
       "source": "agent-kiyosaki",
       "target": "model-default-cloud",
-      "type": "routes_to",
-      "label": "planning & review"
+      "label": "planning & review",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#bc8cff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kiyosaki-delegates_to-model-worker-local",
+      "type": "delegates_to",
       "source": "agent-kiyosaki",
       "target": "model-worker-local",
-      "type": "delegates_to",
-      "label": "file edits"
+      "label": "file edits",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-governs-agent-toji",
+      "type": "governs",
+      "source": "zen-core",
       "target": "agent-toji",
-      "type": "governs",
-      "label": "authority"
+      "label": "authority",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-toji-routes_to-model-default-cloud",
+      "type": "routes_to",
       "source": "agent-toji",
       "target": "model-default-cloud",
-      "type": "routes_to",
-      "label": "planning & review"
+      "label": "planning & review",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#bc8cff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-toji-delegates_to-model-worker-local",
+      "type": "delegates_to",
       "source": "agent-toji",
       "target": "model-worker-local",
-      "type": "delegates_to",
-      "label": "file edits"
+      "label": "file edits",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-governs-agent-minato",
+      "type": "governs",
+      "source": "zen-core",
       "target": "agent-minato",
-      "type": "governs",
-      "label": "authority"
+      "label": "authority",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-minato-routes_to-model-default-cloud",
+      "type": "routes_to",
       "source": "agent-minato",
       "target": "model-default-cloud",
-      "type": "routes_to",
-      "label": "planning & review"
+      "label": "planning & review",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#bc8cff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-minato-delegates_to-model-worker-local",
+      "type": "delegates_to",
       "source": "agent-minato",
       "target": "model-worker-local",
-      "type": "delegates_to",
-      "label": "file edits"
+      "label": "file edits",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-governs-agent-kazuki",
+      "type": "governs",
+      "source": "zen-core",
       "target": "agent-kazuki",
-      "type": "governs",
-      "label": "authority"
+      "label": "authority",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kazuki-routes_to-model-default-cloud",
+      "type": "routes_to",
       "source": "agent-kazuki",
       "target": "model-default-cloud",
-      "type": "routes_to",
-      "label": "planning & review"
+      "label": "planning & review",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#bc8cff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kazuki-delegates_to-model-worker-local",
+      "type": "delegates_to",
       "source": "agent-kazuki",
       "target": "model-worker-local",
-      "type": "delegates_to",
-      "label": "file edits"
+      "label": "file edits",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "rule-local-vs-cloud",
+      "id": "zen-core-enforces-rule-local-vs-cloud",
       "type": "enforces",
-      "label": "policy"
+      "source": "zen-core",
+      "target": "rule-local-vs-cloud",
+      "label": "policy",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#f0883e",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "model-default-cloud-consumes-resource-token-budget",
+      "type": "consumes",
       "source": "model-default-cloud",
       "target": "resource-token-budget",
-      "type": "consumes",
-      "label": "spend"
+      "label": "spend",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#e8b84d",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "resource-worker-config",
+      "id": "zen-core-configures-resource-worker-config",
       "type": "configures",
-      "label": "owns"
+      "source": "zen-core",
+      "target": "resource-worker-config",
+      "label": "owns",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#58d4e8",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "resource-worker-config-launches-model-worker-local",
+      "type": "launches",
       "source": "resource-worker-config",
       "target": "model-worker-local",
-      "type": "launches",
-      "label": "executes via Aider"
+      "label": "executes via Aider",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "model-owl-alpha",
-      "target": "resource-token-activity",
+      "id": "model-nemotron-contributes_to-resource-token-activity",
       "type": "contributes_to",
-      "label": "activity"
+      "source": "model-nemotron",
+      "target": "resource-token-activity",
+      "label": "activity",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#e8b84d",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-kazuki",
+      "id": "zen-core-oversees-project-kazuki",
       "type": "oversees",
-      "label": "governance"
+      "source": "zen-core",
+      "target": "project-kazuki",
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kazuki-owns-project-kazuki",
+      "type": "owns",
       "source": "agent-kazuki",
       "target": "project-kazuki",
-      "type": "owns",
-      "label": "domain"
+      "label": "domain",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-kiyosaki",
+      "id": "zen-core-oversees-project-kiyosaki",
       "type": "oversees",
-      "label": "governance"
+      "source": "zen-core",
+      "target": "project-kiyosaki",
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-kiyosaki-owns-project-kiyosaki",
+      "type": "owns",
       "source": "agent-kiyosaki",
       "target": "project-kiyosaki",
-      "type": "owns",
-      "label": "domain"
+      "label": "domain",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-minato",
+      "id": "zen-core-oversees-project-minato",
       "type": "oversees",
-      "label": "governance"
+      "source": "zen-core",
+      "target": "project-minato",
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-minato-owns-project-minato",
+      "type": "owns",
       "source": "agent-minato",
       "target": "project-minato",
-      "type": "owns",
-      "label": "domain"
+      "label": "domain",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-rin",
+      "id": "zen-core-oversees-project-rin",
       "type": "oversees",
-      "label": "governance"
+      "source": "zen-core",
+      "target": "project-rin",
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-rin-owns-project-rin",
+      "type": "owns",
       "source": "agent-rin",
       "target": "project-rin",
-      "type": "owns",
-      "label": "domain"
+      "label": "domain",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-swarm",
+      "id": "zen-core-oversees-project-swarm",
       "type": "oversees",
-      "label": "governance"
-    },
-    {
-      "source": "agent-swarm",
+      "source": "zen-core",
       "target": "project-swarm",
-      "type": "owns",
-      "label": "domain"
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
+      "id": "zen-core-oversees-project-toji",
+      "type": "oversees",
+      "source": "zen-core",
       "target": "project-toji",
-      "type": "oversees",
-      "label": "governance"
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "agent-toji-owns-project-toji",
+      "type": "owns",
       "source": "agent-toji",
       "target": "project-toji",
-      "type": "owns",
-      "label": "domain"
+      "label": "domain",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "project-zen",
+      "id": "zen-core-oversees-project-zen",
       "type": "oversees",
-      "label": "governance"
-    },
-    {
-      "source": "agent-zen",
+      "source": "zen-core",
       "target": "project-zen",
-      "type": "owns",
-      "label": "domain"
+      "label": "governance",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#f778ba",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "resource-sandbox",
+      "id": "zen-core-manages-resource-sandbox-engine",
       "type": "manages",
-      "label": "orchestrator"
+      "source": "zen-core",
+      "target": "resource-sandbox-engine",
+      "label": "orchestrator",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#e8b84d",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "model-worker-local-executes-resource-local-worker",
+      "type": "executes",
       "source": "model-worker-local",
       "target": "resource-local-worker",
-      "type": "executes",
-      "label": "work"
+      "label": "work",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#4da3ff",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "resource-local-worker",
-      "target": "zens-agent",
+      "id": "resource-local-worker-reports_to-zen-core",
       "type": "reports_to",
-      "label": "results"
+      "source": "resource-local-worker",
+      "target": "zen-core",
+      "label": "results",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#3fc960",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "model-default-cloud-generates-resource-tokens-today",
+      "type": "generates",
       "source": "model-default-cloud",
       "target": "resource-tokens-today",
-      "type": "generates",
-      "label": "usage"
+      "label": "usage",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dashed",
+        "color_override": "#e8b84d",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
-      "source": "zen-agent",
-      "target": "resource-zen-worker",
+      "id": "zen-core-configures-resource-zen-worker",
       "type": "configures",
-      "label": "owns"
+      "source": "zen-core",
+      "target": "resource-zen-worker",
+      "label": "owns",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "solid",
+        "color_override": "#58d4e8",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     },
     {
+      "id": "resource-zen-worker-invokes-model-worker-local",
+      "type": "invokes",
       "source": "resource-zen-worker",
       "target": "model-worker-local",
-      "type": "invokes",
-      "label": "Aider → Ollama"
+      "label": "Aider → Ollama",
+      "confidence": 0.9,
+      "evidence": [],
+      "created_at": "2026-06-11T18:16:48",
+      "updated_at": "2026-06-11T18:16:48",
+      "data": {},
+      "visual": {
+        "style": "dotted",
+        "color_override": "#58d4e8",
+        "width_modifier": 1.0,
+        "animated": false,
+        "arrowhead": "standard"
+      }
     }
   ]
 }
