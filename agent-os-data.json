@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-06-11T15:59:37.966275",
+  "generated_at": "2026-06-12T03:02:11.688382",
   "token_usage": {
     "today": {
-      "in": 105443241,
-      "out": 286527,
-      "calls": 518,
-      "cost": 2.1232
+      "in": 33000107,
+      "out": 45210,
+      "calls": 232,
+      "cost": 0.6623
     },
     "yesterday": {
-      "in": 129112927,
-      "out": 290348,
-      "cost": 2.5968
+      "in": 248582167,
+      "out": 675900,
+      "cost": 5.0054
     },
-    "total_in": 234556168,
-    "total_out": 576875,
-    "total_calls": 1434,
+    "total_in": 410695201,
+    "total_out": 1011458,
+    "total_calls": 2490,
     "per_model": {
       "openrouter/owl-alpha": {
-        "in": 22301613,
-        "out": 60853,
-        "calls": 249,
+        "in": 57589836,
+        "out": 107280,
+        "calls": 493,
         "cost": 0.0
       },
       "gpt-5.5": {
@@ -35,36 +35,36 @@
         "cost": 0.0355
       },
       "nvidia/nemotron-3-ultra:free": {
-        "in": 193705613,
-        "out": 430965,
-        "calls": 981,
-        "cost": 29.1851
+        "in": 334556423,
+        "out": 819121,
+        "calls": 1793,
+        "cost": 50.4292
       }
     },
     "per_session": {
       "20260610_175225_4d8ac9": {
-        "in": 145579325,
-        "out": 242323,
-        "calls": 623,
-        "cost": 21.9096
+        "in": 272482844,
+        "out": 541226,
+        "calls": 1294,
+        "cost": 41.0348
       },
       "20260609_113730_45e6f63f": {
-        "in": 42102615,
-        "out": 157834,
-        "calls": 292,
-        "cost": 6.3627
+        "in": 52043237,
+        "out": 182097,
+        "calls": 343,
+        "cost": 7.8611
+      },
+      "20260610_120409_244b6034": {
+        "in": 45486235,
+        "out": 133089,
+        "calls": 365,
+        "cost": 6.8629
       },
       "20260610_032623_e99fa4": {
         "in": 22037480,
         "out": 60971,
         "calls": 226,
         "cost": 3.3239
-      },
-      "20260610_120409_244b6034": {
-        "in": 6251387,
-        "out": 22026,
-        "calls": 34,
-        "cost": 0.9443
       },
       "20260610_170448_ee6097": {
         "in": 5275499,
@@ -872,73 +872,73 @@
   "token_history": {
     "days": [
       {
-        "label": "Fri",
-        "date": "2026-06-05",
-        "total": 41549948,
-        "models": {
-          "local": 207749,
-          "regular": 31162462,
-          "free": 10179737
-        }
-      },
-      {
         "label": "Sat",
         "date": "2026-06-06",
-        "total": 38869306,
+        "total": 72751719,
         "models": {
-          "local": 194346,
-          "regular": 29151980,
-          "free": 9522980
+          "local": 363758,
+          "regular": 54563790,
+          "free": 17824171
         }
       },
       {
         "label": "Sun",
         "date": "2026-06-07",
-        "total": 36188665,
+        "total": 68058061,
         "models": {
-          "local": 180943,
-          "regular": 27141499,
-          "free": 8866223
+          "local": 340290,
+          "regular": 51043546,
+          "free": 16674225
         }
       },
       {
         "label": "Mon",
         "date": "2026-06-08",
-        "total": 33508023,
+        "total": 63364401,
         "models": {
-          "local": 167540,
-          "regular": 25131018,
-          "free": 8209465
+          "local": 316822,
+          "regular": 47523301,
+          "free": 15524278
         }
       },
       {
         "label": "Tue",
         "date": "2026-06-09",
-        "total": 30827380,
+        "total": 58670742,
         "models": {
-          "local": 154136,
-          "regular": 23120536,
-          "free": 7552708
+          "local": 293353,
+          "regular": 44003057,
+          "free": 14374332
         }
       },
       {
         "label": "Wed",
         "date": "2026-06-10",
-        "total": 28146739,
+        "total": 53977082,
         "models": {
-          "local": 140733,
-          "regular": 21110055,
-          "free": 6895951
+          "local": 269885,
+          "regular": 40482812,
+          "free": 13224385
         }
       },
       {
         "label": "Thu",
         "date": "2026-06-11",
-        "total": 25466097,
+        "total": 49283423,
         "models": {
-          "local": 127330,
-          "regular": 19099573,
-          "free": 6239194
+          "local": 246417,
+          "regular": 36962568,
+          "free": 12074438
+        }
+      },
+      {
+        "label": "Fri",
+        "date": "2026-06-12",
+        "total": 44589763,
+        "models": {
+          "local": 222948,
+          "regular": 33442323,
+          "free": 10924492
         }
       }
     ],
@@ -968,7 +968,7 @@
       ],
       [
         "Regular Cloud",
-        447
+        691
       ],
       [
         "Free Tier Cloud",
@@ -982,7 +982,7 @@
       ],
       [
         "Regular Cloud",
-        3129
+        4837
       ],
       [
         "Free Tier Cloud",
@@ -996,7 +996,7 @@
       ],
       [
         "Regular Cloud",
-        13410
+        20730
       ],
       [
         "Free Tier Cloud",
@@ -1010,7 +1010,7 @@
       ],
       [
         "Regular Cloud",
-        40230
+        62190
       ],
       [
         "Free Tier Cloud",
@@ -1043,42 +1043,41 @@
   "health": {
     "git": {
       "clean": false,
-      "modified": 9,
-      "untracked": 0,
+      "modified": 2,
+      "untracked": 4,
       "staged": 1,
       "summary": [
-        "M agent-os-data.json",
-        " M agent-os-v2/src/components/Sidebar.tsx",
-        " M agent-os-v2/src/index.css",
-        " M agent-os-v2/src/pages/MemoryWorld.tsx",
-        " M agent-os-v2/src/pages/Projects.tsx"
+        "M agent-os.css",
+        " M agent-os.html",
+        "?? Dockerfile.collector",
+        "?? data/.exporter-state.json",
+        "?? docs/schema_m2.sql"
       ]
     },
     "obsidian": {
       "live": false,
       "last_write": "2026-06-10T21:20:56.401720",
       "last_file": "01_Projects/Kiyosaki/Swarm/Swarm Dashboard.md",
-      "age_seconds": 67121,
+      "age_seconds": 106875,
       "file_count": 183
     },
     "hermes": {
       "running": true,
-      "pid_count": 4,
+      "pid_count": 3,
       "pids": [
-        "12672",
-        "60670",
-        "484814",
-        "546090"
+        "843694",
+        "892201",
+        "896165"
       ]
     },
     "active_models": [
-      "nvidia/nemotron-3-ultra:free"
+      "openrouter/owl-alpha"
     ],
     "zen_bot": {
       "connected": false,
       "last_activity": "unknown"
     },
-    "data_generated_at": "2026-06-11T15:59:37.966055",
+    "data_generated_at": "2026-06-12T03:02:11.688064",
     "stale_threshold_seconds": 900
   }
 }
