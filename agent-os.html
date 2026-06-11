@@ -62,6 +62,9 @@
     <button class="os-nav-item" onclick="showPage('sandbox')" id="nav-sandbox">
       <span class="os-nav-icon">🧪</span> Sandbox
     </button>
+    <button class="os-nav-item" onclick="showPage('kanban')" id="nav-kanban">
+      <span class="os-nav-icon">▦</span> Kanban
+    </button>
     <button class="os-nav-item" onclick="showPage('memory')" id="nav-memory">
       <span class="os-nav-icon">🧠</span> Memory
     </button>
@@ -431,6 +434,60 @@
     </div>
   </section>
 
+  <!-- ═══ KANBAN ═══ -->
+  <section id="page-kanban" class="os-page kanban-page" style="display:none">
+    <header class="os-top-bar kanban-top-bar">
+      <div class="os-page-title">
+        <h2>Kanban</h2>
+        <p>Daily operating surface for active project work, review gates, and currently running processes</p>
+      </div>
+    </header>
+
+    <div class="kanban-shell">
+      <div class="kanban-toolbar">
+        <div class="kanban-filters">
+          <input id="kanban-search" class="kanban-input" type="search" placeholder="Search tasks..." oninput="renderKanbanBoard()">
+          <select id="kanban-status-filter" class="kanban-select" onchange="renderKanbanBoard()"></select>
+          <select id="kanban-project-filter" class="kanban-select" onchange="renderKanbanBoard()"></select>
+          <button id="kanban-archive-toggle" class="os-btn os-btn-secondary" onclick="toggleArchivedTasks()">Show archived</button>
+          <button class="os-btn os-btn-secondary" onclick="refreshData()">Refresh</button>
+        </div>
+        <div class="kanban-quick-add">
+          <span class="kanban-add-plus">+</span>
+          <input id="kanban-quick-title" class="kanban-input kanban-input-main" type="text" placeholder="New task title... (Enter to create)" autocomplete="off">
+          <select id="kanban-quick-project" class="kanban-select"></select>
+          <button class="os-btn os-btn-primary" onclick="addKanbanTask()">Add</button>
+        </div>
+      </div>
+      <div class="kanban-board" id="kanban-board"></div>
+    </div>
+  </section>
+
+  <!-- ═══ TASK BOARD DETAIL ═══ -->
+  <section id="page-task-board" class="os-page" style="display:none">
+    <header class="os-top-bar task-board-top">
+      <div class="os-page-title">
+        <button class="os-btn os-btn-ghost project-back" onclick="showPage('kanban')">← Board</button>
+        <h2 id="task-board-title">Task Board</h2>
+        <p id="task-board-subtitle">Focused task workspace</p>
+      </div>
+      <button class="os-btn os-btn-secondary" onclick="openSelectedTaskDrawer()">Open Details</button>
+    </header>
+    <div class="task-board-layout">
+      <section class="task-board-main" id="task-board-overview"></section>
+      <section class="task-board-panel">
+        <header class="task-panel-header">
+          <span>Subtasks</span>
+          <span class="task-panel-meta" id="task-board-progress">0 / 0</span>
+        </header>
+        <div class="subtask-kanban" id="task-board-subtasks"></div>
+      </section>
+      <section class="task-board-panel" id="task-board-evidence"></section>
+      <section class="task-board-panel" id="task-board-activity"></section>
+      <section class="task-board-panel" id="task-board-validation"></section>
+    </div>
+  </section>
+
   <!-- ═══ PROJECTS GRID ═══ -->
   <section id="page-projects" class="os-page" style="display:none">
     <header class="os-top-bar">
@@ -466,49 +523,7 @@
       </div>
     </header>
 
-    <!-- Project KPIs -->
-    <div class="os-stats-row" id="project-stats"></div>
-
-    <!-- Main Content Grid -->
-    <div class="os-grid-2">
-      <!-- Runs Section -->
-      <div class="os-card" id="project-runs-card">
-        <header class="os-card-header">
-          <span class="os-card-title">Runs</span>
-          <div class="os-tab-bar" id="project-run-tabs">
-            <button class="os-tab active" onclick="filterProjectRuns('all',this)">All</button>
-            <button class="os-tab" onclick="filterProjectRuns('accepted',this)">Accepted</button>
-            <button class="os-tab" onclick="filterProjectRuns('rejected',this)">Rejected</button>
-            <button class="os-tab" onclick="filterProjectRuns('pending',this)">Pending Review</button>
-          </div>
-        </header>
-        <div class="os-card-body" style="padding:0;max-height:500px;overflow-y:auto" id="project-runs-body"></div>
-      </div>
-
-      <!-- Activity & Insights -->
-      <div style="display:flex;flex-direction:column;gap:var(--space-5)">
-        <div class="os-card" id="project-activity-card">
-          <header class="os-card-header"><span class="os-card-title">Activity</span></header>
-          <div class="os-card-body" id="project-activity"></div>
-        </div>
-
-        <div class="os-card" id="project-insights-card">
-          <header class="os-card-header"><span class="os-card-title">Insights</span></header>
-          <div class="os-card-body" id="project-insights">
-            <div class="insight-grid" id="insight-grid"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Review Queue -->
-    <div class="os-card" id="project-review-queue" style="display:none;margin-top:var(--section-gap-sm)">
-      <header class="os-card-header">
-        <span class="os-card-title">Review Queue</span>
-        <span class="os-badge info" id="review-queue-count">0 pending</span>
-      </header>
-      <div class="os-card-body" id="project-review-body"></div>
-    </div>
+    <div class="project-command-grid" id="project-command-grid"></div>
   </section>
 
   <!-- ═══ MEMORY WORLD ═══ -->
@@ -516,42 +531,81 @@
     <header class="os-top-bar">
       <div class="os-page-title">
         <h2>Memory World</h2>
-        <p>Interactive graph of agents, models, rules, resources, and projects</p>
+        <p>Zen's inner domain — the living graph of agents, models, rules, resources, memories, gates, decisions, routes</p>
       </div>
     </header>
 
-    <div id="memory-world-header" class="memory-world-header">
-      <div class="memory-world-header-left">
-        <h1>Memory World</h1>
-        <p>Zen's inner domain — agents, models, rules, resources, gates, decisions, memories, routes</p>
-      </div>
-      <div id="memory-world-controls" class="memory-world-controls">
-        <button class="os-btn os-btn-secondary os-btn-sm" onclick="resetMemoryWorldView()">↺ Reset View</button>
-        <select id="memory-world-layer-filter" class="os-select" onchange="filterMemoryWorldLayers(this.value)">
-          <option value="all">All Layers</option>
-          <option value="0">Layer 0: Zen Core</option>
-          <option value="1">Layer 1: Infrastructure</option>
-          <option value="2">Layer 2: Agents/Models/Rules/Projects</option>
-          <option value="3">Layer 3: Resources/Risk</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="memory-world-container">
-      <div class="memory-world-canvas-wrap">
+    <div class="memory-world-stage">
+      <!-- Graph Canvas - Dominant Centerpiece -->
+      <div class="memory-world-viewport" id="memory-world-viewport">
         <canvas id="memory-world-canvas" class="memory-world-canvas"></canvas>
         <div id="memory-world-tooltip" class="memory-world-tooltip"></div>
-      </div>
-
-      <div id="memory-world-sidepanel" class="memory-world-sidepanel">
-        <div class="memory-world-placeholder">
-          <div class="memory-world-placeholder-icon">🧠</div>
-          <div class="memory-world-placeholder-text">Click a node to inspect details</div>
+        
+        <!-- Zen Core Sovereign Marker -->
+        <div id="zen-core-marker" class="zen-core-marker" aria-hidden="true">
+          <div class="zen-core-ring"></div>
+          <div class="zen-core-pulse"></div>
+          <div class="zen-core-sigil">🧠</div>
         </div>
       </div>
+
+      <!-- Right Inspector Panel -->
+      <aside class="memory-world-inspector" id="memory-world-inspector" role="region" aria-label="Node inspector">
+        <div class="memory-world-inspector-header">
+          <h3 class="memory-world-inspector-title">Inspector</h3>
+          <button class="memory-world-inspector-close" onclick="hideMemoryWorldInspector()" aria-label="Close inspector">✕</button>
+        </div>
+        <div class="memory-world-inspector-body" id="memory-world-inspector-body">
+          <div class="memory-world-inspector-placeholder">
+            <div class="memory-world-inspector-icon">🧠</div>
+            <p class="memory-world-inspector-text">Click a node to inspect its identity, connections, and provenance.</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Collapsible Legend Panel -->
+      <aside class="memory-world-legend-panel" id="memory-world-legend-panel" role="region" aria-label="Graph legend">
+        <button class="memory-world-legend-toggle" onclick="toggleMemoryWorldLegend()" aria-expanded="false">
+          <span class="memory-world-legend-toggle-text">Legend</span>
+          <span class="memory-world-legend-toggle-icon">⌄</span>
+        </button>
+        <div class="memory-world-legend-content" id="memory-world-legend-content" hidden>
+          <div class="memory-world-legend-categories" id="memory-world-legend-categories"></div>
+          <div class="memory-world-legend-edges" id="memory-world-legend-edges"></div>
+        </div>
+      </aside>
     </div>
 
-    <div id="memory-world-legend" class="memory-world-legend"></div>
+    <!-- Bottom Controls Bar -->
+    <div class="memory-world-controls-bar" id="memory-world-controls-bar">
+      <div class="memory-world-controls-left">
+        <button class="os-btn os-btn-secondary os-btn-sm" onclick="resetMemoryWorldView()" title="Reset view (R)">
+          <span class="btn-icon">↺</span> Reset View
+        </button>
+        <span class="memory-world-controls-divider"></span>
+        <label class="memory-world-layer-label" title="Filter by render layer">
+          <span class="layer-label-text">Layer:</span>
+          <select id="memory-world-layer-filter" class="os-select os-select-sm" onchange="filterMemoryWorldLayers(this.value)" aria-label="Render layer filter">
+            <option value="all">All Layers</option>
+            <option value="0">Layer 0: Zen Core</option>
+            <option value="1">Layer 1: Infrastructure</option>
+            <option value="2">Layer 2: Agents & Models</option>
+            <option value="3">Layer 3: Resources & Memory</option>
+            <option value="4">Layer 4: Events & Risk</option>
+          </select>
+        </label>
+      </div>
+      <div class="memory-world-controls-center">
+        <span class="memory-world-stats" id="memory-world-stats">
+          <span class="stat"><span class="stat-value" id="stat-nodes">0</span> nodes</span>
+          <span class="stat"><span class="stat-value" id="stat-edges">0</span> edges</span>
+          <span class="stat"><span class="stat-value" id="stat-clusters">0</span> clusters</span>
+        </span>
+      </div>
+      <div class="memory-world-controls-right">
+        <span class="memory-world-zoom-indicator" id="memory-world-zoom">100%</span>
+      </div>
+    </div>
   </section>
 
   <!-- ═══ TOKENS ═══ -->
@@ -698,6 +752,18 @@
 
 </main>
 
+<aside class="task-drawer" id="task-drawer" aria-hidden="true">
+  <div class="task-drawer-header" id="task-drawer-header">
+    <div>
+      <div class="task-drawer-kicker" id="task-drawer-project">Project</div>
+      <h3 id="task-drawer-title">Task</h3>
+    </div>
+    <button class="os-btn os-btn-ghost os-btn-icon" onclick="event.stopPropagation(); closeTaskDrawer()" aria-label="Close task drawer">×</button>
+  </div>
+  <div class="task-drawer-body" id="task-drawer-body"></div>
+</aside>
+<div class="task-drawer-scrim" id="task-drawer-scrim" onclick="closeTaskDrawer()"></div>
+
 </div>
 
 <script type="application/json" id="embedded-data">
@@ -714,10 +780,12 @@ let currentPage = 'dashboard';
 let autoRefreshTimer = null;
 let autoRefreshEnabled = true;
 let activeProject = null;
+let activeTaskId = null;
 let projectPrompts = [];
 let projectRunFilter = 'all';
 let paletteHighlightedIndex = -1;
 let paletteItems = [];
+let kanbanShowArchived = false;
 
 // ── Load data ──
 async function loadData() {
@@ -805,9 +873,16 @@ function showPage(id) {
   document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
   document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).style.display = 'block';
+  document.body.dataset.page = id;
   const nav = document.getElementById('nav-' + id);
   if (nav) nav.classList.add('active');
   currentPage = id;
+  if (id === 'kanban') {
+    requestAnimationFrame(() => { renderKanbanControls(); renderKanbanBoard(); });
+  }
+  if (id !== 'task-board') {
+    closeTaskDrawer();
+  }
   if (id === 'tokens') {
     requestAnimationFrame(() => { renderTokens(); animateTokensPage(); });
   }
@@ -918,6 +993,7 @@ function renderAll() {
   try { renderRunLog('all'); } catch(e) { console.warn('renderRunLog failed:', e); }
   try { renderMemory(); } catch(e) { console.warn('renderMemory failed:', e); }
   try { renderProjectCards(); } catch(e) { console.warn('renderProjectCards failed:', e); }
+  try { renderKanbanControls(); renderKanbanBoard(); } catch(e) { console.warn('renderKanban failed:', e); }
   try { updateHealthStrip(); } catch(e) { console.warn('updateHealthStrip failed:', e); }
   try { renderDashboardHero(); } catch(e) { console.warn('renderDashboardHero failed:', e); }
   try { renderActionQueue(); } catch(e) { console.warn('renderActionQueue failed:', e); }
@@ -1043,6 +1119,7 @@ function buildCommandPalette() {
         {icon: '🖥️', label: 'Dashboard', desc: 'Mission control overview', shortcut: 'g d', action: "showPage('dashboard')"},
         {icon: '🔢', label: 'Tokens', desc: 'Usage, costs, routing', shortcut: 'g t', action: "showPage('tokens')"},
         {icon: '🧪', label: 'Sandbox', desc: 'Prompt pipeline & review', shortcut: 'g s', action: "showPage('sandbox')"},
+        {icon: '▦', label: 'Kanban', desc: 'Daily task board', shortcut: 'g k', action: "showPage('kanban')"},
         {icon: '📁', label: 'Projects', desc: 'Project workspaces', shortcut: 'g p', action: "showPage('projects')"},
         {icon: '📈', label: 'Income', desc: 'Earnings tracking', shortcut: 'g i', action: "showPage('income')"},
         {icon: '🔗', label: 'Integrations', desc: 'Connected services', shortcut: 'g n', action: "showPage('integrations')"},
@@ -1285,6 +1362,266 @@ function renderAgents() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ═══ WORK TASKS / KANBAN ═══
+const KANBAN_COLUMNS = [
+  {id: 'backlog', label: 'Backlog', meaning: 'parked / to-do work'},
+  {id: 'wip', label: 'Work in Progress', meaning: 'actively being worked on'},
+  {id: 'validate', label: 'Validate', meaning: 'needs review/checking before accepted'},
+  {id: 'done', label: 'Done', meaning: 'completed task'},
+  {id: 'running', label: 'Running', meaning: 'running right now'},
+];
+
+const PROJECT_COLORS = {
+  zen: 'var(--zen)',
+  kiyosaki: 'var(--kiyosaki)',
+  rin: 'var(--rin)',
+  minato: 'var(--minato)',
+  toji: 'var(--toji)',
+  kazuki: 'var(--kazuki)',
+};
+
+const DEFAULT_TASKS = [
+  {id:'task-zen-agent-os-kanban', title:'Build Agent OS Kanban operating surface', project:'zen', status:'wip', priority:'High', risk:'Medium', created:'2026-06-11', lastActive:'Now', archived:false, why:'Turns Agent OS into the daily place where project work is created, moved, reviewed, and automated.', nextAction:'Verify layout, drawer flow, and project-page preview.', notes:'Static-file implementation with shared task state, drawer details, full task board, and project previews.', subtasks:[{title:'Add Kanban page shell',status:'done'},{title:'Wire quick add and filters',status:'done'},{title:'Redesign project command pages',status:'wip'},{title:'Screenshot QA',status:'validate'}], evidence:['agent-os.html','agent-os.css'], validation:['No raw JSON in task cards','Project pages prioritize active work','Archive hides without deleting'], activity:['Task created from Agent OS redesign request','Kanban page added to sidebar']},
+  {id:'task-zen-local-worker', title:'Harden local worker review loop', project:'zen', status:'validate', priority:'High', risk:'High', created:'2026-06-10', lastActive:'5h ago', archived:false, why:'Local worker quality determines whether generated edits can be trusted before promotion.', nextAction:'Review the latest worker outputs and capture failure patterns.', notes:'Recent wrapper fix moved Aider to message-file mode. Validation still needs a concise review delivered.', subtasks:[{title:'Read latest worker outputs',status:'done'},{title:'Compose review findings',status:'validate'},{title:'Promote durable worker rules',status:'backlog'}], evidence:['SESSION-HANDOFF.md','worker review notes'], validation:['Review identifies exact failure modes','Accepted outputs have promotion targets'], activity:['Worker output review moved to validation','Worker wrapper fixed and tested']},
+  {id:'task-zen-memory-world', title:'Stabilize Memory World graph lines', project:'zen', status:'backlog', priority:'Medium', risk:'Medium', created:'2026-06-10', lastActive:'Yesterday', archived:false, why:'The graph should explain system relationships without visual noise or broken edge rendering.', nextAction:'Audit edge drawing, labels, and graph density at desktop and mobile widths.', notes:'Deferred from prior Agent OS fixes. Keep visual identity but reduce clutter.', subtasks:[{title:'Reproduce graph-line issue',status:'backlog'},{title:'Tune edge opacity and routing',status:'backlog'},{title:'Capture before/after screenshot',status:'backlog'}], evidence:['data/memory-world.json','scripts/zen-graph-exporter.py'], validation:['Edges readable at 1440px','No labels overlap core controls'], activity:['Graph exporter added','Line cleanup deferred']},
+  {id:'task-kiyosaki-swarm-dashboard', title:'Swarm strategy dashboard and bench-swap gates', project:'kiyosaki', status:'wip', priority:'High', risk:'High', created:'2026-06-09', lastActive:'2h ago', archived:false, why:'Kiyosaki needs multiple trading workstreams visible without collapsing the project into one mission.', nextAction:'Define scorecard columns and validation gates before any automation runs.', notes:'Focus on survivability, drawdown controls, strategy diversity, and evidence-backed promotion.', subtasks:[{title:'Define scorecard metrics',status:'wip'},{title:'Set drawdown circuit breaker gates',status:'validate'},{title:'Document bench-swap protocol',status:'backlog'}], evidence:['01_Projects/Kiyosaki/Swarm/Swarm Dashboard.md'], validation:['No strategy can promote without risk gate','Bench-swap reason is logged'], activity:['Scorecard work moved into active design','Risk gate requirements added']},
+  {id:'task-kiyosaki-lean-schema', title:'Validate Lean result schema', project:'kiyosaki', status:'validate', priority:'Medium', risk:'High', created:'2026-06-09', lastActive:'Yesterday', archived:false, why:'Bad schema assumptions can make backtests look valid while hiding execution defects.', nextAction:'Check result fields against real Lean output before accepting generated analysis.', notes:'This is a gate, not a research task. Validate before downstream automation.', subtasks:[{title:'Collect representative Lean output',status:'validate'},{title:'Compare expected fields',status:'backlog'},{title:'Record rejection criteria',status:'backlog'}], evidence:['Lean result sample','schema comparison notes'], validation:['Schema includes drawdown, fill, fees, and regime tags'], activity:['Schema validation moved to review','Required output fields identified']},
+  {id:'task-rin-review-rubric', title:'Tighten review rubric for accepted outputs', project:'rin', status:'backlog', priority:'Medium', risk:'Low', created:'2026-06-11', lastActive:'1d ago', archived:false, why:'Accepted work needs a repeatable standard before promotion into memory or automation.', nextAction:'Draft short acceptance checklist for reviews.', notes:'Use as an operating rubric across Zen and Kiyosaki tasks.', subtasks:[{title:'List acceptance conditions',status:'backlog'},{title:'Add evidence requirement',status:'backlog'}], evidence:['Sandbox review history'], validation:['Rubric fits in one screen','Each item is testable'], activity:['Project added to task board']},
+  {id:'task-minato-data-refresh', title:'Make Agent OS refresh path reliable', project:'minato', status:'done', priority:'Medium', risk:'Low', created:'2026-06-10', lastActive:'Yesterday', archived:false, why:'File-mode refresh needs predictable behavior when fetch is blocked.', nextAction:'Keep monitoring for stale embedded data.', notes:'Refresh button now reloads in file mode.', subtasks:[{title:'Handle file fetch failure',status:'done'},{title:'Verify in browser',status:'done'}], evidence:['agent-os.html','generate-data.py'], validation:['Refresh does not silently fail'], activity:['File-mode refresh fixed']},
+  {id:'task-toji-training-cycle', title:'Set weekly training/recovery planning loop', project:'toji', status:'running', priority:'Low', risk:'Low', created:'2026-06-08', lastActive:'3d ago', archived:false, why:'A stable recurring loop can run without daily manual planning.', nextAction:'Auto-surface only when recovery or nutrition data is missing.', notes:'Validated as a recurring project rhythm.', subtasks:[{title:'Weekly plan template',status:'done'},{title:'Recovery gate',status:'running'}], evidence:['01_Projects/Toji'], validation:['Only alerts when action is needed'], activity:['Moved to running automation lane']},
+];
+
+function getStoredTasks() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('zen-os-kanban-tasks') || '[]');
+    const map = new Map(DEFAULT_TASKS.map(t => [t.id, t]));
+    stored.forEach(t => map.set(t.id, {...map.get(t.id), ...t}));
+    return Array.from(map.values());
+  } catch(e) {
+    return [...DEFAULT_TASKS];
+  }
+}
+
+function saveStoredTasks(tasks) {
+  localStorage.setItem('zen-os-kanban-tasks', JSON.stringify(tasks));
+}
+
+function getTasks() { return getStoredTasks(); }
+function setTasks(tasks) { saveStoredTasks(tasks); }
+function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function getProjectOptions() { return agents.map(a => ({id: a.id, name: a.name})); }
+function getProjectLabel(id) { return getProjectOptions().find(p => p.id === id)?.name || id; }
+function getStatusLabel(id) { return KANBAN_COLUMNS.find(c => c.id === id)?.label || id; }
+
+function renderKanbanControls() {
+  ['kanban-quick-project', 'kanban-project-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const current = el.value;
+    const all = id.includes('filter') ? '<option value="all">All projects</option>' : '';
+    el.innerHTML = all + getProjectOptions().map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (current) el.value = current;
+  });
+  const status = document.getElementById('kanban-status-filter');
+  if (status) {
+    const current = status.value;
+    status.innerHTML = '<option value="all">All statuses</option>' + KANBAN_COLUMNS.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+    if (current) status.value = current;
+  }
+  const quick = document.getElementById('kanban-quick-title');
+  if (quick && !quick.dataset.bound) {
+    quick.dataset.bound = 'true';
+    quick.addEventListener('keydown', e => { if (e.key === 'Enter') addKanbanTask(); });
+  }
+}
+
+function getFilteredTasks(projectId = null) {
+  const q = (document.getElementById('kanban-search')?.value || '').trim().toLowerCase();
+  const status = document.getElementById('kanban-status-filter')?.value || 'all';
+  const projectFilter = projectId || document.getElementById('kanban-project-filter')?.value || 'all';
+  return getTasks().filter(t => {
+    if (!kanbanShowArchived && t.archived) return false;
+    if (status !== 'all' && t.status !== status) return false;
+    if (projectFilter !== 'all' && t.project !== projectFilter) return false;
+    if (q && ![t.title, t.notes, t.why, t.nextAction, getProjectLabel(t.project)].join(' ').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderKanbanBoard(projectId = null, limit = null) {
+  const board = document.getElementById(projectId ? `project-kanban-${projectId}` : 'kanban-board');
+  if (!board) return;
+  const tasks = getFilteredTasks(projectId);
+  board.innerHTML = KANBAN_COLUMNS.map(col => {
+    const columnTasks = tasks.filter(t => t.status === col.id);
+    const items = columnTasks.slice(0, limit || 99);
+    return `<section class="kanban-column" data-status="${col.id}" ondragover="allowTaskDrop(event)" ondrop="dropTask(event,'${col.id}')">
+      <header class="kanban-column-header"><div><span class="kanban-column-title">${col.label}</span><span class="kanban-column-meaning">${col.meaning}</span></div><span class="kanban-count">${columnTasks.length}</span></header>
+      <div class="kanban-card-list">${items.map(renderTaskCard).join('') || '<div class="kanban-empty">No tasks</div>'}</div>
+    </section>`;
+  }).join('');
+}
+
+function renderTaskCard(task) {
+  const color = PROJECT_COLORS[task.project] || 'var(--accent)';
+  return `<article class="kanban-card" draggable="true" ondragstart="dragTask(event,'${task.id}')" onclick="openTaskDrawer('${task.id}')" style="--task-color:${color}">
+    <div class="kanban-card-accent"></div>
+    <div class="kanban-card-title">${escapeHtml(task.title)}</div>
+    <div class="kanban-card-footer">
+      <span class="project-badge" style="--task-color:${color}">${escapeHtml(getProjectLabel(task.project))}</span>
+      <span class="task-risk ${String(task.risk).toLowerCase()}">${escapeHtml(task.risk)} risk</span>
+      <span class="kanban-last-active">${escapeHtml(task.lastActive)}</span>
+    </div>
+  </article>`;
+}
+
+function addKanbanTask() {
+  const titleEl = document.getElementById('kanban-quick-title');
+  const projectEl = document.getElementById('kanban-quick-project');
+  const title = titleEl?.value.trim();
+  if (!title) return;
+  const task = {id:'task-' + Date.now(), title, project:projectEl?.value || 'zen', status:'backlog', priority:'Medium', risk:'Low', created:new Date().toISOString().slice(0,10), lastActive:'Now', archived:false, why:'Added from the daily Kanban quick-add row.', nextAction:'Clarify the next safe action.', notes:'', subtasks:[], evidence:[], validation:[], activity:['Task added from Kanban quick add']};
+  const tasks = getTasks();
+  tasks.unshift(task);
+  setTasks(tasks);
+  titleEl.value = '';
+  renderKanbanBoard();
+  showToast(title, 'success');
+}
+
+function toggleArchivedTasks() {
+  kanbanShowArchived = !kanbanShowArchived;
+  const btn = document.getElementById('kanban-archive-toggle');
+  if (btn) btn.textContent = kanbanShowArchived ? 'Hide archived' : 'Show archived';
+  renderKanbanBoard();
+}
+
+function archiveTask(id) {
+  const tasks = getTasks().map(t => t.id === id ? {...t, archived:true, lastActive:'Now', activity:[...(t.activity || []), 'Archived from task drawer']} : t);
+  setTasks(tasks);
+  closeTaskDrawer();
+  renderKanbanBoard();
+  if (activeProject) renderProjectDetail(projectInfo[activeProject], getProjectStats(activeProject), projectPrompts, getProjectActivity(activeProject));
+}
+
+function dragTask(event, id) { event.dataTransfer.setData('text/plain', id); }
+function allowTaskDrop(event) { event.preventDefault(); }
+function dropTask(event, status) { event.preventDefault(); moveTask(event.dataTransfer.getData('text/plain'), status); }
+
+function moveTask(id, status) {
+  const tasks = getTasks().map(t => t.id === id ? {...t, status, lastActive:'Now', activity:[...(t.activity || []), `Moved to ${getStatusLabel(status)}`]} : t);
+  setTasks(tasks);
+  renderKanbanBoard();
+  if (document.getElementById('task-drawer')?.classList.contains('open')) openTaskDrawer(id);
+  if (currentPage === 'task-board' && activeTaskId === id) renderTaskBoard(id);
+}
+
+function findTask(id) { return getTasks().find(t => t.id === id); }
+
+function openTaskDrawer(id) {
+  activeTaskId = id;
+  const task = findTask(id);
+  if (!task) return;
+  const drawer = document.getElementById('task-drawer');
+  const header = document.getElementById('task-drawer-header');
+  const body = document.getElementById('task-drawer-body');
+  document.getElementById('task-drawer-project').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)}`;
+  document.getElementById('task-drawer-title').textContent = task.title;
+  header.onclick = () => openTaskBoard(task.id);
+  body.onclick = () => openTaskBoard(task.id);
+  body.innerHTML = `
+    <div class="task-drawer-open-hint">Click panel to open task board</div>
+    <div class="task-drawer-grid">${drawerField('Priority / Risk', `${task.priority} priority · ${task.risk} risk`)}${drawerField('Created', task.created)}${drawerField('Last Active', task.lastActive)}${drawerField('Status', getStatusLabel(task.status))}</div>
+    <section class="task-drawer-section"><h4>Why It Matters</h4><p>${escapeHtml(task.why || 'No reason recorded yet.')}</p></section>
+    <section class="task-drawer-section"><h4>Next Action</h4><p>${escapeHtml(task.nextAction || 'No next action recorded yet.')}</p></section>
+    <section class="task-drawer-section"><h4>Notes / Summary</h4><p>${escapeHtml(task.notes || 'No notes yet.')}</p></section>
+    <section class="task-drawer-section"><h4>Subtasks</h4>${renderChecklist(task.subtasks)}</section>
+    <section class="task-drawer-section"><h4>Evidence / Links</h4>${renderPillList(task.evidence)}</section>
+    <section class="task-drawer-section"><h4>Validation Checklist</h4>${renderChecklist((task.validation || []).map(v => ({title:v, status:task.status === 'done' || task.status === 'running' ? 'done' : 'validate'})))}</section>
+    <section class="task-drawer-section"><h4>Activity History</h4>${renderActivityList(task.activity)}</section>
+    <section class="task-drawer-actions" onclick="event.stopPropagation()">${renderTaskActions(task)}</section>`;
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden', 'false');
+  document.getElementById('task-drawer-scrim').classList.add('open');
+}
+
+function renderTaskActions(task) {
+  const actions = [];
+  if (task.status !== 'wip') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','wip')">Move to WIP</button>`);
+  if (task.status !== 'validate') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','validate')">Send to Validate</button>`);
+  if (task.status !== 'done') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Mark Done</button>`);
+  if (task.status === 'done') actions.push(`<button class="os-btn os-btn-primary" onclick="moveTask('${task.id}','running')">Run</button>`);
+  if (task.status === 'running') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Stop Running</button>`);
+  actions.push(`<button class="os-btn os-btn-danger" onclick="archiveTask('${task.id}')">Archive</button>`);
+  return actions.join('');
+}
+
+function drawerField(label, value) { return `<div class="task-drawer-field"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`; }
+
+function renderChecklist(items = []) {
+  if (!items.length) return '<div class="task-muted">No subtasks yet.</div>';
+  return items.map(item => `<div class="task-check-row"><span class="task-check-dot ${item.status === 'done' || item.status === 'running' ? 'done' : ''}"></span><span>${escapeHtml(item.title)}</span><small>${escapeHtml(getStatusLabel(item.status))}</small></div>`).join('');
+}
+
+function renderActivityList(items = []) {
+  if (!items.length) return '<div class="task-muted">No activity yet.</div>';
+  return items.map(item => `<div class="task-activity-row">${escapeHtml(item)}</div>`).join('');
+}
+
+function closeTaskDrawer() {
+  document.getElementById('task-drawer')?.classList.remove('open');
+  document.getElementById('task-drawer')?.setAttribute('aria-hidden', 'true');
+  document.getElementById('task-drawer-scrim')?.classList.remove('open');
+  const header = document.getElementById('task-drawer-header');
+  const body = document.getElementById('task-drawer-body');
+  if (header) header.onclick = null;
+  if (body) body.onclick = null;
+}
+
+function openSelectedTaskDrawer() { if (activeTaskId) openTaskDrawer(activeTaskId); }
+
+function openTaskBoard(id) {
+  activeTaskId = id;
+  closeTaskDrawer();
+  document.querySelectorAll('.os-page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.os-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-task-board').style.display = 'block';
+  document.body.dataset.page = 'task-board';
+  currentPage = 'task-board';
+  renderTaskBoard(id);
+}
+
+function renderTaskBoard(id) {
+  const task = findTask(id);
+  if (!task) return;
+  document.getElementById('task-board-title').textContent = task.title;
+  document.getElementById('task-board-subtitle').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)} · ${task.lastActive}`;
+  document.getElementById('task-board-overview').innerHTML = `<div class="task-board-hero" style="--task-color:${PROJECT_COLORS[task.project] || 'var(--accent)'}"><span class="task-board-pill">${escapeHtml(getProjectLabel(task.project))}</span><h3>${escapeHtml(task.title)}</h3><p>${escapeHtml(task.why)}</p><div class="task-board-meta"><span>${escapeHtml(task.priority)} priority</span><span>${escapeHtml(task.risk)} risk</span><span>Created ${escapeHtml(task.created)}</span><span>Last active ${escapeHtml(task.lastActive)}</span></div></div><div class="task-board-notes"><h4>Notes</h4><p>${escapeHtml(task.notes || 'No notes yet.')}</p><h4>Next Action</h4><p>${escapeHtml(task.nextAction)}</p></div>`;
+  const subtasks = task.subtasks || [];
+  document.getElementById('task-board-progress').textContent = `${subtasks.filter(s => s.status === 'done' || s.status === 'running').length} / ${subtasks.length}`;
+  document.getElementById('task-board-subtasks').innerHTML = KANBAN_COLUMNS.map(col => `<div class="subtask-column"><div class="subtask-column-title">${col.label}</div>${subtasks.filter(s => s.status === col.id).map(s => `<div class="subtask-card">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty">Empty</div>'}</div>`).join('');
+  document.getElementById('task-board-evidence').innerHTML = `<header class="task-panel-header"><span>Evidence / Links</span></header>${renderPillList(task.evidence)}`;
+  document.getElementById('task-board-activity').innerHTML = `<header class="task-panel-header"><span>Activity Log</span></header>${renderActivityList(task.activity)}`;
+  document.getElementById('task-board-validation').innerHTML = `<header class="task-panel-header"><span>Validation Checklist</span></header>${renderChecklist((task.validation || []).map(v => ({title:v, status:task.status === 'running' || task.status === 'done' ? 'done' : 'validate'})))}`;
+}
+
+function renderPillList(items = []) {
+  if (!items.length) return '<div class="task-muted">No links recorded yet.</div>';
+  return `<div class="task-pill-list">${items.map(item => `<span>${escapeHtml(item)}</span>`).join('')}</div>`;
+}
+
+function getProjectTasks(projectId) { return getTasks().filter(t => t.project === projectId && !t.archived); }
+function getProjectStats(projectId) {
+  const tasks = getProjectTasks(projectId);
+  return {total:tasks.length, active:tasks.filter(t => ['wip','validate'].includes(t.status)).length, review:tasks.filter(t => t.status === 'validate').length, running:tasks.filter(t => t.status === 'running').length, lastActive:tasks[0]?.lastActive || 'No recent activity'};
+}
+function getProjectActivity(projectId) {
+  const name = getProjectLabel(projectId).toLowerCase();
+  const taskEvents = getProjectTasks(projectId).flatMap(t => (t.activity || []).slice(-2).map(a => ({time:t.lastActive, type:projectId, details:`${t.title}: ${a}`})));
+  const runEvents = (DASHBOARD_DATA?.run_log || []).filter(r => r.details.toLowerCase().includes(name));
+  return [...taskEvents, ...runEvents].slice(0, 6);
 }
 
 // ═══ STATS ═══
@@ -1837,16 +2174,18 @@ function renderProjectCards() {
   const proj = DASHBOARD_DATA?.projects || {};
   document.getElementById('project-cards').innerHTML = agents.map(a => {
     const p = proj[a.name] || {};
-    return `<div class="os-mini-card">
+    const taskStats = getProjectStats(a.id);
+    return `<div class="os-mini-card project-workspace-card" onclick="openProject('${a.id}')">
       <div class="flex-between mb-8">
         <div class="flex gap-8" style="align-items:center"><span style="font-size:20px">${a.avatar}</span><strong>${a.name}</strong></div>
-        <span class="os-badge ${p.accepted?'success':'idle'}">${p.accepted?'Active':'Idle'}</span>
+        <span class="os-badge ${taskStats.active?'success':'idle'}">${taskStats.active?'Active':'Idle'}</span>
       </div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">${a.status==='active'?'Working on active tasks':'Waiting for assignment'}</div>
-      <div style="display:flex;gap:12px;border-top:1px solid var(--border-subtle);padding-top:10px;">
-        <div class="os-agent-stat"><strong>${p.accepted||0}</strong> accepted</div>
-        <div class="os-agent-stat"><strong>${p.rejected||0}</strong> rejected</div>
-        <div class="os-agent-stat"><strong>${p.total||0}</strong> total</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">${projectInfo[a.id]?.description || 'Project workspace'}</div>
+      <div style="display:flex;gap:12px;border-top:1px solid var(--border-subtle);padding-top:10px;flex-wrap:wrap">
+        <div class="os-agent-stat"><strong>${taskStats.active}</strong> active</div>
+        <div class="os-agent-stat"><strong>${taskStats.review}</strong> review</div>
+        <div class="os-agent-stat"><strong>${taskStats.running}</strong> running</div>
+        <div class="os-agent-stat"><strong>${p.total||0}</strong> sandbox</div>
       </div>
     </div>`;
   }).join('');
@@ -1856,54 +2195,140 @@ function renderProjectCards() {
 function renderProjectDetail(info, proj, prompts, activity) {
   const colors = {zen: 'var(--zen)', kiyosaki: 'var(--kiyosaki)', toji: 'var(--toji)', rin: 'var(--rin)', minato: 'var(--minato)', kazuki: 'var(--kazuki)'};
   const color = colors[info.id] || 'var(--zen)';
-  const acceptanceRate = proj.total ? Math.round((proj.accepted || 0) / proj.total * 100) : 0;
-  const health = acceptanceRate >= 60 ? 'healthy' : acceptanceRate >= 30 ? 'warning' : 'critical';
+  const projectStats = getProjectStats(info.id);
+  const projectTasks = getProjectTasks(info.id);
+  const needsReview = projectTasks.filter(t => t.status === 'validate');
+  const blockers = projectTasks.filter(t => String(t.risk).toLowerCase() === 'high' && ['wip', 'validate'].includes(t.status));
+  const attention = [...needsReview, ...blockers.filter(t => !needsReview.some(r => r.id === t.id))].slice(0, 5);
+  const activeTasks = projectTasks.filter(t => ['wip', 'validate', 'backlog'].includes(t.status)).slice(0, 6);
+  const acceptanceRate = prompts.length ? Math.round(prompts.filter(p => p.review_status === 'accepted').length / prompts.length * 100) : 0;
+  const health = blockers.length ? 'warning' : needsReview.length ? 'warning' : 'healthy';
   
-  // Hero
   document.getElementById('project-avatar').textContent = info.avatar;
   document.getElementById('project-avatar').style.background = color + '20';
   document.getElementById('project-title').textContent = info.name;
   document.getElementById('project-description').textContent = info.description || 'No description available';
   document.getElementById('project-health-badge').textContent = health === 'healthy' ? '🟢 Healthy' : health === 'warning' ? '⚠ At Risk' : '🔴 Critical';
   document.getElementById('project-health-badge').className = 'project-health-badge ' + health;
-  
-  // Phase estimation
-  const phaseNames = ['Discovery', 'Planning', 'Execution', 'Review', 'Production'];
-  const phaseIdx = Math.min(phaseNames.length - 1, Math.floor(acceptanceRate / 25));
-  document.getElementById('project-phase-value').textContent = phaseNames[phaseIdx];
+  document.getElementById('project-phase-value').textContent = info.phase || 'Execution';
 
-  // Stats row (using os-stat-card classes)
-  document.getElementById('project-stats').innerHTML = `
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Total Runs</span></div><div class="os-stat-value">${proj.total || 0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--accent)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Accepted</span><span class="os-stat-badge up">${acceptanceRate}%</span></div><div class="os-stat-value text-success">${proj.accepted || 0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${acceptanceRate}%;background:var(--success)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Rejected</span></div><div class="os-stat-value text-danger">${proj.rejected || 0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${proj.total?proj.rejected/proj.total*100:0}%;background:var(--danger)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Pending Review</span></div><div class="os-stat-value text-warning">${proj.pending || 0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${proj.total?proj.pending/proj.total*100:0}%;background:var(--warning)"></div></div></div>`;
+  const command = document.getElementById('project-command-grid');
+  command.innerHTML = `
+    <section class="project-summary-strip" style="--project-color:${color}">
+      ${projectMetric('Status', health === 'healthy' ? 'On track' : 'Needs attention')}
+      ${projectMetric('Phase', info.phase || 'Execution')}
+      ${projectMetric('Active tasks', projectStats.active)}
+      ${projectMetric('Needs review', projectStats.review)}
+      ${projectMetric('Last activity', projectStats.lastActive)}
+    </section>
 
-  renderProjectRuns(prompts);
-  renderProjectActivity(activity);
-  renderProjectInsights(info, proj, prompts);
-
-  // Review Queue
-  const pendingPrompts = prompts.filter(p => p.review_status === 'pending');
-  const reviewQueue = document.getElementById('project-review-queue');
-  const reviewBody = document.getElementById('project-review-body');
-  const reviewCount = document.getElementById('review-queue-count');
-  if (pendingPrompts.length) {
-    reviewQueue.style.display = 'block';
-    reviewCount.textContent = `${pendingPrompts.length} pending`;
-    reviewBody.innerHTML = pendingPrompts.map(p => `
-      <div class="review-queue-item" onclick="jumpToReview('${p.id}')">
-        <span class="review-queue-dot info"></span>
-        <div class="review-queue-info">
-          <div class="review-queue-id">${p.id}</div>
-          <div class="review-queue-summary">${p.summary}</div>
-          <div class="review-queue-project">${p.project}</div>
-        </div>
+    <section class="project-panel project-panel-wide">
+      <header class="project-panel-header"><div><h3>What Needs Attention</h3><p>Decisions, reviews, blockers, corrections, and safe gates.</p></div></header>
+      <div class="attention-list">
+        ${attention.map(t => renderAttentionItem(t)).join('') || '<div class="project-empty">No active blockers or review gates. Keep work moving from Backlog into Work in Progress.</div>'}
       </div>
-    `).join('');
-  } else {
-    reviewQueue.style.display = 'none';
+    </section>
+
+    <section class="project-panel project-panel-wide">
+      <header class="project-panel-header">
+        <div><h3>Project Kanban Preview</h3><p>Same operating lanes as the full task board.</p></div>
+        <button class="os-btn os-btn-secondary os-btn-sm" onclick="openProjectKanban('${info.id}')">Open Full Project Kanban</button>
+      </header>
+      <div class="kanban-board kanban-board-preview" id="project-kanban-${info.id}"></div>
+    </section>
+
+    <section class="project-panel">
+      <header class="project-panel-header"><div><h3>Active Tasks</h3><p>Current work and next actions.</p></div></header>
+      <div class="active-task-list">
+        ${activeTasks.map(renderActiveTaskItem).join('') || '<div class="project-empty">No active tasks yet.</div>'}
+      </div>
+    </section>
+
+    <section class="project-panel">
+      <header class="project-panel-header"><div><h3>Project Memory / Decisions</h3><p>Durable rules for this project.</p></div></header>
+      <div class="decision-list">${getProjectDecisions(info.id).map(renderDecisionItem).join('')}</div>
+    </section>
+
+    <section class="project-panel">
+      <header class="project-panel-header"><div><h3>Risks / Gates</h3><p>Known risks and mitigation gates.</p></div></header>
+      <div class="risk-list">${getProjectRisks(info.id).map(renderRiskItem).join('')}</div>
+    </section>
+
+    <section class="project-panel">
+      <header class="project-panel-header"><div><h3>Recent Meaningful Activity</h3><p>Task movement, decisions, validations, and useful system events.</p></div></header>
+      <div class="project-activity-compact">
+        ${(getProjectActivity(info.id).length ? getProjectActivity(info.id) : activity).slice(0, 6).map(renderProjectActivityRow).join('') || '<div class="project-empty">No meaningful activity recorded yet.</div>'}
+      </div>
+    </section>
+
+    <section class="project-panel project-panel-wide sandbox-health">
+      <header class="project-panel-header"><div><h3>Sandbox Health</h3><p>Low-priority signal only; this is not the project command surface.</p></div></header>
+      <div class="sandbox-health-grid">
+        ${projectMetric('Runs', prompts.length)}
+        ${projectMetric('Accepted', prompts.filter(p => p.review_status === 'accepted').length)}
+        ${projectMetric('Rejected', prompts.filter(p => p.review_status === 'rejected').length)}
+        ${projectMetric('Acceptance', acceptanceRate + '%')}
+      </div>
+    </section>`;
+  renderKanbanBoard(info.id, 3);
+}
+
+function projectMetric(label, value) {
+  return `<div class="project-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function renderAttentionItem(task) {
+  return `<button class="attention-item" onclick="openTaskDrawer('${task.id}')" style="--task-color:${PROJECT_COLORS[task.project] || 'var(--accent)'}">
+    <span class="attention-line"></span>
+    <div><strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.nextAction)}</p></div>
+    <span>${escapeHtml(getStatusLabel(task.status))}</span>
+  </button>`;
+}
+
+function renderActiveTaskItem(task) {
+  return `<button class="active-task-item" onclick="openTaskDrawer('${task.id}')">
+    <div><strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.why)}</p></div>
+    <div class="active-task-side"><span>${escapeHtml(getStatusLabel(task.status))}</span><small>${escapeHtml(task.lastActive)}</small></div>
+  </button>`;
+}
+
+function getProjectDecisions(projectId) {
+  const defaults = {
+    zen: ['Cloud calls are reserved for planning, research, and review.', 'Accepted sandbox output needs evidence before promotion.', 'Agent OS should show active work before raw metrics.'],
+    kiyosaki: ['No strategy promotes without risk-gate evidence.', 'Survivability outranks short-term performance.', 'Bench swaps must record reason, market regime, and expected failure mode.'],
+    rin: ['Reviews must state acceptance criteria and evidence.', 'Reject generic outputs even when they are polished.'],
+    minato: ['Infrastructure changes need a rollback path.', 'File-mode Agent OS behavior must remain usable.'],
+    toji: ['Automated loops should interrupt only when action is needed.'],
+    kazuki: ['Safety checks block automation when evidence is missing.'],
+  };
+  return defaults[projectId] || ['No durable decisions recorded yet.'];
+}
+
+function renderDecisionItem(text) {
+  return `<div class="decision-item">${escapeHtml(text)}</div>`;
+}
+
+function getProjectRisks(projectId) {
+  const highTasks = getProjectTasks(projectId).filter(t => String(t.risk).toLowerCase() === 'high');
+  if (highTasks.length) {
+    return highTasks.map(t => ({severity:t.risk, reason:t.why, mitigation:t.nextAction}));
   }
+  return [{severity:'Low', reason:'No active high-risk task recorded.', mitigation:'Keep validation gates explicit before moving tasks to Running.'}];
+}
+
+function renderRiskItem(risk) {
+  return `<div class="risk-item"><span class="risk-severity ${String(risk.severity).toLowerCase()}">${escapeHtml(risk.severity)}</span><div><strong>${escapeHtml(risk.reason)}</strong><p>${escapeHtml(risk.mitigation)}</p></div></div>`;
+}
+
+function renderProjectActivityRow(row) {
+  return `<div class="project-activity-row"><span>${escapeHtml(row.time || 'Recent')}</span><p>${escapeHtml(row.details || row.type || '')}</p></div>`;
+}
+
+function openProjectKanban(projectId) {
+  showPage('kanban');
+  const projectFilter = document.getElementById('kanban-project-filter');
+  if (projectFilter) projectFilter.value = projectId;
+  renderKanbanBoard();
 }
 
 function renderProjectInsights(info, proj, prompts) {
@@ -1995,88 +2420,52 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// MEMORY WORLD RENDERER — M4 Visual Identity (Power Design)
+// MEMORY WORLD — Power Design Implementation
 // ═══════════════════════════════════════════════════════════════
 
+let memoryWorldCanvas = null;
+let memoryWorldCtx = null;
 let memoryWorldData = null;
 let memoryWorldSimNodes = [];
 let memoryWorldEdges = [];
-let memoryWorldCanvas = null;
-let memoryWorldCtx = null;
 let memoryWorldTransform = { x: 0, y: 0, scale: 1 };
 let memoryWorldAnimId = null;
+let memoryWorldRunning = false;
 let memoryWorldHovered = null;
 let memoryWorldSelected = null;
 let memoryWorldDragging = null;
 let memoryWorldPanning = null;
 let memoryWorldLayerFilter = 'all';
-let memoryWorldRunning = false;
+let memoryWorldExpandedAdvanced = false;
 
-// Visual identity tokens (matching schema v1.0 §7)
+// Cluster visual tokens (from schema)
 const MEMORY_WORLD_CLUSTER_TOKENS = {
-  zen_core:    { color: '#4da3ff', sigil: '🧠', shape: 'hexagon', layer: 0, baseSize: 22, pulse: 'heartbeat' },
-  agents:      { color: '#3fc960', sigil: '👤', shape: 'circle',   layer: 2, baseSize: 18, pulse: 'none' },
-  models:      { color: '#bc8cff', sigil: '☁️', shape: 'diamond',  layer: 2, baseSize: 16, pulse: 'slow' },
-  rules:       { color: '#f0883e', sigil: '⚖️', shape: 'shield',   layer: 2, baseSize: 18, pulse: 'slow' },
-  resources:   { color: '#58d4e8', sigil: '⚙️', shape: 'square',   layer: 3, baseSize: 16, pulse: 'none' },
-  projects:    { color: '#f778ba', sigil: '📁', shape: 'folder',   layer: 2, baseSize: 18, pulse: 'none' },
-  events:      { color: '#e8b84d', sigil: '⚡', shape: 'bolt',     layer: 4, baseSize: 14, pulse: 'fast' },
-  memory:      { color: '#8b9bb3', sigil: '💾', shape: 'cylinder', layer: 3, baseSize: 14, pulse: 'slow' },
-  risk:        { color: '#f06258', sigil: '⚠️', shape: 'triangle', layer: 2, baseSize: 18, pulse: 'fast' }
-};
-
-const MEMORY_WORLD_EDGE_TOKENS = {
-  governs:        { style: 'solid',   color: '#4da3ff', width: 2, animated: false },
-  routes_to:      { style: 'dashed',  color: '#bc8cff', width: 1.5, animated: true },
-  delegates_to:   { style: 'dotted',  color: '#3fc960', width: 1.5, animated: true },
-  enforces:       { style: 'solid',   color: '#f0883e', width: 2, animated: false },
-  consumes:       { style: 'dashed',  color: '#e8b84d', width: 1.5, animated: true },
-  configures:     { style: 'solid',   color: '#58d4e8', width: 1.5, animated: false },
-  launches:       { style: 'solid',   color: '#3fc960', width: 1.5, animated: false },
-  participates_in:{ style: 'dotted',  color: '#8b9bb3', width: 1, animated: true },
-  manages:        { style: 'solid',   color: '#e8b84d', width: 1.5, animated: false },
-  oversees:       { style: 'dashed',  color: '#f778ba', width: 1, animated: false },
-  owns:           { style: 'solid',   color: '#3fc960', width: 1.5, animated: false },
-  produces:       { style: 'solid',   color: '#e8b84d', width: 1.5, animated: false },
-  triggers:       { style: 'dotted',  color: '#58d4e8', width: 1, animated: true },
-  validates:      { style: 'dashed',  color: '#f0883e', width: 1, animated: false },
-  promotes:       { style: 'solid',   color: '#3fc960', width: 2, animated: false },
-  blocks:         { style: 'solid',   color: '#f06258', width: 2, animated: true },
-  derives_from:   { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
-  supersedes:     { style: 'dashed',  color: '#e8b84d', width: 1, animated: false },
-  depends_on:     { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
-  reports_to:     { style: 'solid',   color: '#3fc960', width: 1, animated: true },
-  alerts:         { style: 'solid',   color: '#f06258', width: 2, animated: true },
-  invokes:        { style: 'dotted',  color: '#58d4e8', width: 1, animated: true },
-  generates:      { style: 'dashed',  color: '#e8b84d', width: 1.5, animated: false },
-  executes:       { style: 'solid',   color: '#4da3ff', width: 1.5, animated: false },
-  bridges:        { style: 'dotted',  color: '#8b9bb3', width: 1, animated: true },
-  stores_in:      { style: 'dashed',  color: '#58d4e8', width: 1, animated: false },
-  assigns_to:     { style: 'dotted',  color: '#f0883e', width: 1, animated: false },
-  falls_back_to:  { style: 'dotted',  color: '#bc8cff', width: 1, animated: true },
-  available_to:   { style: 'dotted',  color: '#8b9bb3', width: 1, animated: false },
-  contributes_to: { style: 'dashed',  color: '#e8b84d', width: 1, animated: true }
+  zen_core: { color: '#4da3ff', sigil: '🧠', shape: 'hexagon', baseSize: 42, layer: 0, pulse: 'heartbeat' },
+  agents: { color: '#3fc960', sigil: '👤', shape: 'circle', baseSize: 24, layer: 2, pulse: 'none' },
+  models: { color: '#bc8cff', sigil: '☁️', shape: 'diamond', baseSize: 26, layer: 2, pulse: 'slow' },
+  rules: { color: '#f0883e', sigil: '⚖️', shape: 'shield', baseSize: 24, layer: 2, pulse: 'slow' },
+  resources: { color: '#58d4e8', sigil: '⚙️', shape: 'square', baseSize: 22, layer: 3, pulse: 'none' },
+  projects: { color: '#f778ba', sigil: '📁', shape: 'folder', baseSize: 24, layer: 2, pulse: 'none' },
+  events: { color: '#e8b84d', sigil: '⚡', shape: 'bolt', baseSize: 20, layer: 4, pulse: 'fast' },
+  memory: { color: '#8b9bb3', sigil: '💾', shape: 'cylinder', baseSize: 22, layer: 3, pulse: 'slow' },
+  risk: { color: '#f06258', sigil: '⚠️', shape: 'triangle', baseSize: 20, layer: 2, pulse: 'fast' }
 };
 
 const NODE_TYPE_CLUSTER = {
-  zen_core: 'zen_core',
-  hermes_runtime: 'zen_core',
-  discord_gateway: 'zen_core',
-  obsidian_vault: 'zen_core',
-  agent: 'agents',
-  agent_session: 'agents',
+  governance_agent: 'zen_core',
+  coo_agent: 'zen_core',
+  safety_agent: 'zen_core',
+  policy_agent: 'zen_core',
+  delegate_agent: 'agents',
+  worker_agent: 'agents',
   model_cloud: 'models',
   model_local: 'models',
-  model_fallback: 'models',
   routing_rule: 'rules',
-  safety_gate: 'rules',
-  review_gate: 'rules',
-  resource_quota: 'rules',
-  token_budget: 'resources',
-  worker_launcher: 'resources',
-  sandbox_engine: 'resources',
-  skill_registry: 'resources',
-  script_layer: 'resources',
+  guardrail_rule: 'rules',
+  gate_rule: 'rules',
+  promotion_rule: 'rules',
+  sandbox_config: 'resources',
+  token_tracker: 'resources',
   cron_scheduler: 'resources',
   session_store: 'resources',
   worker_activity: 'resources',
@@ -2100,35 +2489,63 @@ const NODE_TYPE_CLUSTER = {
   alert: 'risk'
 };
 
+const MEMORY_WORLD_EDGE_TOKENS = {
+  governs: { style: 'solid', color: '#4da3ff', width: 2, animated: true },
+  routes_to: { style: 'solid', color: '#3fc960', width: 1.5, animated: true },
+  delegates_to: { style: 'dashed', color: '#3fc960', width: 1.5, animated: false },
+  enforces: { style: 'solid', color: '#f0883e', width: 1.5, animated: false },
+  configures: { style: 'dotted', color: '#58d4e8', width: 1, animated: false },
+  consumes: { style: 'dashed', color: '#bc8cff', width: 1, animated: false },
+  launches: { style: 'solid', color: '#e8b84d', width: 1.5, animated: true },
+  triggers: { style: 'dashed', color: '#e8b84d', width: 1, animated: true },
+  validates: { style: 'solid', color: '#f0883e', width: 1.5, animated: false },
+  promotes: { style: 'solid', color: '#f778ba', width: 1.5, animated: true },
+  blocks: { style: 'solid', color: '#f06258', width: 2, animated: false },
+  derives_from: { style: 'dotted', color: '#8b9bb3', width: 1, animated: false },
+  supersedes: { style: 'dashed', color: '#f06258', width: 1.5, animated: false },
+  depends_on: { style: 'dotted', color: '#58d4e8', width: 1, animated: false },
+  monitors: { style: 'dashed', color: '#58d4e8', width: 1, animated: false },
+  logs_to: { style: 'dotted', color: '#8b9bb3', width: 1, animated: false },
+  routes_through: { style: 'solid', color: '#4da3ff', width: 1.5, animated: true },
+  evaluates: { style: 'dashed', color: '#f0883e', width: 1, animated: false },
+  records: { style: 'solid', color: '#8b9bb3', width: 1, animated: false },
+  learns_from: { style: 'dashed', color: '#8b9bb3', width: 1, animated: false },
+  fails_at: { style: 'solid', color: '#f06258', width: 2, animated: false },
+  alerts_on: { style: 'dashed', color: '#f06258', width: 1.5, animated: true },
+  checks: { style: 'dotted', color: '#58d4e8', width: 1, animated: false },
+  reported_by: { style: 'solid', color: '#f06258', width: 1.5, animated: false }
+};
+
 function initMemoryWorld() {
   memoryWorldCanvas = document.getElementById('memory-world-canvas');
   if (!memoryWorldCanvas) return;
-  
+
   memoryWorldCtx = memoryWorldCanvas.getContext('2d');
   resizeMemoryWorldCanvas();
-  
+
   // Event listeners
   memoryWorldCanvas.addEventListener('mousedown', onMemoryWorldMouseDown);
   memoryWorldCanvas.addEventListener('mousemove', onMemoryWorldMouseMove);
   memoryWorldCanvas.addEventListener('mouseup', onMemoryWorldMouseUp);
   memoryWorldCanvas.addEventListener('wheel', onMemoryWorldWheel, { passive: false });
   memoryWorldCanvas.addEventListener('mouseleave', onMemoryWorldMouseLeave);
-  
+
   window.addEventListener('resize', resizeMemoryWorldCanvas);
-  
+
   // Load data
   loadMemoryWorldData();
 }
 
 function resizeMemoryWorldCanvas() {
   if (!memoryWorldCanvas) return;
-  const wrap = memoryWorldCanvas.parentElement;
-  if (!wrap) return;
+  const viewport = document.getElementById('memory-world-viewport');
+  if (!viewport) return;
   const dpr = window.devicePixelRatio || 1;
-  memoryWorldCanvas.width = wrap.clientWidth * dpr;
-  memoryWorldCanvas.height = wrap.clientHeight * dpr;
-  memoryWorldCanvas.style.width = wrap.clientWidth + 'px';
-  memoryWorldCanvas.style.height = wrap.clientHeight + 'px';
+  memoryWorldCanvas.width = viewport.clientWidth * dpr;
+  memoryWorldCanvas.height = viewport.clientHeight * dpr;
+  memoryWorldCanvas.style.width = viewport.clientWidth + 'px';
+  memoryWorldCanvas.style.height = viewport.clientHeight + 'px';
+  memoryWorldCtx.setTransform(1, 0, 0, 1, 0, 0);
   memoryWorldCtx.scale(dpr, dpr);
   // Re-center on resize
   if (memoryWorldSimNodes.length) {
@@ -2143,6 +2560,7 @@ async function loadMemoryWorldData() {
     memoryWorldData = await resp.json();
     initMemoryWorldSimulation();
     buildMemoryWorldLegend();
+    updateMemoryWorldStats();
     startMemoryWorldAnimation();
   } catch (e) {
     console.error('Failed to load memory-world.json:', e);
@@ -2152,35 +2570,48 @@ async function loadMemoryWorldData() {
 
 function initMemoryWorldSimulation() {
   if (!memoryWorldData) return;
-  
+
   const nodes = memoryWorldData.nodes || [];
   const edges = memoryWorldData.edges || [];
-  
+
   // Build node map
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
-  
+
   // Apply layer filter
   const filteredNodes = nodes.filter(n => {
     if (memoryWorldLayerFilter === 'all') return true;
     return String(n.layer) === memoryWorldLayerFilter;
   });
-  
+
   // Initialize sim nodes with positions
   memoryWorldSimNodes = filteredNodes.map((node, i) => {
     const cluster = NODE_TYPE_CLUSTER[node.type] || 'agents';
     const tokens = MEMORY_WORLD_CLUSTER_TOKENS[cluster] || MEMORY_WORLD_CLUSTER_TOKENS.agents;
-    
+
     // Preserve existing positions if node existed
     const existing = memoryWorldSimNodes.find(n => n.id === node.id);
     if (existing) return existing;
-    
-    // Initial circular layout by cluster
-    const clusterNodes = filteredNodes.filter(n => NODE_TYPE_CLUSTER[n.type] === cluster);
-    const clusterIndex = clusterNodes.indexOf(node);
-    const angle = (2 * Math.PI * clusterIndex) / Math.max(1, clusterNodes.length);
-    const radius = 150 + tokens.layer * 80 + Math.random() * 40;
+
+    // Initial layout: Zen Core at center, others in orbital rings by layer
+    if (cluster === 'zen_core') {
+      return {
+        id: node.id,
+        node: node,
+        cluster: cluster,
+        tokens: tokens,
+        x: 0, y: 0,
+        vx: 0, vy: 0,
+        fixed: true // Zen Core stays centered
+      };
+    }
+
+    const layer = tokens.layer;
+    const layerNodes = filteredNodes.filter(n => (NODE_TYPE_CLUSTER[n.type] || 'agents') === cluster);
+    const clusterIndex = layerNodes.indexOf(node);
+    const angle = (2 * Math.PI * clusterIndex) / Math.max(1, layerNodes.length);
+    const radius = 180 + layer * 100 + Math.random() * 50;
     const centerX = 0, centerY = 0;
-    
+
     return {
       id: node.id,
       node: node,
@@ -2192,41 +2623,49 @@ function initMemoryWorldSimulation() {
       fixed: false
     };
   });
-  
+
   // Filter edges to only include those with both endpoints in filtered nodes
   const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
-  memoryWorldEdges = edges.filter(e => 
+  memoryWorldEdges = edges.filter(e =>
     filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
   );
-  
+
   centerMemoryWorldView();
 }
 
 function centerMemoryWorldView() {
   if (!memoryWorldSimNodes.length || !memoryWorldCanvas) return;
+  const viewport = document.getElementById('memory-world-viewport');
+  if (!viewport) return;
+
   const bounds = getMemoryWorldBounds();
   const cx = (bounds.minX + bounds.maxX) / 2;
   const cy = (bounds.minY + bounds.maxY) / 2;
-  const w = memoryWorldCanvas.width / (window.devicePixelRatio || 1);
-  const h = memoryWorldCanvas.height / (window.devicePixelRatio || 1);
-  const scale = Math.min(w, h) / (Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY) + 200);
+  const w = viewport.clientWidth;
+  const h = viewport.clientHeight;
+  const contentW = Math.max(bounds.maxX - bounds.minX, 100);
+  const contentH = Math.max(bounds.maxY - bounds.minY, 100);
+  const scale = Math.min(w, h) / Math.max(contentW, contentH) * 0.85;
+
   memoryWorldTransform = {
     x: w / 2 - cx * scale,
     y: h / 2 - cy * scale,
     scale: Math.max(0.3, Math.min(3, scale))
   };
+  updateZoomIndicator();
 }
 
 function getMemoryWorldBounds() {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const n of memoryWorldSimNodes) {
-    minX = Math.min(minX, n.x);
-    maxX = Math.max(maxX, n.x);
-    minY = Math.min(minY, n.y);
-    maxY = Math.max(maxY, n.y);
+    const size = n.tokens.baseSize * 2;
+    minX = Math.min(minX, n.x - size);
+    maxX = Math.max(maxX, n.x + size);
+    minY = Math.min(minY, n.y - size);
+    maxY = Math.max(maxY, n.y + size);
   }
-  return { minX: minX === Infinity ? 0 : minX, minY: minY === Infinity ? 0 : minY,
-           maxX: maxX === -Infinity ? 0 : maxX, maxY: maxY === -Infinity ? 0 : maxY };
+  if (minX === Infinity) return { minX: -100, minY: -100, maxX: 100, maxY: 100 };
+  return { minX, minY, maxX, maxY };
 }
 
 function startMemoryWorldAnimation() {
@@ -2237,69 +2676,111 @@ function startMemoryWorldAnimation() {
 
 function animateMemoryWorld() {
   if (!memoryWorldRunning) return;
-  
-  const canvas = memoryWorldCanvas;
-  if (!canvas || !memoryWorldCtx) return;
-  
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.width / dpr;
-  const H = canvas.height / dpr;
-  
+
+  const viewport = document.getElementById('memory-world-viewport');
+  if (!viewport || !memoryWorldCtx) return;
+
+  const W = viewport.clientWidth;
+  const H = viewport.clientHeight;
+
   // Physics step
   stepMemoryWorldPhysics();
-  
+
   // Render
   memoryWorldCtx.setTransform(1, 0, 0, 1, 0, 0);
-  memoryWorldCtx.clearRect(0, 0, canvas.width, canvas.height);
+  memoryWorldCtx.clearRect(0, 0, memoryWorldCanvas.width, memoryWorldCanvas.height);
+
+  // Background grid
+  drawMemoryWorldGrid(W, H);
+
   memoryWorldCtx.save();
-  memoryWorldCtx.translate(memoryWorldTransform.x * dpr, memoryWorldTransform.y * dpr);
-  memoryWorldCtx.scale(memoryWorldTransform.scale * dpr, memoryWorldTransform.scale * dpr);
-  
+  memoryWorldCtx.translate(memoryWorldTransform.x, memoryWorldTransform.y);
+  memoryWorldCtx.scale(memoryWorldTransform.scale, memoryWorldTransform.scale);
+
   // Draw edges first
   drawMemoryWorldEdges();
-  
+
   // Draw nodes
   drawMemoryWorldNodes();
-  
+
   // Hover highlight
   if (memoryWorldHovered) drawMemoryWorldNodeHighlight(memoryWorldHovered);
-  
+
   // Selection highlight
   if (memoryWorldSelected) drawMemoryWorldNodeHighlight(memoryWorldSelected, true);
-  
+
   memoryWorldCtx.restore();
-  
+
   // Update tooltip
   updateMemoryWorldTooltip();
-  
+
   memoryWorldAnimId = requestAnimationFrame(animateMemoryWorld);
 }
 
+function drawMemoryWorldGrid(W, H) {
+  const tx = memoryWorldTransform;
+  const gridSize = 50;
+  const startX = (-tx.x / tx.scale) % gridSize;
+  const startY = (-tx.y / tx.scale) % gridSize;
+
+  memoryWorldCtx.strokeStyle = '#1e2a38';
+  memoryWorldCtx.lineWidth = 0.5;
+
+  // Vertical lines
+  for (let x = startX; x < W / tx.scale + gridSize; x += gridSize) {
+    memoryWorldCtx.beginPath();
+    memoryWorldCtx.moveTo(x * tx.scale + tx.x, 0);
+    memoryWorldCtx.lineTo(x * tx.scale + tx.x, H);
+    memoryWorldCtx.stroke();
+  }
+  // Horizontal lines
+  for (let y = startY; y < H / tx.scale + gridSize; y += gridSize) {
+    memoryWorldCtx.beginPath();
+    memoryWorldCtx.moveTo(0, y * tx.scale + tx.y);
+    memoryWorldCtx.lineTo(W, y * tx.scale + tx.y);
+    memoryWorldCtx.stroke();
+  }
+
+  // Center crosshair (subtle)
+  const centerX = tx.x;
+  const centerY = tx.y;
+  memoryWorldCtx.strokeStyle = '#4da3ff20';
+  memoryWorldCtx.lineWidth = 1;
+  memoryWorldCtx.beginPath();
+  memoryWorldCtx.moveTo(centerX - 40, centerY);
+  memoryWorldCtx.lineTo(centerX + 40, centerY);
+  memoryWorldCtx.moveTo(centerX, centerY - 40);
+  memoryWorldCtx.lineTo(centerX, centerY + 40);
+  memoryWorldCtx.stroke();
+}
+
 function stepMemoryWorldPhysics() {
-  const alpha = 0.15; // Cooling factor
-  
+  const alpha = 0.12; // Cooling factor
+
   // Repulsion between all nodes
   for (const a of memoryWorldSimNodes) {
+    if (a.fixed) continue;
     let fx = 0, fy = 0;
     for (const b of memoryWorldSimNodes) {
       if (a === b) continue;
       const dx = a.x - b.x;
       const dy = a.y - b.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      if (dist < 400) {
-        const repel = 8000 / (dist * dist);
+      if (dist < 500) {
+        const repel = 12000 / (dist * dist);
         fx += (dx / dist) * repel * alpha;
         fy += (dy / dist) * repel * alpha;
       }
     }
-    // Center gravity
-    fx += (-a.x) * 0.0005 * alpha;
-    fy += (-a.y) * 0.0005 * alpha;
-    
-    a.vx = a.vx * 0.85 + fx;
-    a.vy = a.vy * 0.85 + fy;
+    // Center gravity (stronger for outer layers)
+    const layerGravity = 0.0003 + (a.tokens.layer || 0) * 0.0002;
+    fx += (-a.x) * layerGravity * alpha;
+    fy += (-a.y) * layerGravity * alpha;
+
+    a.vx = a.vx * 0.88 + fx;
+    a.vy = a.vy * 0.88 + fy;
   }
-  
+
   // Edge springs
   const posMap = new Map(memoryWorldSimNodes.map(n => [n.id, n]));
   for (const edge of memoryWorldEdges) {
@@ -2309,17 +2790,17 @@ function stepMemoryWorldPhysics() {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const targetDist = 120;
-    const force = (dist - targetDist) * 0.002;
+    const targetDist = 140;
+    const force = (dist - targetDist) * 0.0015;
     const fx = (dx / dist) * force;
     const fy = (dy / dist) * force;
-    a.vx += fx; a.vy += fy;
-    b.vx -= fx; b.vy -= fy;
+    if (!a.fixed) { a.vx += fx; a.vy += fy; }
+    if (!b.fixed) { b.vx -= fx; b.vy -= fy; }
   }
-  
+
   // Integrate
   for (const n of memoryWorldSimNodes) {
-    if (memoryWorldDragging === n.id) {
+    if (n.fixed || memoryWorldDragging === n.id) {
       n.vx = 0; n.vy = 0;
       continue;
     }
@@ -2330,104 +2811,173 @@ function stepMemoryWorldPhysics() {
 
 function drawMemoryWorldEdges() {
   const posMap = new Map(memoryWorldSimNodes.map(n => [n.id, n]));
-  
+
   for (const edge of memoryWorldEdges) {
     const a = posMap.get(edge.source);
     const b = posMap.get(edge.target);
     if (!a || !b) continue;
-    
+
     const tokens = MEMORY_WORLD_EDGE_TOKENS[edge.type] || { style: 'solid', color: '#8b9bb3', width: 1, animated: false };
-    const animOffset = Date.now() * 0.001;
-    
+    const animOffset = Date.now() * 0.0008;
+
     memoryWorldCtx.beginPath();
     memoryWorldCtx.moveTo(a.x, a.y);
-    
+
     // Curved bezier for visual interest
     const dx = b.x - a.x;
     const dy = b.y - a.y;
-    const cx = a.x + dx * 0.4 + Math.sin(animOffset) * 10;
-    const cy = a.y + dy * 0.4 + Math.cos(animOffset) * 10;
-    memoryWorldCtx.bezierCurveTo(cx, cy, cx, cy, b.x, b.y);
-    
-    memoryWorldCtx.strokeStyle = tokens.color + (tokens.animated ? '80' : '50');
+    const midX = a.x + dx * 0.5;
+    const midY = a.y + dy * 0.5;
+    const curveOffset = Math.sin(animOffset + a.x * 0.01) * 15;
+    const curveX = midX - dy * 0.15 + curveOffset;
+    const curveY = midY + dx * 0.15 + curveOffset;
+
+    memoryWorldCtx.quadraticCurveTo(curveX, curveY, b.x, b.y);
+
+    memoryWorldCtx.strokeStyle = tokens.color + (tokens.animated ? '60' : '35');
     memoryWorldCtx.lineWidth = tokens.width;
-    
+
     if (tokens.style === 'dashed') {
-      memoryWorldCtx.setLineDash([8 * animOffset % 16, 8]);
+      memoryWorldCtx.setLineDash([10, 6]);
+      memoryWorldCtx.lineDashOffset = -animOffset * 15;
     } else if (tokens.style === 'dotted') {
-      memoryWorldCtx.setLineDash([2, 6]);
+      memoryWorldCtx.setLineDash([2, 8]);
     } else {
       memoryWorldCtx.setLineDash([]);
     }
-    
+
     // Animated flow
     if (tokens.animated) {
-      memoryWorldCtx.lineDashOffset = -animOffset * 20;
+      memoryWorldCtx.lineDashOffset = -animOffset * 25;
     }
-    
+
     memoryWorldCtx.stroke();
     memoryWorldCtx.setLineDash([]);
   }
 }
 
 function drawMemoryWorldNodes() {
-  for (const sim of memoryWorldSimNodes) {
-    const node = sim.node;
-    const tokens = sim.tokens;
-    const isHover = memoryWorldHovered?.id === sim.id;
-    const isSelected = memoryWorldSelected?.id === sim.id;
-    const isActive = node.active !== false;
-    
-    // Size
-    const baseSize = tokens.baseSize;
-    const size = baseSize * (isHover || isSelected ? 1.2 : 1);
-    
-    // Color
-    const color = tokens.color;
-    const clusterColor = tokens.color;
-    
-    // Glow for selected/active
-    if (isSelected || (isActive && (tokens.pulse === 'heartbeat' || tokens.pulse === 'fast'))) {
-      const pulsePhase = Date.now() * 0.003;
-      const pulse = tokens.pulse === 'heartbeat' ? (Math.sin(pulsePhase) * 4 + 4) :
-                    tokens.pulse === 'fast' ? (Math.sin(pulsePhase * 2) * 3 + 3) : 0;
-      memoryWorldCtx.beginPath();
-      drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size + pulse + 8);
-      memoryWorldCtx.fillStyle = clusterColor + '20';
-      memoryWorldCtx.fill();
+  // Draw in layer order (back to front): 0, 2, 3, 4
+  const layerOrder = [0, 1, 2, 3, 4];
+  for (const layer of layerOrder) {
+    for (const sim of memoryWorldSimNodes) {
+      if (sim.tokens.layer !== layer) continue;
+      drawSingleNode(sim);
     }
-    
-    // Main node
+  }
+}
+
+function drawSingleNode(sim) {
+  const node = sim.node;
+  const tokens = sim.tokens;
+  const isHover = memoryWorldHovered?.id === sim.id;
+  const isSelected = memoryWorldSelected?.id === sim.id;
+  const isActive = node.active !== false;
+
+  // Size
+  const baseSize = tokens.baseSize;
+  const size = baseSize * (isHover || isSelected ? 1.15 : 1);
+  const isZenCore = sim.cluster === 'zen_core';
+
+  // Color
+  const color = tokens.color;
+
+  // Zen Core special: always prominent, ring + glow
+  if (isZenCore) {
+    // Outer sovereign ring
+    const pulsePhase = Date.now() * 0.0015;
+    const ringPulse = Math.sin(pulsePhase) * 4 + 2;
     memoryWorldCtx.beginPath();
-    drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size);
-    memoryWorldCtx.fillStyle = isActive ? color : color + '60';
+    drawShape(memoryWorldCtx, sim.x, sim.y, 'hexagon', size + 24 + ringPulse);
+    const ringGrad = memoryWorldCtx.createRadialGradient(sim.x, sim.y, size + 10, sim.x, sim.y, size + 30);
+    ringGrad.addColorStop(0, color + '00');
+    ringGrad.addColorStop(0.5, color + '15');
+    ringGrad.addColorStop(1, color + '00');
+    memoryWorldCtx.fillStyle = ringGrad;
     memoryWorldCtx.fill();
-    
-    // Border for selected
-    if (isSelected) {
-      memoryWorldCtx.strokeStyle = '#ffffff';
-      memoryWorldCtx.lineWidth = 3;
-      memoryWorldCtx.stroke();
-    } else if (isHover) {
-      memoryWorldCtx.strokeStyle = color + 'cc';
-      memoryWorldCtx.lineWidth = 2;
-      memoryWorldCtx.stroke();
-    }
-    
-    // Sigil/Label
-    memoryWorldCtx.font = 'bold ' + Math.max(10, size * 0.7) + 'px Inter';
+
+    // Inner pulse ring
+    const innerPulse = Math.sin(pulsePhase * 0.7) * 3 + 2;
+    memoryWorldCtx.beginPath();
+    drawShape(memoryWorldCtx, sim.x, sim.y, 'hexagon', size + 12 + innerPulse);
+    memoryWorldCtx.strokeStyle = color + '40';
+    memoryWorldCtx.lineWidth = 2;
+    memoryWorldCtx.stroke();
+  }
+
+  // Active pulse glow
+  if (isActive && (tokens.pulse === 'heartbeat' || tokens.pulse === 'fast') && !isZenCore) {
+    const pulsePhase = Date.now() * 0.003;
+    const pulse = tokens.pulse === 'heartbeat'
+      ? (Math.sin(pulsePhase) * 5 + 5)
+      : tokens.pulse === 'fast'
+        ? (Math.sin(pulsePhase * 2) * 4 + 4)
+        : 0;
+    memoryWorldCtx.beginPath();
+    drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size + pulse + 6);
+    memoryWorldCtx.fillStyle = color + '18';
+    memoryWorldCtx.fill();
+  }
+
+  // Selection/hover glow
+  if (isSelected) {
+    memoryWorldCtx.beginPath();
+    drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size + 10);
+    memoryWorldCtx.strokeStyle = '#ffffff';
+    memoryWorldCtx.lineWidth = 3;
+    memoryWorldCtx.setLineDash([8, 4]);
+    memoryWorldCtx.stroke();
+    memoryWorldCtx.setLineDash([]);
+  }
+
+  // Main node shape
+  memoryWorldCtx.beginPath();
+  drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size);
+  memoryWorldCtx.fillStyle = isActive ? color : color + '60';
+  memoryWorldCtx.fill();
+
+  // Border
+  if (isSelected) {
+    memoryWorldCtx.strokeStyle = '#ffffff';
+    memoryWorldCtx.lineWidth = 2;
+    memoryWorldCtx.stroke();
+  } else if (isHover) {
+    memoryWorldCtx.strokeStyle = color + 'cc';
+    memoryWorldCtx.lineWidth = 2;
+    memoryWorldCtx.stroke();
+  } else if (isZenCore) {
+    memoryWorldCtx.strokeStyle = color;
+    memoryWorldCtx.lineWidth = 2.5;
+    memoryWorldCtx.stroke();
+  }
+
+  // Sigil
+  const sigilSize = isZenCore ? 28 : Math.max(10, size * 0.65);
+  memoryWorldCtx.font = 'bold ' + sigilSize + 'px Inter';
+  memoryWorldCtx.fillStyle = isActive ? '#ffffff' : '#ffffff80';
+  memoryWorldCtx.textAlign = 'center';
+  memoryWorldCtx.textBaseline = 'middle';
+  memoryWorldCtx.fillText(node.sigil || tokens.sigil || '●', sim.x, sim.y + (isZenCore ? 2 : 0));
+
+  // Label for hover/selected
+  if ((isHover || isSelected) && !isZenCore) {
+    const label = node.label;
+    memoryWorldCtx.font = '500 11px Inter';
+    memoryWorldCtx.fillStyle = '#e8ecf1';
+    memoryWorldCtx.textAlign = 'center';
+    const labelY = sim.y + size + 16;
+    memoryWorldCtx.fillText(label, sim.x, labelY);
+  }
+
+  // Zen Core label (always visible, elevated)
+  if (isZenCore) {
+    memoryWorldCtx.font = '600 13px Inter';
     memoryWorldCtx.fillStyle = '#ffffff';
     memoryWorldCtx.textAlign = 'center';
-    memoryWorldCtx.textBaseline = 'middle';
-    memoryWorldCtx.fillText(node.sigil || tokens.sigil || '●', sim.x, sim.y);
-    
-    // Label below node
-    if (isHover || isSelected) {
-      memoryWorldCtx.font = 'bold 11px Inter';
-      memoryWorldCtx.fillStyle = '#e8ecf1';
-      memoryWorldCtx.textAlign = 'center';
-      memoryWorldCtx.fillText(node.label, sim.x, sim.y + size + 16);
-    }
+    memoryWorldCtx.fillText('ZEN CORE', sim.x, sim.y + size + 24);
+    memoryWorldCtx.font = '400 11px Inter';
+    memoryWorldCtx.fillStyle = color;
+    memoryWorldCtx.fillText('Governance • Supreme Authority', sim.x, sim.y + size + 42);
   }
 }
 
@@ -2454,32 +3004,33 @@ function drawShape(ctx, x, y, shape, size) {
       break;
     case 'shield':
       ctx.moveTo(x, y - size);
-      ctx.lineTo(x + size * 0.8, y + size * 0.3);
-      ctx.lineTo(x + size * 0.4, y + size);
-      ctx.lineTo(x, y + size * 1.2);
-      ctx.lineTo(x - size * 0.4, y + size);
-      ctx.lineTo(x - size * 0.8, y + size * 0.3);
+      ctx.lineTo(x + size * 0.85, y + size * 0.3);
+      ctx.lineTo(x + size * 0.45, y + size);
+      ctx.lineTo(x, y + size * 1.25);
+      ctx.lineTo(x - size * 0.45, y + size);
+      ctx.lineTo(x - size * 0.85, y + size * 0.3);
       ctx.closePath();
       break;
     case 'square':
-      ctx.rect(x - size * 0.7, y - size * 0.7, size * 1.4, size * 1.4);
+      const sq = size * 0.75;
+      ctx.rect(x - sq, y - sq, sq * 2, sq * 2);
       break;
     case 'folder':
-      ctx.moveTo(x - size, y - size * 0.5);
-      ctx.lineTo(x - size * 0.3, y - size * 1);
-      ctx.lineTo(x + size * 0.3, y - size * 1);
-      ctx.lineTo(x + size, y - size * 0.5);
+      ctx.moveTo(x - size, y - size * 0.45);
+      ctx.lineTo(x - size * 0.25, y - size * 0.95);
+      ctx.lineTo(x + size * 0.25, y - size * 0.95);
+      ctx.lineTo(x + size, y - size * 0.45);
       ctx.lineTo(x + size, y + size * 0.7);
       ctx.lineTo(x - size, y + size * 0.7);
       ctx.closePath();
       break;
     case 'bolt':
       ctx.moveTo(x, y - size);
-      ctx.lineTo(x + size * 0.3, y);
-      ctx.lineTo(x - size * 0.2, y);
+      ctx.lineTo(x + size * 0.35, y + size * 0.05);
+      ctx.lineTo(x - size * 0.2, y + size * 0.05);
       ctx.lineTo(x, y + size);
-      ctx.lineTo(x - size * 0.3, y);
-      ctx.lineTo(x + size * 0.2, y);
+      ctx.lineTo(x - size * 0.35, y - size * 0.05);
+      ctx.lineTo(x + size * 0.2, y - size * 0.05);
       ctx.closePath();
       break;
     case 'cylinder':
@@ -2501,96 +3052,113 @@ function drawShape(ctx, x, y, shape, size) {
 }
 
 function drawMemoryWorldNodeHighlight(sim, selected = false) {
-  const node = sim.node;
   const tokens = sim.tokens;
-  const size = tokens.baseSize * 1.3;
-  
+  const size = tokens.baseSize * 1.4;
+
   memoryWorldCtx.beginPath();
   drawShape(memoryWorldCtx, sim.x, sim.y, tokens.shape, size);
   memoryWorldCtx.strokeStyle = selected ? '#ffffff' : tokens.color;
   memoryWorldCtx.lineWidth = selected ? 4 : 2;
-  memoryWorldCtx.setLineDash([8, 4]);
+  memoryWorldCtx.setLineDash([10, 5]);
   memoryWorldCtx.stroke();
   memoryWorldCtx.setLineDash([]);
 }
 
 function buildMemoryWorldLegend() {
-  const legend = document.getElementById('memory-world-legend');
-  if (!legend) return;
-  
+  const content = document.getElementById('memory-world-legend-content');
+  if (!content) return;
+
   // Filter clusters that actually have nodes
   const presentClusters = new Set();
   for (const sim of memoryWorldSimNodes) {
     presentClusters.add(sim.cluster);
   }
-  
-  let html = '';
-  
-  // Node types
+
+  let nodeHtml = '';
   for (const [clusterKey, tokens] of Object.entries(MEMORY_WORLD_CLUSTER_TOKENS)) {
     if (!presentClusters.has(clusterKey)) continue;
-    
-    const count = memoryWorldSimNodes.filter(s => s.cluster === clusterKey).length;
-    if (count === 0) continue;
-    
-    html += `
-      <div class="memory-world-legend-group">
-        <span class="memory-world-legend-title">${clusterKey.toUpperCase().replace('_', ' ')}</span>
-        ${memoryWorldSimNodes.filter(s => s.cluster === clusterKey).map(sim => {
-          const tokens = sim.tokens;
-          return `
-            <span class="memory-world-legend-item">
-              <span class="memory-world-legend-dot" style="background:${tokens.color}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px;"></span>
-              ${sim.node.label} <span class="text-muted">(${count})</span>
-            </span>`;
-        }).join('')}
-      </div>`;
+
+    const clusterNodes = memoryWorldSimNodes.filter(s => s.cluster === clusterKey);
+    if (clusterNodes.length === 0) continue;
+
+    const layerLabels = ['Zen Core', 'Infrastructure', 'Agents & Models', 'Resources & Memory', 'Events & Risk'];
+    const layerLabel = layerLabels[tokens.layer] || 'Unknown';
+
+    nodeHtml += `
+      <div class="memory-world-legend-category">
+        <div class="memory-world-legend-category-title">
+          <span class="memory-world-legend-item-sigil" style="background:${tokens.color}">${tokens.sigil}</span>
+          ${clusterKey.toUpperCase().replace('_', ' ')}
+          <span class="memory-world-legend-category-count">${clusterNodes.length}</span>
+          <span style="margin-left:auto; opacity:0.5; font-size:10px;">${layerLabel}</span>
+        </div>
+        <div class="memory-world-legend-items">
+          ${clusterNodes.map(sim => {
+            const isActive = sim.node.active !== false;
+            return `
+              <div class="memory-world-legend-item" style="opacity:${isActive ? 1 : 0.5};">
+                <span class="memory-world-legend-item-sigil" style="background:${tokens.color}">${sim.node.sigil || tokens.sigil}</span>
+                <span class="memory-world-legend-item-label">${sim.node.label}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
   }
-  
+
   // Edge types
   const presentEdges = new Set(memoryWorldEdges.map(e => e.type));
+  let edgeHtml = '';
   if (presentEdges.size) {
-    html += `<div class="memory-world-legend-group"><span class="memory-world-legend-title">CONNECTIONS</span>`;
-    for (const edgeType of presentEdges) {
-      const tokens = MEMORY_WORLD_EDGE_TOKENS[edgeType] || { style: 'solid', color: '#8b9bb3' };
-      html += `
-        <span class="memory-world-legend-edge">
-          <span class="memory-world-legend-edge-line" style="background:${tokens.color}; height:2px; width:20px; display:inline-block; margin-right:6px; opacity:0.6;"></span>
-          ${edgeType.replace('_', ' ')}
-        </span>`;
+    edgeHtml += `<div class="memory-world-legend-divider"></div>`;
+    edgeHtml += `<div class="memory-world-legend-category"><div class="memory-world-legend-category-title">CONNECTIONS</div>`;
+    for (const edgeType of Array.from(presentEdges).sort()) {
+      const tokens = MEMORY_WORLD_EDGE_TOKENS[edgeType] || { style: 'solid', color: '#8b9bb3', width: 1 };
+      edgeHtml += `
+        <div class="memory-world-legend-edge-item">
+          <span class="memory-world-legend-edge-line" style="background:${tokens.color}; width:${tokens.width * 12}px;"></span>
+          <span>${edgeType.replace('_', ' ')}</span>
+        </div>
+      `;
     }
-    html += `</div>`;
+    edgeHtml += `</div>`;
   }
-  
-  legend.innerHTML = html;
+
+  document.getElementById('memory-world-legend-categories').innerHTML = nodeHtml;
+  document.getElementById('memory-world-legend-edges').innerHTML = edgeHtml;
+}
+
+function updateMemoryWorldStats() {
+  if (!memoryWorldData) return;
+  document.getElementById('stat-nodes').textContent = memoryWorldData.stats?.total_nodes || memoryWorldSimNodes.length;
+  document.getElementById('stat-edges').textContent = memoryWorldData.stats?.total_edges || memoryWorldEdges.length;
+  document.getElementById('stat-clusters').textContent = memoryWorldData.stats?.clusters ? Object.keys(memoryWorldData.stats.clusters).length : new Set(memoryWorldSimNodes.map(s => s.cluster)).size;
 }
 
 function showMemoryWorldError(msg) {
-  const canvas = document.getElementById('memory-world-canvas');
-  if (canvas) {
-    canvas.style.display = 'none';
+  const viewport = document.getElementById('memory-world-viewport');
+  if (viewport) {
+    viewport.innerHTML = `
+      <div class="memory-world-empty">
+        <div class="memory-world-empty-icon">⚠️</div>
+        <h3 style="color:var(--text-primary); margin-bottom:var(--space-2);">Failed to load Memory World</h3>
+        <p style="color:var(--text-secondary); max-width:400px;">${msg}</p>
+        <button class="os-btn os-btn-primary" style="margin-top:var(--space-4);" onclick="loadMemoryWorldData()">Retry</button>
+      </div>
+    `;
   }
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'os-error-state';
-  msgDiv.innerHTML = `
-    <span class="os-error-state-icon">⚠️</span>
-    <div class="os-error-state-title">Failed to load Memory World</div>
-    <div class="os-error-state-desc">${msg}</div>
-    <button class="os-btn os-btn-primary os-error-state-retry" onclick="loadMemoryWorldData()">Retry</button>
-  `;
-  document.querySelector('.memory-world-canvas-wrap').appendChild(msgDiv);
 }
 
 // Interaction handlers
 function onMemoryWorldMouseDown(e) {
   const rect = memoryWorldCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
   const tx = memoryWorldTransform;
-  const x = (e.clientX - rect.left) / dpr;
-  const y = (e.clientY - rect.top) / dpr;
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
   const wx = (x - tx.x) / tx.scale;
   const wy = (y - tx.y) / tx.scale;
-  
+
   const hit = findMemoryWorldNode(wx, wy);
   if (hit) {
     memoryWorldDragging = hit.id;
@@ -2598,20 +3166,20 @@ function onMemoryWorldMouseDown(e) {
   } else {
     memoryWorldPanning = { startX: e.clientX, startY: e.clientY, startTx: tx.x, startTy: tx.y };
   }
+  memoryWorldCanvas.style.cursor = 'grabbing';
 }
 
 function onMemoryWorldMouseMove(e) {
   const rect = memoryWorldCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
   const tx = memoryWorldTransform;
-  const x = (e.clientX - rect.left) / dpr;
-  const y = (e.clientY - rect.top) / dpr;
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
   const wx = (x - tx.x) / tx.scale;
   const wy = (y - tx.y) / tx.scale;
-  
+
   if (memoryWorldDragging) {
     const sim = memoryWorldSimNodes.find(n => n.id === memoryWorldDragging);
-    if (sim) {
+    if (sim && !sim.fixed) {
       sim.x = wx;
       sim.y = wy;
       sim.vx = 0;
@@ -2634,42 +3202,44 @@ function onMemoryWorldMouseUp(e) {
     memoryWorldDragging = null;
   }
   memoryWorldPanning = null;
-  
-  // Click to select
-  const rect = memoryWorldCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  const tx = memoryWorldTransform;
-  const x = (e.clientX - rect.left) / dpr;
-  const y = (e.clientY - rect.top) / dpr;
-  const wx = (x - tx.x) / tx.scale;
-  const wy = (y - tx.y) / tx.scale;
-  
-  const hit = findMemoryWorldNode(wx, wy);
-  if (hit) {
-    memoryWorldSelected = hit;
-    showMemoryWorldSidePanel(hit);
-  } else if (!memoryWorldDragging && !memoryWorldPanning) {
-    memoryWorldSelected = null;
-    hideMemoryWorldSidePanel();
+
+  // Click to select (only if not a drag/pan)
+  if (!memoryWorldDragging && !memoryWorldPanning) {
+    const rect = memoryWorldCanvas.getBoundingClientRect();
+    const tx = memoryWorldTransform;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const wx = (x - tx.x) / tx.scale;
+    const wy = (y - tx.y) / tx.scale;
+
+    const hit = findMemoryWorldNode(wx, wy);
+    if (hit) {
+      memoryWorldSelected = hit;
+      showMemoryWorldInspector(hit);
+    } else {
+      memoryWorldSelected = null;
+      hideMemoryWorldInspector();
+    }
   }
+  memoryWorldCanvas.style.cursor = 'grab';
 }
 
 function onMemoryWorldWheel(e) {
   e.preventDefault();
   const rect = memoryWorldCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  const x = (e.clientX - rect.left) / dpr;
-  const y = (e.clientY - rect.top) / dpr;
-  
-  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const delta = e.deltaY > 0 ? 0.88 : 1.14;
   const tx = memoryWorldTransform;
-  
+
   // Zoom towards cursor
   const beforeX = (x - tx.x) / tx.scale;
   const beforeY = (y - tx.y) / tx.scale;
-  tx.scale = Math.max(0.2, Math.min(4, tx.scale * delta));
+  tx.scale = Math.max(0.25, Math.min(4, tx.scale * delta));
   tx.x = x - beforeX * tx.scale;
   tx.y = y - beforeY * tx.scale;
+  updateZoomIndicator();
 }
 
 function onMemoryWorldMouseLeave(e) {
@@ -2680,104 +3250,148 @@ function onMemoryWorldMouseLeave(e) {
 }
 
 function findMemoryWorldNode(wx, wy) {
-  for (const sim of memoryWorldSimNodes) {
+  // Search in reverse (top-most first) - prioritize larger/selected nodes
+  const sorted = [...memoryWorldSimNodes].sort((a, b) => {
+    const sa = a.tokens.baseSize * (memoryWorldSelected?.id === a.id ? 2 : 1);
+    const sb = b.tokens.baseSize * (memoryWorldSelected?.id === b.id ? 2 : 1);
+    return sa - sb;
+  });
+
+  for (const sim of sorted) {
     const dx = wx - sim.x;
     const dy = wy - sim.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const radius = sim.tokens.baseSize * 1.5;
+    const radius = sim.tokens.baseSize * 1.6;
     if (dist < radius) return sim;
   }
   return null;
 }
 
-function showMemoryWorldSidePanel(sim) {
-  const panel = document.getElementById('memory-world-sidepanel');
-  if (!panel) return;
-  
+function showMemoryWorldInspector(sim) {
+  const panel = document.getElementById('memory-world-inspector');
+  const body = document.getElementById('memory-world-inspector-body');
+  if (!panel || !body) return;
+
   const node = sim.node;
   const tokens = sim.tokens;
   const cluster = sim.cluster;
-  
+
   // Find connected edges
   const connected = memoryWorldEdges.filter(e => e.source === node.id || e.target === node.id);
-  
-  panel.innerHTML = `
-    <div class="memory-world-sidepanel-content">
-      <div class="memory-world-sidepanel-header">
-        <div class="memory-world-sidepanel-dot" style="background:${tokens.color}; width:16px; height:16px; border-radius:50%;"></div>
-        <h2 class="memory-world-sidepanel-title">${node.label}</h2>
+
+  body.innerHTML = `
+    <div class="mw-inspector-section">
+      <div class="mw-inspector-section-title">Identity</div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Type</div>
+        <div class="mw-inspector-field-value"><span class="badge">${node.type}</span></div>
       </div>
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-section-title">TYPE</div>
-        <div class="memory-world-sidepanel-field">
-          <div class="memory-world-sidepanel-field-label">${node.type}</div>
-          <div class="memory-world-sidepanel-field-value">${cluster.toUpperCase().replace('_', ' ')}</div>
-        </div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Cluster</div>
+        <div class="mw-inspector-field-value">${cluster.toUpperCase().replace('_', ' ')}</div>
       </div>
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-section-title">STATUS</div>
-        <div class="memory-world-sidepanel-field">
-          <div class="memory-world-sidepanel-field-label">Active</div>
-          <div class="memory-world-sidepanel-field-value" style="color:${node.active ? 'var(--success)' : 'var(--text-muted)'}">${node.active ? 'YES' : 'NO'}</div>
-        </div>
-        <div class="memory-world-sidepanel-field">
-          <div class="memory-world-sidepanel-field-label">Risk</div>
-          <div class="memory-world-sidepanel-field-value" style="color:var(--${node.risk === 'high' ? 'danger' : node.risk === 'medium' ? 'warning' : 'success'})">${node.risk.toUpperCase()}</div>
-        </div>
-        <div class="memory-world-sidepanel-field">
-          <div class="memory-world-sidepanel-field-label">Confidence</div>
-          <div class="memory-world-sidepanel-field-value">${Math.round(node.confidence * 100)}%</div>
-        </div>
-        <div class="memory-world-sidepanel-field">
-          <div class="memory-world-sidepanel-field-label">Layer</div>
-          <div class="memory-world-sidepanel-field-value">${node.layer}</div>
-        </div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Layer</div>
+        <div class="mw-inspector-field-value">${node.layer} (${['Zen Core','Infrastructure','Agents & Models','Resources & Memory','Events & Risk'][node.layer] || 'Unknown'})</div>
       </div>
-      ${node.summary ? `
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-section-title">SUMMARY</div>
-        <div class="memory-world-sidepanel-field-value">${node.summary}</div>
-      </div>` : ''}
-      ${Object.keys(node.data || {}).length ? `
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-section-title">DATA</div>
-        <div class="memory-world-sidepanel-data">${JSON.stringify(node.data, null, 2)}</div>
-      </div>` : ''}
-      ${connected.length ? `
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-section-title">CONNECTIONS (${connected.length})</div>
-        <div class="memory-world-sidepanel-connections">
-          ${connected.slice(0, 20).map(e => {
-            const otherId = e.source === node.id ? e.target : e.source;
-            const other = memoryWorldSimNodes.find(s => s.id === otherId);
-            const dir = e.source === node.id ? '→' : '←';
-            const edgeTokens = MEMORY_WORLD_EDGE_TOKENS[e.type] || { color: '#8b9bb3' };
-            return `
-              <div class="memory-world-sidepanel-connection">
-                <span class="memory-world-sidepanel-connection-dir" style="color:${edgeTokens.color}">${dir}</span>
-                <span class="memory-world-sidepanel-connection-target">${other?.node?.label || otherId}</span>
-                <span class="memory-world-sidepanel-connection-type">(${e.type})</span>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>` : ''}
-      <div class="memory-world-sidepanel-section">
-        <div class="memory-world-sidepanel-field-label">Source</div>
-        <div class="memory-world-sidepanel-field-value font-mono" style="font-size:10px; word-break:break-all">${node.source_path || '—'}</div>
+    </div>
+
+    <div class="mw-inspector-section">
+      <div class="mw-inspector-section-title">Status</div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Active</div>
+        <div class="mw-inspector-field-value"><span class="badge ${node.active ? 'badge-active' : 'badge-inactive'}">${node.active ? 'YES' : 'NO'}</span></div>
       </div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Risk</div>
+        <div class="mw-inspector-field-value"><span class="badge badge-risk-${node.risk || 'low'}">${(node.risk || 'low').toUpperCase()}</span></div>
+      </div>
+      <div class="mw-inspector-field">
+        <div class="mw-inspector-field-label">Confidence</div>
+        <div class="mw-inspector-field-value">${Math.round((node.confidence || 1) * 100)}%</div>
+      </div>
+    </div>
+
+    ${node.summary ? `
+    <div class="mw-inspector-section">
+      <div class="mw-inspector-section-title">Summary</div>
+      <div class="mw-inspector-summary">${node.summary}</div>
+    </div>` : ''}
+
+    ${connected.length ? `
+    <div class="mw-inspector-section">
+      <div class="mw-inspector-section-title">Connections (${connected.length})</div>
+      <div class="mw-inspector-connections">
+        ${connected.slice(0, 30).map(e => {
+          const otherId = e.source === node.id ? e.target : e.source;
+          const other = memoryWorldSimNodes.find(s => s.id === otherId);
+          const dir = e.source === node.id ? '→' : '←';
+          const edgeTokens = MEMORY_WORLD_EDGE_TOKENS[e.type] || { color: '#8b9bb3' };
+          return `
+            <div class="mw-inspector-connection">
+              <span class="mw-inspector-connection-dir" style="color:${edgeTokens.color}">${dir}</span>
+              <span class="mw-inspector-connection-target">${other?.node?.label || otherId}</span>
+              <span class="mw-inspector-connection-type">${e.type.replace('_', ' ')}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <div class="mw-inspector-advanced">
+      <button class="mw-inspector-advanced-toggle" onclick="toggleMemoryWorldAdvanced(this)" aria-expanded="false">
+        <span>Advanced / Raw Data</span>
+        <span class="toggle-icon">▸</span>
+      </button>
+      <div class="mw-inspector-advanced-content" id="mw-advanced-content">
+        ${node.data && Object.keys(node.data).length ? `
+        <div class="mw-inspector-raw-data">${JSON.stringify(node.data, null, 2)}</div>
+        ` : '<div class="mw-inspector-raw-data" style="opacity:0.5">No additional data</div>'}
+      </div>
+    </div>
+
+    <div class="mw-inspector-section">
+      <div class="mw-inspector-section-title">Provenance</div>
+      <div class="mw-inspector-source">${node.source_path || '—'}</div>
     </div>
   `;
 }
 
-function hideMemoryWorldSidePanel() {
-  const panel = document.getElementById('memory-world-sidepanel');
-  if (!panel) return;
-  panel.innerHTML = `
-    <div class="memory-world-placeholder">
-      <div class="memory-world-placeholder-icon">🧠</div>
-      <div class="memory-world-placeholder-text">Click a node to inspect details</div>
+function hideMemoryWorldInspector() {
+  const body = document.getElementById('memory-world-inspector-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="memory-world-inspector-placeholder">
+      <div class="memory-world-inspector-icon">🧠</div>
+      <p class="memory-world-inspector-text">Click a node to inspect its identity, connections, and provenance.</p>
     </div>
   `;
+}
+
+function toggleMemoryWorldInspector() {
+  const panel = document.getElementById('memory-world-inspector');
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleMemoryWorldAdvanced(btn) {
+  const content = document.getElementById('mw-advanced-content');
+  if (!content) return;
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', !expanded);
+  if (expanded) {
+    content.classList.remove('open');
+  } else {
+    content.classList.add('open');
+  }
+}
+
+function toggleMemoryWorldLegend() {
+  const content = document.getElementById('memory-world-legend-content');
+  const toggle = document.querySelector('.memory-world-legend-toggle');
+  if (!content || !toggle) return;
+  const expanded = toggle.getAttribute('aria-expanded') === 'true';
+  toggle.setAttribute('aria-expanded', !expanded);
+  content.hidden = expanded;
 }
 
 function updateMemoryWorldTooltip() {
@@ -2786,52 +3400,51 @@ function updateMemoryWorldTooltip() {
     if (tooltip) tooltip.classList.remove('visible');
     return;
   }
-  
+
   const node = memoryWorldHovered.node;
   const tokens = memoryWorldHovered.tokens;
-  
-  tooltip.innerHTML = `
-    <div class="memory-world-tooltip-title" style="color:${tokens.color}">${node.label}</div>
-    <div class="memory-world-tooltip-type">${node.type} · ${sim.cluster.toUpperCase()}</div>
-    <div class="memory-world-tooltip-data">${node.summary || 'No summary'}</div>
-  `;
-  
-  const rect = memoryWorldCanvas.getBoundingClientRect();
-  tooltip.style.left = (event?.clientX || rect.left + 100) + 'px';
-  tooltip.style.top = (event?.clientY || rect.top + 100) + 'px';
-  tooltip.classList.add('visible');
-}
 
-function findMemoryWorldNode(wx, wy) {
-  // Search in reverse (top-most first)
-  for (let i = memoryWorldSimNodes.length - 1; i >= 0; i--) {
-    const sim = memoryWorldSimNodes[i];
-    const dx = wx - sim.x;
-    const dy = wy - sim.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const radius = sim.tokens.baseSize * 1.5;
-    if (dist < radius) return sim;
-  }
-  return null;
+  tooltip.innerHTML = `
+    <div class="memory-world-tooltip-title" style="color:${tokens.color}">${node.sigil || tokens.sigil} ${node.label}</div>
+    <div class="memory-world-tooltip-type">${node.type} · ${sim.cluster.toUpperCase().replace('_', ' ')} · Layer ${node.layer}</div>
+    <div class="memory-world-tooltip-data">${node.summary || 'No summary available'}</div>
+  `;
+
+  const rect = memoryWorldCanvas.getBoundingClientRect();
+  const tx = memoryWorldTransform;
+  const wx = memoryWorldHovered.x;
+  const wy = memoryWorldHovered.y;
+  const screenX = tx.x + wx * tx.scale;
+  const screenY = tx.y + wy * tx.scale;
+
+  tooltip.style.left = (rect.left + screenX) + 'px';
+  tooltip.style.top = (rect.top + screenY - tokens.baseSize - 20) + 'px';
+  tooltip.classList.add('visible');
 }
 
 function filterMemoryWorldLayers(value) {
   memoryWorldLayerFilter = value;
   initMemoryWorldSimulation();
   buildMemoryWorldLegend();
+  updateMemoryWorldStats();
 }
 
 function resetMemoryWorldView() {
   centerMemoryWorldView();
 }
 
-// ═══ PAGE HOOK ═══
-// Hook into showPage to init Memory World when page is shown
+function updateZoomIndicator() {
+  const zoomEl = document.getElementById('memory-world-zoom');
+  if (zoomEl) {
+    zoomEl.textContent = Math.round(memoryWorldTransform.scale * 100) + '%';
+  }
+}
+
+// Page hook
 const _originalShowPage = showPage;
 window.showPage = function(id) {
   _originalShowPage(id);
   if (id === 'memory') {
-    // Small delay to ensure DOM is ready
     setTimeout(initMemoryWorld, 50);
   }
 };
