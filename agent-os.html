@@ -1569,6 +1569,7 @@ function openTaskDrawer(id) {
   const body = document.getElementById('task-drawer-body');
   const actions = document.getElementById('task-drawer-actions');
   document.getElementById('task-drawer-project').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)}`;
+  header.onclick = () => openTaskBoard(task.id);
 
   drawerEditMode = false;
 
