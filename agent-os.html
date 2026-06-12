@@ -437,23 +437,14 @@
     <header class="os-top-bar task-board-top">
       <div class="os-page-title">
         <button class="os-btn os-btn-ghost project-back" onclick="showPage('kanban')">← Board</button>
-        <h2 id="task-board-title">Task Board</h2>
-        <p id="task-board-subtitle">Focused task workspace</p>
+        <p id="task-board-subtitle" style="margin:0">Focused task workspace</p>
       </div>
       <button class="os-btn os-btn-secondary" onclick="openSelectedTaskDrawer()">Open Details</button>
     </header>
     <div class="task-board-layout">
       <section class="task-board-main" id="task-board-overview"></section>
-      <section class="task-board-panel">
-        <header class="task-panel-header">
-          <span>Subtasks</span>
-          <span class="task-panel-meta" id="task-board-progress">0 / 0</span>
-        </header>
-        <div class="subtask-kanban" id="task-board-subtasks"></div>
-      </section>
-      <section class="task-board-panel" id="task-board-evidence"></section>
-      <section class="task-board-panel" id="task-board-activity"></section>
-      <section class="task-board-panel" id="task-board-validation"></section>
+      <section class="task-board-panel" id="task-board-subtasks"></section>
+      <div class="task-board-bottom-row" id="task-board-triple"></div>
     </div>
   </section>
 
@@ -723,10 +714,7 @@
 
 <aside class="task-drawer" id="task-drawer" aria-hidden="true">
   <div class="task-drawer-header" id="task-drawer-header">
-    <div>
-      <div class="task-drawer-kicker" id="task-drawer-project">Project</div>
-      <h3 id="task-drawer-title">Task</h3>
-    </div>
+    <div class="task-drawer-kicker" id="task-drawer-project">Project</div>
     <button class="os-btn os-btn-ghost os-btn-icon" onclick="event.stopPropagation(); closeTaskDrawer()" aria-label="Close task drawer">×</button>
   </div>
   <div class="task-drawer-body" id="task-drawer-body"></div>
@@ -1374,7 +1362,7 @@ const DEFAULT_TASKS = [
   {id:'task-minato-intel-engine-m3-process', title:'M3: Process, dedup + enrich collected data', project:'minato', status:'backlog', priority:'High', risk:'Medium', created:'2026-06-11', lastActive:'Now', archived:false, why:'Raw collection is complete (1,501 records). Next: deduplicate, normalize, enrich (email via Hunter.io, website via Firecrawl, PageSpeed via API), and score leads.', nextAction:'Build processing pipeline: read from raw_collection_events → dedup → normalize → enrich → write to processed table.', notes:'Pipeline: raw_collection_events → dedup by place_id → normalize addresses → enrich (Hunter.io email, Firecrawl site, PageSpeed) → score → output.', subtasks:[{title:'Dedup by place_id',status:'backlog'},{title:'Normalize addresses',status:'backlog'},{title:'Enrich: Hunter.io email lookup',status:'backlog'},{title:'Enrich: Firecrawl website',status:'backlog'},{title:'Enrich: PageSpeed API',status:'backlog'},{title:'Lead scoring model',status:'backlog'},{title:'Output to processed table',status:'backlog'}], evidence:['intel-pg DB: 1,501 raw records'], validation:['Dedup working','Enrichment APIs responding','Scored leads output'], activity:['M3 collection complete — ready for processing']},
 ];
 
-const TASKS_VERSION = 4; // Increment when DEFAULT_TASKS structure changes
+const TASKS_VERSION = 5; // Increment when DEFAULT_TASKS structure changes
 
 function getStoredTasks() {
   try {
@@ -1537,7 +1525,7 @@ function moveTask(id, status) {
 
 function findTask(id) { return getTasks().find(t => t.id === id); }
 
-// ── Inline edit helper ──
+// ── Inline edit helper (used only by pencil-icon edit mode) ──
 function enableInlineEdit(element, field, taskId, options = {}) {
   const currentValue = element.textContent.trim();
   const isTextarea = options.textarea || false;
@@ -1557,10 +1545,8 @@ function enableInlineEdit(element, field, taskId, options = {}) {
     const tasks = getTasks().map(t => t.id === taskId ? {...t, [field]: newValue || currentValue} : t);
     setTasks(tasks);
     const span = document.createElement('span');
-    span.className = 'task-drawer-editable';
+    span.className = 'task-drawer-readonly';
     span.textContent = newValue || currentValue;
-    span.title = 'Click to edit';
-    span.onclick = () => enableInlineEdit(span, field, taskId, options);
     input.replaceWith(span);
   };
 
@@ -1570,6 +1556,9 @@ function enableInlineEdit(element, field, taskId, options = {}) {
     if (e.key === 'Escape') { input.value = currentValue; input.blur(); }
   });
 }
+
+// ── Drawer edit mode state ──
+let drawerEditMode = false;
 
 function openTaskDrawer(id) {
   activeTaskId = id;
@@ -1581,65 +1570,54 @@ function openTaskDrawer(id) {
   const actions = document.getElementById('task-drawer-actions');
   document.getElementById('task-drawer-project').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)}`;
 
-  // Title — inline editable
-  const titleEl = document.createElement('span');
-  titleEl.className = 'task-drawer-editable';
-  titleEl.textContent = task.title;
-  titleEl.title = 'Click to edit';
-  titleEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(titleEl, 'title', task.id); };
+  drawerEditMode = false;
 
-  const titleContainer = document.getElementById('task-drawer-title');
-  titleContainer.innerHTML = '';
-  titleContainer.appendChild(titleEl);
+  // ── Summary box: Title + Meta + Why ──
+  const summaryBox = document.createElement('div');
+  summaryBox.className = 'task-drawer-summary-box';
 
-  header.onclick = () => openTaskBoard(task.id);
+  // Title row with pencil
+  const titleRow = document.createElement('div');
+  titleRow.className = 'task-drawer-summary-title-row';
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'task-drawer-title-text';
+  titleSpan.textContent = task.title;
+  const pencilBtn = document.createElement('button');
+  pencilBtn.className = 'task-drawer-edit-btn';
+  pencilBtn.innerHTML = '✎';
+  pencilBtn.title = 'Edit task';
+  pencilBtn.setAttribute('aria-label', 'Edit task');
+  pencilBtn.onclick = (e) => { e.stopPropagation(); toggleDrawerEditMode(task.id); };
+  titleRow.appendChild(titleSpan);
+  titleRow.appendChild(pencilBtn);
+  summaryBox.appendChild(titleRow);
 
-  // Meta row below title
+  // Meta row inside summary box
   const metaRow = document.createElement('div');
   metaRow.className = 'task-drawer-meta-row';
   metaRow.innerHTML = `
-    <span class="meta-accent">◆ ${task.priority} priority</span>
-    <span class="meta-accent">◆ ${task.risk} risk</span>
+    <span class="meta-priority">${task.priority} priority</span>
+    <span class="meta-risk meta-risk--${String(task.risk).toLowerCase()}">${task.risk} risk</span>
     <span>Created ${task.created}</span>
-    <span>Last active ${task.lastActive}</span>
-    <span>${getStatusLabel(task.status)}</span>`;
+    <span>Last active ${task.lastActive}</span>`;
+  summaryBox.appendChild(metaRow);
 
-  // Summary (why) — longer, more detailed
-  const summarySection = document.createElement('div');
-  summarySection.className = 'task-drawer-summary';
+  // Why text inside summary box
   const whyEl = document.createElement('p');
-  whyEl.className = 'task-drawer-why task-drawer-editable';
+  whyEl.className = 'task-drawer-readonly task-drawer-why-text';
   whyEl.textContent = task.why || 'No description yet.';
-  whyEl.title = 'Click to edit';
-  whyEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(whyEl, 'why', task.id, {textarea: true}); };
-  summarySection.appendChild(whyEl);
+  summaryBox.appendChild(whyEl);
 
-  // Next Action — weighted
+  // ── Next Action box (above subtasks) ──
   const nextActionSection = document.createElement('div');
   nextActionSection.className = 'task-drawer-next-action';
   nextActionSection.innerHTML = `<h4>⚡ Next Action</h4>`;
   const nextActionEl = document.createElement('p');
-  nextActionEl.className = 'task-drawer-editable';
+  nextActionEl.className = 'task-drawer-readonly';
   nextActionEl.textContent = task.nextAction || 'No next action defined.';
-  nextActionEl.title = 'Click to edit';
-  nextActionEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(nextActionEl, 'nextAction', task.id, {textarea: true}); };
   nextActionSection.appendChild(nextActionEl);
 
-  // Notes — user-editable section
-  const notesSection = document.createElement('div');
-  notesSection.className = 'task-drawer-notes';
-  notesSection.innerHTML = `<h4>📝 Notes <small style="font-weight:400;color:var(--text-muted)">— your notes, not Zen's</small></h4>`;
-  const notesTextarea = document.createElement('textarea');
-  notesTextarea.placeholder = 'Write your notes here...';
-  notesTextarea.value = task.notes || '';
-  notesTextarea.onblur = () => {
-    const tasks = getTasks().map(t => t.id === task.id ? {...t, notes: notesTextarea.value} : t);
-    setTasks(tasks);
-  };
-  notesTextarea.onclick = (e) => e.stopPropagation();
-  notesSection.appendChild(notesTextarea);
-
-  // Subtasks — mini Kanban, big focus
+  // ── Subtasks — mini Kanban with drag-and-drop ──
   const subtaskSection = document.createElement('div');
   subtaskSection.className = 'task-drawer-subtasks';
   const subtaskCount = (task.subtasks || []).filter(s => s.status === 'done' || s.status === 'running').length;
@@ -1649,30 +1627,48 @@ function openTaskDrawer(id) {
   miniKanban.className = 'subtask-kanban';
   miniKanban.innerHTML = KANBAN_COLUMNS.map(col => {
     const colSubtasks = (task.subtasks || []).filter(s => s.status === col.id);
-    return `<div class="subtask-column">
+    return `<div class="subtask-column" data-col="${col.id}" ondragover="allowSubtaskDrop(event)" ondrop="dropSubtask(event,'${task.id}','${col.id}')">
       <div class="subtask-column-title">${col.label}</div>
-      ${colSubtasks.map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" onclick="event.stopPropagation(); cycleSubtaskStatus('${task.id}','${s.title}')">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}
+      ${colSubtasks.map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="true" ondragstart="dragSubtask(event,'${task.id}','${s.title}')" onclick="event.stopPropagation(); cycleSubtaskStatus('${task.id}','${s.title}')">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}
     </div>`;
   }).join('');
   subtaskSection.appendChild(miniKanban);
 
-  // Evidence / Validation pills
-  const evidenceSection = document.createElement('div');
-  evidenceSection.innerHTML = `<div class="task-pill-list">${(task.evidence || []).map(e => `<span>${escapeHtml(e)}</span>`).join('') || '<span style="color:var(--text-muted);font-size:var(--text-xs)">No evidence yet</span>'}</div>`;
+  // ── Bottom row: Evidence + Notes + Hermes (placeholder) ──
+  const bottomRow = document.createElement('div');
+  bottomRow.className = 'task-drawer-bottom-row';
 
-  // Activity
-  const activitySection = document.createElement('div');
-  activitySection.innerHTML = (task.activity || []).map(a => `<div class="task-activity-row">${escapeHtml(a)}</div>`).join('') || '<div class="task-muted">No activity yet.</div>';
+  const evidenceCol = document.createElement('div');
+  evidenceCol.className = 'task-drawer-bottom-col';
+  evidenceCol.innerHTML = `<h4>🔗 Evidence / Links</h4><div class="task-pill-list">${(task.evidence || []).map(e => `<span>${escapeHtml(e)}</span>`).join('') || '<span style="color:var(--text-muted);font-size:var(--text-xs)">No evidence yet</span>'}</div>`;
 
-  // Build body
+  const notesCol = document.createElement('div');
+  notesCol.className = 'task-drawer-bottom-col';
+  notesCol.innerHTML = `<h4>📝 Notes <small style="font-weight:400;color:var(--text-muted)">— your notes, not Zen's</small></h4>`;
+  const notesTextarea = document.createElement('textarea');
+  notesTextarea.placeholder = 'Write your notes here...';
+  notesTextarea.value = task.notes || '';
+  notesTextarea.onblur = () => {
+    const tasks = getTasks().map(t => t.id === task.id ? {...t, notes: notesTextarea.value} : t);
+    setTasks(tasks);
+  };
+  notesTextarea.onclick = (e) => e.stopPropagation();
+  notesCol.appendChild(notesTextarea);
+
+  const hermesCol = document.createElement('div');
+  hermesCol.className = 'task-drawer-bottom-col task-drawer-bottom-col--placeholder';
+  hermesCol.innerHTML = `<h4>💬 Hermes Chat</h4><div class="task-drawer-placeholder-box"><span style="color:var(--text-muted);font-size:var(--text-xs)">Coming soon</span></div>`;
+
+  bottomRow.appendChild(evidenceCol);
+  bottomRow.appendChild(notesCol);
+  bottomRow.appendChild(hermesCol);
+
+  // ── Build body ──
   body.innerHTML = '';
-  body.appendChild(metaRow);
-  body.appendChild(summarySection);
+  body.appendChild(summaryBox);
   body.appendChild(nextActionSection);
-  body.appendChild(notesSection);
   body.appendChild(subtaskSection);
-  body.appendChild(evidenceSection);
-  body.appendChild(activitySection);
+  body.appendChild(bottomRow);
 
   // Actions footer
   actions.innerHTML = renderTaskActions(task);
@@ -1680,6 +1676,78 @@ function openTaskDrawer(id) {
   drawer.classList.add('open');
   drawer.setAttribute('aria-hidden', 'false');
   document.getElementById('task-drawer-scrim').classList.add('open');
+}
+
+function toggleDrawerEditMode(taskId) {
+  drawerEditMode = !drawerEditMode;
+  const task = findTask(taskId);
+  if (!task) return;
+
+  const body = document.getElementById('task-drawer-body');
+  const summaryBox = body.querySelector('.task-drawer-summary-box');
+  const titleRow = summaryBox.querySelector('.task-drawer-summary-title-row');
+  const titleSpan = titleRow.querySelector('.task-drawer-title-text');
+  const pencilBtn = titleRow.querySelector('.task-drawer-edit-btn');
+
+  if (drawerEditMode) {
+    pencilBtn.innerHTML = '✓';
+    pencilBtn.title = 'Save';
+    pencilBtn.classList.add('editing');
+    enableInlineEdit(titleSpan, 'title', taskId);
+
+    // Make why editable
+    const whyEl = summaryBox.querySelector('.task-drawer-why-text');
+    if (whyEl) {
+      whyEl.className = 'task-drawer-editable task-drawer-why-text';
+      whyEl.title = 'Click to edit';
+      whyEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(whyEl, 'why', taskId, {textarea: true}); };
+    }
+
+    // Make next action editable
+    const nextP = body.querySelector('.task-drawer-next-action .task-drawer-readonly');
+    if (nextP) {
+      nextP.className = 'task-drawer-editable';
+      nextP.title = 'Click to edit';
+      nextP.onclick = (e) => { e.stopPropagation(); enableInlineEdit(nextP, 'nextAction', taskId, {textarea: true}); };
+    }
+  } else {
+    pencilBtn.innerHTML = '✎';
+    pencilBtn.title = 'Edit task';
+    pencilBtn.classList.remove('editing');
+    openTaskDrawer(taskId);
+  }
+}
+
+// ── Subtask drag-and-drop ──
+let draggedSubtask = {taskId: null, title: null};
+
+function dragSubtask(event, taskId, subtaskTitle) {
+  draggedSubtask = {taskId, title: subtaskTitle};
+  event.dataTransfer.setData('text/plain', subtaskTitle);
+  event.dataTransfer.effectAllowed = 'move';
+}
+
+function allowSubtaskDrop(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+}
+
+function dropSubtask(event, taskId, newStatus) {
+  event.preventDefault();
+  if (!draggedSubtask.taskId || draggedSubtask.taskId !== taskId) return;
+  const subtaskTitle = draggedSubtask.title;
+  draggedSubtask = {taskId: null, title: null};
+
+  const tasks = getTasks().map(t => {
+    if (t.id !== taskId) return t;
+    const subtasks = (t.subtasks || []).map(s => {
+      if (s.title !== subtaskTitle) return s;
+      return {...s, status: newStatus};
+    });
+    return {...t, subtasks, lastActive: 'Now', activity: [...(t.activity || []), `Moved "${subtaskTitle}" to ${getStatusLabel(newStatus)}`]};
+  });
+  setTasks(tasks);
+  openTaskDrawer(taskId);
 }
 
 function cycleSubtaskStatus(taskId, subtaskTitle) {
@@ -1747,15 +1815,99 @@ function openTaskBoard(id) {
 function renderTaskBoard(id) {
   const task = findTask(id);
   if (!task) return;
-  document.getElementById('task-board-title').textContent = task.title;
-  document.getElementById('task-board-subtitle').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)} · ${task.lastActive}`;
-  document.getElementById('task-board-overview').innerHTML = `<div class="task-board-hero" style="--task-color:${PROJECT_COLORS[task.project] || 'var(--accent)'}"><span class="task-board-pill">${escapeHtml(getProjectLabel(task.project))}</span><h3>${escapeHtml(task.title)}</h3><p>${escapeHtml(task.why)}</p><div class="task-board-meta"><span>${escapeHtml(task.priority)} priority</span><span>${escapeHtml(task.risk)} risk</span><span>Created ${escapeHtml(task.created)}</span><span>Last active ${escapeHtml(task.lastActive)}</span></div></div><div class="task-board-notes"><h4>Notes</h4><p>${escapeHtml(task.notes || 'No notes yet.')}</p><h4>Next Action</h4><p>${escapeHtml(task.nextAction)}</p></div>`;
+
+  document.getElementById('task-board-subtitle').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)}`;
+
+  // Summary card: project badge + title + pencil + meta + why
+  document.getElementById('task-board-overview').innerHTML = `
+    <div class="task-board-summary-card" style="--task-color:${PROJECT_COLORS[task.project] || 'var(--accent)'}">
+      <div class="task-board-summary-title-row">
+        <h3 id="task-board-title">${escapeHtml(task.title)}</h3>
+        <button class="task-drawer-edit-btn" id="task-board-edit-btn" onclick="toggleTaskBoardEditMode()" title="Edit task" aria-label="Edit task">✎</button>
+      </div>
+      <div class="task-board-meta-row">
+        <span class="meta-priority">${task.priority} priority</span>
+        <span class="meta-risk meta-risk--${String(task.risk).toLowerCase()}">${task.risk} risk</span>
+        <span>Created ${task.created}</span>
+        <span>Last active ${task.lastActive}</span>
+      </div>
+      <p class="task-board-why" id="task-board-why">${escapeHtml(task.why || 'No description yet.')}</p>
+    </div>`;
+
+  // Next Action box
+  document.getElementById('task-board-subtasks').innerHTML = `
+    <div class="task-board-next-action">
+      <h4>⚡ Next Action</h4>
+      <p id="task-board-next-action">${escapeHtml(task.nextAction || 'No next action defined.')}</p>
+    </div>
+    <div class="task-board-subtasks-header">
+      <h4>📋 Subtasks <span id="task-board-progress">0 / 0</span></h4>
+    </div>`;
+
+  // Subtasks with drag-and-drop
   const subtasks = task.subtasks || [];
   document.getElementById('task-board-progress').textContent = `${subtasks.filter(s => s.status === 'done' || s.status === 'running').length} / ${subtasks.length}`;
-  document.getElementById('task-board-subtasks').innerHTML = KANBAN_COLUMNS.map(col => `<div class="subtask-column"><div class="subtask-column-title">${col.label}</div>${subtasks.filter(s => s.status === col.id).map(s => `<div class="subtask-card">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty">Empty</div>'}</div>`).join('');
-  document.getElementById('task-board-evidence').innerHTML = `<header class="task-panel-header"><span>Evidence / Links</span></header>${renderPillList(task.evidence)}`;
-  document.getElementById('task-board-activity').innerHTML = `<header class="task-panel-header"><span>Activity Log</span></header>${renderActivityList(task.activity)}`;
-  document.getElementById('task-board-validation').innerHTML = `<header class="task-panel-header"><span>Validation Checklist</span></header>${renderChecklist((task.validation || []).map(v => ({title:v, status:task.status === 'running' || task.status === 'done' ? 'done' : 'validate'})))}`;
+  const subtaskKanban = document.createElement('div');
+  subtaskKanban.className = 'subtask-kanban';
+  subtaskKanban.innerHTML = KANBAN_COLUMNS.map(col => `<div class="subtask-column" data-col="${col.id}" ondragover="allowSubtaskDrop(event)" ondrop="dropSubtask(event,'${task.id}','${col.id}')"><div class="subtask-column-title">${col.label}</div>${subtasks.filter(s => s.status === col.id).map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="true" ondragstart="dragSubtask(event,'${task.id}','${s.title}')" onclick="event.stopPropagation(); cycleSubtaskStatus('${task.id}','${s.title}')">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}</div>`).join('');
+  document.getElementById('task-board-subtasks').appendChild(subtaskKanban);
+
+  // Bottom row: Evidence + Notes + Hermes
+  document.getElementById('task-board-triple').innerHTML = `
+    <div class="task-board-bottom-col">
+      <h4>🔗 Evidence / Links</h4>
+      <div class="task-pill-list">${(task.evidence || []).map(e => `<span>${escapeHtml(e)}</span>`).join('') || '<span style="color:var(--text-muted);font-size:var(--text-xs)">No evidence yet</span>'}</div>
+    </div>
+    <div class="task-board-bottom-col">
+      <h4>📝 Notes <small style="font-weight:400;color:var(--text-muted)">— your notes</small></h4>
+      <textarea id="task-board-notes-input" placeholder="Write your notes here...">${escapeHtml(task.notes || '')}</textarea>
+    </div>
+    <div class="task-board-bottom-col" style="opacity:0.6">
+      <h4>💬 Hermes Chat</h4>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:80px;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);"><span style="color:var(--text-muted);font-size:var(--text-xs)">Coming soon</span></div>
+    </div>`;
+
+  // Auto-save notes
+  document.getElementById('task-board-notes-input').onblur = function() {
+    var tasks = getTasks().map(function(t) { return t.id === task.id ? Object.assign({}, t, {notes: this.value}) : t; }.bind(this));
+    setTasks(tasks);
+  };
+}
+
+let taskBoardEditMode = false;
+
+function toggleTaskBoardEditMode() {
+  taskBoardEditMode = !taskBoardEditMode;
+  const btn = document.getElementById('task-board-edit-btn');
+  const task = findTask(activeTaskId);
+  if (!task) return;
+
+  if (taskBoardEditMode) {
+    btn.innerHTML = '✓';
+    btn.title = 'Save';
+    btn.classList.add('editing');
+
+    // Make why editable
+    const whyEl = document.getElementById('task-board-why');
+    if (whyEl) {
+      whyEl.className = 'task-board-why task-drawer-editable';
+      whyEl.title = 'Click to edit';
+      whyEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(whyEl, 'why', task.id, {textarea: true}); };
+    }
+
+    // Make next action editable
+    const nextEl = document.getElementById('task-board-next-action');
+    if (nextEl) {
+      nextEl.className = 'task-drawer-editable';
+      nextEl.title = 'Click to edit';
+      nextEl.onclick = (e) => { e.stopPropagation(); enableInlineEdit(nextEl, 'nextAction', task.id, {textarea: true}); };
+    }
+  } else {
+    btn.innerHTML = '✎';
+    btn.title = 'Edit task';
+    btn.classList.remove('editing');
+    renderTaskBoard(activeTaskId);
+  }
 }
 
 function renderPillList(items = []) {
