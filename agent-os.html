@@ -260,133 +260,60 @@
 <main class="os-main">
 
   <!-- ═══ DASHBOARD ═══ -->
-  <section id="page-dashboard" class="os-page">
+  <section id="page-dashboard" class="os-page dashboard-page">
+
+    <!-- Dashboard cosmic background -->
+    <div class="dashboard-cosmos" aria-hidden="true">
+      <span class="dashboard-star ds-1"></span>
+      <span class="dashboard-star ds-2"></span>
+      <span class="dashboard-star ds-3"></span>
+      <span class="dashboard-star ds-4"></span>
+      <span class="dashboard-star ds-5"></span>
+      <span class="dashboard-star ds-6"></span>
+      <span class="dashboard-star ds-7"></span>
+      <span class="dashboard-star ds-8"></span>
+      <span class="dashboard-star ds-9"></span>
+      <span class="dashboard-star ds-10"></span>
+      <span class="dashboard-star ds-11"></span>
+      <span class="dashboard-star ds-12"></span>
+    </div>
+
+    <!-- Top Bar -->
     <header class="os-top-bar">
       <div class="os-page-title">
         <h2>Mission Control</h2>
         <p id="current-time">Loading...</p>
       </div>
       <div class="os-top-actions">
-        <input type="text" class="os-search" placeholder="Search...">
+        <input type="text" class="os-search" placeholder="Search agents, tasks, events...">
         <button class="os-btn os-btn-primary" onclick="refreshData()">↻ Refresh</button>
       </div>
     </header>
 
-    <!-- Dashboard Hero -->
-    <section class="os-hero dashboard-section" id="dashboard-hero">
-      <div class="os-hero-header">
-        <div class="os-hero-project">
-          <div class="os-hero-avatar" id="hero-avatar">📊</div>
-          <div class="os-hero-info">
-            <h3 id="hero-project-name">Kiyosaki</h3>
-            <p id="hero-project-desc">ETH 5M Ensemble Strategy</p>
-          </div>
-        </div>
-        <span class="os-hero-health warning" id="hero-health">⚠ At Risk</span>
+    <!-- Agent Workforce Row -->
+    <section class="dashboard-section">
+      <div class="dashboard-section-header">
+        <h3 class="dashboard-section-title">Agent Workforce</h3>
+        <span class="dashboard-section-subtitle">6 agents · 2 active · 4 idle</span>
       </div>
-
-      <div class="os-hero-progress">
-        <div class="os-hero-progress-bar">
-          <div class="os-hero-progress-fill" id="hero-progress-fill" style="width: 68%"></div>
-        </div>
-        <div class="os-hero-progress-meta">
-          <span id="hero-progress-pct">68% complete</span>
-          <span id="hero-progress-sprint">Sprint 3 of 5</span>
-          <span id="hero-progress-tasks">12 tasks left</span>
-        </div>
-      </div>
-
-      <div class="os-hero-focus">
-        <div class="os-hero-focus-label">What matters right now</div>
-        <div class="os-hero-focus-list" id="hero-focus-list">
-          <div class="os-hero-focus-item">
-            <span class="os-hero-focus-dot blocked"></span>
-            <span>Swarm drawdown circuit breakers (SB-016) — blocked, needs review</span>
-          </div>
-          <div class="os-hero-focus-item">
-            <span class="os-hero-focus-dot progress"></span>
-            <span>300-strategy diversity coverage (SB-017) — in progress</span>
-          </div>
-          <div class="os-hero-focus-item">
-            <span class="os-hero-focus-dot review"></span>
-            <span>Strategy health dashboard (SB-015) — pending acceptance</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="os-hero-actions">
-        <div class="os-hero-next-gate">
-          <span class="os-hero-next-gate-text" id="hero-next-gate">Next Safe Gate: Review SB-016 → Accept → Promote to risk rules</span>
-          <button class="os-btn os-btn-primary os-btn-sm" onclick="jumpToReview('SB-016')">Review Now</button>
-        </div>
-        <button class="os-btn os-btn-secondary os-btn-sm" onclick="showPage('sandbox')">View All Gates</button>
-      </div>
+      <div class="dashboard-agent-grid" id="agent-grid"></div>
     </section>
 
-    <!-- Action Queue -->
-    <section class="os-action-queue" id="action-queue">
-      <div class="os-queue-column os-queue-review">
-        <header class="os-queue-header">
-          <span class="os-queue-title"><span class="os-badge-dot info"></span> REVIEW</span>
-          <span class="os-queue-count" id="queue-review-count">0</span>
-        </header>
-        <div class="os-queue-body" id="queue-review-body">
-          <div class="os-queue-empty">No pending reviews</div>
-        </div>
+    <!-- Metrics Pipeline -->
+    <section class="dashboard-section">
+      <div class="dashboard-section-header">
+        <h3 class="dashboard-section-title">System Metrics</h3>
+        <span class="dashboard-section-subtitle">Live pipeline health</span>
       </div>
-
-      <div class="os-queue-column os-queue-blocked">
-        <header class="os-queue-header">
-          <span class="os-queue-title"><span class="os-badge-dot danger"></span> BLOCKED</span>
-          <span class="os-queue-count" id="queue-blocked-count">0</span>
-        </header>
-        <div class="os-queue-body" id="queue-blocked-body">
-          <div class="os-queue-empty">No blocked items</div>
-        </div>
-      </div>
-
-      <div class="os-queue-column os-queue-retry">
-        <header class="os-queue-header">
-          <span class="os-queue-title"><span class="os-badge-dot warning"></span> RETRY</span>
-          <span class="os-queue-count" id="queue-retry-count">0</span>
-        </header>
-        <div class="os-queue-body" id="queue-retry-body">
-          <div class="os-queue-empty">No retry items</div>
-        </div>
-      </div>
-
-      <div class="os-queue-column os-queue-promote">
-        <header class="os-queue-header">
-          <span class="os-queue-title"><span class="os-badge-dot ok"></span> PROMOTE</span>
-          <span class="os-queue-count" id="queue-promote-count">0</span>
-        </header>
-        <div class="os-queue-body" id="queue-promote-body">
-          <div class="os-queue-empty">No promotion candidates</div>
-        </div>
-      </div>
-
-      <div class="os-queue-column os-queue-done">
-        <header class="os-queue-header">
-          <span class="os-queue-title"><span class="os-badge-dot muted"></span> DONE</span>
-          <span class="os-queue-count" id="queue-done-count">0</span>
-        </header>
-        <div class="os-queue-body" id="queue-done-body">
-          <div class="os-queue-empty">No recent completions</div>
-        </div>
-      </div>
+      <div class="dashboard-metrics-grid" id="stats-row"></div>
     </section>
 
-    <!-- Agent Grid -->
-    <div class="os-grid-6 dashboard-section" id="agent-grid"></div>
-
-    <!-- KPIs -->
-    <div class="os-stats-row dashboard-section" id="stats-row"></div>
-
-    <!-- Activity & Project Status -->
-    <div class="os-grid-2 dashboard-section">
-      <div class="os-card">
-        <header class="os-card-header">
-          <span class="os-card-title">Activity Feed</span>
+    <!-- Activity & Projects -->
+    <div class="dashboard-lower-grid">
+      <!-- Activity Feed -->
+      <section class="dashboard-card dashboard-activity">
+        <header class="dashboard-card-header">
+          <h3 class="dashboard-card-title">Activity Feed</h3>
           <div class="os-tab-bar">
             <button class="os-tab active" onclick="filterActivity('all',this)">All</button>
             <button class="os-tab" onclick="filterActivity('zen',this)">Zen</button>
@@ -394,17 +321,21 @@
             <button class="os-tab" onclick="filterActivity('system',this)">System</button>
           </div>
         </header>
-        <div class="os-card-body" id="activity-feed"></div>
-      </div>
+        <div class="dashboard-card-body" id="activity-feed"></div>
+      </section>
 
-      <div class="os-card">
-        <header class="os-card-header">
-          <span class="os-card-title">Project Status</span>
+      <!-- Project Status -->
+      <section class="dashboard-card dashboard-projects">
+        <header class="dashboard-card-header">
+          <h3 class="dashboard-card-title">Project Status</h3>
         </header>
-        <div class="os-card-body" style="padding:0">
-          <table class="os-table"><thead><tr><th>Project</th><th>Status</th><th>Prompts</th><th>Accepted</th><th>Last Active</th></tr></thead><tbody id="project-tbody"></tbody></table>
+        <div class="dashboard-card-body" style="padding:0">
+          <table class="os-table dashboard-table">
+            <thead><tr><th>Project</th><th>Status</th><th>Prompts</th><th>Accepted</th><th>Last Active</th></tr></thead>
+            <tbody id="project-tbody"></tbody>
+          </table>
         </div>
-      </div>
+      </section>
     </div>
   </section>
 
@@ -1387,21 +1318,24 @@ const agents = [
 
 function renderAgents() {
   const projData = DASHBOARD_DATA?.projects || {};
+  const agentColors = { zen: 'var(--zen)', kiyosaki: 'var(--kiyosaki)', rin: 'var(--rin)', minato: 'var(--minato)', toji: 'var(--toji)', kazuki: 'var(--kazuki)' };
   document.getElementById('agent-grid').innerHTML = agents.map(a => {
     const p = projData[a.name] || {};
-    return `<div class="os-card os-card-hover os-card-interactive" onclick="openProject('${a.id}')">
-      <div class="os-agent-header">
-        <div class="os-agent-avatar">${a.avatar}</div>
-        <div class="os-agent-name">${a.name}</div>
+    const color = agentColors[a.id] || 'var(--accent)';
+    const isIdle = a.status !== 'active';
+    return `<div class="dashboard-agent-card" style="--agent-color:${color}" onclick="openProject('${a.id}')">
+      <div class="dashboard-agent-top">
+        <div class="dashboard-agent-avatar">${a.avatar}</div>
+        <div class="dashboard-agent-name">${a.name}</div>
       </div>
-      <div class="os-agent-status">
-        <div class="os-dot ${a.status==='active'?'ok':'muted'}"></div>
-        ${a.status==='active'?'Active':'Idle'}
+      <div class="dashboard-agent-status">
+        <div class="os-dot ${isIdle ? 'muted' : 'ok'}"></div>
+        ${isIdle ? 'Idle' : 'Active'}
       </div>
-      <div class="os-agent-task">${a.status==='active'?'Working on active tasks':'Waiting for assignment'}</div>
-      <div class="os-agent-stats">
-        <div class="os-agent-stat"><strong>${p.accepted||0}</strong> accepted</div>
-        <div class="os-agent-stat"><strong>${p.total||0}</strong> total</div>
+      <div class="dashboard-agent-task">${isIdle ? 'Waiting for assignment' : 'Working on active tasks'}</div>
+      <div class="dashboard-agent-stats">
+        <div class="dashboard-agent-stat"><strong>${p.accepted || 0}</strong> accepted</div>
+        <div class="dashboard-agent-stat"><strong>${p.total || 0}</strong> total</div>
       </div>
     </div>`;
   }).join('');
@@ -1823,36 +1757,61 @@ function getProjectActivity(projectId) {
 // ═══ STATS ═══
 function renderStats() {
   const sb = DASHBOARD_DATA?.sandbox || {};
+  const pct = sb.total ? Math.round(sb.accepted / sb.total * 100) : 0;
   document.getElementById('stats-row').innerHTML = `
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Total Prompts</span></div><div class="os-stat-value">${sb.total||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:100%;background:var(--accent)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Accepted</span><span class="os-stat-badge up">${sb.total?Math.round(sb.accepted/sb.total*100):0}%</span></div><div class="os-stat-value">${sb.accepted||0}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:${sb.total?sb.accepted/sb.total*100:0}%;background:var(--success)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">API Calls Today</span></div><div class="os-stat-value">${fmtTokens(DASHBOARD_DATA?.token_usage?.today?.calls||0)}</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:72%;background:var(--info)"></div></div></div>
-    <div class="os-stat-card"><div class="os-stat-header"><span class="os-stat-label">Active Sessions</span></div><div class="os-stat-value">12</div><div class="os-stat-bar"><div class="os-stat-bar-fill" style="width:40%;background:var(--warning)"></div></div></div>`;
+    <div class="dashboard-metric" style="--metric-color:var(--accent)">
+      <div class="dashboard-metric-header">
+        <span class="dashboard-metric-label">Total Prompts</span>
+      </div>
+      <div class="dashboard-metric-value">${sb.total || 0}</div>
+      <div class="dashboard-metric-bar"><div class="dashboard-metric-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="dashboard-metric" style="--metric-color:var(--success)">
+      <div class="dashboard-metric-header">
+        <span class="dashboard-metric-label">Accepted</span>
+        <span class="dashboard-metric-badge">${pct}%</span>
+      </div>
+      <div class="dashboard-metric-value">${sb.accepted || 0}</div>
+      <div class="dashboard-metric-bar"><div class="dashboard-metric-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="dashboard-metric" style="--metric-color:var(--info)">
+      <div class="dashboard-metric-header">
+        <span class="dashboard-metric-label">API Calls Today</span>
+      </div>
+      <div class="dashboard-metric-value">${fmtTokens(DASHBOARD_DATA?.token_usage?.today?.calls || 0)}</div>
+      <div class="dashboard-metric-bar"><div class="dashboard-metric-bar-fill" style="width:72%"></div></div>
+    </div>
+    <div class="dashboard-metric" style="--metric-color:var(--warning)">
+      <div class="dashboard-metric-header">
+        <span class="dashboard-metric-label">Active Sessions</span>
+      </div>
+      <div class="dashboard-metric-value">12</div>
+      <div class="dashboard-metric-bar"><div class="dashboard-metric-bar-fill" style="width:40%"></div></div>
+    </div>`;
 }
 
 // ═══ ACTIVITY ═══
 const activities = [
-  {agent:'Minato',color:'var(--accent)',text:'M3 collection complete — 1,501 AU business records across 15 niche×city combos',time:'Just now'},
-  {agent:'Minato',color:'var(--success)',text:'Fixed collector: force-click, h1.DUwDvf selector, go_back nav, async .all(), FK constraint',time:'15m ago'},
-  {agent:'Minato',color:'var(--info)',text:'Built Intel Engine M3 pipeline: Docker + Playwright + asyncpg + PostgreSQL',time:'1h ago'},
-  {agent:'Zen',color:'var(--accent)',text:'rebuilt Agent OS Dashboard v2.1 — all pages functional with live data',time:'3h ago'},
-  {agent:'Zen',color:'var(--success)',text:'integrated real token usage tracking from Hermes agent logs',time:'3h ago'},
-  {agent:'System',color:'var(--success)',text:'SB Prompt Index deduplicated — 0 pending review',time:'4h ago'},
-  {agent:'Kiyosaki',color:'var(--info)',text:'sandbox batch complete — 68 prompts, 4.7 avg quality',time:'6h ago'},
+  {agent:'Minato',color:'var(--minato)',text:'M3 collection complete — 1,501 AU business records across 15 niche×city combos',time:'Just now'},
+  {agent:'Minato',color:'var(--minato)',text:'Fixed collector: force-click, h1.DUwDvf selector, go_back nav, async .all(), FK constraint',time:'15m ago'},
+  {agent:'Minato',color:'var(--minato)',text:'Built Intel Engine M3 pipeline: Docker + Playwright + asyncpg + PostgreSQL',time:'1h ago'},
+  {agent:'Zen',color:'var(--zen)',text:'rebuilt Agent OS Dashboard v2.1 — all pages functional with live data',time:'3h ago'},
+  {agent:'Zen',color:'var(--zen)',text:'integrated real token usage tracking from Hermes agent logs',time:'3h ago'},
+  {agent:'System',color:'var(--text-muted)',text:'SB Prompt Index deduplicated — 0 pending review',time:'4h ago'},
+  {agent:'Kiyosaki',color:'var(--kiyosaki)',text:'sandbox batch complete — 68 prompts, 4.7 avg quality',time:'6h ago'},
 ];
 
 function renderActivity(filter) {
   const feed = document.getElementById('activity-feed');
-  const filtered = filter==='all'?activities:activities.filter(a=>a.agent.toLowerCase()===filter);
-  feed.innerHTML = filtered.map((a,i) => `
-    <div class="os-timeline-item">
-      <div class="os-timeline-dot ${a.agent==='Zen'?'info':a.agent==='Kiyosaki'?'ok':a.agent==='System'?'ok':'warning'}"></div>
-      <div class="os-timeline-content">
-        <div class="os-timeline-text"><strong>${a.agent}</strong> ${a.text}</div>
-        <div class="os-timeline-time">${a.time}</div>
+  const filtered = filter === 'all' ? activities : activities.filter(a => a.agent.toLowerCase() === filter);
+  feed.innerHTML = filtered.map(a => `
+    <div class="dashboard-activity-entry">
+      <span class="dashboard-activity-dot" style="background:${a.color};color:${a.color}"></span>
+      <div class="dashboard-activity-content">
+        <div class="dashboard-activity-text"><strong>${a.agent}</strong> ${a.text}</div>
+        <div class="dashboard-activity-time">${a.time}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function filterActivity(filter, btn) {
@@ -1867,10 +1826,10 @@ function renderProjectTable() {
   const rows = Object.entries(proj).map(([name, d]) => `
     <tr>
       <td><strong>${name}</strong></td>
-      <td><span class="os-badge ${d.accepted?'success':'idle'}">${d.accepted?'Active':'Idle'}</span></td>
+      <td><span class="dashboard-status-badge ${d.accepted ? 'active' : 'idle'}">${d.accepted ? '● Active' : '○ Idle'}</span></td>
       <td>${d.total}</td>
-      <td class="text-success">${d.accepted||0}</td>
-      <td class="text-muted">${name==='Zen'?'Now':name==='Kiyosaki'?'2h ago':'—'}</td>
+      <td>${d.accepted || 0}</td>
+      <td style="color:var(--text-muted)">${name === 'Zen' ? 'Now' : name === 'Kiyosaki' ? '2h ago' : '—'}</td>
     </tr>`).join('');
   document.getElementById('project-tbody').innerHTML = rows || '<tr><td colspan="5" class="text-center text-muted" style="padding:20px">No project data</td></tr>';
 }
