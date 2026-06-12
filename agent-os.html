@@ -1506,6 +1506,14 @@ function archiveTask(id) {
   if (activeProject) renderProjectDetail(projectInfo[activeProject], getProjectStats(activeProject), projectPrompts, getProjectActivity(activeProject));
 }
 
+function unarchiveTask(id) {
+  const tasks = getTasks().map(t => t.id === id ? {...t, archived:false, lastActive:'Now', activity:[...(t.activity || []), 'Unarchived from task drawer']} : t);
+  setTasks(tasks);
+  closeTaskDrawer();
+  renderKanbanBoard();
+  if (activeProject) renderProjectDetail(projectInfo[activeProject], getProjectStats(activeProject), projectPrompts, getProjectActivity(activeProject));
+}
+
 function dragTask(event, id) { event.dataTransfer.setData('text/plain', id); }
 function allowTaskDrop(event) { event.preventDefault(); }
 function dropTask(event, status) { event.preventDefault(); moveTask(event.dataTransfer.getData('text/plain'), status); }
@@ -1681,12 +1689,16 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
 
 function renderTaskActions(task) {
   const actions = [];
-  if (task.status !== 'wip') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','wip')">Move to WIP</button>`);
-  if (task.status !== 'validate') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','validate')">Send to Validate</button>`);
-  if (task.status !== 'done') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Mark Done</button>`);
-  if (task.status === 'done') actions.push(`<button class="os-btn os-btn-primary" onclick="moveTask('${task.id}','running')">Run</button>`);
-  if (task.status === 'running') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Stop Running</button>`);
-  actions.push(`<button class="os-btn os-btn-danger" onclick="archiveTask('${task.id}')">Archive</button>`);
+  if (task.archived) {
+    actions.push(`<button class="os-btn os-btn-secondary" onclick="unarchiveTask('${task.id}')" style="flex:2">↩ Unarchive</button>`);
+  } else {
+    if (task.status !== 'wip') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','wip')">Move to WIP</button>`);
+    if (task.status !== 'validate') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','validate')">Send to Validate</button>`);
+    if (task.status !== 'done') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Mark Done</button>`);
+    if (task.status === 'done') actions.push(`<button class="os-btn os-btn-primary" onclick="moveTask('${task.id}','running')">Run</button>`);
+    if (task.status === 'running') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Stop Running</button>`);
+    actions.push(`<button class="os-btn os-btn-danger" onclick="archiveTask('${task.id}')">Archive</button>`);
+  }
   return actions.join('');
 }
 
