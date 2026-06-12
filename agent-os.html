@@ -1748,7 +1748,13 @@ function dropSubtask(event, taskId, newStatus) {
     return {...t, subtasks, lastActive: 'Now', activity: [...(t.activity || []), `Moved "${subtaskTitle}" to ${getStatusLabel(newStatus)}`]};
   });
   setTasks(tasks);
-  openTaskDrawer(taskId);
+  // If task board page is visible, re-render it; otherwise refresh drawer if open
+  var tb = document.getElementById('page-task-board');
+  if (tb && tb.style.display === 'block') {
+    renderTaskBoard(taskId);
+  } else if (document.querySelector('.task-drawer.open')) {
+    openTaskDrawer(taskId);
+  }
 }
 
 function cycleSubtaskStatus(taskId, subtaskTitle) {
@@ -1762,7 +1768,13 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
     return {...t, subtasks};
   });
   setTasks(tasks);
-  openTaskDrawer(taskId);
+  // If task board page is visible, re-render it; otherwise refresh drawer if open
+  var tb = document.getElementById('page-task-board');
+  if (tb && tb.style.display === 'block') {
+    renderTaskBoard(taskId);
+  } else if (document.querySelector('.task-drawer.open')) {
+    openTaskDrawer(taskId);
+  }
 }
 
 function renderTaskActions(task) {
