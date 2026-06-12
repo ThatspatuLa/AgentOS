@@ -722,6 +722,43 @@
 </aside>
 <div class="task-drawer-scrim" id="task-drawer-scrim" onclick="closeTaskDrawer()"></div>
 
+<!-- ═══ SUBTASK DETAIL DRAWER ═══ -->
+<aside class="subtask-drawer" id="subtask-drawer" aria-hidden="true">
+  <div class="subtask-drawer-header" id="subtask-drawer-header">
+    <div class="subtask-drawer-kicker" id="subtask-drawer-kicker">Subtask</div>
+    <button class="os-btn os-btn-ghost os-btn-icon" onclick="event.stopPropagation(); closeSubtaskDrawer()" aria-label="Close subtask drawer">×</button>
+  </div>
+  <div class="subtask-drawer-body" id="subtask-drawer-body">
+    <div class="subtask-drawer-summary">
+      <h3 id="subtask-drawer-title" class="subtask-drawer-title"></h3>
+      <div class="subtask-drawer-meta-row" id="subtask-drawer-meta"></div>
+      <p class="subtask-drawer-desc" id="subtask-drawer-desc"></p>
+    </div>
+    <div class="subtask-drawer-section" id="subtask-drawer-activity">
+      <h4>📋 Activity</h4>
+      <div class="subtask-drawer-activity-list" id="subtask-drawer-activity-list"></div>
+    </div>
+    <div class="subtask-drawer-bottom-row">
+      <div class="subtask-drawer-bottom-col">
+        <h4>🔗 Evidence / Links</h4>
+        <div id="subtask-drawer-evidence"></div>
+      </div>
+      <div class="subtask-drawer-bottom-col">
+        <h4>📝 Notes</h4>
+        <textarea id="subtask-drawer-notes" placeholder="Write notes about this subtask..."></textarea>
+      </div>
+      <div class="subtask-drawer-bottom-col" style="opacity:0.5">
+        <h4>💬 Hermes Chat</h4>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:60px;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);"><span style="color:var(--text-muted);font-size:var(--text-xs)">Coming soon</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="subtask-drawer-actions" id="subtask-drawer-actions">
+    <button class="os-btn os-btn-secondary" onclick="closeSubtaskDrawer()">Close</button>
+  </div>
+</aside>
+<div class="subtask-drawer-scrim" id="subtask-drawer-scrim" onclick="closeSubtaskDrawer()"></div>
+
 </div>
 
 <script type="application/json" id="embedded-data">
@@ -1630,7 +1667,7 @@ function openTaskDrawer(id) {
     const colSubtasks = (task.subtasks || []).filter(s => s.status === col.id);
     return `<div class="subtask-column" data-col="${col.id}" ondragover="allowSubtaskDrop(event)" ondrop="dropSubtask(event,'${task.id}','${col.id}')">
       <div class="subtask-column-title">${col.label}</div>
-      ${colSubtasks.map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="true" ondragstart="dragSubtask(event,'${task.id}','${s.title}')" onclick="event.stopPropagation(); cycleSubtaskStatus('${task.id}','${s.title}')">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}
+      ${colSubtasks.map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="false" data-task-id="${task.id}" data-subtask-title="${escapeHtml(s.title)}" data-subtask-status="${s.status}"><span class="subtask-card-label">${escapeHtml(s.title)}</span><div class="subtask-cog-overlay"><span class="cog-icon">⚙</span></div></div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}
     </div>`;
   }).join('');
   subtaskSection.appendChild(miniKanban);
@@ -1719,25 +1756,20 @@ function toggleDrawerEditMode(taskId) {
   }
 }
 
-// ── Subtask drag-and-drop ──
-let draggedSubtask = {taskId: null, title: null};
-
-function dragSubtask(event, taskId, subtaskTitle) {
-  draggedSubtask = {taskId, title: subtaskTitle};
-  event.dataTransfer.setData('text/plain', subtaskTitle);
-  event.dataTransfer.effectAllowed = 'move';
-}
-
+// ── Subtask long-press drag (shared state) ──
 function allowSubtaskDrop(event) {
   event.preventDefault();
   event.dataTransfer.dropEffect = 'move';
 }
 
+// ── Subtask drag-and-drop (shared state for long-press drag mode) ──
+var dragSubtaskData = {taskId: null, title: null};
+
 function dropSubtask(event, taskId, newStatus) {
   event.preventDefault();
-  if (!draggedSubtask.taskId || draggedSubtask.taskId !== taskId) return;
-  const subtaskTitle = draggedSubtask.title;
-  draggedSubtask = {taskId: null, title: null};
+  if (!dragSubtaskData.taskId || dragSubtaskData.taskId !== taskId) return;
+  const subtaskTitle = dragSubtaskData.title;
+  dragSubtaskData = {taskId: null, title: null};
 
   const tasks = getTasks().map(t => {
     if (t.id !== taskId) return t;
@@ -1777,7 +1809,213 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
   }
 }
 
-function renderTaskActions(task) {
+  // ── Subtask Detail Drawer ──
+  function openSubtaskDrawer(taskId, subtaskTitle) {
+    const task = findTask(taskId);
+    if (!task) return;
+    const subtask = (task.subtasks || []).find(s => s.title === subtaskTitle);
+    if (!subtask) return;
+
+    document.getElementById('subtask-drawer-kicker').textContent = `${getProjectLabel(task.project)} · ${getStatusLabel(task.status)}`;
+    document.getElementById('subtask-drawer-title').textContent = subtask.title;
+    document.getElementById('subtask-drawer-desc').textContent = subtask.description || 'No description yet.';
+
+    // Meta pills
+    const metaEl = document.getElementById('subtask-drawer-meta');
+    metaEl.innerHTML = `
+      <span class="meta-status meta-status--${subtask.status}">${getStatusLabel(subtask.status)}</span>
+      <span>Created ${task.created}</span>
+    `;
+
+    // Activity
+    const actEl = document.getElementById('subtask-drawer-activity-list');
+    const activities = subtask.activity || [];
+    actEl.innerHTML = activities.length
+      ? activities.map(a => `<div class="activity-row">${escapeHtml(a)}</div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:var(--text-xs)">No activity yet</div>';
+
+    // Evidence
+    const evEl = document.getElementById('subtask-drawer-evidence');
+    const evidence = subtask.evidence || [];
+    evEl.innerHTML = evidence.length
+      ? evidence.map(e => `<span style="display:inline-block;padding:3px 10px;margin:2px;border:1px solid var(--border-subtle);border-radius:999px;font-size:var(--text-xs);color:var(--text-secondary)">${escapeHtml(e)}</span>`).join('')
+      : '<span style="color:var(--text-muted);font-size:var(--text-xs)">No evidence yet</span>';
+
+    // Notes
+    const notesEl = document.getElementById('subtask-drawer-notes');
+    notesEl.value = subtask.notes || '';
+    notesEl.onblur = function() {
+      const tasks = getTasks().map(t => {
+        if (t.id !== taskId) return t;
+        return {...t, subtasks: (t.subtasks || []).map(s => s.title === subtaskTitle ? {...s, notes: notesEl.value} : s)};
+      });
+      setTasks(tasks);
+    };
+
+    const drawer = document.getElementById('subtask-drawer');
+    const scrim = document.getElementById('subtask-drawer-scrim');
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    scrim.classList.add('open');
+  }
+
+  function closeSubtaskDrawer() {
+    const drawer = document.getElementById('subtask-drawer');
+    const scrim = document.getElementById('subtask-drawer-scrim');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    scrim.classList.remove('open');
+  }
+
+
+  // ── Subtask long-press → cogwheel → drag mode ──
+  // Uses event delegation on document body for all .subtask-card elements
+  (function() {
+    var pressTimer = null;
+    var dragModeCard = null;
+    var LONG_PRESS_MS = 600;
+
+    function findSubtaskCard(el) {
+      while (el && el !== document.body) {
+        if (el.classList && el.classList.contains('subtask-card')) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    function startDragMode(card) {
+      dragModeCard = card;
+      card.classList.add('in-drag-mode');
+      card.setAttribute('draggable', 'true');
+      dragSubtaskData = {
+        taskId: card.dataset.taskId,
+        title: card.dataset.subtaskTitle
+      };
+    }
+
+    function endDragMode() {
+      if (dragModeCard) {
+        dragModeCard.classList.remove('in-drag-mode');
+        dragModeCard.setAttribute('draggable', 'false');
+        dragModeCard = null;
+      }
+      dragSubtaskData = {taskId: null, title: null};
+    }
+
+    function handlePointerDown(e) {
+      var card = findSubtaskCard(e.target);
+      if (!card) return;
+      // Only left-click / primary touch
+      if (e.button && e.button !== 0) return;
+
+      var overlay = card.querySelector('.subtask-cog-overlay');
+      if (overlay) overlay.classList.add('active', 'spinning');
+
+      pressTimer = setTimeout(function() {
+        // Long press complete — show pop animation then enter drag mode
+        if (overlay) {
+          overlay.classList.remove('spinning');
+          overlay.classList.add('done-spinning');
+          setTimeout(function() {
+            overlay.classList.remove('active', 'done-spinning');
+          }, 300);
+        }
+        startDragMode(card);
+      }, LONG_PRESS_MS);
+    }
+
+    function handlePointerUp(e) {
+      var card = findSubtaskCard(e.target);
+      if (!card) return;
+
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+
+      var overlay = card.querySelector('.subtask-cog-overlay');
+      if (overlay) {
+        overlay.classList.remove('active', 'spinning', 'done-spinning');
+      }
+
+      // If NOT in drag mode, this was a regular click → open subtask drawer
+      if (card !== dragModeCard) {
+        var taskId = card.dataset.taskId;
+        var subtaskTitle = card.dataset.subtaskTitle;
+        if (taskId && subtaskTitle) {
+          openSubtaskDrawer(taskId, subtaskTitle);
+        }
+      }
+    }
+
+    function handlePointerLeave(e) {
+      var card = findSubtaskCard(e.target);
+      if (!card) return;
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      var overlay = card.querySelector('.subtask-cog-overlay');
+      if (overlay) {
+        overlay.classList.remove('active', 'spinning', 'done-spinning');
+      }
+      // Don't end drag mode on leave — user might be dragging
+    }
+
+    function handleDragStart(e) {
+      if (!dragModeCard) {
+        e.preventDefault();
+        return;
+      }
+      dragSubtaskData = {
+        taskId: dragModeCard.dataset.taskId,
+        title: dragModeCard.dataset.subtaskTitle
+      };
+      e.dataTransfer.setData('text/plain', dragSubtaskData.title);
+      e.dataTransfer.effectAllowed = 'move';
+      dragModeCard.classList.add('dragging');
+    }
+
+    function handleDragEnd(e) {
+      if (dragModeCard) {
+        dragModeCard.classList.remove('dragging');
+      }
+      endDragMode();
+    }
+
+    // Event delegation
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown, {passive: true});
+    document.addEventListener('mouseup', handlePointerUp);
+    document.addEventListener('touchend', handlePointerUp);
+    document.addEventListener('mouseleave', handlePointerLeave);
+
+    // Drag events on subtask cards (delegated)
+    document.addEventListener('dragstart', function(e) {
+      var card = findSubtaskCard(e.target);
+      if (card) handleDragStart(e);
+    });
+    document.addEventListener('dragend', function(e) {
+      var card = findSubtaskCard(e.target);
+      if (card) handleDragEnd(e);
+    });
+
+    // Click fallback: if mousedown/up didn't fire (e.g. programmatic click),
+    // open subtask drawer on click
+    document.addEventListener('click', function(e) {
+      var card = findSubtaskCard(e.target);
+      if (!card) return;
+      if (card === dragModeCard) return; // don't open drawer if in drag mode
+      var taskId = card.dataset.taskId;
+      var subtaskTitle = card.dataset.subtaskTitle;
+      if (taskId && subtaskTitle) {
+        openSubtaskDrawer(taskId, subtaskTitle);
+      }
+    });
+  })();
+
+
+  function renderTaskActions(task) {
   const actions = [];
   if (task.archived) {
     actions.push(`<button class="os-btn os-btn-secondary" onclick="unarchiveTask('${task.id}')" style="flex:2">↩ Unarchive</button>`);
@@ -1862,7 +2100,7 @@ function renderTaskBoard(id) {
   document.getElementById('task-board-progress').textContent = `${subtasks.filter(s => s.status === 'done' || s.status === 'running').length} / ${subtasks.length}`;
   const subtaskKanban = document.createElement('div');
   subtaskKanban.className = 'subtask-kanban';
-  subtaskKanban.innerHTML = KANBAN_COLUMNS.map(col => `<div class="subtask-column" data-col="${col.id}" ondragover="allowSubtaskDrop(event)" ondrop="dropSubtask(event,'${task.id}','${col.id}')"><div class="subtask-column-title">${col.label}</div>${subtasks.filter(s => s.status === col.id).map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="true" ondragstart="dragSubtask(event,'${task.id}','${s.title}')" onclick="event.stopPropagation(); cycleSubtaskStatus('${task.id}','${s.title}')">${escapeHtml(s.title)}</div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}</div>`).join('');
+  subtaskKanban.innerHTML = KANBAN_COLUMNS.map(col => `<div class="subtask-column" data-col="${col.id}" ondragover="allowSubtaskDrop(event)" ondrop="dropSubtask(event,'${task.id}','${col.id}')"><div class="subtask-column-title">${col.label}</div>${subtasks.filter(s => s.status === col.id).map(s => `<div class="subtask-card ${s.status === 'done' || s.status === 'running' ? 'done' : ''}" draggable="false" data-task-id="${task.id}" data-subtask-title="${escapeHtml(s.title)}" data-subtask-status="${s.status}"><span class="subtask-card-label">${escapeHtml(s.title)}</span><div class="subtask-cog-overlay"><span class="cog-icon">⚙</span></div></div>`).join('') || '<div class="kanban-empty" style="font-size:10px">Empty</div>'}</div>`).join('');
   document.getElementById('task-board-subtasks').appendChild(subtaskKanban);
 
   // Bottom row: Evidence + Notes + Hermes
