@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/playwright:v1.60.0-jammy
+
+WORKDIR /workspace
+
+RUN apt-get update && apt-get install -y python3-pip && pip install playwright asyncpg && playwright install chromium
+
+COPY intelligence_engine /workspace/intelligence_engine
+
+CMD ["python3", "-m", "intelligence_engine.collectors.google_maps_au"]
