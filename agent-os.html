@@ -2105,11 +2105,11 @@ function renderTaskBoard(id) {
   document.getElementById('task-board-triple').innerHTML = `
     <div class="task-board-bottom-col task-board-bottom-col--hermes" style="grid-row:1/3">
       <h4>💬 Hermes Chat</h4>
-      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:80px;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);"><span style="color:var(--text-muted);font-size:var(--text-xs)">Coming soon</span></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:240px;border:1px dashed var(--border-subtle);border-radius:var(--radius-sm);"><span style="color:var(--text-muted);font-size:var(--text-xs)">Coming soon</span></div>
     </div>
     <div class="task-board-bottom-col">
       <h4>📝 Notes <small style="font-weight:400;color:var(--text-muted)">— your notes</small></h4>
-      <textarea id="task-board-notes-input" placeholder="Write your notes here...">${escapeHtml(task.notes || '')}</textarea>
+      <textarea id="task-board-notes-input" placeholder="Write your notes here..." style="min-height:120px">${escapeHtml(task.notes || '')}</textarea>
     </div>
     <div class="task-board-bottom-col">
       <h4>🔗 Evidence / Links</h4>
