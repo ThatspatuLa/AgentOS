@@ -4733,9 +4733,10 @@ body[data-page="kanban"] .os-main {
   top: 0 !important;
 }
 
-/* Full page mode: hide session header and sidebar, fill entire viewport */
-.zen-chat-page.zen-chat-full-mode .zen-chat-session-header {
-  display: none !important;
+/* Full page mode: remove os-main padding, hide sidebar, restore header */
+body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
+  padding: 0 !important;
+  margin-top: 36px !important;
 }
 .zen-chat-page.zen-chat-full-mode .zen-chat-session-picker {
   display: none !important;
