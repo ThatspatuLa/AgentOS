@@ -1925,7 +1925,7 @@ body {
 }
 .subtask-kanban {
   display: grid;
-  grid-template-columns: repeat(5, minmax(80px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 .subtask-column {
@@ -4073,10 +4073,10 @@ body[data-page="kanban"] .os-main {
   line-height: 1.6;
 }
 
-/* ── Drawer: Bottom row (Evidence + Notes + Hermes) ── */
+/* ── Drawer: Bottom row (Evidence + Notes) ── */
 .task-drawer-bottom-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 .task-drawer-bottom-col {
@@ -4677,4 +4677,34 @@ body[data-page="kanban"] .os-main {
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border-subtle);
   justify-content: flex-start;
+}
+
+/* ── Subtask grid/status refinement: four equal workflow columns ── */
+.subtask-kanban {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  width: 100%;
+  align-items: stretch;
+}
+.subtask-column {
+  min-width: 0;
+}
+.subtask-next-action-item.is-backlog .subtask-next-action-check {
+  background: rgba(139,155,179,0.08);
+  border-color: rgba(139,155,179,0.22);
+  color: var(--text-muted);
+}
+.subtask-next-action-item.is-wip .subtask-next-action-check {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-subtle));
+  color: var(--accent);
+}
+.subtask-next-action-item.is-validate .subtask-next-action-check {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 32%, var(--border-subtle));
+  color: var(--warning);
+}
+.subtask-next-action-item.is-done .subtask-next-action-check {
+  background: rgba(63,201,96,0.10);
+  border-color: rgba(63,201,96,0.22);
+  color: var(--success);
 }
