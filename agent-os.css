@@ -4724,10 +4724,12 @@ body[data-page="kanban"] .os-main {
 .zen-chat-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 36px);
-  overflow: hidden;
+  height: calc(100vh - 36px) !important;
+  max-height: calc(100vh - 36px) !important;
+  overflow: hidden !important;
   position: relative;
   padding: 0 !important;
+  margin: 0 !important;
 }
 
 .zen-chat-layout {
@@ -4810,7 +4812,20 @@ body[data-page="kanban"] .os-main {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
+}
+
+.zen-chat-full-page {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.zen-chat-full-page.active {
+  display: flex;
 }
 
 /* ═══ SESSION HEADER (M3) ═══ */
@@ -5001,8 +5016,9 @@ body[data-page="kanban"] .os-main {
 .zen-chat-input-area {
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--border-subtle);
-  background: rgba(12, 16, 24, 0.5);
+  background: rgba(12, 16, 24, 0.8);
   flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .zen-chat-input-wrap {
@@ -5174,17 +5190,6 @@ body[data-page="kanban"] .os-main {
 @keyframes zenChatDrawerIn {
   from { opacity: 0; transform: translateX(20px); }
   to { opacity: 1; transform: translateX(0); }
-}
-
-/* ═══ FULL PAGE CHAT (M2) ═══ */
-.zen-chat-full-page {
-  display: none;
-  flex-direction: column;
-  height: 100%;
-}
-
-.zen-chat-full-page.active {
-  display: flex;
 }
 
 /* ═══ VIEW MODE TOGGLE (M2) ═══ */

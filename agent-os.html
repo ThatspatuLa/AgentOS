@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=19">
+<link rel="stylesheet" href="agent-os.css?v=20">
 </head>
 <body>
 
@@ -843,7 +843,7 @@
         <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-small-view-drawer" title="Drawer">◧</button>
         <button class="zen-chat-view-btn active" onclick="zenChatGoToView('small')" id="zen-chat-small-view-small" title="Small">◻</button>
       </div>
-      <button class="os-btn os-btn-ghost" style="padding:2px 6px;font-size:var(--text-xs);margin-left:4px" onclick="zenChatCloseSmallPanel()" title="Close">✕</button>
+      <button class="os-btn os-btn-ghost" style="padding:2px 6px;font-size:var(--text-xs);margin-left:4px" onclick="event.stopPropagation();zenChatCloseSmallPanel()" title="Close">✕</button>
     </div>
     <div class="zen-chat-session-picker" id="zen-chat-small-session-picker">
       <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" onclick="zenChatSelectSession('ui','small');">
@@ -902,7 +902,7 @@
         <button class="zen-chat-view-btn active" onclick="zenChatGoToView('drawer')" id="zen-chat-drawer-view-drawer">Drawer</button>
         <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-drawer-view-small">Small</button>
       </div>
-      <button class="os-btn os-btn-ghost" style="padding:2px 8px;font-size:var(--text-xs)" onclick="zenChatCloseDrawer()">✕</button>
+      <button class="os-btn os-btn-ghost" style="padding:2px 8px;font-size:var(--text-xs)" onclick="event.stopPropagation();zenChatCloseDrawer()">✕</button>
     </div>
     <div class="zen-chat-session-picker" id="zen-chat-drawer-session-picker">
       <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" onclick="zenChatSelectSession('ui','drawer')">
@@ -4541,16 +4541,20 @@ function updateZoomIndicator() {
 }
 
 // Page hook
+var _zenChatPrevPage = 'dashboard';
 const _originalShowPage = showPage;
 window.showPage = function(id) {
+  // Save current page before _originalShowPage changes it
+  if (id === 'zen-chat') {
+    _zenChatPrevPage = currentPage;
+  }
   _originalShowPage(id);
   if (id === 'memory') {
     setTimeout(initMemoryWorld, 50);
   }
   if (id === 'zen-chat') {
-    zenChatState.previousPage = currentPage;
-    zenChatSetView('full');
-    setTimeout(() => zenChatScrollToBottom('full'), 100);
+    zenChatState.previousPage = _zenChatPrevPage;
+    zenChatGoToView('full');
   }
 };
 
@@ -4633,61 +4637,105 @@ function zenChatCloseAllPickers() {
   });
 }
 
-// ── View Navigation (preserves previous page) ──
+// ── View Navigation ──
+// Chat views: full (zen-chat page), drawer (fixed overlay), small (fixed overlay)
+// Strategy: Don't navigate the underlying page. Just toggle which chat view is visible.
+// The drawer and small panel are fixed-position overlays that sit on top of whatever page is showing.
 function zenChatGoToView(view) {
-  if (view === 'full') {
-    // Save current page before going to full chat
+  // Save the page we're leaving (for when we eventually close the chat)
+  if (view === 'full' && currentPage !== 'zen-chat') {
     zenChatState.previousPage = currentPage;
-    showPage('zen-chat');
-    zenChatSetView('full');
-  } else if (view === 'drawer') {
-    // Save current page before opening drawer
-    zenChatState.previousPage = currentPage;
-    zenChatSetView('drawer');
-  } else if (view === 'small') {
-    // Open small panel on top of current page
-    zenChatState.view = 'small';
-    zenChatState.smallPanelOpen = true;
-    const panel = document.getElementById('zen-chat-small-panel');
-    const launcher = document.getElementById('zen-chat-launcher');
-    if (panel) panel.classList.add('open');
-    if (launcher) launcher.style.display = 'none';
-    // Close drawer if open
-    const drawer = document.getElementById('zen-chat-drawer');
-    if (drawer) drawer.classList.remove('open');
-    // Update view toggle buttons
-    ['full','drawer','small'].forEach(v => {
-      const btn = document.getElementById('zen-chat-view-' + v);
-      if (btn) btn.classList.toggle('active', v === view);
-      const drawerBtn = document.getElementById('zen-chat-drawer-view-' + v);
-      if (drawerBtn) drawerBtn.classList.toggle('active', v === view);
-      const smallBtn = document.getElementById('zen-chat-small-view-' + v);
-      if (smallBtn) smallBtn.classList.toggle('active', v === view);
-    });
-    zenChatSetSession(zenChatState.activeSession, 'small');
-    setTimeout(() => {
-      const input = document.getElementById('zen-chat-small-input');
-      if (input) input.focus();
-    }, 100);
   }
+
+  zenChatState.view = view;
+
+  var smallPanel = document.getElementById('zen-chat-small-panel');
+  var drawer = document.getElementById('zen-chat-drawer');
+  var launcher = document.getElementById('zen-chat-launcher');
+  var fullPage = document.getElementById('page-zen-chat');
+
+  // Close overlays
+  if (smallPanel) smallPanel.classList.remove('open');
+  if (drawer) drawer.classList.remove('open');
+  zenChatState.smallPanelOpen = false;
+
+  if (view === 'full') {
+    // Show the zen-chat page
+    if (fullPage) fullPage.style.display = 'block';
+    // Hide other pages
+    document.querySelectorAll('.os-page').forEach(function(p) {
+      if (p.id !== 'page-zen-chat') p.style.display = 'none';
+    });
+    // Update nav
+    document.querySelectorAll('.os-nav-item').forEach(function(n) { n.classList.remove('active'); });
+    var nav = document.getElementById('nav-zen-chat');
+    if (nav) nav.classList.add('active');
+    currentPage = 'zen-chat';
+    if (launcher) launcher.style.display = 'none';
+    zenChatSetSession(zenChatState.activeSession, 'full');
+    setTimeout(function() { zenChatScrollToBottom('full'); }, 100);
+  } else {
+    // For drawer/small: hide zen-chat page, show previous page underneath
+    if (fullPage) fullPage.style.display = 'none';
+    // Show the previous page
+    var prev = zenChatState.previousPage || 'dashboard';
+    if (prev !== 'zen-chat') {
+      var prevPage = document.getElementById('page-' + prev);
+      if (prevPage) prevPage.style.display = 'block';
+      currentPage = prev;
+    }
+    // Hide launcher so it doesn't float on top of overlays
+    if (launcher) launcher.style.display = 'none';
+
+    if (view === 'drawer') {
+      if (drawer) drawer.classList.add('open');
+      zenChatSetSession(zenChatState.activeSession, 'drawer');
+    } else if (view === 'small') {
+      zenChatState.smallPanelOpen = true;
+      if (smallPanel) smallPanel.classList.add('open');
+      zenChatSetSession(zenChatState.activeSession, 'small');
+      setTimeout(function() {
+        var input = document.getElementById('zen-chat-small-input');
+        if (input) input.focus();
+      }, 100);
+    }
+  }
+
+  // Update view toggle buttons in all views
+  ['full','drawer','small'].forEach(function(v) {
+    var btn = document.getElementById('zen-chat-view-' + v);
+    if (btn) btn.classList.toggle('active', v === view);
+    var drawerBtn = document.getElementById('zen-chat-drawer-view-' + v);
+    if (drawerBtn) drawerBtn.classList.toggle('active', v === view);
+    var smallBtn = document.getElementById('zen-chat-small-view-' + v);
+    if (smallBtn) smallBtn.classList.toggle('active', v === view);
+  });
 }
 
 function zenChatCloseSmallPanel() {
   zenChatState.smallPanelOpen = false;
-  const panel = document.getElementById('zen-chat-small-panel');
-  const launcher = document.getElementById('zen-chat-launcher');
+  zenChatState.view = 'full';
+  var panel = document.getElementById('zen-chat-small-panel');
   if (panel) panel.classList.remove('open');
+  // Go back to the page user was on before opening chat
+  var prev = zenChatState.previousPage || 'dashboard';
+  if (prev !== 'zen-chat') {
+    showPage(prev);
+  }
+  var launcher = document.getElementById('zen-chat-launcher');
   if (launcher) launcher.style.display = 'flex';
 }
 
 function zenChatCloseDrawer() {
-  // Go back to previous page when closing drawer
-  const prev = zenChatState.previousPage || 'dashboard';
-  if (currentPage === 'zen-chat') {
+  var drawer = document.getElementById('zen-chat-drawer');
+  if (drawer) drawer.classList.remove('open');
+  // Go back to the page user was on before opening chat
+  var prev = zenChatState.previousPage || 'dashboard';
+  if (prev !== 'zen-chat') {
     showPage(prev);
   }
-  const drawer = document.getElementById('zen-chat-drawer');
-  if (drawer) drawer.classList.remove('open');
+  var launcher = document.getElementById('zen-chat-launcher');
+  if (launcher) launcher.style.display = 'flex';
 }
 
 // ── M2: View Mode ──
