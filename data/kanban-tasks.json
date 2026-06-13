@@ -1,6 +1,6 @@
 {
   "version": 20,
-  "updated_at": "2026-06-13T06:06:59.950622Z",
+  "updated_at": "2026-06-13T18:06:59.242807Z",
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -468,7 +468,7 @@
       "subtasks": [
         {
           "title": "M1: Zen Chat Product Architecture",
-          "status": "backlog",
+          "status": "done",
           "description": "M1 defines Zen Chat as one of the main operating layers of Agent OS. The goal is to prevent this from becoming a simple bottom-right chatbot. Zen Chat must function as a conversational helper, project/task command center, review surface, and Hermes-style governed execution cockpit.",
           "nextAction": "Define Zen Chat as the Agent OS cockpit.\nDefine its three roles: conversation, command center, review/approval.\nConfirm Hermes-style response behavior inside the UI.\nDefine planning, execution, review, and GitHub update stages.\nDefine the relationship between Zen, Hermes, sessions, models, execution, and GitHub.\nDefine what the chat can do before and after Accept.\nDefine what actions remain gated.\nCreate final architecture brief before implementation.\nConfirm this feature is treated as core Agent OS infrastructure.",
           "notes": "",
@@ -481,7 +481,7 @@
         },
         {
           "title": "M2: Chat Shell & View Mode Foundation",
-          "status": "backlog",
+          "status": "done",
           "description": "M2 builds the core visual container for Zen Chat. The chat must support Small Chat, Side Drawer Chat, and Full Page Chat without changing the active session. View mode controls presentation only, not context.",
           "nextAction": "Create bottom-right Small Chat launcher.\nCreate Small Chat floating panel.\nCreate Side Drawer Chat mode.\nCreate Full Page Chat mode.\nAllow smooth transitions between view modes.\nKeep the same active session across view changes.\nAdd consistent chat header across all views.\nAdd settings gear to every view.\nAdd responsive layout behavior.\nMatch Agent OS spacing, typography, radius, shadows, and polish.",
           "notes": "",
@@ -494,7 +494,7 @@
         },
         {
           "title": "M3: Always-Visible Session Header",
-          "status": "backlog",
+          "status": "done",
           "description": "M3 makes session identity impossible to miss. The current session must always be visible in the chat header, no matter which chat view is open. The session label must be clickable at all times so the user can manually change the active session.",
           "nextAction": "Show current session in every chat header.\nMake current session label clickable.\nCreate session picker interaction.\nShow project, task, or UI session type.\nShow session source: Auto Detect or Manual.\nAdd visual session switch animation.\nAdd compact session badge for Small Chat.\nAdd full session breadcrumb for Side Drawer and Full Page.\nPrevent hidden session changes.\nValidate that session identity is always visible.",
           "notes": "",
@@ -507,7 +507,7 @@
         },
         {
           "title": "M4: Project, Task, and Global UI Sessions",
-          "status": "backlog",
+          "status": "wip",
           "description": "M4 creates the session model. Each project has one project session. Each task has one task session. Subtasks do not have their own sessions and inherit the parent task session. Agent OS interface work uses one global Agent OS UI session.",
           "nextAction": "Create Project Session structure.\nCreate Task Session structure.\nEnsure subtasks inherit task session.\nCreate Global Agent OS UI Session.\nDefine session metadata fields.\nStore session title, type, project, task, status, and summary.\nStore decisions, blockers, next safe gate, and recent changes.\nConnect sessions to project/task records.\nPrevent duplicate task sessions.\nCreate session initialization logic.",
           "notes": "",
@@ -828,7 +828,11 @@
         "Notes changes from Six preserved"
       ],
       "activity": [
-        "Task added from Kanban quick add"
+        "Task added from Kanban quick add",
+        "Moved \"M1: Zen Chat Product Architecture\" to Done",
+        "Moved \"M2: Chat Shell & View Mode Foundation\" to Done",
+        "Moved \"M3: Always-Visible Session Header\" to Done",
+        "Moved \"M4: Project, Task, and Global UI Sessions\" to Work in Progress"
       ]
     }
   ]

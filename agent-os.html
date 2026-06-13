@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=31">
+<link rel="stylesheet" href="agent-os.css?v=36">
 </head>
 <body>
 
@@ -439,80 +439,98 @@
   <section id="page-zen-chat" class="os-page zen-chat-page" style="display:none">
     <div class="zen-chat-layout">
       <!-- Left Sidebar: Session List -->
-      <div class="zen-chat-sidebar">
-        <div class="zen-chat-sidebar-header">Sessions</div>
-        <div class="zen-chat-sidebar-item active" data-session="ui" onclick="zenChatHandleSidebarClick('ui')">
-          <div class="zen-chat-sidebar-item-info">
-            <div class="zen-chat-sidebar-item-title">Global UI Session</div>
-            <div class="zen-chat-sidebar-item-meta">Auto Detect · Agent OS</div>
+      <aside class="zen-chat-sidebar">
+        <div class="zen-chat-sidebar-header">
+          <h3 class="zen-chat-sidebar-heading">Sessions</h3>
+          <span class="zen-chat-sidebar-count">4 contexts</span>
+        </div>
+        <div class="zen-chat-sidebar-list">
+          <div class="zen-chat-sidebar-item active" data-session="ui" onclick="zenChatHandleSidebarClick('ui')">
+            <span class="zen-chat-sidebar-item-icon" aria-hidden="true">🖥️</span>
+            <div class="zen-chat-sidebar-item-info">
+              <div class="zen-chat-sidebar-item-title">Global UI Session</div>
+              <div class="zen-chat-sidebar-item-meta">Auto Detect · Agent OS</div>
+            </div>
+          </div>
+          <div class="zen-chat-sidebar-item" data-session="project-zen" onclick="zenChatHandleSidebarClick('project-zen')">
+            <span class="zen-chat-sidebar-item-icon" aria-hidden="true">🦉</span>
+            <div class="zen-chat-sidebar-item-info">
+              <div class="zen-chat-sidebar-item-title">Zen Project</div>
+              <div class="zen-chat-sidebar-item-meta">Project workspace</div>
+            </div>
+          </div>
+          <div class="zen-chat-sidebar-item" data-session="project-kiyosaki" onclick="zenChatHandleSidebarClick('project-kiyosaki')">
+            <span class="zen-chat-sidebar-item-icon" aria-hidden="true">📊</span>
+            <div class="zen-chat-sidebar-item-info">
+              <div class="zen-chat-sidebar-item-title">Kiyosaki Project</div>
+              <div class="zen-chat-sidebar-item-meta">Project workspace</div>
+            </div>
+          </div>
+          <div class="zen-chat-sidebar-item" data-session="project-minato" onclick="zenChatHandleSidebarClick('project-minato')">
+            <span class="zen-chat-sidebar-item-icon" aria-hidden="true">🔧</span>
+            <div class="zen-chat-sidebar-item-info">
+              <div class="zen-chat-sidebar-item-title">Minato Project</div>
+              <div class="zen-chat-sidebar-item-meta">Project workspace</div>
+            </div>
           </div>
         </div>
-        <div class="zen-chat-sidebar-item" data-session="project-zen" onclick="zenChatHandleSidebarClick('project-zen')">
-          <div class="zen-chat-sidebar-item-info">
-            <div class="zen-chat-sidebar-item-title">Zen Project</div>
-            <div class="zen-chat-sidebar-item-meta">Project</div>
-          </div>
-        </div>
-        <div class="zen-chat-sidebar-item" data-session="project-kiyosaki" onclick="zenChatHandleSidebarClick('project-kiyosaki')">
-          <div class="zen-chat-sidebar-item-info">
-            <div class="zen-chat-sidebar-item-title">Kiyosaki Project</div>
-            <div class="zen-chat-sidebar-item-meta">Project</div>
-          </div>
-        </div>
-        <div class="zen-chat-sidebar-item" data-session="project-minato" onclick="zenChatHandleSidebarClick('project-minato')">
-          <div class="zen-chat-sidebar-item-info">
-            <div class="zen-chat-sidebar-item-title">Minato Project</div>
-            <div class="zen-chat-sidebar-item-meta">Project</div>
-          </div>
-        </div>
-      </div>
+      </aside>
 
       <!-- Main Chat Area -->
       <div class="zen-chat-main-area">
         <!-- Full Page Chat View -->
         <div class="zen-chat-full-page active" id="zen-chat-full-page">
-          <!-- Session Header (M3) -->
-          <div class="zen-chat-session-header" id="zen-chat-session-header">
-            <div class="zen-chat-session-info" style="cursor:pointer" onclick="zenChatToggleSessionPicker()">
-              <div class="zen-chat-session-title" id="zen-chat-session-title">Global UI Session</div>
-              <div class="zen-chat-session-meta" id="zen-chat-session-meta">Auto Detect · Agent OS interface</div>
-              <div class="zen-chat-session-status" id="zen-chat-session-status"><span class="zen-chat-status-dot"></span><span id="zen-chat-status-text">Ready</span></div>
-            </div>
-            <span class="zen-chat-session-source" id="zen-chat-session-source">Auto</span>
-            <div class="zen-chat-view-toggle">
-              <button class="zen-chat-view-btn active" onclick="zenChatGoToView('full')" id="zen-chat-view-full">Full</button>
-              <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-view-drawer">Drawer</button>
-              <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-view-small">Small</button>
-            </div>
-          </div>
-
-          <!-- Session Picker (M3) -->
-          <div class="zen-chat-session-picker" id="zen-chat-session-picker">
-            <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" onclick="zenChatSelectSession('ui')">
-              <div class="zen-chat-session-picker-info">
-                <div class="zen-chat-session-picker-title">Global UI Session</div>
-                <div class="zen-chat-session-picker-meta">Agent OS interface · Auto Detect</div>
+          <!-- Top Bar -->
+          <header class="zen-chat-top-bar" id="zen-chat-session-header">
+            <div class="zen-chat-top-bar-title">
+              <div class="zen-chat-session-selector" id="zen-chat-full-session-selector">
+                <div class="zen-chat-session-info" style="cursor:pointer" onclick="zenChatToggleSessionPicker()">
+                  <div class="zen-chat-session-title-row">
+                    <h2 class="zen-chat-page-heading" id="zen-chat-session-title">Global UI Session</h2>
+                    <span class="zen-chat-session-chevron" id="zen-chat-full-session-chevron" aria-hidden="true">▾</span>
+                  </div>
+                  <p class="zen-chat-page-subtitle" id="zen-chat-session-meta">Auto Detect · Agent OS interface</p>
+                </div>
+                <div class="zen-chat-session-picker" id="zen-chat-session-picker">
+                  <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" data-session="ui" onclick="zenChatSelectSession('ui')">
+                    <div class="zen-chat-session-picker-info">
+                      <div class="zen-chat-session-picker-title">Global UI Session</div>
+                      <div class="zen-chat-session-picker-meta">Agent OS interface · Auto Detect</div>
+                    </div>
+                  </div>
+                  <div class="zen-chat-session-picker-item" data-session="project-zen" onclick="zenChatSelectSession('project-zen')">
+                    <div class="zen-chat-session-picker-info">
+                      <div class="zen-chat-session-picker-title">Zen Project Session</div>
+                      <div class="zen-chat-session-picker-meta">Project: Zen</div>
+                    </div>
+                  </div>
+                  <div class="zen-chat-session-picker-item" data-session="project-kiyosaki" onclick="zenChatSelectSession('project-kiyosaki')">
+                    <div class="zen-chat-session-picker-info">
+                      <div class="zen-chat-session-picker-title">Kiyosaki Project Session</div>
+                      <div class="zen-chat-session-picker-meta">Project: Kiyosaki</div>
+                    </div>
+                  </div>
+                  <div class="zen-chat-session-picker-item" data-session="project-minato" onclick="zenChatSelectSession('project-minato')">
+                    <div class="zen-chat-session-picker-info">
+                      <div class="zen-chat-session-picker-title">Minato Project Session</div>
+                      <div class="zen-chat-session-picker-meta">Project: Minato</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-zen')">
-              <div class="zen-chat-session-picker-info">
-                <div class="zen-chat-session-picker-title">Zen Project Session</div>
-                <div class="zen-chat-session-picker-meta">Project: Zen</div>
+            <div class="zen-chat-top-bar-actions">
+              <div class="zen-chat-status-pill" id="zen-chat-session-status">
+                <span class="zen-chat-status-dot"></span>
+                <span id="zen-chat-header-status-text">Ready</span>
+              </div>
+              <div class="zen-chat-view-toggle">
+                <button class="zen-chat-view-btn active" onclick="zenChatGoToView('full')" id="zen-chat-view-full">Full</button>
+                <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-view-drawer">Drawer</button>
+                <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-view-small">Small</button>
               </div>
             </div>
-            <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-kiyosaki')">
-              <div class="zen-chat-session-picker-info">
-                <div class="zen-chat-session-picker-title">Kiyosaki Project Session</div>
-                <div class="zen-chat-session-picker-meta">Project: Kiyosaki</div>
-              </div>
-            </div>
-            <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-minato')">
-              <div class="zen-chat-session-picker-info">
-                <div class="zen-chat-session-picker-title">Minato Project Session</div>
-                <div class="zen-chat-session-picker-meta">Project: Minato</div>
-              </div>
-            </div>
-          </div>
+          </header>
 
           <!-- Messages Area -->
           <div class="zen-chat-messages" id="zen-chat-messages">
@@ -894,9 +912,40 @@
   <!-- ═══ ZEN CHAT: Side Drawer Chat (M2) ═══ -->
   <div class="zen-chat-drawer" id="zen-chat-drawer">
     <div class="zen-chat-session-header">
-      <div class="zen-chat-session-info" style="cursor:pointer" onclick="zenChatToggleDrawerSessionPicker()">
-        <div class="zen-chat-session-title" id="zen-chat-drawer-session-title">Global UI Session</div>
-        <div class="zen-chat-session-meta" id="zen-chat-drawer-session-meta">Auto Detect · Agent OS interface</div>
+      <div class="zen-chat-session-selector" id="zen-chat-drawer-session-selector">
+        <div class="zen-chat-session-info" style="cursor:pointer" onclick="zenChatToggleDrawerSessionPicker()">
+          <div class="zen-chat-session-title-row">
+            <div class="zen-chat-session-title" id="zen-chat-drawer-session-title">Global UI Session</div>
+            <span class="zen-chat-session-chevron" id="zen-chat-drawer-session-chevron" aria-hidden="true">▾</span>
+          </div>
+          <div class="zen-chat-session-meta" id="zen-chat-drawer-session-meta">Auto Detect · Agent OS interface</div>
+        </div>
+        <div class="zen-chat-session-picker" id="zen-chat-drawer-session-picker">
+          <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" data-session="ui" onclick="zenChatSelectSession('ui','drawer')">
+            <div class="zen-chat-session-picker-info">
+              <div class="zen-chat-session-picker-title">Global UI Session</div>
+              <div class="zen-chat-session-picker-meta">Agent OS interface · Auto Detect</div>
+            </div>
+          </div>
+          <div class="zen-chat-session-picker-item" data-session="project-zen" onclick="zenChatSelectSession('project-zen','drawer')">
+            <div class="zen-chat-session-picker-info">
+              <div class="zen-chat-session-picker-title">Zen Project Session</div>
+              <div class="zen-chat-session-picker-meta">Project: Zen</div>
+            </div>
+          </div>
+          <div class="zen-chat-session-picker-item" data-session="project-kiyosaki" onclick="zenChatSelectSession('project-kiyosaki','drawer')">
+            <div class="zen-chat-session-picker-info">
+              <div class="zen-chat-session-picker-title">Kiyosaki Project Session</div>
+              <div class="zen-chat-session-picker-meta">Project: Kiyosaki</div>
+            </div>
+          </div>
+          <div class="zen-chat-session-picker-item" data-session="project-minato" onclick="zenChatSelectSession('project-minato','drawer')">
+            <div class="zen-chat-session-picker-info">
+              <div class="zen-chat-session-picker-title">Minato Project Session</div>
+              <div class="zen-chat-session-picker-meta">Project: Minato</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="zen-chat-view-toggle">
         <button class="zen-chat-view-btn" onclick="zenChatGoToView('full')" id="zen-chat-drawer-view-full">Full</button>
@@ -904,32 +953,6 @@
         <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-drawer-view-small">Small</button>
       </div>
       <button class="os-btn os-btn-ghost" style="padding:2px 8px;font-size:var(--text-xs)" onclick="event.stopPropagation();zenChatCloseDrawer()">✕</button>
-    </div>
-    <div class="zen-chat-session-picker" id="zen-chat-drawer-session-picker">
-      <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" onclick="zenChatSelectSession('ui','drawer')">
-        <div class="zen-chat-session-picker-info">
-          <div class="zen-chat-session-picker-title">Global UI Session</div>
-          <div class="zen-chat-session-picker-meta">Agent OS interface · Auto Detect</div>
-        </div>
-      </div>
-      <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-zen','drawer')">
-        <div class="zen-chat-session-picker-info">
-          <div class="zen-chat-session-picker-title">Zen Project Session</div>
-          <div class="zen-chat-session-picker-meta">Project: Zen</div>
-        </div>
-      </div>
-      <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-kiyosaki','drawer')">
-        <div class="zen-chat-session-picker-info">
-          <div class="zen-chat-session-picker-title">Kiyosaki Project Session</div>
-          <div class="zen-chat-session-picker-meta">Project: Kiyosaki</div>
-        </div>
-      </div>
-      <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('project-minato','drawer')">
-        <div class="zen-chat-session-picker-info">
-          <div class="zen-chat-session-picker-title">Minato Project Session</div>
-          <div class="zen-chat-session-picker-meta">Project: Minato</div>
-        </div>
-      </div>
     </div>
     <div class="zen-chat-messages" id="zen-chat-drawer-messages">
       <div class="zen-chat-welcome" id="zen-chat-drawer-welcome">
@@ -4556,6 +4579,13 @@ window.showPage = function(id) {
   if (id === 'zen-chat') {
     zenChatState.previousPage = _zenChatPrevPage;
     zenChatGoToView('full');
+  } else {
+    // Show launcher when on any non-zen-chat page
+    var launcher = document.getElementById('zen-chat-launcher');
+    if (launcher) launcher.style.display = 'flex';
+    // Clear full-mode class so os-main padding restores
+    var fullPage = document.getElementById('page-zen-chat');
+    if (fullPage) fullPage.classList.remove('zen-chat-full-mode');
   }
 };
 
@@ -4599,8 +4629,15 @@ function zenChatSetSession(sessionId, view) {
   if (title) title.textContent = s.title;
   if (meta) meta.textContent = s.meta;
   zenChatCloseAllPickers();
+  zenChatUpdateSessionPickers();
   zenChatRenderMessages(scope);
   zenChatUpdateSidebar();
+}
+
+function zenChatUpdateSessionPickers() {
+  document.querySelectorAll('.zen-chat-session-picker-item[data-session]').forEach(function(item) {
+    item.classList.toggle('zen-chat-session-picker-item--active', item.dataset.session === zenChatState.activeSession);
+  });
 }
 
 function zenChatSelectSession(sessionId, view) {
@@ -4609,10 +4646,16 @@ function zenChatSelectSession(sessionId, view) {
 
 function zenChatToggleSessionPicker() {
   const picker = document.getElementById('zen-chat-session-picker');
+  const selector = document.getElementById('zen-chat-full-session-selector');
   if (!picker) return;
   const isOpen = picker.classList.contains('open');
   zenChatCloseAllPickers();
-  if (!isOpen) picker.classList.add('open');
+  if (!isOpen) {
+    picker.classList.add('open');
+    const page = document.getElementById('page-zen-chat');
+    if (page) page.classList.add('picker-open');
+    if (selector) selector.classList.add('picker-open');
+  }
 }
 
 function zenChatToggleSmallSessionPicker() {
@@ -4620,15 +4663,25 @@ function zenChatToggleSmallSessionPicker() {
   if (!picker) return;
   const isOpen = picker.classList.contains('open');
   zenChatCloseAllPickers();
-  if (!isOpen) picker.classList.add('open');
+  if (!isOpen) {
+    picker.classList.add('open');
+    const panel = document.getElementById('zen-chat-small-panel');
+    if (panel) panel.classList.add('picker-open');
+  }
 }
 
 function zenChatToggleDrawerSessionPicker() {
   const picker = document.getElementById('zen-chat-drawer-session-picker');
+  const selector = document.getElementById('zen-chat-drawer-session-selector');
   if (!picker) return;
   const isOpen = picker.classList.contains('open');
   zenChatCloseAllPickers();
-  if (!isOpen) picker.classList.add('open');
+  if (!isOpen) {
+    picker.classList.add('open');
+    const drawer = document.getElementById('zen-chat-drawer');
+    if (drawer) drawer.classList.add('picker-open');
+    if (selector) selector.classList.add('picker-open');
+  }
 }
 
 function zenChatCloseAllPickers() {
@@ -4636,6 +4689,17 @@ function zenChatCloseAllPickers() {
     const el = document.getElementById(id);
     if (el) el.classList.remove('open');
   });
+  // Remove picker-open from drawer, small panel, full page, and session selectors
+  const drawer = document.getElementById('zen-chat-drawer');
+  if (drawer) drawer.classList.remove('picker-open');
+  const drawerSelector = document.getElementById('zen-chat-drawer-session-selector');
+  if (drawerSelector) drawerSelector.classList.remove('picker-open');
+  const fullSelector = document.getElementById('zen-chat-full-session-selector');
+  if (fullSelector) fullSelector.classList.remove('picker-open');
+  const panel = document.getElementById('zen-chat-small-panel');
+  if (panel) panel.classList.remove('picker-open');
+  const page = document.getElementById('page-zen-chat');
+  if (page) page.classList.remove('picker-open');
 }
 
 // ── View Navigation ──
@@ -4690,6 +4754,10 @@ function zenChatGoToView(view) {
       var prevPage = document.getElementById('page-' + prev);
       if (prevPage) prevPage.style.display = 'block';
       currentPage = prev;
+      // Update nav sidebar to show previous page as active
+      document.querySelectorAll('.os-nav-item').forEach(function(n) { n.classList.remove('active'); });
+      var prevNav = document.getElementById('nav-' + prev);
+      if (prevNav) prevNav.classList.add('active');
     }
     // Hide launcher so it doesn't float on top of overlays
     if (launcher) launcher.style.display = 'none';
@@ -4920,7 +4988,7 @@ function zenChatSetStatus(state, view) {
 
 // ── Close pickers on outside click ──
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('.zen-chat-session-badge') && !e.target.closest('.zen-chat-session-picker') && !e.target.closest('.zen-chat-session-info')) {
+  if (!e.target.closest('.zen-chat-session-badge') && !e.target.closest('.zen-chat-session-picker') && !e.target.closest('.zen-chat-session-info') && !e.target.closest('.zen-chat-session-selector')) {
     zenChatCloseAllPickers();
   }
 });
