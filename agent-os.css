@@ -4708,3 +4708,12 @@ body[data-page="kanban"] .os-main {
   border-color: rgba(63,201,96,0.22);
   color: var(--success);
 }
+
+/* ── Task board title edit polish ── */
+.task-board-summary-title-row > .task-drawer-editable-input {
+  flex: 1;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
