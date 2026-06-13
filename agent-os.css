@@ -4733,7 +4733,7 @@ body[data-page="kanban"] .os-main {
   top: 0 !important;
 }
 
-/* Full page mode: remove os-main padding, hide sidebar, restore header */
+/* Full page mode: remove os-main padding, restore sidebar, simplify header */
 body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   padding: 0 !important;
   margin-top: 36px !important;
@@ -4741,12 +4741,25 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-page.zen-chat-full-mode .zen-chat-session-picker {
   display: none !important;
 }
-.zen-chat-page.zen-chat-full-mode .zen-chat-sidebar {
+.zen-chat-page.zen-chat-full-mode .zen-chat-session-source {
   display: none !important;
 }
+.zen-chat-page.zen-chat-full-mode .zen-chat-view-toggle {
+  display: none !important;
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-status-bar {
+  display: none !important;
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-session-header {
+  padding: var(--space-2) var(--space-3);
+  min-height: unset;
+  border-bottom: none;
+  background: transparent;
+  backdrop-filter: none;
+}
 .zen-chat-page.zen-chat-full-mode .zen-chat-main-area {
-  width: 100% !important;
-  max-width: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
 .zen-chat-layout {
@@ -4931,6 +4944,29 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.zen-chat-session-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.zen-chat-session-status .zen-chat-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.zen-chat-session-status .zen-chat-status-dot--working {
+  background: #3b82f6;
+}
+.zen-chat-session-status .zen-chat-status-dot--idle {
+  background: #6b7280;
 }
 
 .zen-chat-session-source {

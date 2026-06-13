@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=30">
+<link rel="stylesheet" href="agent-os.css?v=31">
 </head>
 <body>
 
@@ -476,6 +476,7 @@
             <div class="zen-chat-session-info" style="cursor:pointer" onclick="zenChatToggleSessionPicker()">
               <div class="zen-chat-session-title" id="zen-chat-session-title">Global UI Session</div>
               <div class="zen-chat-session-meta" id="zen-chat-session-meta">Auto Detect · Agent OS interface</div>
+              <div class="zen-chat-session-status" id="zen-chat-session-status"><span class="zen-chat-status-dot"></span><span id="zen-chat-status-text">Ready</span></div>
             </div>
             <span class="zen-chat-session-source" id="zen-chat-session-source">Auto</span>
             <div class="zen-chat-view-toggle">
@@ -537,7 +538,7 @@
           <!-- Input Area -->
           <div class="zen-chat-input-area">
             <div class="zen-chat-input-wrap">
-              <textarea class="zen-chat-input" id="zen-chat-input" placeholder="Message Zen Chat... (Enter to send, Shift+Enter for newline)" rows="1" onkeydown="zenChatInputKeydown(event)" oninput="zenChatAutoResize(this)"></textarea>
+              <textarea class="zen-chat-input" id="zen-chat-input" placeholder="Message Zen..." rows="1" onkeydown="zenChatInputKeydown(event)" oninput="zenChatAutoResize(this)"></textarea>
               <button class="zen-chat-send-btn" id="zen-chat-send-btn" onclick="zenChatSend('full')" disabled>➤</button>
             </div>
           </div>
