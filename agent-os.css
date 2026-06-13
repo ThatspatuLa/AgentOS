@@ -4730,6 +4730,22 @@ body[data-page="kanban"] .os-main {
   position: relative;
   padding: 0 !important;
   margin: 0 !important;
+  top: 0 !important;
+}
+
+/* Full page mode: hide session header and sidebar, fill entire viewport */
+.zen-chat-page.zen-chat-full-mode .zen-chat-session-header {
+  display: none !important;
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-session-picker {
+  display: none !important;
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-sidebar {
+  display: none !important;
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-main-area {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .zen-chat-layout {
@@ -4737,6 +4753,8 @@ body[data-page="kanban"] .os-main {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  align-items: stretch;
+  height: 100%;
 }
 
 .zen-chat-sidebar {
@@ -4815,11 +4833,12 @@ body[data-page="kanban"] .os-main {
   min-height: 0;
   overflow: hidden;
 }
-
+/* ═══ ZEN CHAT PAGE — FULL HEIGHT ═══ */
+.zen-chat-main-area,
 .zen-chat-full-page {
-  display: none;
+  display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 0%;
   min-height: 0;
   overflow: hidden;
 }
@@ -5303,57 +5322,51 @@ body[data-page="kanban"] .os-main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   padding: var(--space-4) var(--space-6);
-  padding-bottom: var(--space-2);
   text-align: center;
   gap: var(--space-2);
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
 }
-
 .zen-chat-welcome-icon {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.05));
   border: 1px solid rgba(99, 102, 241, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 18px;
 }
-
 .zen-chat-welcome h3 {
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
 }
-
 .zen-chat-welcome p {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--text-secondary);
-  max-width: 360px;
-  line-height: 1.6;
+  max-width: 320px;
+  line-height: 1.5;
   margin: 0;
 }
-
 .zen-chat-welcome-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-1);
   justify-content: center;
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 .zen-chat-welcome-chip {
-  padding: var(--space-2) var(--space-3);
+  padding: 3px 10px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
-  font-size: var(--text-xs);
+  font-size: 11px;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
 }

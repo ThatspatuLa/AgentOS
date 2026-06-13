@@ -1,6 +1,6 @@
 {
   "version": 20,
-  "updated_at": "2026-06-13T05:34:26.567680Z",
+  "updated_at": "2026-06-13T06:06:59.950622Z",
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -457,13 +457,13 @@
       "title": "Agent OS: Zen Chat",
       "project": "zen",
       "status": "backlog",
-      "priority": "High",
-      "risk": "High",
+      "priority": "Medium",
+      "risk": "Low",
       "created": "2026-06-13",
       "lastActive": "Now",
       "archived": false,
-      "why": "Zen Chat is a core Agent OS operating layer: conversational helper, project/task command center, governed execution cockpit, review surface, and GitHub update gateway — not a simple bottom-right chatbot.",
-      "nextAction": "M1: Zen Chat Product Architecture — define the cockpit architecture, roles, governed stages, action boundaries, and final implementation brief.",
+      "why": "Added from the daily Kanban quick-add row.",
+      "nextAction": "Clarify the next safe action.",
       "notes": "",
       "subtasks": [
         {
@@ -828,7 +828,7 @@
         "Notes changes from Six preserved"
       ],
       "activity": [
-        "Zen Chat roadmap M1–M27 added from Six roadmap document"
+        "Task added from Kanban quick add"
       ]
     }
   ]

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=22">
+<link rel="stylesheet" href="agent-os.css?v=30">
 </head>
 <body>
 
@@ -4661,7 +4661,10 @@ function zenChatGoToView(view) {
 
   if (view === 'full') {
     // Show the zen-chat page
-    if (fullPage) fullPage.style.display = 'block';
+    if (fullPage) {
+      fullPage.style.display = 'block';
+      fullPage.classList.add('zen-chat-full-mode');
+    }
     // Hide other pages
     document.querySelectorAll('.os-page').forEach(function(p) {
       if (p.id !== 'page-zen-chat') p.style.display = 'none';
@@ -4676,7 +4679,10 @@ function zenChatGoToView(view) {
     setTimeout(function() { zenChatScrollToBottom('full'); }, 100);
   } else {
     // For drawer/small: hide zen-chat page, show previous page underneath
-    if (fullPage) fullPage.style.display = 'none';
+    if (fullPage) {
+      fullPage.style.display = 'none';
+      fullPage.classList.remove('zen-chat-full-mode');
+    }
     // Show the previous page
     var prev = zenChatState.previousPage || 'dashboard';
     if (prev !== 'zen-chat') {

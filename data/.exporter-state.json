@@ -1,0 +1,26 @@
+{
+  "source_mtimes": {
+    "/home/spatula/.hermes/config.yaml": 1781083871.0018265,
+    "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md": 1781059573.7896216,
+    "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md": 1781057689.0469432,
+    "/home/spatula/.hermes/state.db": 1781165760.3865676,
+    "/home/spatula/.hermes/logs/agent.log": 1781165808.582393,
+    "/home/spatula/Obsidian/ZenVault/01_Projects": 1781062130.1339014,
+    "/home/spatula/Obsidian/ZenVault/Sandbox/Runs": 1780998075.73105,
+    "/home/spatula/.hermes/sandbox/local-worker-usage.json": 1781069742.314208,
+    "/home/spatula/Projects/ZenNew/agent-os-data.json": 1781157577.9668524,
+    "/home/spatula/.local/bin/zen-worker": 1781021580.0563223
+  },
+  "source_hashes": {
+    "/home/spatula/.hermes/config.yaml": "904f5469ba6261e1",
+    "/home/spatula/Obsidian/ZenVault/00_System/SOUL.md": "43abfe9a35d91949",
+    "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md": "3af30305f8b65c01",
+    "/home/spatula/.hermes/state.db": "2d3e6c5a8f882594",
+    "/home/spatula/.hermes/logs/agent.log": "fb1e8a539d9be69f",
+    "/home/spatula/Obsidian/ZenVault/01_Projects": "missing",
+    "/home/spatula/Obsidian/ZenVault/Sandbox/Runs": "missing",
+    "/home/spatula/.hermes/sandbox/local-worker-usage.json": "36446ff6e7bd7b0d",
+    "/home/spatula/Projects/ZenNew/agent-os-data.json": "bee5053b8e25ae90",
+    "/home/spatula/.local/bin/zen-worker": "8a610820ea688b8d"
+  }
+}
