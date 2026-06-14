@@ -14,10 +14,17 @@ Serves static files and adds:
   GET      /api/sessions/:id/messages     -> reads from Hermes state.db
   POST     /api/sessions/:id/messages     -> Agent OS chat (stores locally)
   GET      /api/sessions/:id/rollup       -> child task summaries
+  GET      /api/memory                    -> Hermes MEMORY.md + USER.md
+  GET      /api/memory-world              -> data/memory-world.json
 
 Data layout:
   data/sessions/index.json                   -> session registry + hermesSessionId links
   data/sessions/<sessionId>/summary.json     -> decisions, blockers, files, validation
+  data/sessions/<sessionId>/messages.jsonl   -> Agent OS chat messages (supplemental)
+  data/sessions/<sessionId>/events.jsonl     -> reserved
+  data/memory-world.json                     -> force-directed graph data
+  ~/.hermes/memories/MEMORY.md               -> project rules, conventions, roadmap
+  ~/.hermes/memories/USER.md                 -> user profile and preferences
   data/sessions/<sessionId>/messages.jsonl   -> Agent OS chat messages (supplemental)
   data/sessions/<sessionId>/events.jsonl     -> reserved
 """
@@ -463,6 +470,24 @@ class Handler(SimpleHTTPRequestHandler):
                     "color": ch.get("color", "#666"),
                 })
             return self._json({"sessionId": m["id"], "children": rollup})
+
+        # GET /api/memory — Hermes MEMORY.md + USER.md
+        if self._match("api/memory") is not None:
+            memory_md = ""
+            user_md = ""
+            memory_path = HERMES_DB.parent / "memories" / "MEMORY.md"
+            user_path = HERMES_DB.parent / "memories" / "USER.md"
+            if memory_path.exists():
+                memory_md = memory_path.read_text(encoding="utf-8")
+            if user_path.exists():
+                user_md = user_path.read_text(encoding="utf-8")
+            return self._json({"memory": memory_md, "user": user_md})
+
+        # GET /api/memory-world — force-directed graph data
+        if self._match("api/memory-world") is not None:
+            mw_path = ROOT / "data" / "memory-world.json"
+            mw = _read_json(mw_path, {"nodes": [], "edges": []})
+            return self._json(mw)
 
         self._json({"error": "not found"}, 404)
 
