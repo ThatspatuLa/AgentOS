@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=41">
+<link rel="stylesheet" href="agent-os.css?v=44">
 </head>
 <body>
 
@@ -538,6 +538,8 @@
             </div>
           </div>
 
+          <div class="zen-work-panel-host" id="zen-work-panel-full" aria-live="polite"></div>
+
           <!-- Status Bar -->
           <div class="zen-chat-status-bar">
             <span class="zen-chat-status-dot" id="zen-chat-status-dot"></span>
@@ -841,6 +843,14 @@
     <button class="zen-chat-launcher-btn" onclick="zenChatToggleSmallPanel()" title="Open Zen Chat">💬</button>
   </div>
 
+  <div class="zen-work-global" id="zen-work-global" aria-live="polite">
+    <div class="zen-work-global-stack" id="zen-work-global-stack"></div>
+    <button class="zen-work-global-minimized" id="zen-work-global-minimized" onclick="zenWorkToggleGlobal(false)" style="display:none" title="Show Zen activity">
+      <span class="zen-work-orb zen-work-orb--running">🦉</span>
+      <span id="zen-work-global-count">0</span>
+    </button>
+  </div>
+
   <!-- ═══ ZEN CHAT: Small Chat Panel (M2) ═══ -->
   <div class="zen-chat-small-panel" id="zen-chat-small-panel">
     <div class="zen-chat-session-header">
@@ -906,6 +916,10 @@
         <p>Quick chat cockpit</p>
       </div>
     </div>
+    <button class="zen-work-mini" id="zen-work-mini-small" onclick="zenWorkOpenActivity()" style="display:none">
+      <span class="zen-work-mini-icon">🦉</span>
+      <span id="zen-work-mini-small-text">Running task · View activity</span>
+    </button>
     <div class="zen-chat-status-bar">
       <span class="zen-chat-status-dot" id="zen-chat-small-status-dot"></span>
       <span id="zen-chat-small-status-text">Ready</span>
@@ -993,6 +1007,7 @@
         </div>
       </div>
     </div>
+    <div class="zen-work-panel-host" id="zen-work-panel-drawer" aria-live="polite"></div>
     <div class="zen-chat-status-bar">
       <span class="zen-chat-status-dot" id="zen-chat-drawer-status-dot"></span>
       <span id="zen-chat-drawer-status-text">Ready</span>
@@ -4629,9 +4644,9 @@ window.showPage = function(id) {
 // ── M1: State ──
 const ZEN_CHAT_SESSIONS = {
   'zen-os':    {id:'zen-os',    type:'global', icon:'🖥️', label:'Zen OS',   title:'Zen OS Session',         meta:'Agent OS · UI & Frontend',  badgeClass:'zen-chat-session-badge--ui',     projectId:null,       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'main',              hermesSessionId:null,       channel:'zen-chat',    color:'#7c3aed'},
-  'zen':       {id:'zen',       type:'main',   icon:'🦉', label:'Zen',      title:'Zen Project Session',     meta:'Project: Zen',              badgeClass:'zen-chat-session-badge--project', projectId:'zen',       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/zen/',       hermesSessionId:'20260607_193056_683caea5', channel:'zen-chat',    color:'#6366f1'},
-  'kiyosaki':  {id:'kiyosaki',  type:'main',   icon:'📊', label:'Kiyosaki', title:'Kiyosaki Project Session', meta:'Project: Kiyosaki',         badgeClass:'zen-chat-session-badge--project', projectId:'kiyosaki',  repo:'/home/spatula/Projects/Kiyosaki', branchPrefix:'session/kiyosaki/',  hermesSessionId:'20260607_193646_a685023b', channel:'kiyosaki-chat', color:'#059669'},
-  'minato':    {id:'minato',    type:'main',   icon:'🔧', label:'Minato',   title:'Minato Project Session',  meta:'Project: Minato',           badgeClass:'zen-chat-session-badge--project', projectId:'minato',    repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/minato/',    hermesSessionId:null,       channel:'minato-chat',  color:'#d97706'},
+  'zen':       {id:'zen',       type:'main',   icon:'🦉', label:'Zen',      title:'Zen Project Session',     meta:'Project: Zen',              badgeClass:'zen-chat-session-badge--project', projectId:'zen',       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/zen/',       hermesSessionId:'20260614_203554_56e2f5', channel:'zen-chat',    color:'#6366f1'},
+  'kiyosaki':  {id:'kiyosaki',  type:'main',   icon:'📊', label:'Kiyosaki', title:'Kiyosaki Project Session', meta:'Project: Kiyosaki',         badgeClass:'zen-chat-session-badge--project', projectId:'kiyosaki',  repo:'/home/spatula/Projects/Kiyosaki', branchPrefix:'session/kiyosaki/',  hermesSessionId:'20260613_130913_a8909b', channel:'kiyosaki-chat', color:'#059669'},
+  'minato':    {id:'minato',    type:'main',   icon:'🔧', label:'Minato',   title:'Minato Project Session',  meta:'Project: Minato',           badgeClass:'zen-chat-session-badge--project', projectId:'minato',    repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/minato/',    hermesSessionId:'20260613_123151_42ef1c', channel:'minato-chat',  color:'#d97706'},
   'rin':       {id:'rin',       type:'main',   icon:'🎯', label:'Rin',      title:'Rin Project Session',     meta:'Project: Rin',              badgeClass:'zen-chat-session-badge--project', projectId:'rin',       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/rin/',       hermesSessionId:'20260608_042151_b4f5cf15', channel:'rin-chat',     color:'#dc2626'},
   'toji':      {id:'toji',      type:'main',   icon:'⚡', label:'Toji',     title:'Toji Project Session',    meta:'Project: Toji',             badgeClass:'zen-chat-session-badge--project', projectId:'toji',      repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/toji/',      hermesSessionId:'20260608_042419_3a98b4c7', channel:'toji-chat',    color:'#2563eb'},
   'kazuki':    {id:'kazuki',    type:'main',   icon:'🛡️', label:'Kazuki',   title:'Kazuki Project Session',  meta:'Project: Kazuki',           badgeClass:'zen-chat-session-badge--project', projectId:'kazuki',    repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/kazuki/',    hermesSessionId:null,       channel:'kazuki-chat',  color:'#7c2d12'}
@@ -5008,6 +5023,7 @@ function zenChatSetView(view) {
   zenChatSetSession(zenChatState.activeSession, 'full');
   zenChatSetSession(zenChatState.activeSession, 'drawer');
   zenChatSetSession(zenChatState.activeSession, 'small');
+  zenWorkRenderAll();
 
   if (view === 'full') {
     setTimeout(() => zenChatScrollToBottom('full'), 100);
@@ -5037,6 +5053,7 @@ function zenChatUpdateSidebar() {
 
 function zenChatHandleSidebarClick(sessionId) {
   zenChatSetSession(sessionId, 'full');
+  zenWorkRenderAll();
   setTimeout(() => {
     const input = document.getElementById('zen-chat-input');
     if (input) input.focus();
@@ -5057,29 +5074,71 @@ function zenChatRenderMessages(view) {
     return;
   }
   if (welcome) welcome.style.display = 'none';
-  msgs.forEach(m => {
-    const el = document.createElement('div');
-    el.className = 'zen-chat-message zen-chat-message--' + m.role;
-    el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble">' + escapeHtml(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
-    container.appendChild(el);
+  msgs.forEach(function(m, idx) {
+    container.appendChild(zenChatCreateMessageEl(m, idx));
   });
+}
+
+function zenChatMessageKey(m, idx) {
+  return [m.ts || '', m.role || '', m.content || '', idx].join('|');
+}
+
+function zenChatCreateMessageEl(m, idx) {
+  const el = document.createElement('div');
+  el.className = 'zen-chat-message zen-chat-message--' + m.role;
+  el.dataset.key = zenChatMessageKey(m, idx || 0);
+  el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble">' + escapeHtml(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
+  return el;
+}
+
+function zenChatSyncMessages(view, previousCount) {
+  const sessionId = zenChatState.activeSession;
+  const msgs = zenChatGetMessages(sessionId);
+  const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
+  const container = document.getElementById('zen-chat' + suffix + '-messages');
+  const welcome = document.getElementById('zen-chat' + suffix + '-welcome');
+  if (!container) return;
+  if (msgs.length === 0) {
+    container.querySelectorAll('.zen-chat-message').forEach(el => el.remove());
+    if (welcome) welcome.style.display = '';
+    return;
+  }
+  if (welcome) welcome.style.display = 'none';
+
+  const rendered = container.querySelectorAll('.zen-chat-message').length;
+  const countBefore = typeof previousCount === 'number' ? previousCount : rendered;
+
+  // Normal polling appends only new messages. That avoids clearing the DOM on
+  // every refresh, which was causing visible flicker in the chat window.
+  if (rendered > msgs.length || rendered > countBefore) {
+    zenChatRenderMessages(view);
+    return;
+  }
+
+  for (let i = rendered; i < msgs.length; i++) {
+    container.appendChild(zenChatCreateMessageEl(msgs[i], i));
+  }
 }
 
 function zenChatAddMessage(role, content, view) {
   const sessionId = zenChatState.activeSession;
   const now = new Date();
   const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  // Optimistically add to cache and render
+  // Optimistically add to cache and append without rebuilding the whole chat.
   const msgs = zenChatGetMessages(sessionId);
-  msgs.push({role, content, time});
-  ['full','drawer','small'].forEach(v => zenChatRenderMessages(v));
+  msgs.push({role, content, time, ts: now.toISOString()});
+  ['full','drawer','small'].forEach(function(v) { zenChatSyncMessages(v); });
   zenChatScrollToBottom(view || zenChatState.view);
 }
 
 function zenChatRefreshActiveMessages(forceScroll) {
   var sessionId = zenChatState.activeSession;
+  var before = (zenChatState.messagesCache[sessionId] || []).length;
   return zenChatFetchMessages(sessionId, true).then(function() {
-    ['full','drawer','small'].forEach(function(v) { zenChatRenderMessages(v); });
+    var after = (zenChatState.messagesCache[sessionId] || []).length;
+    if (after !== before) {
+      ['full','drawer','small'].forEach(function(v) { zenChatSyncMessages(v, before); });
+    }
     if (forceScroll) zenChatScrollToBottom(zenChatState.view);
   });
 }
@@ -5092,7 +5151,7 @@ function zenChatStartRefreshTimer() {
     if (chatVisible && document.visibilityState === 'visible') {
       zenChatRefreshActiveMessages(false);
     }
-  }, 5000);
+  }, 15000);
 }
 
 function zenChatScrollToBottom(view) {
@@ -5100,6 +5159,235 @@ function zenChatScrollToBottom(view) {
   const container = document.getElementById('zen-chat' + suffix + '-messages');
   if (container) setTimeout(() => container.scrollTop = container.scrollHeight, 50);
 }
+
+
+// ── Zen working-state UI ──
+const ZEN_WORK_STATE = {
+  tasks: {},
+  minimized: false,
+  tickTimer: null,
+  streamLibrary: {
+    thinking: [
+      { icon:'🧠', label:'session context', text:'Reviewing session context.' },
+      { icon:'📌', label:'boundary', text:'Planning only — no file writes or GitHub updates.' }
+    ],
+    running: [
+      { icon:'📚', label:'skill_view', text:'Loading relevant operating patterns.' },
+      { icon:'🔎', label:'search_files', text:'Checking files, routes, and session state.' },
+      { icon:'🧩', label:'editing', text:'Applying scoped local changes.' },
+      { icon:'🧪', label:'validating', text:'Running checks and browser verification.' },
+      { icon:'🛡️', label:'boundary', text:'Local only — GitHub update requires Six review.' }
+    ],
+    failed: [
+      { icon:'⚠️', label:'diagnosis', text:'Execution stopped before completion.' },
+      { icon:'🧾', label:'evidence', text:'See cause and recovery options below.' }
+    ],
+    complete: [
+      { icon:'✅', label:'validated', text:'Task complete. Ready for review.' },
+      { icon:'🧭', label:'next gate', text:'Accept, alter, review, or request GitHub update plan.' }
+    ]
+  }
+};
+
+function zenWorkNow() { return Date.now(); }
+function zenWorkElapsed(task) {
+  var ms = Math.max(0, zenWorkNow() - (task.startedAt || zenWorkNow()));
+  var sec = Math.floor(ms / 1000);
+  if (sec < 60) return sec + 's';
+  var min = Math.floor(sec / 60);
+  return min + 'm ' + String(sec % 60).padStart(2,'0') + 's';
+}
+function zenWorkSessionInfo(sessionId) {
+  return ZEN_CHAT_SESSIONS[sessionId] || { id: sessionId, label: sessionId || 'Session', title: 'Zen Session', meta: 'Agent OS' };
+}
+function zenWorkActiveTasks() {
+  return Object.values(ZEN_WORK_STATE.tasks).sort(function(a,b){ return (b.startedAt||0) - (a.startedAt||0); });
+}
+function zenWorkCurrentTask(sessionId) {
+  return zenWorkActiveTasks().find(function(t){ return t.sessionId === sessionId && t.status !== 'dismissed'; }) || null;
+}
+function zenWorkSetTask(task) {
+  ZEN_WORK_STATE.tasks[task.id] = Object.assign({}, ZEN_WORK_STATE.tasks[task.id] || {}, task);
+  zenWorkEnsureTicker();
+  zenWorkRenderAll();
+  return ZEN_WORK_STATE.tasks[task.id];
+}
+function zenWorkStart(status, opts) {
+  var sessionId = (opts && opts.sessionId) || zenChatState.activeSession;
+  var info = zenWorkSessionInfo(sessionId);
+  var id = (opts && opts.id) || ('work-' + sessionId + '-' + Date.now());
+  return zenWorkSetTask({
+    id: id,
+    sessionId: sessionId,
+    status: status,
+    title: (opts && opts.title) || info.title || info.label,
+    action: (opts && opts.action) || (status === 'thinking' ? 'Reviewing session context.' : 'Preparing execution.'),
+    modelRole: (opts && opts.modelRole) || (status === 'thinking' ? 'Chat / Plan model' : 'Execution model'),
+    boundary: (opts && opts.boundary) || (status === 'thinking' ? 'Planning only' : 'Execution boundary · local only'),
+    startedAt: zenWorkNow(),
+    updatedAt: zenWorkNow(),
+    prompt: (opts && opts.prompt) || '',
+    currentAction: (opts && opts.currentAction) || '',
+    cause: (opts && opts.cause) || '',
+    evidence: (opts && opts.evidence) || '',
+    recovery: (opts && opts.recovery) || [],
+    activityLog: (opts && opts.activityLog) || [{
+      icon: status === 'thinking' ? '🧠' : '🦉',
+      label: status === 'thinking' ? 'thinking' : status,
+      text: (opts && opts.action) || (status === 'thinking' ? 'Reviewing session context.' : 'Preparing execution.'),
+      ts: zenWorkNow(),
+      status: 'active'
+    }]
+  });
+}
+function zenWorkTransition(id, status, patch) {
+  var prev = ZEN_WORK_STATE.tasks[id];
+  if (!prev) return null;
+  var nextPatch = patch || {};
+  var nextLog = (prev.activityLog || []).slice();
+  if (status !== prev.status || nextPatch.action) {
+    nextLog.push({
+      icon: status === 'running' ? '⚙️' : (status === 'complete' ? '✅' : (status === 'failed' ? '⚠️' : '🧠')),
+      label: status,
+      text: nextPatch.action || zenWorkStatusText(Object.assign({}, prev, { status: status })),
+      ts: zenWorkNow(),
+      status: status === 'failed' ? 'failed' : (status === 'complete' ? 'done' : 'active')
+    });
+  }
+  return zenWorkSetTask(Object.assign({}, prev, nextPatch, { status: status, activityLog: nextLog, updatedAt: zenWorkNow() }));
+}
+function zenWorkAddActivity(id, icon, label, text, status) {
+  var prev = ZEN_WORK_STATE.tasks[id];
+  if (!prev) return null;
+  var entry = { icon: icon || '•', label: label || 'activity', text: text || '', ts: zenWorkNow(), status: status || 'active' };
+  var log = (prev.activityLog || []).concat([entry]).slice(-24);
+  return zenWorkSetTask(Object.assign({}, prev, {
+    action: text || prev.action,
+    activityLog: log,
+    updatedAt: zenWorkNow()
+  }));
+}
+function zenWorkDismiss(id) {
+  delete ZEN_WORK_STATE.tasks[id];
+  zenWorkRenderAll();
+}
+function zenWorkToggleGlobal(minimized) {
+  ZEN_WORK_STATE.minimized = !!minimized;
+  zenWorkRenderGlobal();
+}
+function zenWorkEnsureTicker() {
+  if (ZEN_WORK_STATE.tickTimer) return;
+  ZEN_WORK_STATE.tickTimer = setInterval(function(){
+    if (zenWorkActiveTasks().length === 0) return;
+    zenWorkRenderAll();
+  }, 1000);
+}
+function zenWorkStatusText(task) {
+  if (!task) return 'Ready';
+  if (task.status === 'thinking') return task.modelRole && task.modelRole.toLowerCase().includes('plan') ? 'Zen is planning...' : 'Zen is thinking...';
+  if (task.status === 'running') return 'Zen is running...';
+  if (task.status === 'complete') return 'Task complete';
+  if (task.status === 'failed') return 'Needs diagnosis';
+  return 'Ready';
+}
+function zenWorkIconClass(status) {
+  if (status === 'thinking') return 'zen-work-orb--thinking';
+  if (status === 'running') return 'zen-work-orb--running';
+  if (status === 'complete') return 'zen-work-orb--complete';
+  if (status === 'failed') return 'zen-work-orb--failed';
+  return '';
+}
+function zenWorkStream(task) {
+  var live = (task.activityLog || []).slice(-12);
+  if (live.length) {
+    return live.map(function(item, idx){
+      var age = Math.max(0, Math.floor((zenWorkNow() - (item.ts || task.startedAt)) / 1000));
+      var active = idx === live.length - 1 && (task.status === 'thinking' || task.status === 'running');
+      return '<div class="zen-work-stream-item zen-work-stream-item--' + escapeHtml(item.status || 'active') + (active ? ' active' : '') + '"><span>' + escapeHtml(item.icon || '•') + '</span><strong>' + escapeHtml(item.label || 'activity') + '</strong><em>' + escapeHtml(item.text || '') + '</em><time>' + age + 's ago</time></div>';
+    }).join('');
+  }
+  var base = ZEN_WORK_STATE.streamLibrary[task.status] || ZEN_WORK_STATE.streamLibrary.thinking;
+  return base.map(function(item, idx){
+    var active = task.status === 'running' && idx === Math.min(base.length - 1, Math.floor((zenWorkNow() - task.startedAt) / 1400) % base.length);
+    return '<div class="zen-work-stream-item' + (active ? ' active' : '') + '"><span>' + item.icon + '</span><strong>' + escapeHtml(item.label) + '</strong><em>' + escapeHtml(item.text) + '</em><time>live</time></div>';
+  }).join('');
+}
+function zenWorkPanelHtml(task, mode) {
+  if (!task) return '';
+  var sameSession = task.sessionId === zenChatState.activeSession;
+  var session = zenWorkSessionInfo(task.sessionId);
+  var notice = sameSession && task.status === 'running'
+    ? '<div class="zen-work-attached-notice">Same-session execution is running. New prompts stay attached/queued to this session context.</div>'
+    : (!sameSession ? '<div class="zen-work-attached-notice muted">Another session is working; this chat remains usable.</div>' : '');
+  var failure = task.status === 'failed'
+    ? '<div class="zen-work-diagnosis"><strong>Cause:</strong> ' + escapeHtml(task.cause || 'Unknown failure') + '<br><strong>Evidence:</strong> ' + escapeHtml(task.evidence || 'No additional evidence captured yet.') + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery"><button>Retry</button><button>Alter plan</button><button>Open logs</button></div></div>'
+    : '';
+  var complete = task.status === 'complete'
+    ? '<div class="zen-work-completion-actions"><button>Accept</button><button>Alter</button><button>Review</button><button>GitHub update plan</button></div>'
+    : '';
+  return '<section class="zen-work-panel zen-work-panel--' + task.status + ' zen-work-panel--' + mode + '">'
+    + '<div class="zen-work-panel-head"><span class="zen-work-orb ' + zenWorkIconClass(task.status) + '">🦉</span><div class="zen-work-panel-title"><strong>' + escapeHtml(zenWorkStatusText(task)) + '</strong><span>' + escapeHtml(task.action || 'Reviewing session context.') + '</span></div><button onclick="zenWorkDismiss(\'' + task.id + '\')" title="Hide activity">×</button></div>'
+    + '<div class="zen-work-panel-meta"><span>Session: ' + escapeHtml(session.label || session.id) + '</span><span>Role: ' + escapeHtml(task.modelRole) + '</span><span>Elapsed: ' + zenWorkElapsed(task) + '</span><span>Boundary: ' + escapeHtml(task.boundary) + '</span></div>'
+    + notice
+    + '<details class="zen-work-stream" open><summary>Live Hermes activity stream</summary>' + zenWorkStream(task) + '</details>'
+    + failure + complete
+    + '</section>';
+}
+function zenWorkRenderPanels() {
+  var active = zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks().find(function(t){ return t.status === 'running' || t.status === 'thinking'; }) || null;
+  var full = document.getElementById('zen-work-panel-full');
+  var drawer = document.getElementById('zen-work-panel-drawer');
+  if (full) full.innerHTML = active ? zenWorkPanelHtml(active, 'full') : '';
+  if (drawer) drawer.innerHTML = active ? zenWorkPanelHtml(active, 'drawer') : '';
+  var mini = document.getElementById('zen-work-mini-small');
+  var miniText = document.getElementById('zen-work-mini-small-text');
+  if (mini) {
+    mini.style.display = active ? 'flex' : 'none';
+    mini.className = 'zen-work-mini ' + (active ? 'zen-work-mini--' + active.status : '');
+  }
+  if (miniText && active) miniText.textContent = (active.status === 'thinking' ? 'Thinking' : active.status === 'complete' ? 'Complete' : active.status === 'failed' ? 'Needs diagnosis' : 'Running task') + ' · View activity';
+}
+function zenWorkRenderGlobal() {
+  var tasks = zenWorkActiveTasks().filter(function(t){ return t.status !== 'dismissed'; });
+  var stack = document.getElementById('zen-work-global-stack');
+  var mini = document.getElementById('zen-work-global-minimized');
+  var count = document.getElementById('zen-work-global-count');
+  if (!stack || !mini) return;
+  if (count) count.textContent = String(tasks.length);
+  if (ZEN_WORK_STATE.minimized && tasks.length) {
+    stack.style.display = 'none';
+    mini.style.display = 'inline-flex';
+    return;
+  }
+  mini.style.display = 'none';
+  stack.style.display = tasks.length ? 'flex' : 'none';
+  stack.innerHTML = tasks.map(function(task){
+    var session = zenWorkSessionInfo(task.sessionId);
+    return '<article class="zen-work-card zen-work-card--' + task.status + '"><span class="zen-work-orb ' + zenWorkIconClass(task.status) + '">🦉</span><div><strong>' + escapeHtml(zenWorkStatusText(task)) + '</strong><p>' + escapeHtml(session.label || task.sessionId) + ' · ' + escapeHtml(task.action || task.title) + '</p><small>' + zenWorkElapsed(task) + ' · ' + escapeHtml(task.boundary || '') + '</small></div><button onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
+  }).join('');
+}
+function zenWorkRenderHeaderStatus() {
+  var task = zenWorkCurrentTask(zenChatState.activeSession);
+  var text = document.getElementById('zen-chat-header-status-text');
+  var pill = document.getElementById('zen-chat-session-status');
+  if (text) text.textContent = task ? zenWorkStatusText(task).replace('Zen is ', '').replace('...', '').replace(/^./, function(c){ return c.toUpperCase(); }) : 'Ready';
+  if (pill) pill.className = 'zen-chat-status-pill ' + (task ? 'zen-chat-status-pill--' + task.status : '');
+}
+function zenWorkRenderAll() {
+  zenWorkRenderGlobal();
+  zenWorkRenderPanels();
+  zenWorkRenderHeaderStatus();
+}
+function zenWorkOpenActivity() {
+  if (zenChatState.view === 'small') zenChatGoToView('drawer');
+  else zenChatGoToView('full');
+  zenWorkRenderAll();
+}
+window.zenWorkStart = zenWorkStart;
+window.zenWorkTransition = zenWorkTransition;
+window.zenWorkAddActivity = zenWorkAddActivity;
+window.zenWorkRenderAll = zenWorkRenderAll;
+window.zenWorkOpenActivity = zenWorkOpenActivity;
 
 // ── Input ──
 function zenChatInputKeydown(e) {
@@ -5128,23 +5416,73 @@ function zenChatSend(view) {
   zenChatAddMessage('user', text, view);
   zenChatSetStatus('working', view);
   zenChatUpdateSendBtn(view);
-  // Send to Agent OS server, which forwards to Hermes if session has a Hermes link
+
   var sessionId = zenChatState.activeSession;
+  var info = zenWorkSessionInfo(sessionId);
+  var work = zenWorkStart('thinking', {
+    sessionId: sessionId,
+    prompt: text,
+    title: info.title || info.label,
+    action: text.toLowerCase().includes('plan') ? 'Reviewing session context and forming a plan.' : 'Reviewing session context.',
+    modelRole: text.toLowerCase().includes('plan') ? 'Chat / Plan model' : 'Chat model',
+    boundary: 'Planning only',
+    activityLog: [
+      { icon:'💬', label:'prompt', text:'Received prompt from Zen Chat.', ts: zenWorkNow(), status:'done' },
+      { icon:'🧠', label:'context', text:'Reviewing session context.', ts: zenWorkNow(), status:'active' }
+    ]
+  });
+  zenWorkAddActivity(work.id, '📌', 'boundary', 'Planning only — no file writes or GitHub update.', 'done');
+  var runningTimer = setTimeout(function(){
+    zenWorkTransition(work.id, 'running', {
+      action: 'Executing accepted session request.',
+      modelRole: 'Execution model',
+      boundary: 'Execution boundary · local only · no GitHub update'
+    });
+    zenWorkAddActivity(work.id, '🌉', 'bridge', 'Forwarding request through Agent OS → Hermes bridge.', 'active');
+  }, 900);
+
+  zenWorkAddActivity(work.id, '📡', 'api', 'POST /api/sessions/' + sessionId + '/messages', 'active');
+  // Send to Agent OS server, which forwards to Hermes if session has a Hermes link
   zenChatApi('/' + sessionId + '/messages', {
     method: 'POST',
     body: { role: 'user', content: text }
   }).then(function(resp) {
+    clearTimeout(runningTimer);
+    zenWorkAddActivity(work.id, '🦉', 'hermes', resp && resp.assistant ? 'Hermes response received.' : 'Hermes bridge completed; refreshing session history.', 'done');
+    zenWorkAddActivity(work.id, '🔄', 'refresh', 'Refreshing visible chat history from Hermes state.', 'active');
+    zenWorkTransition(work.id, 'complete', {
+      action: 'Task complete / Ready for review.',
+      modelRole: 'Execution model',
+      boundary: 'Review gate · GitHub update requires approval'
+    });
     zenChatRefreshActiveMessages(true).then(function() {
       zenChatSetStatus('idle', view);
       zenChatUpdateSendBtn(view);
+      zenWorkAddActivity(work.id, '✅', 'complete', 'Task complete / Ready for review.', 'done');
+      zenWorkRenderAll();
     });
   }).catch(function(err) {
-    zenChatAddMessage('assistant', '[Error: could not reach Hermes. ' + (err.message || 'Server error') + ']', view);
+    clearTimeout(runningTimer);
+    var msg = err && err.message ? err.message : 'Server error';
+    var cause = 'Hermes bridge request failed.';
+    if (/timeout/i.test(msg)) cause = 'Execution timeout or blocked process.';
+    if (/token|context/i.test(msg)) cause = 'Token/context limit hit.';
+    if (/network|fetch|reach/i.test(msg)) cause = 'Agent OS could not reach Hermes.';
+    zenWorkAddActivity(work.id, '⚠️', 'failure', cause, 'failed');
+    zenWorkTransition(work.id, 'failed', {
+      action: 'Diagnosis required before retry.',
+      modelRole: 'Execution model',
+      boundary: 'Recovery gate',
+      cause: cause,
+      evidence: msg,
+      recovery: ['Retry same prompt', 'Alter plan', 'Open logs']
+    });
+    zenChatAddMessage('assistant', '[Error: could not reach Hermes. ' + msg + ']', view);
     zenChatSetStatus('idle', view);
     zenChatUpdateSendBtn(view);
+    zenWorkRenderAll();
   });
 }
-
 function zenChatQuickPrompt(text, view) {
   const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
   const input = document.getElementById('zen-chat' + suffix + '-input');
