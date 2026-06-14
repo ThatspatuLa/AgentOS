@@ -5097,11 +5097,23 @@ function zenChatSend(view) {
   input.style.height = 'auto';
   zenChatAddMessage('user', text, view);
   zenChatSetStatus('working', view);
-  setTimeout(() => {
-    zenChatAddMessage('assistant', 'Zen Chat M1–M3 scaffolding is active. This is a placeholder response — real Hermes integration comes in M4+.', view);
+  zenChatUpdateSendBtn(view);
+  // Send to Agent OS server, which forwards to Hermes if session has a Hermes link
+  var sessionId = zenChatState.activeSession;
+  zenChatApi('/' + sessionId + '/messages', {
+    method: 'POST',
+    body: { role: 'user', content: text }
+  }).then(function(resp) {
+    if (resp.assistant) {
+      zenChatAddMessage('assistant', resp.assistant.content, view);
+    }
     zenChatSetStatus('idle', view);
     zenChatUpdateSendBtn(view);
-  }, 800);
+  }).catch(function(err) {
+    zenChatAddMessage('assistant', '[Error: could not reach Hermes. ' + (err.message || 'Server error') + ']', view);
+    zenChatSetStatus('idle', view);
+    zenChatUpdateSendBtn(view);
+  });
 }
 
 function zenChatQuickPrompt(text, view) {

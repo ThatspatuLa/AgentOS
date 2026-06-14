@@ -520,7 +520,7 @@ class Handler(SimpleHTTPRequestHandler):
             now = _now_iso()
             record = {"role": role, "content": content, "ts": now, "source": "agent-os"}
 
-            # Store locally
+            # Store user message locally
             msg_path = SESSIONS_DIR / m["id"] / "messages.jsonl"
             _append_jsonl(msg_path, record)
 
@@ -529,9 +529,112 @@ class Handler(SimpleHTTPRequestHandler):
             s["messageCount"] = (s.get("messageCount") or 0) + 1
             _save_index(index)
 
-            return self._json({"ok": True, "message": record})
+            # If this is a user message and the session has a Hermes link,
+            # forward to Hermes via `hermes chat` so the agent processes it
+            # with full context (memory, tools, skills) and the response
+            # goes to Discord automatically via the gateway.
+            assistant_record = None
+            if role == "user" and s.get("hermesSessionId"):
+                assistant_record = self._hermes_chat(s["hermesSessionId"], content)
+                if assistant_record:
+                    _append_jsonl(msg_path, assistant_record)
+                    s["messageCount"] = (s.get("messageCount") or 0) + 1
+                    _save_index(index)
+
+            return self._json({
+                "ok": True,
+                "message": record,
+                "assistant": assistant_record,
+            })
 
         self._json({"error": "not found"}, 404)
+
+    def _hermes_chat(self, hermes_session_id: str, user_message: str) -> dict | None:
+        """Send a message to Hermes via `hermes chat` CLI.
+
+        Resumes the existing Hermes session so the agent has full context
+        (memory, tools, skills, conversation history). The response is
+        automatically delivered to Discord by the Hermes gateway.
+
+        Returns the assistant response record, or None on failure.
+        """
+        import subprocess
+
+        cmd = [
+            "hermes", "chat",
+            "-q", user_message,
+            "--resume", hermes_session_id,
+            "-Q",
+            "--source", "tool",
+        ]
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,  # 5 min max — same as gateway timeout
+            )
+            if result.returncode == 0:
+                # Extract the response text from stdout
+                # Format: session_id line, blank line, then the response
+                stdout = result.stdout.strip()
+                response_text = stdout
+
+                # Try to strip the session_id prefix line
+                lines = stdout.split("\n")
+                # Skip lines like "session_id: ..." and blank lines
+                content_lines = []
+                past_header = False
+                for line in lines:
+                    if past_header:
+                        content_lines.append(line)
+                    elif line.strip() == "":
+                        past_header = True
+                    elif line.startswith("session_id:"):
+                        continue
+                    else:
+                        content_lines.append(line)
+                        past_header = True
+
+                response_text = "\n".join(content_lines).strip() if content_lines else stdout
+
+                if response_text:
+                    return {
+                        "role": "assistant",
+                        "content": response_text,
+                        "ts": _now_iso(),
+                        "source": "hermes",
+                    }
+            else:
+                err = result.stderr.strip() or "hermes chat returned non-zero"
+                return {
+                    "role": "assistant",
+                    "content": f"[Hermes error: {err}]",
+                    "ts": _now_iso(),
+                    "source": "hermes-error",
+                }
+        except subprocess.TimeoutExpired:
+            return {
+                "role": "assistant",
+                "content": "[Hermes timeout — no response in 5 minutes]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+            }
+        except FileNotFoundError:
+            return {
+                "role": "assistant",
+                "content": "[Hermes CLI not found — install with: pip install hermes-agent]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+            }
+        except Exception as e:
+            return {
+                "role": "assistant",
+                "content": f"[Hermes error: {e}]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+            }
 
     # -- OPTIONS (CORS) --------------------------------------------------
 
