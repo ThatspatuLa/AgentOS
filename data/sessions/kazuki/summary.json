@@ -1,0 +1,16 @@
+{
+  "id": "kazuki",
+  "label": "Kazuki",
+  "type": "main",
+  "projectId": "kazuki",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-06-14T03:48:13.749420Z",
+  "lastActive": "2026-06-14T03:48:13.749421Z"
+}

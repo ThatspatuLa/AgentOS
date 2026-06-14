@@ -1,0 +1,16 @@
+{
+  "id": "minato",
+  "label": "Minato",
+  "type": "main",
+  "projectId": "minato",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-06-14T03:48:13.748540Z",
+  "lastActive": "2026-06-14T03:48:13.748542Z"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "zen-os",
+  "label": "Zen OS",
+  "type": "global",
+  "projectId": null,
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 2,
+  "createdAt": "2026-06-14T03:48:13.747496Z",
+  "lastActive": "2026-06-14T04:04:05.257786Z"
+}

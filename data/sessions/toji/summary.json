@@ -1,0 +1,16 @@
+{
+  "id": "toji",
+  "label": "Toji",
+  "type": "main",
+  "projectId": "toji",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-06-14T03:48:13.749135Z",
+  "lastActive": "2026-06-14T03:48:13.749136Z"
+}

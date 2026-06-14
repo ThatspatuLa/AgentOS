@@ -1,0 +1,16 @@
+{
+  "id": "rin",
+  "label": "Rin",
+  "type": "main",
+  "projectId": "rin",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-06-14T03:48:13.748850Z",
+  "lastActive": "2026-06-14T03:48:13.748851Z"
+}

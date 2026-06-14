@@ -1,0 +1,16 @@
+{
+  "id": "zen",
+  "label": "Zen",
+  "type": "main",
+  "projectId": "zen",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-06-14T03:48:13.747937Z",
+  "lastActive": "2026-06-14T03:48:13.747939Z"
+}
