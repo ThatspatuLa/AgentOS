@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=39">
+<link rel="stylesheet" href="agent-os.css?v=41">
 </head>
 <body>
 
@@ -3554,8 +3554,12 @@ const projectInfo = {
 // ═══ INIT ═══
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
-  // Load sessions from API
-  zenChatLoadSessions();
+  // Load sessions from API and keep the active linked session fresh so
+  // Discord, Hermes Chat, and Agent OS converge on the same history.
+  zenChatLoadSessions().then(function() {
+    zenChatSetSession(zenChatState.activeSession, zenChatState.view);
+    zenChatStartRefreshTimer();
+  });
   // Start auto-refresh
   if (autoRefreshEnabled) {
     autoRefreshTimer = setInterval(() => {
@@ -4634,7 +4638,7 @@ const ZEN_CHAT_SESSIONS = {
 };
 
 let zenChatState = {
-  activeSession: 'zen-os',
+  activeSession: 'zen',
   view: 'full',
   smallPanelOpen: false,
   sessionPickersOpen: {full: false, drawer: false, small: false},
@@ -4647,6 +4651,7 @@ let zenChatState = {
   sessionMeta: {},  // sessionId -> summary from API
   sidebarSessions: [], // ordered list for sidebar rendering
   messagesCache: {}, // sessionId -> messages array (loaded on demand)
+  refreshTimer: null,
 };
 
 // ── Session API helpers ──
@@ -4708,8 +4713,8 @@ function zenChatRenderSidebar() {
 }
 
 // Load messages for a session (cached)
-function zenChatFetchMessages(sessionId) {
-  if (zenChatState.messagesCache[sessionId]) {
+function zenChatFetchMessages(sessionId, forceRefresh) {
+  if (!forceRefresh && zenChatState.messagesCache[sessionId]) {
     return Promise.resolve(zenChatState.messagesCache[sessionId]);
   }
   return zenChatApi('/' + sessionId + '/messages').then(function(data) {
@@ -4782,7 +4787,7 @@ function zenChatSetSession(sessionId, view) {
   zenChatUpdateSessionPickers();
   zenChatUpdateSidebar();
   // Load messages from API then render
-  zenChatFetchMessages(sessionId).then(function(msgs) {
+  zenChatFetchMessages(sessionId, true).then(function(msgs) {
     ['full','drawer','small'].forEach(function(v) { zenChatRenderMessages(v); });
   });
   // If this is a project main session, preload rollup (async, for later use)
@@ -5055,7 +5060,7 @@ function zenChatRenderMessages(view) {
   msgs.forEach(m => {
     const el = document.createElement('div');
     el.className = 'zen-chat-message zen-chat-message--' + m.role;
-    el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble">' + escapeHtml(m.content) + '</div><div class="zen-chat-message-time">' + m.time + '</div></div>';
+    el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble">' + escapeHtml(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
     container.appendChild(el);
   });
 }
@@ -5069,8 +5074,25 @@ function zenChatAddMessage(role, content, view) {
   msgs.push({role, content, time});
   ['full','drawer','small'].forEach(v => zenChatRenderMessages(v));
   zenChatScrollToBottom(view || zenChatState.view);
-  // Persist to API (async, fire-and-forget)
-  zenChatPersistMessage(sessionId, role, content);
+}
+
+function zenChatRefreshActiveMessages(forceScroll) {
+  var sessionId = zenChatState.activeSession;
+  return zenChatFetchMessages(sessionId, true).then(function() {
+    ['full','drawer','small'].forEach(function(v) { zenChatRenderMessages(v); });
+    if (forceScroll) zenChatScrollToBottom(zenChatState.view);
+  });
+}
+
+function zenChatStartRefreshTimer() {
+  if (zenChatState.refreshTimer) clearInterval(zenChatState.refreshTimer);
+  zenChatState.refreshTimer = setInterval(function() {
+    var drawer = document.getElementById('zen-chat-drawer');
+    var chatVisible = zenChatState.view === 'full' || zenChatState.smallPanelOpen || (drawer && drawer.classList.contains('open'));
+    if (chatVisible && document.visibilityState === 'visible') {
+      zenChatRefreshActiveMessages(false);
+    }
+  }, 5000);
 }
 
 function zenChatScrollToBottom(view) {
@@ -5112,11 +5134,10 @@ function zenChatSend(view) {
     method: 'POST',
     body: { role: 'user', content: text }
   }).then(function(resp) {
-    if (resp.assistant) {
-      zenChatAddMessage('assistant', resp.assistant.content, view);
-    }
-    zenChatSetStatus('idle', view);
-    zenChatUpdateSendBtn(view);
+    zenChatRefreshActiveMessages(true).then(function() {
+      zenChatSetStatus('idle', view);
+      zenChatUpdateSendBtn(view);
+    });
   }).catch(function(err) {
     zenChatAddMessage('assistant', '[Error: could not reach Hermes. ' + (err.message || 'Server error') + ']', view);
     zenChatSetStatus('idle', view);

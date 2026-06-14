@@ -292,7 +292,7 @@ def _get_session(index: dict, session_id: str) -> dict | None:
 # Hermes DB — read-only access to Discord conversation history
 # ---------------------------------------------------------------------------
 
-def _hermes_messages(hermes_session_id: str, limit: int = 200) -> list[dict]:
+def _hermes_messages(hermes_session_id: str, limit: int = 500) -> list[dict]:
     """Read messages from Hermes state.db for a given Hermes session ID.
     This is how Discord chat history appears in Agent OS."""
     if not HERMES_DB.exists() or not hermes_session_id:
@@ -427,15 +427,19 @@ class Handler(SimpleHTTPRequestHandler):
             # Read from Hermes DB (Discord history)
             hermes_msgs = _hermes_messages(hsid) if hsid else []
 
-            # Read Agent OS local messages
+            # Read Agent OS local messages only for sessions that do not have
+            # a Hermes link. Linked sessions use Hermes state.db as the single
+            # source of truth so Discord, Hermes Chat, and Agent OS stay aligned
+            # without local duplicate artifacts.
             local_path = SESSIONS_DIR / m["id"] / "messages.jsonl"
-            local_msgs = [
-                {**rec, "source": "agent-os"}
+            local_msgs = [] if hsid else [
+                {**rec, "source": rec.get("source") or "agent-os"}
                 for rec in _read_jsonl(local_path)
             ]
 
-            # Merge: Hermes first (chronological), then local
-            all_msgs = hermes_msgs + local_msgs
+            # Merge chronologically. For Hermes-linked sessions this is only
+            # Hermes history; for unlinked sessions this is local Agent OS history.
+            all_msgs = sorted(hermes_msgs + local_msgs, key=lambda rec: rec.get("ts") or "")
 
             return self._json({
                 "sessionId": m["id"],
@@ -545,9 +549,13 @@ class Handler(SimpleHTTPRequestHandler):
             now = _now_iso()
             record = {"role": role, "content": content, "ts": now, "source": "agent-os"}
 
-            # Store user message locally
             msg_path = SESSIONS_DIR / m["id"] / "messages.jsonl"
-            _append_jsonl(msg_path, record)
+
+            # Hermes-linked sessions write through Hermes only. Unlinked sessions
+            # remain local so future Minato/Kazuki setup can still chat before a
+            # Discord/Hermes session exists.
+            if not s.get("hermesSessionId"):
+                _append_jsonl(msg_path, record)
 
             # Update index
             s["lastActive"] = now
@@ -561,7 +569,7 @@ class Handler(SimpleHTTPRequestHandler):
             assistant_record = None
             if role == "user" and s.get("hermesSessionId"):
                 assistant_record = self._hermes_chat(s["hermesSessionId"], content)
-                if assistant_record:
+                if assistant_record and not s.get("hermesSessionId"):
                     _append_jsonl(msg_path, assistant_record)
                     s["messageCount"] = (s.get("messageCount") or 0) + 1
                     _save_index(index)
