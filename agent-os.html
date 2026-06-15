@@ -4791,10 +4791,10 @@ function zenChatFetchMessages(sessionId, forceRefresh) {
     return Promise.resolve(zenChatState.messagesCache[sessionId]);
   }
   return zenChatApi('/' + sessionId + '/messages').then(function(data) {
-    // Normalize messages: convert ts (ISO) to time (HH:MM) for display
+    // Normalize messages: convert ts (Unix seconds) to time (HH:MM) for display
     var normalized = (data.messages || []).map(function(m) {
       if (!m.time && m.ts) {
-        var d = new Date(m.ts);
+        var d = new Date(m.ts * 1000);
         m.time = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
       }
       return m;
