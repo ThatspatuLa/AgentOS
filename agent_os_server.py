@@ -38,6 +38,7 @@ import os
 import re
 import sqlite3
 import shutil
+import subprocess
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
@@ -201,7 +202,72 @@ DEFAULT_SESSIONS = [
 # ---------------------------------------------------------------------------
 
 def _now_iso() -> str:
-    return datetime.datetime.utcnow().isoformat() + "Z"
+    return datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _run_status_command(args: list[str], timeout: int = 10) -> tuple[int, str]:
+    try:
+        proc = subprocess.run(
+            args,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=timeout,
+        )
+        return proc.returncode, proc.stdout.strip()
+    except Exception as exc:
+        return 1, str(exc)
+
+
+def _parse_hermes_status(output: str) -> dict:
+    status = {
+        "running": False,
+        "model": "—",
+        "provider": "—",
+        "checkedAt": _now_iso(),
+        "source": "hermes status",
+    }
+    for line in output.splitlines():
+        clean = line.strip()
+        if clean.startswith("Model:"):
+            status["model"] = clean.split("Model:", 1)[1].strip() or "—"
+        elif clean.startswith("Provider:"):
+            status["provider"] = clean.split("Provider:", 1)[1].strip() or "—"
+    status["running"] = bool(status["model"] != "—" or status["provider"] != "—")
+    return status
+
+
+def _git_health() -> dict:
+    code, out = _run_status_command(["git", "status", "--short", "--branch"], timeout=5)
+    if code != 0:
+        return {"status": "Unknown", "ok": False, "details": out}
+    lines = [line for line in out.splitlines() if line.strip()]
+    dirty = [line for line in lines if not line.startswith("##")]
+    branch = lines[0].replace("##", "").strip() if lines and lines[0].startswith("##") else ""
+    return {
+        "status": "Clean" if not dirty else f"Dirty · {len(dirty)}",
+        "ok": not dirty,
+        "branch": branch,
+        "details": out,
+    }
+
+
+def _live_health() -> dict:
+    code, out = _run_status_command(["hermes", "status"], timeout=15)
+    hermes = _parse_hermes_status(out) if code == 0 else {
+        "running": False,
+        "model": "—",
+        "provider": "—",
+        "checkedAt": _now_iso(),
+        "source": "hermes status",
+        "error": out,
+    }
+    return {
+        "updatedAt": _now_iso(),
+        "hermes": hermes,
+        "git": _git_health(),
+    }
 
 
 def _read_json(path: Path, default):
@@ -712,7 +778,8 @@ class Handler(SimpleHTTPRequestHandler):
     # -- routing ---------------------------------------------------------
 
     def _match(self, pattern: str):
-        parts = [p for p in self.path.split("/") if p]
+        path = urlparse(self.path).path
+        parts = [p for p in path.split("/") if p]
         pat = [p for p in pattern.split("/") if p]
         if len(parts) != len(pat):
             return None
@@ -759,6 +826,10 @@ class Handler(SimpleHTTPRequestHandler):
             return
 
         index = _load_index()
+
+        # GET /api/health
+        if self._match("api/health") is not None:
+            return self._json(_live_health())
 
         # GET /api/kanban-tasks
         if self._match("api/kanban-tasks") is not None:

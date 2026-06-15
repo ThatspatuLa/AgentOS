@@ -41,10 +41,7 @@
     <span class="os-health-label">Obsidian</span>
     <span class="os-health-value" id="health-obsidian-val">Live</span>
   </div>
-  <div class="os-health-refresh" onclick="refreshData()" title="Refresh data">
-    <span id="health-last-refresh">2m ago</span>
-    <span>↻</span>
-  </div>
+
 </div>
 
 <!-- ═══ SIDEBAR ═══ -->
@@ -1094,14 +1091,19 @@ let projectRunFilter = 'all';
 let paletteHighlightedIndex = -1;
 let paletteItems = [];
 let kanbanShowArchived = false;
+let LAST_REFRESHED_AT = null;
+let LIVE_HEALTH = null;
 
 // ── Load data ──
-async function loadData() {
+async function loadData(options = {}) {
+  const refreshHealth = !!options.refreshHealth;
   try {
     const resp = await fetch('agent-os-data.json?t=' + Date.now());
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     DASHBOARD_DATA = await resp.json();
     await loadKanbanTasks();
+    if (refreshHealth || !LIVE_HEALTH) await refreshLiveHealth();
+    LAST_REFRESHED_AT = new Date().toISOString();
     console.log('Data loaded from fetch:', DASHBOARD_DATA.sandbox?.total);
     renderAll();
   } catch(e) {
@@ -1111,19 +1113,36 @@ async function loadData() {
       try {
         DASHBOARD_DATA = JSON.parse(embedded.textContent);
         await loadKanbanTasks();
+        if (refreshHealth || !LIVE_HEALTH) await refreshLiveHealth();
+        LAST_REFRESHED_AT = new Date().toISOString();
         console.log('Data loaded from embedded:', DASHBOARD_DATA.sandbox?.total);
         renderAll();
       } catch(e2) {
         console.error('Failed to parse embedded data:', e2);
         DASHBOARD_DATA = getFallbackData();
         await loadKanbanTasks();
+        if (refreshHealth || !LIVE_HEALTH) await refreshLiveHealth();
+        LAST_REFRESHED_AT = new Date().toISOString();
         renderAll();
       }
     } else {
       DASHBOARD_DATA = getFallbackData();
       await loadKanbanTasks();
+      if (refreshHealth || !LIVE_HEALTH) await refreshLiveHealth();
+      LAST_REFRESHED_AT = new Date().toISOString();
       renderAll();
     }
+  }
+}
+
+async function refreshLiveHealth() {
+  try {
+    const resp = await fetch('/api/health?t=' + Date.now());
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    LIVE_HEALTH = await resp.json();
+  } catch (e) {
+    console.warn('Live health refresh failed:', e.message);
+    LIVE_HEALTH = LIVE_HEALTH || { updatedAt: new Date().toISOString(), hermes: { running: false, model: '—', provider: '—' }, git: { status: 'Unknown', ok: false } };
   }
 }
 
@@ -1255,45 +1274,47 @@ function relativeTime(iso) {
 
 // ── Health Strip ──
 async function updateHealthStrip() {
-  // Hermes status (check if we can fetch)
+  const health = LIVE_HEALTH || {};
+
+  // Hermes status
   const hermesDot = document.getElementById('health-hermes');
   const hermesVal = document.getElementById('health-hermes-val');
-  hermesDot.className = 'os-health-dot ok';
-  hermesVal.textContent = 'Running';
+  const hermesRunning = !!health.hermes?.running;
+  hermesDot.className = 'os-health-dot ' + (hermesRunning ? 'ok' : 'warn');
+  hermesVal.textContent = hermesRunning ? 'Running' : 'Unknown';
 
-  // Active model
+  // Active model from live `hermes status`, not historical token usage
   const modelDot = document.getElementById('health-model');
   const modelVal = document.getElementById('health-model-val');
-  const topModel = DASHBOARD_DATA?.token_usage?.per_model ?
-    Object.entries(DASHBOARD_DATA.token_usage.per_model).sort((a,b)=>b[1].calls-a[1].calls)[0] : null;
-  modelVal.textContent = topModel ? topModel[0].split('/').pop() : '—';
+  const activeModel = health.hermes?.model || '—';
+  modelDot.className = 'os-health-dot ' + (activeModel && activeModel !== '—' ? 'ok' : 'warn');
+  modelVal.textContent = activeModel;
+  modelVal.title = health.hermes?.provider ? `Provider: ${health.hermes.provider}` : 'Active model';
 
-  // Zen Bot (Discord bridge - assume connected if we have session data)
+  // Zen Bot
   const zenDot = document.getElementById('health-zenbot');
   const zenVal = document.getElementById('health-zenbot-val');
   zenDot.className = 'os-health-dot ok';
   zenVal.textContent = 'Connected';
 
-  // Git status
+  // Git status from live backend command
   const gitDot = document.getElementById('health-git');
   const gitVal = document.getElementById('health-git-val');
-  gitDot.className = 'os-health-dot ok';
-  gitVal.textContent = 'Clean'; // Would need terminal check
+  gitDot.className = 'os-health-dot ' + (health.git?.ok ? 'ok' : 'warn');
+  gitVal.textContent = health.git?.status || 'Unknown';
+  gitVal.title = health.git?.branch || 'Git status';
 
   // Obsidian
   const obsDot = document.getElementById('health-obsidian');
   const obsVal = document.getElementById('health-obsidian-val');
   obsDot.className = 'os-health-dot ok';
   obsVal.textContent = 'Live';
-
-  // Last refresh
-  document.getElementById('health-last-refresh').textContent = DASHBOARD_DATA?.generated_at ? relativeTime(DASHBOARD_DATA.generated_at) : '—';
 }
 
-function refreshData() {
+async function refreshData() {
   const btn = event?.target?.closest('button');
   if (btn) btn.style.transform = 'rotate(360deg)';
-  loadData();
+  await loadData({ refreshHealth: true });
   setTimeout(() => { if (btn) btn.style.transform = ''; }, 500);
 }
 
@@ -1317,12 +1338,13 @@ function renderAll() {
   try { renderActionQueue(); } catch(e) { console.warn('renderActionQueue failed:', e); }
   try { buildCommandPalette(); } catch(e) { console.warn('buildCommandPalette failed:', e); }
 
-  // Update last updated in sidebar
-  document.getElementById('last-updated').textContent = DASHBOARD_DATA?.generated_at ? 'Updated ' + relativeTime(DASHBOARD_DATA.generated_at) : 'Updated just now';
+  // Update last updated in sidebar based on the actual refresh action, not stale snapshot age
+  document.getElementById('last-updated').textContent = LAST_REFRESHED_AT ? 'Updated ' + relativeTime(LAST_REFRESHED_AT) : 'Updated just now';
 }
 
 // ═══ DASHBOARD HERO ═══
 function renderDashboardHero() {
+  if (!document.getElementById('hero-avatar')) return;
   const d = DASHBOARD_DATA || {};
   const sb = d.sandbox || {};
   const projects = d.projects || {};
@@ -1403,6 +1425,7 @@ function renderActionQueue() {
 function updateQueueColumn(type, items, dotClass) {
   const countEl = document.getElementById('queue-' + type + '-count');
   const bodyEl = document.getElementById('queue-' + type + '-body');
+  if (!countEl || !bodyEl) return;
   
   countEl.textContent = items.length;
   
@@ -3175,6 +3198,7 @@ function filterRunLog(filter, btn) {
 
 // ═══ MEMORY ═══
 function renderMemory() {
+  if (!document.getElementById('memory-user-content')) return;
   document.getElementById('memory-user-content').innerHTML = `
     <div style="margin-bottom:12px"><span class="os-tag">Name: Zen</span><span class="os-tag">Role: Primary Agent</span><span class="os-tag">Model: owl-alpha</span></div>
     <div style="margin-bottom:8px"><strong>Communication Style:</strong> Tactical, direct, structured, practical, unsentimental, evidence-driven, capability-aware.</div>
@@ -3570,7 +3594,7 @@ const projectInfo = {
 
 // ═══ INIT ═══
 document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+  loadData({ refreshHealth: true });
   // Load sessions from API and keep the active linked session fresh so
   // Discord, Hermes Chat, and Agent OS converge on the same history.
   zenChatLoadSessions().then(function() {
@@ -3581,7 +3605,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (autoRefreshEnabled) {
     autoRefreshTimer = setInterval(() => {
       if (autoRefreshEnabled && document.visibilityState === 'visible') {
-        loadData();
+        loadData({ refreshHealth: true });
       }
     }, 5 * 60 * 1000); // 5 minutes
   }
@@ -3591,7 +3615,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && autoRefreshEnabled) {
-    loadData();
+    loadData({ refreshHealth: true });
   }
 });
 
@@ -5293,6 +5317,7 @@ function zenWorkStart(status, opts) {
     cause: (opts && opts.cause) || '',
     evidence: (opts && opts.evidence) || '',
     recovery: (opts && opts.recovery) || [],
+    reviewRequired: !!(opts && opts.reviewRequired),
     activityLog: (opts && opts.activityLog) || [{
       icon: status === 'thinking' ? '🧠' : '🦉',
       label: status === 'thinking' ? 'thinking' : status,
@@ -5708,15 +5733,18 @@ function zenWorkPanelHtml(task, mode) {
   var failure = task.status === 'failed'
     ? '<div class="zen-work-diagnosis"><strong>Cause:</strong> ' + escapeHtml(task.cause || 'Unknown failure') + '<br><strong>Evidence:</strong> ' + escapeHtml(task.evidence || 'No additional evidence captured yet.') + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery"><button>Retry</button><button>Alter plan</button><button>Open logs</button></div></div>'
     : '';
-  var complete = task.status === 'complete'
+  var complete = task.status === 'complete' && task.reviewRequired
     ? '<div class="zen-work-completion-actions"><button>Accept</button><button>Alter</button><button>Review</button><button>GitHub update plan</button></div>'
+    : '';
+  var completeNote = task.status === 'complete' && !task.reviewRequired
+    ? '<div class="zen-work-attached-notice muted">Chat response complete — no review gate needed.</div>'
     : '';
   return '<section class="zen-work-panel zen-work-panel--' + task.status + ' zen-work-panel--' + mode + '" data-work-id="' + escapeHtml(task.id) + '">'
     + '<button class="zen-work-dismiss" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Hide activity">×</button>'
     + '<div class="zen-work-center">' + zenWorkMarkHtml(task.status, mode === 'full' ? 'large' : '') + '<button class="zen-work-action-line" onclick="zenWorkToggleDetails(this)" aria-expanded="' + (task.detailsOpen ? 'true' : 'false') + '">' + escapeHtml(action) + '</button></div>'
     + notice
     + '<details class="zen-work-stream"' + detailsOpen + '><summary>Hermes actions</summary>' + zenWorkStream(task) + '</details>'
-    + failure + complete
+    + failure + completeNote + complete
     + '</section>';
 }
 function zenWorkSetHtmlPreservingMarks(container, html) {
@@ -5863,6 +5891,16 @@ function zenChatAutoResize(el) {
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
+function zenChatRequiresReviewGate(text) {
+  var raw = String(text || '');
+  var lower = raw.toLowerCase();
+  var systemTerms = /(agent\s*os|zen\s*system|zen\s*os|dashboard|kanban|memory\s*world|zen\s*chat|github|gh\s*update|repo|server|api|database|session mapping|hermes bridge|working[-\s]*state|ui|frontend|css|html|javascript|python)/i;
+  var changeTerms = /(change|update|modify|edit|patch|fix|build|create|add|remove|delete|revert|restore|turn on|turn off|enable|disable|commit|push|deploy|save|persist|wire|integrate|refactor|implement|make .* work|set up|setup)/i;
+  if (/(gh\s*update|commit|push|deploy|revert|delete|remove|patch|modify|edit)/i.test(lower)) return true;
+  if (systemTerms.test(lower) && changeTerms.test(lower)) return true;
+  return false;
+}
+
 function zenChatSend(view) {
   const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
   const input = document.getElementById('zen-chat' + suffix + '-input');
@@ -5876,10 +5914,12 @@ function zenChatSend(view) {
   zenChatUpdateSendBtn(view);
 
   var sessionId = zenChatState.activeSession;
+  var reviewRequired = zenChatRequiresReviewGate(text);
   var info = zenWorkSessionInfo(sessionId);
   var work = zenWorkStart('thinking', {
     sessionId: sessionId,
     prompt: text,
+    reviewRequired: reviewRequired,
     title: info.title || info.label,
     action: text.toLowerCase().includes('plan') ? 'Reviewing session context and forming a plan.' : 'Reviewing session context.',
     modelRole: text.toLowerCase().includes('plan') ? 'Chat / Plan model' : 'Chat model',
@@ -5889,7 +5929,7 @@ function zenChatSend(view) {
       { icon:'🧠', label:'context', text:'Reviewing session context.', ts: zenWorkNow(), status:'active' }
     ]
   });
-  zenWorkAddActivity(work.id, '📌', 'boundary', 'Planning only — no file writes or GitHub update.', 'done');
+  zenWorkAddActivity(work.id, '📌', 'boundary', reviewRequired ? 'Review gate armed for Zen/Agent OS system change.' : 'Chat response only — no review gate needed.', 'done');
   var runningTimer = setTimeout(function(){
     zenWorkTransition(work.id, 'running', {
       action: 'Executing accepted session request.',
@@ -5909,9 +5949,10 @@ function zenChatSend(view) {
     zenWorkAddActivity(work.id, '🦉', 'hermes', resp && resp.assistant ? 'Hermes response received.' : 'Hermes bridge completed; refreshing session history.', 'done');
     zenWorkAddActivity(work.id, '🔄', 'refresh', 'Refreshing visible chat history from Hermes state.', 'active');
     zenWorkTransition(work.id, 'complete', {
-      action: 'Task complete / Ready for review.',
-      modelRole: 'Execution model',
-      boundary: 'Review gate · GitHub update requires approval'
+      action: reviewRequired ? 'Task complete / Ready for review.' : 'Chat response complete.',
+      modelRole: reviewRequired ? 'Execution model' : 'Chat model',
+      boundary: reviewRequired ? 'Review gate · GitHub update requires approval' : 'No review gate · conversation only',
+      reviewRequired: reviewRequired
     });
     zenChatRefreshActiveMessages(true).then(function() {
       zenChatSetStatus('idle', view);
