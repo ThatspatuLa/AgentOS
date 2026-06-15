@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=45">
+<link rel="stylesheet" href="agent-os.css?v=46">
 </head>
 <body>
 
@@ -1202,6 +1202,8 @@ function showPage(id) {
     requestAnimationFrame(() => { initMemoryWorld(); });
   }
   closeGear();
+  // Show global working state when navigating away from Zen Chat
+  zenWorkUpdateChatVisibility();
 }
 
 function openProject(name) {
@@ -3583,6 +3585,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 5 * 60 * 1000); // 5 minutes
   }
+  // Initialize global working state visibility
+  zenWorkUpdateChatVisibility();
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -5017,6 +5021,9 @@ function zenChatGoToView(view) {
     var smallBtn = document.getElementById('zen-chat-small-view-' + v);
     if (smallBtn) smallBtn.classList.toggle('active', v === view);
   });
+
+  // Show/hide global working state based on whether we're in Zen Chat
+  zenWorkUpdateChatVisibility();
 }
 
 function zenChatCloseSmallPanel() {
@@ -5776,7 +5783,29 @@ function zenWorkRenderGlobal() {
   mini.style.display = 'none';
   stack.style.display = tasks.length ? 'flex' : 'none';
   zenWorkSetHtmlPreservingMarks(stack, tasks.map(function(task){
-    return '<article class="zen-work-card zen-work-card--' + task.status + '" data-work-id="' + escapeHtml(task.id) + '">' + zenWorkMarkHtml(task.status, 'mini') + '<button class="zen-work-card-action" onclick="zenWorkOpenActivity()" title="Open activity">' + escapeHtml(zenWorkActionText(task)) + '</button><button class="zen-work-card-btn" onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button class="zen-work-card-btn" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
+    // Build project context label from session info
+    var sessionLabel = '';
+    var sessionIcon = '';
+    var sessionId = task.sessionId || zenChatState.activeSession;
+    var info = zenWorkSessionInfo(sessionId);
+    if (info) {
+      sessionLabel = info.label || info.title || sessionId;
+      sessionIcon = info.icon || '';
+    }
+    var projectLine = sessionIcon ? sessionIcon + ' ' + sessionLabel : sessionLabel;
+    // Compact card: project line above, action text below
+    var cardContent = '<div class="zen-work-card-body">' +
+      '<div class="zen-work-card-project">' + escapeHtml(projectLine) + '</div>' +
+      '<button class="zen-work-card-action" onclick="zenWorkOpenActivity()" title="Open activity">' + escapeHtml(zenWorkActionText(task)) + '</button>' +
+      '</div>';
+    return '<article class="zen-work-card zen-work-card--' + task.status + ' zen-work-card--global" data-work-id="' + escapeHtml(task.id) + '">' +
+      zenWorkMarkHtml(task.status, 'mini') +
+      cardContent +
+      '<div class="zen-work-card-btns">' +
+      '<button class="zen-work-card-btn" onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button>' +
+      '<button class="zen-work-card-btn" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button>' +
+      '</div>' +
+      '</article>';
   }).join(''));
 }
 function zenWorkRenderHeaderStatus() {
@@ -5790,6 +5819,18 @@ function zenWorkRenderAll() {
   zenWorkRenderGlobal();
   zenWorkRenderPanels();
   zenWorkRenderHeaderStatus();
+}
+function zenWorkUpdateChatVisibility() {
+  // Determine if user is currently viewing Zen Chat in any view
+  var inZenChat = (zenChatState.view === 'full' && currentPage === 'zen-chat') ||
+                  zenChatState.view === 'drawer' ||
+                  (zenChatState.view === 'small' && zenChatState.smallPanelOpen);
+  var global = document.getElementById('zen-work-global');
+  if (global) {
+    global.style.display = inZenChat ? 'none' : '';
+  }
+  // Also toggle a body class for CSS-level hiding if needed
+  document.body.classList.toggle('zen-chat-active', inZenChat);
 }
 function zenWorkOpenActivity() {
   if (zenChatState.view === 'small') zenChatGoToView('drawer');

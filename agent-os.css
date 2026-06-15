@@ -6431,6 +6431,36 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   pointer-events: auto;
 }
 
+/* ── Global card: project-specific identity ── */
+.zen-work-card--global {
+  grid-template-columns: 34px 1fr auto;
+}
+.zen-work-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.zen-work-card-project {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zen-work-card-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: start;
+}
+body.zen-chat-active .zen-work-global {
+  display: none !important;
+}
+
 @keyframes zenWorkOrbit {
   from { transform: rotate(0turn); }
   to { transform: rotate(1turn); }
