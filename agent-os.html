@@ -846,7 +846,7 @@
   <div class="zen-work-global" id="zen-work-global" aria-live="polite">
     <div class="zen-work-global-stack" id="zen-work-global-stack"></div>
     <button class="zen-work-global-minimized" id="zen-work-global-minimized" onclick="zenWorkToggleGlobal(false)" style="display:none" title="Show Zen activity">
-      <span class="zen-work-orb zen-work-orb--running">🦉</span>
+      <span class="zen-work-mark zen-work-mark--mini" aria-hidden="true"><span class="zen-work-enso"></span><span class="zen-work-orbit"><i></i></span></span>
       <span id="zen-work-global-count">0</span>
     </button>
   </div>
@@ -917,7 +917,7 @@
       </div>
     </div>
     <button class="zen-work-mini" id="zen-work-mini-small" onclick="zenWorkOpenActivity()" style="display:none">
-      <span class="zen-work-mini-icon">🦉</span>
+      <span class="zen-work-mini-icon" aria-hidden="true"><span class="zen-work-mark zen-work-mark--mini"><span class="zen-work-enso"></span><span class="zen-work-orbit"><i></i></span></span></span>
       <span id="zen-work-mini-small-text">Running task · View activity</span>
     </button>
     <div class="zen-chat-status-bar">
@@ -5246,23 +5246,27 @@ function zenWorkTransition(id, status, patch) {
   var nextPatch = patch || {};
   var nextLog = (prev.activityLog || []).slice();
   if (status !== prev.status || nextPatch.action) {
-    nextLog.push({
-      icon: status === 'running' ? '⚙️' : (status === 'complete' ? '✅' : (status === 'failed' ? '⚠️' : '🧠')),
+    var icon = status === 'running' ? '⚙️' : (status === 'complete' ? '✅' : (status === 'failed' ? '⚠️' : '🧠'));
+    var text = nextPatch.action || zenWorkStatusText(Object.assign({}, prev, { status: status }));
+    nextLog = zenWorkAppendEntries(nextLog, [{
+      icon: icon,
       label: status,
-      text: nextPatch.action || zenWorkStatusText(Object.assign({}, prev, { status: status })),
+      text: text,
+      line: zenFormatToolLine(status, { text: text }, { emoji: icon, preview: text }),
       ts: zenWorkNow(),
-      status: status === 'failed' ? 'failed' : (status === 'complete' ? 'done' : 'active')
-    });
+      status: status === 'failed' ? 'failed' : (status === 'complete' ? 'done' : 'active'),
+      source: 'lifecycle'
+    }]);
   }
   return zenWorkSetTask(Object.assign({}, prev, nextPatch, { status: status, activityLog: nextLog, updatedAt: zenWorkNow() }));
 }
 function zenWorkAddActivity(id, icon, label, text, status) {
   var prev = ZEN_WORK_STATE.tasks[id];
   if (!prev) return null;
-  var entry = { icon: icon || '•', label: label || 'activity', text: text || '', ts: zenWorkNow(), status: status || 'active' };
-  var log = (prev.activityLog || []).concat([entry]).slice(-24);
+  var entry = { icon: icon || '•', label: label || 'activity', text: text || '', line: zenFormatToolLine(label || 'activity', { text: text || '' }, { emoji: icon || '•', preview: text || '' }), ts: zenWorkNow(), status: status || 'active', repeat: 1, source: 'lifecycle' };
+  var log = zenWorkAppendEntries(prev.activityLog || [], [entry]);
   return zenWorkSetTask(Object.assign({}, prev, {
-    action: text || prev.action,
+    action: zenWorkFormatActivityLine(log[log.length - 1]) || text || prev.action,
     activityLog: log,
     updatedAt: zenWorkNow()
   }));
@@ -5275,12 +5279,53 @@ function zenWorkToggleGlobal(minimized) {
   ZEN_WORK_STATE.minimized = !!minimized;
   zenWorkRenderGlobal();
 }
+function zenWorkAppendEntries(log, entries) {
+  var next = (log || []).slice();
+  (entries || []).forEach(function(entry) {
+    var normalized = Object.assign({ ts: zenWorkNow(), status: 'active', repeat: 1 }, entry || {});
+    normalized.line = normalized.line || zenFormatToolLine(normalized.label || 'activity', { text: normalized.text || '' }, { emoji: normalized.icon || '•', preview: normalized.text || '' });
+    var last = next[next.length - 1];
+    if (last && last.line === normalized.line) {
+      last.repeat = (last.repeat || 1) + (normalized.repeat || 1);
+      last.ts = normalized.ts;
+      last.status = normalized.status || last.status;
+      return;
+    }
+    next.push(normalized);
+  });
+  return next.slice(-32);
+}
+function zenWorkAppendTool(toolName, args, opts) {
+  opts = opts || {};
+  var taskId = opts.taskId || opts.id;
+  var task = taskId ? ZEN_WORK_STATE.tasks[taskId] : (zenWorkCurrentTask(opts.sessionId || zenChatState.activeSession) || zenWorkActiveTasks()[0]);
+  if (!task) return null;
+  var preview = opts.preview != null ? opts.preview : zenToolPreview(toolName, args || {});
+  var icon = opts.emoji || zenToolEmoji(toolName, '⚙️');
+  var line = zenFormatToolLine(toolName, args || {}, Object.assign({}, opts, { emoji: icon, preview: preview }));
+  var entry = {
+    icon: icon,
+    label: toolName,
+    text: preview || '',
+    args: args || {},
+    line: line,
+    ts: zenWorkNow(),
+    status: opts.status || 'active',
+    repeat: 1,
+    source: 'hermes'
+  };
+  var log = zenWorkAppendEntries(task.activityLog || [], [entry]);
+  var latest = log[log.length - 1];
+  return zenWorkSetTask(Object.assign({}, task, {
+    action: zenWorkFormatActivityLine(latest),
+    currentAction: zenWorkFormatActivityLine(latest),
+    activityLog: log,
+    updatedAt: zenWorkNow()
+  }));
+}
 function zenWorkEnsureTicker() {
   if (ZEN_WORK_STATE.tickTimer) return;
-  ZEN_WORK_STATE.tickTimer = setInterval(function(){
-    if (zenWorkActiveTasks().length === 0) return;
-    zenWorkRenderAll();
-  }, 1000);
+  ZEN_WORK_STATE.tickTimer = true;
 }
 function zenWorkStatusText(task) {
   if (!task) return 'Ready';
@@ -5297,41 +5342,293 @@ function zenWorkIconClass(status) {
   if (status === 'failed') return 'zen-work-orb--failed';
   return '';
 }
+function zenWorkMarkHtml(status, size) {
+  return '<span class="zen-work-mark zen-work-mark--' + escapeHtml(status || 'running') + (size ? ' zen-work-mark--' + escapeHtml(size) : '') + '" aria-hidden="true"><span class="zen-work-enso"></span><span class="zen-work-orbit"><i></i></span></span>';
+}
+function zenOneline(value) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+function zenToolEmoji(toolName, defaultEmoji) {
+  var map = {
+    skill_view: '📚',
+    skills_list: '📚',
+    todo: '📋',
+    browser_click: '👆',
+    browser_console: '🖥️',
+    browser_navigate: '🌐',
+    browser_type: '⌨️',
+    browser_snapshot: '📸',
+    browser_verify: '🧪',
+    execute_code: '🐍',
+    terminal: '💻',
+    read_file: '📖',
+    write_file: '✍️',
+    patch: '🔧',
+    search_files: '🔎',
+    web_search: '🔎',
+    web_extract: '🌐',
+    api_check: '📡',
+    git_status: '🌿',
+    git_diff: '🌿',
+    complete: '✅',
+    failed: '⚠️',
+    diagnosis: '🧾',
+    compacting_context: '🗜️',
+    working: '⏳',
+    prompt: '💬',
+    context: '🧠',
+    bridge: '🌉',
+    refresh: '🔄',
+    retry: '🔁',
+    editing: '🧩',
+    validating: '🧪'
+  };
+  return map[toolName] || defaultEmoji || '⚙️';
+}
+function zenToolPreview(toolName, args) {
+  args = args || {};
+  if (toolName === 'todo') {
+    var todos = args.todos;
+    if (todos == null) return 'reading task list';
+    var count = Array.isArray(todos) ? todos.length : Number(todos) || 0;
+    return args.merge ? 'updating ' + count + ' task(s)' : 'planning ' + count + ' task(s)';
+  }
+  if (toolName === 'skill_view') return zenOneline(args.name || args.skill || '');
+  if (toolName === 'browser_click') return zenOneline(args.ref || args.selector || args.target || '');
+  if (toolName === 'execute_code') {
+    var code = zenOneline(String(args.code || args.command || '').split(/\r?\n/).find(Boolean) || args.code || args.command || '');
+    return zenWorkTruncateMiddle(code, 64);
+  }
+  var primary = {
+    terminal: 'command',
+    browser_console: 'message',
+    browser_navigate: 'url',
+    browser_type: 'text',
+    browser_verify: 'target',
+    read_file: 'path',
+    write_file: 'path',
+    patch: 'path',
+    search_files: 'pattern',
+    web_search: 'query',
+    web_extract: 'urls',
+    api_check: 'endpoint',
+    git_status: 'command',
+    git_diff: 'path',
+    complete: 'summary',
+    failed: 'cause',
+    diagnosis: 'cause',
+    prompt: 'text',
+    context: 'session',
+    bridge: 'target',
+    refresh: 'target',
+    retry: 'reason',
+    editing: 'target',
+    validating: 'target'
+  }[toolName];
+  var value = primary ? args[primary] : null;
+  if (Array.isArray(value)) value = value[0] || '';
+  if (value == null) {
+    ['query','text','command','path','name','prompt','code','goal','pattern','target','ref'].some(function(key) {
+      if (args[key] != null) {
+        value = Array.isArray(args[key]) ? (args[key][0] || '') : args[key];
+        return true;
+      }
+      return false;
+    });
+  }
+  return zenWorkTruncateMiddle(zenOneline(value || ''), 64);
+}
+function zenFormatToolLine(toolName, args, opts) {
+  opts = opts || {};
+  var emoji = opts.emoji || zenToolEmoji(toolName, opts.defaultEmoji);
+  var preview = opts.preview != null ? zenOneline(opts.preview) : zenToolPreview(toolName, args || {});
+  if (opts.verbose && args && Object.keys(args).length) {
+    preview = JSON.stringify(args);
+  }
+  return emoji + ' ' + toolName + (preview ? ': "' + preview + '"' : '...');
+}
+function zenWorkFormatActivityLine(item) {
+  if (!item) return '';
+  var line = item.line || zenFormatToolLine(item.label || 'activity', { text: item.text || '' }, { emoji: item.icon || '•', preview: item.text || '' });
+  return line + (item.repeat && item.repeat > 1 ? ' (×' + item.repeat + ')' : '');
+}
+function zenWorkLatestActivity(task) {
+  var log = (task && task.activityLog) || [];
+  if (task && (task.status === 'thinking' || task.status === 'running')) {
+    for (var i = log.length - 1; i >= 0; i--) {
+      var item = log[i] || {};
+      var label = String(item.label || '').toLowerCase();
+      var text = String(item.text || '');
+      if (!text) continue;
+      if (label === 'prompt') continue;
+      if ((item.status || '') !== 'done') return item;
+    }
+  }
+  for (var j = log.length - 1; j >= 0; j--) {
+    var fallback = log[j] || {};
+    var fallbackText = String(fallback.text || '');
+    if (!fallbackText) continue;
+    if (String(fallback.label || '').toLowerCase() === 'prompt') continue;
+    return fallback;
+  }
+  return null;
+}
+function zenWorkActionText(task) {
+  if (!task) return 'Forwarding request through Agent OS → Hermes bridge';
+  var latest = zenWorkLatestActivity(task);
+  if (latest) return zenWorkFormatActivityLine(latest);
+  if (task.currentAction) return task.currentAction;
+  if (task.action) return task.action;
+  if (task.status === 'thinking') return 'Reviewing session context';
+  if (task.status === 'complete') return 'Task complete / Ready for review';
+  if (task.status === 'failed') return 'Hermes bridge request needs review';
+  return 'Forwarding request through Agent OS → Hermes bridge';
+}
 function zenWorkStream(task) {
-  var live = (task.activityLog || []).slice(-12);
+  var live = zenWorkHermesEntries(task);
   if (live.length) {
     return live.map(function(item, idx){
-      var age = Math.max(0, Math.floor((zenWorkNow() - (item.ts || task.startedAt)) / 1000));
       var active = idx === live.length - 1 && (task.status === 'thinking' || task.status === 'running');
-      return '<div class="zen-work-stream-item zen-work-stream-item--' + escapeHtml(item.status || 'active') + (active ? ' active' : '') + '"><span>' + escapeHtml(item.icon || '•') + '</span><strong>' + escapeHtml(item.label || 'activity') + '</strong><em>' + escapeHtml(item.text || '') + '</em><time>' + age + 's ago</time></div>';
+      var preview = item.text ? '"' + item.text + '"' : '';
+      return '<div class="zen-work-stream-item zen-work-stream-item--' + escapeHtml(item.status || 'active') + (active ? ' active' : '') + '"><span>' + escapeHtml(item.icon || '•') + '</span><strong>' + escapeHtml(item.label || 'activity') + '</strong><em>' + escapeHtml(preview) + '</em>' + (item.repeat && item.repeat > 1 ? '<b class="zen-work-repeat">×' + escapeHtml(item.repeat) + '</b>' : '') + '</div>';
     }).join('');
   }
-  var base = ZEN_WORK_STATE.streamLibrary[task.status] || ZEN_WORK_STATE.streamLibrary.thinking;
-  return base.map(function(item, idx){
-    var active = task.status === 'running' && idx === Math.min(base.length - 1, Math.floor((zenWorkNow() - task.startedAt) / 1400) % base.length);
-    return '<div class="zen-work-stream-item' + (active ? ' active' : '') + '"><span>' + item.icon + '</span><strong>' + escapeHtml(item.label) + '</strong><em>' + escapeHtml(item.text) + '</em><time>live</time></div>';
-  }).join('');
+  return '<div class="zen-work-stream-empty">Waiting for Hermes tool progress...</div>';
+}
+function zenWorkHermesEntries(task) {
+  var lifecycleLabels = {
+    prompt: true,
+    context: true,
+    boundary: true,
+    api: true,
+    running: true,
+    bridge: true,
+    hermes: true,
+    refresh: true,
+    complete: true,
+    failure: true,
+    failed: true
+  };
+  return ((task && task.activityLog) || []).filter(function(item) {
+    if (!item) return false;
+    if (item.source === 'hermes') return true;
+    var label = String(item.label || '').toLowerCase();
+    return !!item.line && !lifecycleLabels[label] && /^(skill_view|skills_list|todo|browser_|execute_code|terminal|read_file|write_file|patch|search_files|web_search|web_extract|api_check|git_|compacting_context|working|retry|editing|validating)/.test(label);
+  });
+}
+function zenWorkTruncateMiddle(value, max) {
+  var text = String(value || '').trim();
+  var limit = max || 58;
+  if (text.length <= limit) return text;
+  var head = Math.ceil((limit - 3) * 0.58);
+  var tail = Math.floor((limit - 3) * 0.42);
+  return text.slice(0, head) + '...' + text.slice(text.length - tail);
+}
+function zenWorkNormalizeHermesAction(line) {
+  var raw = String(line || '').trim();
+  if (!raw) return null;
+  var cleaned = raw.replace(/^[>\-\s]+/, '').trim();
+  var repeat = 1;
+  var repeatMatch = cleaned.match(/\s*\(×(\d+)\)\s*$/);
+  if (repeatMatch) {
+    repeat = Math.max(1, Number(repeatMatch[1]) || 1);
+    cleaned = cleaned.slice(0, repeatMatch.index).trim();
+  }
+  var explicit = cleaned.match(/^(?:(\S+)\s+)?([a-zA-Z_][\w-]*)\s*:\s*[\"'`]?(.*?)[\"'`]?\s*$/);
+  var noPreview = cleaned.match(/^(?:(\S+)\s+)?([a-zA-Z_][\w-]*)\.\.\.\s*$/);
+  var knownTool = /^(skill_view|skills_list|todo|browser_click|browser_console|browser_navigate|browser_type|browser_snapshot|browser_verify|execute_code|terminal|read_file|write_file|patch|search_files|web_search|web_extract|api_check|git_status|git_diff|complete|failed|diagnosis|compacting_context|working|retry|editing|validating)$/;
+  if (explicit && knownTool.test(explicit[2])) {
+    var preview = zenWorkTruncateMiddle(explicit[3] || '', 64);
+    var icon = explicit[1] && !/^[a-zA-Z_][\w-]*$/.test(explicit[1]) ? explicit[1] : zenToolEmoji(explicit[2], '⚙️');
+    return {
+      icon: icon,
+      label: explicit[2],
+      text: preview,
+      line: zenFormatToolLine(explicit[2], {}, { emoji: icon, preview: preview }),
+      ts: zenWorkNow(),
+      status: 'active',
+      repeat: repeat,
+      source: 'hermes'
+    };
+  }
+  if (noPreview && knownTool.test(noPreview[2])) {
+    var noPreviewIcon = noPreview[1] && !/^[a-zA-Z_][\w-]*$/.test(noPreview[1]) ? noPreview[1] : zenToolEmoji(noPreview[2], '⚙️');
+    return { icon:noPreviewIcon, label:noPreview[2], text:'', line: zenFormatToolLine(noPreview[2], {}, { emoji:noPreviewIcon, preview:'' }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  }
+  var lower = cleaned.toLowerCase();
+  if (/^🗜️?\s*compacting context/i.test(cleaned) || /^compacting context/i.test(cleaned)) {
+    var compactText = cleaned.replace(/^🗜️?\s*/,'').replace(/^compacting context\s*[—-]?\s*/i, '');
+    compactText = compactText || 'summarizing earlier conversation';
+    return { icon:'🗜️', label:'compacting_context', text: zenWorkTruncateMiddle(compactText, 64), line: zenFormatToolLine('compacting_context', { text: compactText }, { emoji:'🗜️', preview: zenWorkTruncateMiddle(compactText, 64) }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  }
+  if (/^⏳?\s*working\s*[—-]/i.test(cleaned) || /^working\s*[—-]/i.test(cleaned)) {
+    var workingText = cleaned.replace(/^⏳?\s*/,'').replace(/^working\s*[—-]\s*/i, '');
+    return { icon:'⏳', label:'working', text: zenWorkTruncateMiddle(workingText, 64), line: zenFormatToolLine('working', { text: workingText }, { emoji:'⏳', preview: zenWorkTruncateMiddle(workingText, 64) }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  }
+  if (/i[’']m patching|patching the frontend|patching/i.test(lower)) return { icon:'🧩', label:'editing', text: zenWorkTruncateMiddle(cleaned, 64), line: zenFormatToolLine('editing', { target: cleaned }, { preview: zenWorkTruncateMiddle(cleaned, 64) }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  if (/read(ing)? .*file|open(ing)? .*file/.test(lower)) return { icon:'📖', label:'read_file', text: zenWorkTruncateMiddle(cleaned, 64), line: zenFormatToolLine('read_file', { path: cleaned }, { preview: zenWorkTruncateMiddle(cleaned, 64) }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  if (/execut(e|ing)|python|node|browser render|validat(e|ing)/.test(lower)) {
+    var label = /python|execute/.test(lower) ? 'execute_code' : 'validating';
+    var preview2 = zenWorkTruncateMiddle(cleaned, 64);
+    return { icon:zenToolEmoji(label), label:label, text: preview2, line: zenFormatToolLine(label, { text: preview2 }, { preview: preview2 }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  }
+  return null;
+}
+function zenWorkExtractHermesActions(content) {
+  var normalized = String(content || '').replace(/\\n/g, '\n');
+  var lines = normalized.split(/\r?\n/);
+  var actions = [];
+  lines.forEach(function(line) {
+    var action = zenWorkNormalizeHermesAction(line);
+    if (action) actions.push(action);
+  });
+  return actions.slice(-16);
+}
+function zenWorkAddHermesActions(id, content) {
+  var actions = zenWorkExtractHermesActions(content);
+  if (!actions.length) return null;
+  var prev = ZEN_WORK_STATE.tasks[id];
+  if (!prev) return null;
+  var log = zenWorkAppendEntries(prev.activityLog || [], actions);
+  var latest = log[log.length - 1];
+  return zenWorkSetTask(Object.assign({}, prev, {
+    action: zenWorkFormatActivityLine(latest),
+    currentAction: zenWorkFormatActivityLine(latest),
+    activityLog: log,
+    updatedAt: zenWorkNow()
+  }));
 }
 function zenWorkPanelHtml(task, mode) {
   if (!task) return '';
   var sameSession = task.sessionId === zenChatState.activeSession;
-  var session = zenWorkSessionInfo(task.sessionId);
-  var notice = sameSession && task.status === 'running'
-    ? '<div class="zen-work-attached-notice">Same-session execution is running. New prompts stay attached/queued to this session context.</div>'
-    : (!sameSession ? '<div class="zen-work-attached-notice muted">Another session is working; this chat remains usable.</div>' : '');
+  var action = zenWorkActionText(task);
+  var detailsOpen = task.detailsOpen ? ' open' : '';
+  var notice = !sameSession ? '<div class="zen-work-attached-notice muted">Another session is working; this chat remains usable.</div>' : '';
   var failure = task.status === 'failed'
     ? '<div class="zen-work-diagnosis"><strong>Cause:</strong> ' + escapeHtml(task.cause || 'Unknown failure') + '<br><strong>Evidence:</strong> ' + escapeHtml(task.evidence || 'No additional evidence captured yet.') + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery"><button>Retry</button><button>Alter plan</button><button>Open logs</button></div></div>'
     : '';
   var complete = task.status === 'complete'
     ? '<div class="zen-work-completion-actions"><button>Accept</button><button>Alter</button><button>Review</button><button>GitHub update plan</button></div>'
     : '';
-  return '<section class="zen-work-panel zen-work-panel--' + task.status + ' zen-work-panel--' + mode + '">'
-    + '<div class="zen-work-panel-head"><span class="zen-work-orb ' + zenWorkIconClass(task.status) + '">🦉</span><div class="zen-work-panel-title"><strong>' + escapeHtml(zenWorkStatusText(task)) + '</strong><span>' + escapeHtml(task.action || 'Reviewing session context.') + '</span></div><button onclick="zenWorkDismiss(\'' + task.id + '\')" title="Hide activity">×</button></div>'
-    + '<div class="zen-work-panel-meta"><span>Session: ' + escapeHtml(session.label || session.id) + '</span><span>Role: ' + escapeHtml(task.modelRole) + '</span><span>Elapsed: ' + zenWorkElapsed(task) + '</span><span>Boundary: ' + escapeHtml(task.boundary) + '</span></div>'
+  return '<section class="zen-work-panel zen-work-panel--' + task.status + ' zen-work-panel--' + mode + '" data-work-id="' + escapeHtml(task.id) + '">'
+    + '<button class="zen-work-dismiss" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Hide activity">×</button>'
+    + '<div class="zen-work-center">' + zenWorkMarkHtml(task.status, mode === 'full' ? 'large' : '') + '<button class="zen-work-action-line" onclick="zenWorkToggleDetails(this)" aria-expanded="' + (task.detailsOpen ? 'true' : 'false') + '">' + escapeHtml(action) + '</button></div>'
     + notice
-    + '<details class="zen-work-stream" open><summary>Live Hermes activity stream</summary>' + zenWorkStream(task) + '</details>'
+    + '<details class="zen-work-stream"' + detailsOpen + '><summary>Hermes actions</summary>' + zenWorkStream(task) + '</details>'
     + failure + complete
     + '</section>';
+}
+function zenWorkToggleDetails(button) {
+  var panel = button && button.closest('.zen-work-panel');
+  var details = panel && panel.querySelector('.zen-work-stream');
+  if (!details) return;
+  details.open = !details.open;
+  button.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+  var workId = panel && panel.getAttribute('data-work-id');
+  var active = (workId && ZEN_WORK_STATE.tasks[workId]) || zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks()[0];
+  if (active) {
+    ZEN_WORK_STATE.tasks[active.id] = Object.assign({}, active, { detailsOpen: details.open });
+  }
 }
 function zenWorkRenderPanels() {
   var active = zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks().find(function(t){ return t.status === 'running' || t.status === 'thinking'; }) || null;
@@ -5345,10 +5642,12 @@ function zenWorkRenderPanels() {
     mini.style.display = active ? 'flex' : 'none';
     mini.className = 'zen-work-mini ' + (active ? 'zen-work-mini--' + active.status : '');
   }
-  if (miniText && active) miniText.textContent = (active.status === 'thinking' ? 'Thinking' : active.status === 'complete' ? 'Complete' : active.status === 'failed' ? 'Needs diagnosis' : 'Running task') + ' · View activity';
+  if (miniText && active) miniText.textContent = zenWorkActionText(active);
 }
 function zenWorkRenderGlobal() {
   var tasks = zenWorkActiveTasks().filter(function(t){ return t.status !== 'dismissed'; });
+  var global = document.getElementById('zen-work-global');
+  if (global && global.parentElement !== document.body) document.body.appendChild(global);
   var stack = document.getElementById('zen-work-global-stack');
   var mini = document.getElementById('zen-work-global-minimized');
   var count = document.getElementById('zen-work-global-count');
@@ -5362,8 +5661,7 @@ function zenWorkRenderGlobal() {
   mini.style.display = 'none';
   stack.style.display = tasks.length ? 'flex' : 'none';
   stack.innerHTML = tasks.map(function(task){
-    var session = zenWorkSessionInfo(task.sessionId);
-    return '<article class="zen-work-card zen-work-card--' + task.status + '"><span class="zen-work-orb ' + zenWorkIconClass(task.status) + '">🦉</span><div><strong>' + escapeHtml(zenWorkStatusText(task)) + '</strong><p>' + escapeHtml(session.label || task.sessionId) + ' · ' + escapeHtml(task.action || task.title) + '</p><small>' + zenWorkElapsed(task) + ' · ' + escapeHtml(task.boundary || '') + '</small></div><button onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
+    return '<article class="zen-work-card zen-work-card--' + task.status + '">' + zenWorkMarkHtml(task.status, 'mini') + '<button class="zen-work-card-action" onclick="zenWorkOpenActivity()" title="Open activity">' + escapeHtml(zenWorkActionText(task)) + '</button><button class="zen-work-card-btn" onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button class="zen-work-card-btn" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
   }).join('');
 }
 function zenWorkRenderHeaderStatus() {
@@ -5386,6 +5684,10 @@ function zenWorkOpenActivity() {
 window.zenWorkStart = zenWorkStart;
 window.zenWorkTransition = zenWorkTransition;
 window.zenWorkAddActivity = zenWorkAddActivity;
+window.zenToolEmoji = zenToolEmoji;
+window.zenToolPreview = zenToolPreview;
+window.zenFormatToolLine = zenFormatToolLine;
+window.zenWorkAppendTool = zenWorkAppendTool;
 window.zenWorkRenderAll = zenWorkRenderAll;
 window.zenWorkOpenActivity = zenWorkOpenActivity;
 
@@ -5448,6 +5750,8 @@ function zenChatSend(view) {
     body: { role: 'user', content: text }
   }).then(function(resp) {
     clearTimeout(runningTimer);
+    var hermesContent = resp && resp.assistant && resp.assistant.content ? resp.assistant.content : '';
+    if (hermesContent) zenWorkAddHermesActions(work.id, hermesContent);
     zenWorkAddActivity(work.id, '🦉', 'hermes', resp && resp.assistant ? 'Hermes response received.' : 'Hermes bridge completed; refreshing session history.', 'done');
     zenWorkAddActivity(work.id, '🔄', 'refresh', 'Refreshing visible chat history from Hermes state.', 'active');
     zenWorkTransition(work.id, 'complete', {
@@ -5458,7 +5762,6 @@ function zenChatSend(view) {
     zenChatRefreshActiveMessages(true).then(function() {
       zenChatSetStatus('idle', view);
       zenChatUpdateSendBtn(view);
-      zenWorkAddActivity(work.id, '✅', 'complete', 'Task complete / Ready for review.', 'done');
       zenWorkRenderAll();
     });
   }).catch(function(err) {
