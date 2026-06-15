@@ -16,8 +16,6 @@ Serves static files and adds:
   GET      /api/sessions/:id/rollup       -> child task summaries
   GET      /api/memory                    -> Hermes MEMORY.md + USER.md
   GET      /api/memory-world              -> data/memory-world.json
-  POST     /api/github-update             -> execute GitHub update plan (Accept)
-  POST     /api/diff                      -> git diff for review
 
 Data layout:
   data/sessions/index.json                   -> session registry + hermesSessionId links
@@ -1012,139 +1010,9 @@ class Handler(SimpleHTTPRequestHandler):
                 "progress": (assistant_record or {}).get("progress", []),
             })
 
-        # POST /api/github-update
-        if self._match("api/github-update") is not None:
-            body = self._read_body()
-            result = self._do_github_update(body)
-            return self._json(result)
-
-        # POST /api/diff
-        if self._match("api/diff") is not None:
-            body = self._read_body()
-            result = self._do_diff(body)
-            return self._json(result)
-
         self._json({"error": "not found"}, 404)
 
-    # -- GitHub Update (Accept) -----------------------------------
-
-    def _do_github_update(self, body: dict) -> dict:
-        """Execute a GitHub update plan. Returns result summary."""
-        import subprocess
-
-        plan = body.get("plan", {})
-        method = plan.get("method", "commit-push")
-        evidence = body.get("evidence", [])
-        session_id = body.get("sessionId", "")
-
-        result = {"ok": True, "steps": [], "errors": []}
-
-        if method == "comment":
-            result["steps"].append("Comment-only mode — no git operations.")
-            return result
-
-        # Determine files to commit
-        files = plan.get("filesTouched", evidence)
-        if not files:
-            result["steps"].append("No files to commit.")
-            return result
-
-        # Build commit message from plan summary
-        summary = plan.get("summary", "Update via Agent OS")
-        commit_msg = summary[:120].replace('"', '\\"')
-
-        try:
-            # git add
-            add_cmd = ["git", "add"] + files
-            add_result = subprocess.run(
-                add_cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT)
-            )
-            if add_result.returncode != 0:
-                result["errors"].append(f"git add failed: {add_result.stderr.strip()}")
-                result["ok"] = False
-                return result
-            result["steps"].append(f"git add {' '.join(files)}")
-
-            # git commit
-            commit_cmd = ["git", "commit", "-m", commit_msg]
-            commit_result = subprocess.run(
-                commit_cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT)
-            )
-            if commit_result.returncode != 0:
-                result["errors"].append(f"git commit failed: {commit_result.stderr.strip()}")
-                result["ok"] = False
-                return result
-            result["steps"].append(f'git commit -m "{commit_msg}"')
-
-            if method == "pr":
-                # Push to new branch
-                branch = f"agent-os/{session_id[:8]}-{int(__import__('time').time())}"
-                push_cmd = ["git", "push", "-u", "origin", branch]
-                push_result = subprocess.run(
-                    push_cmd, capture_output=True, text=True, timeout=60, cwd=str(ROOT)
-                )
-                if push_result.returncode != 0:
-                    result["errors"].append(f"git push failed: {push_result.stderr.strip()}")
-                    result["ok"] = False
-                    return result
-                result["steps"].append(f"git push -u origin {branch}")
-                result["steps"].append(f"PR branch: {branch}")
-            else:
-                # Simple push
-                push_cmd = ["git", "push"]
-                push_result = subprocess.run(
-                    push_cmd, capture_output=True, text=True, timeout=60, cwd=str(ROOT)
-                )
-                if push_result.returncode != 0:
-                    result["errors"].append(f"git push failed: {push_result.stderr.strip()}")
-                    result["ok"] = False
-                    return result
-                result["steps"].append("git push")
-
-        except subprocess.TimeoutExpired:
-            result["errors"].append("Git operation timed out.")
-            result["ok"] = False
-        except Exception as e:
-            result["errors"].append(str(e))
-            result["ok"] = False
-
-        return result
-
-    # -- Diff -----------------------------------------------------
-
-    def _do_diff(self, body: dict) -> dict:
-        """Return git diff for the given files/session."""
-        import subprocess
-
-        evidence = body.get("evidence", [])
-        files = [f for f in evidence if __import__('os').path.exists(str(ROOT / f))]
-
-        if not files:
-            # Return last commit diff
-            try:
-                result = subprocess.run(
-                    ["git", "diff", "HEAD~1", "--stat"],
-                    capture_output=True, text=True, timeout=15, cwd=str(ROOT)
-                )
-                return {"diff": result.stdout.strip() or "No recent changes."}
-            except Exception:
-                return {"diff": "Could not generate diff."}
-
-        try:
-            cmd = ["git", "diff", "--"] + files
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=15, cwd=str(ROOT)
-            )
-            diff = result.stdout.strip()
-            if not diff:
-                result = subprocess.run(
-                    ["git", "diff", "--staged", "--"] + files,
-                    capture_output=True, text=True, timeout=15, cwd=str(ROOT)
-                )
-                diff = result.stdout.strip()
-            return {"diff": diff or "No uncommitted changes."}
-        except Exception as e:
-            return {"diff": f"Error: {e}"}
+    def _hermes_chat(self, hermes_session_id: str, user_message: str) -> dict | None:
         """Send a message to Hermes via `hermes chat` CLI.
 
         Resumes the existing Hermes session so the agent has full context
@@ -1352,21 +1220,13 @@ def main():
         hsid = s.get("hermesSessionId") or "—"
         print(f"  {s['id']:12s} | hermes: {hsid:30s} | channel: {s.get('channel','—')}")
 
-    try:
-        server = ThreadingHTTPServer((args.host, args.port), Handler)
-    except OSError as exc:
-        if exc.errno == 98:
-            print(f"Agent OS server is already running or port {args.port} is in use on {args.host}.", file=sys.stderr)
-            print("Use the existing server, stop the process on that port, or start with --port <other-port>.", file=sys.stderr)
-            return 1
-        raise
+    server = ThreadingHTTPServer((args.host, args.port), Handler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\nShutting down.")
         server.server_close()
-    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

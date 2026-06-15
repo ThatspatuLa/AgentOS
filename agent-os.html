@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=47">
+<link rel="stylesheet" href="agent-os.css?v=46">
 </head>
 <body>
 
@@ -536,9 +536,9 @@
                 <div class="zen-chat-welcome-chip" onclick="zenChatQuickPrompt('Help me plan the next milestone')">Plan next milestone</div>
               </div>
             </div>
-            <!-- Working state strip (scrollable, inside messages) -->
-            <div class="zen-work-strip" id="zen-work-strip-full"></div>
           </div>
+
+          <div class="zen-work-panel-host" id="zen-work-panel-full" aria-live="polite"></div>
 
           <!-- Status Bar -->
           <div class="zen-chat-status-bar">
@@ -915,8 +915,6 @@
         <h3>Zen Chat</h3>
         <p>Quick chat cockpit</p>
       </div>
-      <!-- Working state strip (scrollable, inside messages) -->
-      <div class="zen-work-strip" id="zen-work-strip-small"></div>
     </div>
     <button class="zen-work-mini" id="zen-work-mini-small" onclick="zenWorkOpenActivity()" style="display:none">
       <span class="zen-work-mini-icon" aria-hidden="true"><span class="zen-work-mark zen-work-mark--mini"><span class="zen-work-enso"></span><span class="zen-work-orbit"><i></i></span></span></span>
@@ -1008,9 +1006,8 @@
           <div class="zen-chat-welcome-chip" onclick="zenChatQuickPrompt('Review Kanban changes','drawer')">Kanban</div>
         </div>
       </div>
-      <!-- Working state strip (scrollable, inside messages) -->
-      <div class="zen-work-strip" id="zen-work-strip-drawer"></div>
     </div>
+    <div class="zen-work-panel-host" id="zen-work-panel-drawer" aria-live="polite"></div>
     <div class="zen-chat-status-bar">
       <span class="zen-chat-status-dot" id="zen-chat-drawer-status-dot"></span>
       <span id="zen-chat-drawer-status-text">Ready</span>
@@ -1353,28 +1350,18 @@ function renderDashboardHero() {
   const inProgress = projectPrompts.filter(p => p.review_status === 'accepted');
   
   // Update hero
-  const heroAvatar = document.getElementById('hero-avatar');
-  const heroProjectName = document.getElementById('hero-project-name');
-  const heroProjectDesc = document.getElementById('hero-project-desc');
-  const heroHealth = document.getElementById('hero-health');
-  const heroProgressFill = document.getElementById('hero-progress-fill');
-  const heroProgressPct = document.getElementById('hero-progress-pct');
-  const heroProgressSprint = document.getElementById('hero-progress-sprint');
-  const heroProgressTasks = document.getElementById('hero-progress-tasks');
-  const focusList = document.getElementById('hero-focus-list');
-  const heroNextGate = document.getElementById('hero-next-gate');
-  if (!heroAvatar || !heroProjectName || !heroProjectDesc || !heroHealth || !heroProgressFill || !heroProgressPct || !heroProgressSprint || !heroProgressTasks || !focusList || !heroNextGate) return;
-  heroAvatar.textContent = info.avatar;
-  heroProjectName.textContent = info.name;
-  heroProjectDesc.textContent = info.description?.split('.')[0] || '';
-  heroHealth.textContent = health === 'healthy' ? '🟢 Healthy' : health === 'warning' ? '⚠ At Risk' : '🔴 Critical';
-  heroHealth.className = 'os-hero-health ' + health;
-  heroProgressFill.style.width = acceptanceRate + '%';
-  heroProgressPct.textContent = acceptanceRate + '% complete';
-  heroProgressSprint.textContent = 'Sprint ' + Math.min(5, Math.max(1, Math.ceil(acceptanceRate / 20))) + ' of 5';
-  heroProgressTasks.textContent = (projData.total - (projData.accepted || 0)) + ' tasks left';
+  document.getElementById('hero-avatar').textContent = info.avatar;
+  document.getElementById('hero-project-name').textContent = info.name;
+  document.getElementById('hero-project-desc').textContent = info.description?.split('.')[0] || '';
+  document.getElementById('hero-health').textContent = health === 'healthy' ? '🟢 Healthy' : health === 'warning' ? '⚠ At Risk' : '🔴 Critical';
+  document.getElementById('hero-health').className = 'os-hero-health ' + health;
+  document.getElementById('hero-progress-fill').style.width = acceptanceRate + '%';
+  document.getElementById('hero-progress-pct').textContent = acceptanceRate + '% complete';
+  document.getElementById('hero-progress-sprint').textContent = 'Sprint ' + Math.min(5, Math.max(1, Math.ceil(acceptanceRate / 20))) + ' of 5';
+  document.getElementById('hero-progress-tasks').textContent = (projData.total - (projData.accepted || 0)) + ' tasks left';
   
   // Focus items
+  const focusList = document.getElementById('hero-focus-list');
   const focusItems = [];
   if (blocked.length) focusItems.push({dot: 'blocked', text: blocked[0].summary + ' — blocked, needs review'});
   if (pending.length) focusItems.push({dot: 'review', text: pending[0].summary + ' — pending acceptance'});
@@ -1390,7 +1377,7 @@ function renderDashboardHero() {
   
   // Next gate
   const nextGate = blocked[0] || pending[0] || inProgress[0];
-  heroNextGate.textContent = nextGate
+  document.getElementById('hero-next-gate').textContent = nextGate 
     ? 'Next Safe Gate: Review ' + nextGate.id + ' → Accept → Promote' 
     : 'Next Safe Gate: All clear — no pending gates';
 }
@@ -1416,7 +1403,6 @@ function renderActionQueue() {
 function updateQueueColumn(type, items, dotClass) {
   const countEl = document.getElementById('queue-' + type + '-count');
   const bodyEl = document.getElementById('queue-' + type + '-body');
-  if (!countEl || !bodyEl) return;
   
   countEl.textContent = items.length;
   
@@ -3189,16 +3175,13 @@ function filterRunLog(filter, btn) {
 
 // ═══ MEMORY ═══
 function renderMemory() {
-  const userEl = document.getElementById('memory-user-content');
-  const envEl = document.getElementById('memory-env-content');
-  if (!userEl || !envEl) return;
-  userEl.innerHTML = `
+  document.getElementById('memory-user-content').innerHTML = `
     <div style="margin-bottom:12px"><span class="os-tag">Name: Zen</span><span class="os-tag">Role: Primary Agent</span><span class="os-tag">Model: owl-alpha</span></div>
     <div style="margin-bottom:8px"><strong>Communication Style:</strong> Tactical, direct, structured, practical, unsentimental, evidence-driven, capability-aware.</div>
     <div style="margin-bottom:8px"><strong>Preferences:</strong> No motivational fluff, no vague encouragement, no bloated theory, no generic assistant language, no fake confidence.</div>
     <div style="margin-bottom:8px"><strong>Background:</strong> Data analytics prior job. Values precision and clean UI with detailed information.</div>
     <div><strong>Hardware:</strong> Intel Core Ultra 9 285K, RTX 5060 Ti, 64GB RAM, Ubuntu 26.04</div>`;
-  envEl.innerHTML = `
+  document.getElementById('memory-env-content').innerHTML = `
     <div style="margin-bottom:8px"><strong>Vault:</strong> ~/Obsidian/ZenVault (101 files, git-backed)</div>
     <div style="margin-bottom:8px"><strong>Sandbox:</strong> 105 prompts executed, 15 accepted, 87 rejected, 0 pending</div>
     <div style="margin-bottom:8px"><strong>Discord:</strong> 6 channels mapped to 6 agent sessions</div>
@@ -4663,7 +4646,7 @@ window.showPage = function(id) {
 // ═══════════════════════════════════════════════════════════
 
 // ── M1: State ──
-var ZEN_CHAT_SESSIONS = {
+const ZEN_CHAT_SESSIONS = {
   'zen-os':    {id:'zen-os',    type:'global', icon:'🖥️', label:'Zen OS',   title:'Zen OS Session',         meta:'Agent OS · UI & Frontend',  badgeClass:'zen-chat-session-badge--ui',     projectId:null,       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'main',              hermesSessionId:null,       channel:'zen-chat',    color:'#7c3aed'},
   'zen':       {id:'zen',       type:'main',   icon:'🦉', label:'Zen',      title:'Zen Project Session',     meta:'Project: Zen',              badgeClass:'zen-chat-session-badge--project', projectId:'zen',       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/zen/',       hermesSessionId:'20260615_023828_9b59a6', channel:'zen-chat',    color:'#6366f1'},
   'kiyosaki':  {id:'kiyosaki',  type:'main',   icon:'📊', label:'Kiyosaki', title:'Kiyosaki Project Session', meta:'Project: Kiyosaki',         badgeClass:'zen-chat-session-badge--project', projectId:'kiyosaki',  repo:'/home/spatula/Projects/Kiyosaki', branchPrefix:'session/kiyosaki/',  hermesSessionId:'20260613_130913_a8909b', channel:'kiyosaki-chat', color:'#059669'},
@@ -4673,7 +4656,7 @@ var ZEN_CHAT_SESSIONS = {
   'kazuki':    {id:'kazuki',    type:'main',   icon:'🛡️', label:'Kazuki',   title:'Kazuki Project Session',  meta:'Project: Kazuki',           badgeClass:'zen-chat-session-badge--project', projectId:'kazuki',    repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/kazuki/',    hermesSessionId:null,       channel:'kazuki-chat',  color:'#7c2d12'}
 };
 
-var zenChatState = {
+let zenChatState = {
   activeSession: 'zen',
   view: 'full',
   smallPanelOpen: false,
@@ -5156,7 +5139,6 @@ function zenChatRenderMessages(view) {
   msgs.forEach(function(m, idx) {
     container.appendChild(zenChatCreateMessageEl(m, idx));
   });
-  zenWorkMoveStripToEnd(view);
 }
 
 function zenChatMessageKey(m, idx) {
@@ -5198,7 +5180,6 @@ function zenChatSyncMessages(view, previousCount) {
   for (let i = rendered; i < msgs.length; i++) {
     container.appendChild(zenChatCreateMessageEl(msgs[i], i));
   }
-  zenWorkMoveStripToEnd(view);
 }
 
 function zenChatAddMessage(role, content, view) {
@@ -5243,7 +5224,7 @@ function zenChatScrollToBottom(view) {
 
 
 // ── Zen working-state UI ──
-var ZEN_WORK_STATE = {
+const ZEN_WORK_STATE = {
   tasks: {},
   minimized: false,
   tickTimer: null,
@@ -5771,108 +5752,12 @@ function zenWorkToggleDetails(button) {
     ZEN_WORK_STATE.tasks[active.id] = Object.assign({}, active, { detailsOpen: details.open });
   }
 }
-function zenWorkStripHtml(task, view) {
-  if (!task) return '';
-  var statusIcon = task.status === 'thinking' ? '🧠' : (task.status === 'running' ? '⚙️' : (task.status === 'complete' ? '✅' : '⚠️'));
-  var action = zenWorkActionText(task);
-  var log = task.activityLog || [];
-  var maxLog = view === 'full' ? 50 : (view === 'drawer' ? 20 : 8);
-  var visibleLog = log.slice(-maxLog);
-  var logHtml = visibleLog.map(function(entry){
-    var icon = entry.icon || '•';
-    var text = entry.text || '';
-    var ts = entry.ts ? new Date(entry.ts) : null;
-    var timeStr = ts ? ts.getHours().toString().padStart(2,'0') + ':' + ts.getMinutes().toString().padStart(2,'0') : '';
-    return '<div class="zen-work-strip-item zen-work-strip-item--' + (entry.status||'active') + '">' +
-      '<span class="zen-work-strip-icon">' + icon + '</span>' +
-      '<span class="zen-work-strip-text">' + escapeHtml(zenOneline(text)) + '</span>' +
-      (timeStr ? '<span class="zen-work-strip-time">' + timeStr + '</span>' : '') +
-      '</div>';
-  }).join('');
-  var headerClass = 'zen-work-strip-header zen-work-strip-header--' + task.status;
-  return '<div class="zen-work-strip-inner">' +
-    '<div class="' + headerClass + '" onclick="zenWorkToggleStrip(this)">' +
-      '<span class="zen-work-strip-status-icon">' + statusIcon + '</span>' +
-      '<span class="zen-work-strip-title">' + escapeHtml(task.title || 'Zen') + '</span>' +
-      '<span class="zen-work-strip-action">' + escapeHtml(action) + '</span>' +
-      '<span class="zen-work-strip-toggle">▾</span>' +
-    '</div>' +
-    '<div class="zen-work-strip-log">' + logHtml + '</div>' +
-    (task.status === 'complete' ? '<div class="zen-work-strip-actions"><button onclick="zenWorkAccept(\'' + task.id + '\')">Accept</button><button onclick="zenWorkAlter(\'' + task.id + '\')">Alter</button><button onclick="zenWorkDismiss(\'' + task.id + '\')">Dismiss</button></div>' : '') +
-    (task.status === 'failed' ? '<div class="zen-work-strip-actions"><button onclick="zenWorkRetry(\'' + task.id + '\')">Retry</button><button onclick="zenWorkDismiss(\'' + task.id + '\')">Dismiss</button></div>' : '') +
-    '</div>';
-}
-function zenWorkToggleStrip(header) {
-  var inner = header.parentElement;
-  var log = inner.querySelector('.zen-work-strip-log');
-  var toggle = header.querySelector('.zen-work-strip-toggle');
-  if (!log) return;
-  var isOpen = log.style.display !== 'none';
-  log.style.display = isOpen ? 'none' : 'block';
-  if (toggle) toggle.textContent = isOpen ? '▸' : '▾';
-  header.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-}
-function zenWorkAccept(id) {
-  var task = ZEN_WORK_STATE.tasks[id];
-  if (!task) return;
-  if (window.ZenReviewGate && typeof window.ZenReviewGate.show === 'function') {
-    var plan = window.ZenReviewGate.buildPlan({ filesTouched: [], hasChanges: false });
-    window.ZenReviewGate.show({
-      workId: id,
-      view: zenChatState.view || 'full',
-      sessionId: task.sessionId || zenChatState.activeSession,
-      prompt: task.prompt || '',
-      response: task.response || task.action || 'Task complete.',
-      progress: task.activityLog || [],
-      plan: plan,
-      evidence: [],
-      status: task.status === 'failed' ? 'failed' : 'complete',
-      diagnosis: task.status === 'failed' ? { cause: task.cause || 'Unknown failure', evidence: task.evidence || '', recovery: task.recovery || ['Retry', 'Alter request'] } : null
-    });
-    return;
-  }
-  zenWorkDismiss(id);
-}
-function zenWorkAlter(id) {
-  var task = ZEN_WORK_STATE.tasks[id];
-  var view = zenChatState.view || 'full';
-  if (window.ZenReviewGate && typeof window.ZenReviewGate.alter === 'function' && task) {
-    window.ZenReviewGate.alter({ workId: id, view: view, sessionId: task.sessionId || zenChatState.activeSession, prompt: task.prompt || '', response: task.response || task.action || '' });
-    return;
-  }
-  zenWorkDismiss(id);
-}
-function zenWorkRetry(id) { zenWorkDismiss(id); }
-function zenWorkMoveStripToEnd(view) {
-  var strip = document.getElementById('zen-work-strip-' + view);
-  if (!strip) return null;
-  var suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
-  var messages = document.getElementById('zen-chat' + suffix + '-messages');
-  if (messages && strip.parentElement === messages && messages.lastElementChild !== strip) {
-    messages.appendChild(strip);
-  }
-  return { strip: strip, messages: messages };
-}
 function zenWorkRenderPanels() {
   var active = zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks().find(function(t){ return t.status === 'running' || t.status === 'thinking'; }) || null;
-  // Render into scrollable strips inside each messages container
-  ['full','drawer','small'].forEach(function(view){
-    var target = zenWorkMoveStripToEnd(view);
-    var strip = target && target.strip;
-    var messages = target && target.messages;
-    if (!strip) return;
-    if (!active) {
-      strip.innerHTML = '';
-      strip.style.display = 'none';
-      return;
-    }
-    strip.style.display = 'block';
-    strip.innerHTML = zenWorkStripHtml(active, view);
-    if (messages && (active.status === 'thinking' || active.status === 'running' || active.status === 'complete' || active.status === 'failed')) {
-      messages.scrollTop = messages.scrollHeight;
-    }
-  });
-  // Mini button (small chat toggle)
+  var full = document.getElementById('zen-work-panel-full');
+  var drawer = document.getElementById('zen-work-panel-drawer');
+  if (full) zenWorkSetHtmlPreservingMarks(full, active ? zenWorkPanelHtml(active, 'full') : '');
+  if (drawer) zenWorkSetHtmlPreservingMarks(drawer, active ? zenWorkPanelHtml(active, 'drawer') : '');
   var mini = document.getElementById('zen-work-mini-small');
   var miniText = document.getElementById('zen-work-mini-small-text');
   if (mini) {
@@ -6099,6 +5984,5 @@ document.addEventListener('click', function(e) {
 // ═══ END ZEN CHAT ═══
 
 </script>
-<script src="review-gate.js"></script>
 </body>
 </html>
