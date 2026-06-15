@@ -426,6 +426,17 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _ndjson_start(self, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
+    def _ndjson_event(self, event: dict):
+        self.wfile.write((json.dumps(event, ensure_ascii=False) + "\n").encode("utf-8"))
+        self.wfile.flush()
+
     def _read_body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
         if length:
@@ -588,6 +599,53 @@ class Handler(SimpleHTTPRequestHandler):
 
         index = _load_index()
 
+        # POST /api/sessions/:id/messages/stream
+        m = self._match("api/sessions/:id/messages/stream")
+        if m:
+            s = _get_session(index, m["id"])
+            if not s:
+                return self._json({"error": "not found"}, 404)
+            body = self._read_body()
+            role = body.get("role", "user")
+            content = body.get("content", "")
+            if not content:
+                return self._json({"error": "empty content"}, 400)
+
+            now = _now_iso()
+            record = {"role": role, "content": content, "ts": now, "source": "agent-os"}
+            msg_path = SESSIONS_DIR / m["id"] / "messages.jsonl"
+            if not s.get("hermesSessionId"):
+                _append_jsonl(msg_path, record)
+
+            s["lastActive"] = now
+            s["messageCount"] = (s.get("messageCount") or 0) + 1
+            _save_index(index)
+
+            self._ndjson_start()
+            self._ndjson_event({"event": "accepted", "message": record})
+            assistant_record = None
+            try:
+                if role == "user" and s.get("hermesSessionId"):
+                    assistant_record = self._hermes_chat_stream(
+                        s["hermesSessionId"],
+                        content,
+                        lambda payload: self._ndjson_event(payload),
+                    )
+                self._ndjson_event({
+                    "event": "complete",
+                    "ok": True,
+                    "message": record,
+                    "assistant": assistant_record,
+                    "progress": (assistant_record or {}).get("progress", []),
+                })
+            except Exception as e:
+                self._ndjson_event({
+                    "event": "failed",
+                    "ok": False,
+                    "error": str(e),
+                })
+            return
+
         # POST /api/sessions/:id/messages
         m = self._match("api/sessions/:id/messages")
         if m:
@@ -740,6 +798,91 @@ class Handler(SimpleHTTPRequestHandler):
                 "content": f"[Hermes error: {e}]",
                 "ts": _now_iso(),
                 "source": "hermes-error",
+            }
+
+    def _hermes_chat_stream(self, hermes_session_id: str, user_message: str, emit) -> dict | None:
+        """Run Hermes and emit progress events as CLI progress lines arrive."""
+        import subprocess
+
+        cmd = [
+            "hermes", "chat",
+            "-q", user_message,
+            "--resume", hermes_session_id,
+            "--source", "tool",
+        ]
+        before_messages = _hermes_messages(hermes_session_id, limit=2000)
+        before_len = len(before_messages)
+        progress: list[str] = []
+        output_lines: list[str] = []
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                env={**os.environ, "NO_COLOR": "1", "TERM": "dumb"},
+            )
+            assert proc.stdout is not None
+            for raw in proc.stdout:
+                output_lines.append(raw)
+                lines = _extract_hermes_progress(raw)
+                for line in lines:
+                    progress.append(line)
+                    emit({"event": "progress", "line": line})
+            return_code = proc.wait(timeout=5)
+            stdout = "".join(output_lines)
+            if return_code != 0:
+                cleaned = _clean_hermes_stdout(stdout, progress)
+                return {
+                    "role": "assistant",
+                    "content": f"[Hermes error: {cleaned or 'hermes chat returned non-zero'}]",
+                    "ts": _now_iso(),
+                    "source": "hermes-error",
+                    "progress": progress[-80:],
+                }
+
+            after_messages = _hermes_messages(hermes_session_id, limit=2000)
+            new_messages = after_messages[before_len:] if len(after_messages) >= before_len else []
+            new_assistant = [m for m in new_messages if m.get("role") == "assistant"]
+            response_text = _clean_hermes_stdout(stdout, progress)
+            if new_assistant:
+                response_text = str(new_assistant[-1].get("content") or "").strip() or response_text
+            return {
+                "role": "assistant",
+                "content": response_text,
+                "ts": _now_iso(),
+                "source": "hermes",
+                "progress": progress[-80:],
+            }
+        except subprocess.TimeoutExpired:
+            try:
+                proc.kill()  # type: ignore[name-defined]
+            except Exception:
+                pass
+            return {
+                "role": "assistant",
+                "content": "[Hermes timeout — no response in 5 minutes]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+                "progress": progress[-80:],
+            }
+        except FileNotFoundError:
+            return {
+                "role": "assistant",
+                "content": "[Hermes CLI not found — install with: pip install hermes-agent]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+                "progress": progress[-80:],
+            }
+        except Exception as e:
+            return {
+                "role": "assistant",
+                "content": f"[Hermes error: {e}]",
+                "ts": _now_iso(),
+                "source": "hermes-error",
+                "progress": progress[-80:],
             }
 
     # -- OPTIONS (CORS) --------------------------------------------------

@@ -4682,6 +4682,58 @@ function zenChatApi(path, opts) {
   if (opts.body) fetchOpts.body = JSON.stringify(opts.body);
   return fetch(url, fetchOpts).then(function(r) { return r.json(); });
 }
+function zenChatApiStreamMessage(sessionId, body, workId) {
+  if (!window.ReadableStream) {
+    return zenChatApi('/' + sessionId + '/messages', { method: 'POST', body: body });
+  }
+  return fetch(SESSION_API + '/' + sessionId + '/messages/stream', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  }).then(function(resp) {
+    if (!resp.ok || !resp.body) {
+      return zenChatApi('/' + sessionId + '/messages', { method: 'POST', body: body });
+    }
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+    var finalPayload = null;
+    function consume() {
+      return reader.read().then(function(result) {
+        buffer += decoder.decode(result.value || new Uint8Array(), { stream: !result.done });
+        var lines = buffer.split(/\r?\n/);
+        buffer = lines.pop() || '';
+        lines.forEach(function(line) {
+          if (!line.trim()) return;
+          try {
+            var event = JSON.parse(line);
+            if (event.event === 'progress' && event.line) {
+              zenWorkAddHermesActions(workId, event.line);
+            } else if (event.event === 'complete') {
+              finalPayload = event;
+            } else if (event.event === 'failed') {
+              throw new Error(event.error || 'Hermes stream failed');
+            }
+          } catch (err) {
+            if (!finalPayload) finalPayload = { ok:false, error: err.message || String(err) };
+          }
+        });
+        if (result.done) {
+          if (buffer.trim()) {
+            try {
+              var event = JSON.parse(buffer);
+              if (event.event === 'complete') finalPayload = event;
+            } catch (err) {}
+          }
+          if (finalPayload && finalPayload.ok === false) throw new Error(finalPayload.error || 'Hermes stream failed');
+          return finalPayload || { ok:true };
+        }
+        return consume();
+      });
+    }
+    return consume();
+  });
+}
 
 // Load all sessions from API, populate sidebar/picker labels
 function zenChatLoadSessions() {
@@ -5791,10 +5843,7 @@ function zenChatSend(view) {
 
   zenWorkAddActivity(work.id, '📡', 'api', 'POST /api/sessions/' + sessionId + '/messages', 'active');
   // Send to Agent OS server, which forwards to Hermes if session has a Hermes link
-  zenChatApi('/' + sessionId + '/messages', {
-    method: 'POST',
-    body: { role: 'user', content: text }
-  }).then(function(resp) {
+  zenChatApiStreamMessage(sessionId, { role: 'user', content: text }, work.id).then(function(resp) {
     clearTimeout(runningTimer);
     var hermesContent = resp && resp.assistant && resp.assistant.content ? resp.assistant.content : '';
     var hermesProgress = resp && Array.isArray(resp.progress) ? resp.progress.join('\n') : '';
