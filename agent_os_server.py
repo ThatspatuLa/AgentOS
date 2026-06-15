@@ -38,6 +38,7 @@ import os
 import re
 import sqlite3
 import shutil
+import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
@@ -51,6 +52,9 @@ SESSIONS_INDEX = SESSIONS_DIR / "index.json"
 
 # Hermes session DB — the source of truth for Discord message history
 HERMES_DB = Path.home() / ".hermes" / "state.db"
+HERMES_AGENT_DIR = Path.home() / ".hermes" / "hermes-agent"
+HERMES_PYTHON = HERMES_AGENT_DIR / "venv" / "bin" / "python"
+ZEN_HERMES_PROGRESS_PREFIX = "__ZEN_HERMES_PROGRESS__"
 
 # ---------------------------------------------------------------------------
 # Defaults — sessions are created on first server start if missing
@@ -334,14 +338,180 @@ HERMES_PROGRESS_RE = re.compile(
     re.VERBOSE,
 )
 
+HERMES_PROGRESS_WRAPPER = r"""
+import json
+import os
+import sys
+
+agent_dir = os.environ.get("ZEN_HERMES_AGENT_DIR")
+if agent_dir:
+    sys.path.insert(0, agent_dir)
+
+import cli as hermes_chat_cli
+
+PREFIX = os.environ.get("ZEN_HERMES_PROGRESS_PREFIX", "__ZEN_HERMES_PROGRESS__")
+_orig_progress = hermes_chat_cli.HermesCLI._on_tool_progress
+
+def _json_safe(value):
+    try:
+        json.dumps(value)
+        return value
+    except Exception:
+        return str(value)
+
+def _emit(payload):
+    print(PREFIX + json.dumps(payload, ensure_ascii=False, default=str), flush=True)
+
+def _emit_line(line):
+    line = str(line or "").strip()
+    if line:
+        _emit({"line": line})
+
+def _agent_iteration_label(agent):
+    if agent is None:
+        return ""
+    current = getattr(agent, "api_call_count", None)
+    total = getattr(agent, "max_iterations", None)
+    if current is None or total is None:
+        return ""
+    try:
+        return f"iteration {int(current)}/{int(total)}"
+    except Exception:
+        return ""
+
+def _zen_progress(self, event_type, function_name=None, preview=None, function_args=None, **kwargs):
+    if event_type == "tool.started" and function_name and not str(function_name).startswith("_"):
+        args = function_args if isinstance(function_args, dict) else {}
+        try:
+            from agent.display import build_tool_preview, get_tool_emoji
+            tool_preview = preview or build_tool_preview(function_name, args, max_len=0) or ""
+            emoji = get_tool_emoji(function_name, default="⚙️")
+        except Exception:
+            tool_preview = preview or ""
+            emoji = "⚙️"
+        payload = {
+            "event_type": event_type,
+            "tool_name": function_name,
+            "preview": tool_preview,
+            "emoji": emoji,
+            "args": _json_safe(args),
+        }
+        _emit(payload)
+    elif event_type == "tool.completed" and function_name and not str(function_name).startswith("_"):
+        duration = kwargs.get("duration", 0)
+        try:
+            duration_text = f"{float(duration):.1f}s"
+        except Exception:
+            duration_text = str(duration or "0s")
+        iteration = _agent_iteration_label(getattr(self, "agent", None))
+        detail = f"{iteration}, " if iteration else ""
+        _emit_line(f"⏳ Working — {detail}tool completed: {function_name} ({duration_text})")
+    elif event_type == "reasoning.available" and preview:
+        _emit_line(str(preview))
+    return _orig_progress(self, event_type, function_name, preview, function_args, **kwargs)
+
+hermes_chat_cli.HermesCLI._on_tool_progress = _zen_progress
+_orig_init_agent = hermes_chat_cli.HermesCLI._init_agent
+
+def _zen_init_agent(self, *args, **kwargs):
+    ok = _orig_init_agent(self, *args, **kwargs)
+    agent = getattr(self, "agent", None)
+    if ok and agent is not None:
+        previous_status_callback = getattr(agent, "status_callback", None)
+
+        def _zen_status(event_type, message):
+            if message:
+                _emit_line(message)
+            if previous_status_callback:
+                try:
+                    previous_status_callback(event_type, message)
+                except Exception:
+                    pass
+
+        agent.status_callback = _zen_status
+    return ok
+
+hermes_chat_cli.HermesCLI._init_agent = _zen_init_agent
+
+from hermes_cli import main as hermes_entrypoint
+
+sys.argv = [
+    "hermes",
+    "chat",
+    "-q",
+    os.environ.get("ZEN_HERMES_QUERY", ""),
+    "--resume",
+    os.environ.get("ZEN_HERMES_SESSION", ""),
+    "--source",
+    "tool",
+    "--cli",
+]
+raise SystemExit(hermes_entrypoint.main())
+"""
+
 
 def _strip_ansi(text: str) -> str:
     return ANSI_RE.sub("", text or "")
 
 
+def _truncate_middle(text: str, limit: int = 120) -> str:
+    text = str(text or "").replace("\n", " ").strip()
+    text = re.sub(r"\s+", " ", text)
+    if len(text) <= limit:
+        return text
+    head = max(1, int((limit - 3) * 0.58))
+    tail = max(1, (limit - 3) - head)
+    return text[:head] + "..." + text[-tail:]
+
+
+def _format_hermes_progress_payload(payload: dict) -> str | None:
+    direct_line = str(payload.get("line") or "").strip()
+    if direct_line:
+        return _truncate_middle(direct_line, 160)
+    tool_name = str(payload.get("tool_name") or "").strip()
+    if not tool_name:
+        return None
+    emoji = str(payload.get("emoji") or "⚙️").strip() or "⚙️"
+    preview = _truncate_middle(str(payload.get("preview") or ""), 120)
+    if preview:
+        return f'{emoji} {tool_name}: "{preview}"'
+    return f"{emoji} {tool_name}..."
+
+
+def _decode_zen_progress_line(line: str) -> str | None:
+    stripped = _strip_ansi(line).strip()
+    if not stripped.startswith(ZEN_HERMES_PROGRESS_PREFIX):
+        return None
+    raw = stripped[len(ZEN_HERMES_PROGRESS_PREFIX):]
+    try:
+        payload = json.loads(raw)
+    except Exception:
+        return None
+    return _format_hermes_progress_payload(payload if isinstance(payload, dict) else {})
+
+
+def _hermes_chat_command(hermes_session_id: str, user_message: str) -> tuple[list[str], dict]:
+    python_bin = str(HERMES_PYTHON if HERMES_PYTHON.exists() else Path(sys.executable))
+    env = {
+        **os.environ,
+        "NO_COLOR": "1",
+        "TERM": "dumb",
+        "PYTHONUNBUFFERED": "1",
+        "ZEN_HERMES_AGENT_DIR": str(HERMES_AGENT_DIR),
+        "ZEN_HERMES_PROGRESS_PREFIX": ZEN_HERMES_PROGRESS_PREFIX,
+        "ZEN_HERMES_SESSION": hermes_session_id,
+        "ZEN_HERMES_QUERY": user_message,
+    }
+    return [python_bin, "-u", "-c", HERMES_PROGRESS_WRAPPER], env
+
+
 def _extract_hermes_progress(text: str) -> list[str]:
     progress: list[str] = []
     for raw in (text or "").splitlines():
+        decoded = _decode_zen_progress_line(raw)
+        if decoded:
+            progress.append(decoded)
+            continue
         line = _strip_ansi(raw).strip()
         if not line:
             continue
@@ -366,6 +536,8 @@ def _clean_hermes_stdout(stdout: str, progress: list[str]) -> str:
         stripped = line.strip()
         if not stripped:
             kept.append("")
+            continue
+        if stripped.startswith(ZEN_HERMES_PROGRESS_PREFIX):
             continue
         if stripped in progress_set:
             continue
@@ -706,12 +878,7 @@ class Handler(SimpleHTTPRequestHandler):
         """
         import subprocess
 
-        cmd = [
-            "hermes", "chat",
-            "-q", user_message,
-            "--resume", hermes_session_id,
-            "--source", "tool",
-        ]
+        cmd, env = _hermes_chat_command(hermes_session_id, user_message)
         before_messages = _hermes_messages(hermes_session_id, limit=2000)
         before_len = len(before_messages)
 
@@ -721,7 +888,7 @@ class Handler(SimpleHTTPRequestHandler):
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 min max — same as gateway timeout
-                env={**os.environ, "NO_COLOR": "1", "TERM": "dumb"},
+                env=env,
             )
             progress = _extract_hermes_progress((result.stdout or "") + "\n" + (result.stderr or ""))
             if result.returncode == 0:
@@ -804,12 +971,7 @@ class Handler(SimpleHTTPRequestHandler):
         """Run Hermes and emit progress events as CLI progress lines arrive."""
         import subprocess
 
-        cmd = [
-            "hermes", "chat",
-            "-q", user_message,
-            "--resume", hermes_session_id,
-            "--source", "tool",
-        ]
+        cmd, env = _hermes_chat_command(hermes_session_id, user_message)
         before_messages = _hermes_messages(hermes_session_id, limit=2000)
         before_len = len(before_messages)
         progress: list[str] = []
@@ -822,7 +984,7 @@ class Handler(SimpleHTTPRequestHandler):
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                env={**os.environ, "NO_COLOR": "1", "TERM": "dumb"},
+                env=env,
             )
             assert proc.stdout is not None
             for raw in proc.stdout:

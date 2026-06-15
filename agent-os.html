@@ -4670,7 +4670,9 @@ let zenChatState = {
 };
 
 // ── Session API helpers ──
-var SESSION_API = '/api/sessions';
+var SESSION_API = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:8765/api/sessions'
+  : '/api/sessions';
 
 function zenChatApi(path, opts) {
   opts = opts || {};
@@ -5505,36 +5507,50 @@ function zenWorkFormatActivityLine(item) {
   return line + (item.repeat && item.repeat > 1 ? ' (×' + item.repeat + ')' : '');
 }
 function zenWorkLatestActivity(task) {
+  var live = zenWorkHermesEntries(task);
+  if (live.length) return live[live.length - 1];
   var log = (task && task.activityLog) || [];
+  var lifecycleLabels = {
+    prompt: true,
+    context: true,
+    boundary: true,
+    api: true,
+    running: true,
+    bridge: true,
+    hermes: true,
+    refresh: true
+  };
   if (task && (task.status === 'thinking' || task.status === 'running')) {
     for (var i = log.length - 1; i >= 0; i--) {
       var item = log[i] || {};
       var label = String(item.label || '').toLowerCase();
       var text = String(item.text || '');
       if (!text) continue;
-      if (label === 'prompt') continue;
+      if (lifecycleLabels[label]) continue;
       if ((item.status || '') !== 'done') return item;
     }
+    return null;
   }
   for (var j = log.length - 1; j >= 0; j--) {
     var fallback = log[j] || {};
+    var fallbackLabel = String(fallback.label || '').toLowerCase();
     var fallbackText = String(fallback.text || '');
     if (!fallbackText) continue;
-    if (String(fallback.label || '').toLowerCase() === 'prompt') continue;
+    if (lifecycleLabels[fallbackLabel]) continue;
     return fallback;
   }
   return null;
 }
 function zenWorkActionText(task) {
-  if (!task) return 'Forwarding request through Agent OS → Hermes bridge';
+  if (!task) return 'Waiting for Hermes tool progress...';
   var latest = zenWorkLatestActivity(task);
   if (latest) return zenWorkFormatActivityLine(latest);
-  if (task.currentAction) return task.currentAction;
-  if (task.action) return task.action;
-  if (task.status === 'thinking') return 'Reviewing session context';
+  if (task.status === 'thinking' || task.status === 'running') return 'Waiting for Hermes tool progress...';
   if (task.status === 'complete') return 'Task complete / Ready for review';
   if (task.status === 'failed') return 'Hermes bridge request needs review';
-  return 'Forwarding request through Agent OS → Hermes bridge';
+  if (task.currentAction) return task.currentAction;
+  if (task.action) return task.action;
+  return 'Waiting for Hermes tool progress...';
 }
 function zenWorkStream(task) {
   var live = zenWorkHermesEntries(task);
