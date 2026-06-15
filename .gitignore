@@ -1,11 +1,8 @@
 .aider*
 .env
-.env
-.env
-.env
-.env
-.env
-.env
-.env
-.env
-.env
+__pycache__/
+*.pyc
+bot/__pycache__/
+data/sessions/*/messages.jsonl
+data/sessions/*/events.jsonl
+data/sessions/index.json
