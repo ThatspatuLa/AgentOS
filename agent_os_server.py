@@ -359,7 +359,11 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
     If a channel is provided (or can be derived from the session index),
     aggregates messages from ALL Hermes sessions belonging to that channel
     so the full Discord conversation history is visible.
-    Otherwise falls back to a single session ID."""
+    Otherwise falls back to a single session ID.
+
+    Filters out intermediate assistant messages that are followed by tool calls,
+    keeping only final assistant responses so Zen Chat doesn't show internal
+    reasoning steps as separate chat messages."""
     if not HERMES_DB.exists() or not hermes_session_id:
         return []
 
@@ -373,11 +377,13 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
     try:
         conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
+        # Fetch user + assistant + tool roles so we can identify which
+        # assistant messages are intermediate (followed by tool calls).
         if len(session_ids) == 1:
             rows = conn.execute(
                 """SELECT role, content, token_count, timestamp, session_id
                    FROM messages
-                   WHERE session_id = ? AND role IN ('user','assistant')
+                   WHERE session_id = ? AND role IN ('user','assistant','tool')
                    ORDER BY timestamp ASC
                    LIMIT ?""",
                 (session_ids[0], limit),
@@ -388,13 +394,17 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
                 f"""SELECT role, content, token_count, timestamp, session_id
                     FROM messages
                     WHERE session_id IN ({placeholders})
-                    AND role IN ('user','assistant')
+                    AND role IN ('user','assistant','tool')
                     ORDER BY timestamp ASC
                     LIMIT ?""",
                 (*session_ids, limit),
             ).fetchall()
         conn.close()
-        return [
+
+        # Build list and identify which assistant messages are intermediate.
+        # An assistant message followed by a tool message is an internal
+        # reasoning step, not a final response.
+        all_msgs = [
             {
                 "role": r["role"],
                 "content": r["content"],
@@ -405,6 +415,35 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
             }
             for r in rows
         ]
+
+        # Identify which assistant messages are final responses.
+        # A "final" assistant message is one that is followed by a user message
+        # (or is the very last message in the session). All other assistant
+        # messages are intermediate reasoning steps between tool calls.
+        # Also filter out context compaction summaries injected by Hermes.
+        COMPACTION_RE = re.compile(r'^\[CONTEXT COMPACTION', re.IGNORECASE)
+        skip_indices = set()
+        for i, msg in enumerate(all_msgs):
+            if msg["role"] == "tool":
+                skip_indices.add(i)
+                continue
+            if msg["role"] == "assistant":
+                # Skip context compaction summaries
+                if COMPACTION_RE.search(msg.get("content", "")):
+                    skip_indices.add(i)
+                    continue
+                # Check if this assistant message is followed by a user message
+                # or is the last message — those are final responses.
+                is_final = False
+                if i + 1 >= len(all_msgs):
+                    is_final = True  # last message in session
+                elif all_msgs[i + 1]["role"] == "user":
+                    is_final = True  # followed by user = final response
+                if not is_final:
+                    skip_indices.add(i)
+
+        # Return only user messages and final assistant responses.
+        return [msg for i, msg in enumerate(all_msgs) if i not in skip_indices]
     except Exception:
         return []
 
@@ -723,7 +762,9 @@ class Handler(SimpleHTTPRequestHandler):
 
         # GET /api/kanban-tasks
         if self._match("api/kanban-tasks") is not None:
-            return self._json(_read_json(TASKS_FILE, {"tasks": []}))
+            data = _read_json(TASKS_FILE, {"tasks": []})
+            data["writable"] = True
+            return self._json(data)
 
         # GET /api/sessions
         if self._match("api/sessions") is not None:
