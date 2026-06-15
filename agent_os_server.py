@@ -323,6 +323,60 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500) -> list[dict]:
         return []
 
 
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+HERMES_PROGRESS_RE = re.compile(
+    r"""^(
+        [\U0001F300-\U0001FAFF]\s+[A-Za-z_][\w-]*(?::|\.\.\.)|
+        ┊\s*\S+\s+\S+|
+        (?:\S+\s+)?Compacting\ context|
+        (?:\S+\s+)?Working\s*[—-]
+    )""",
+    re.VERBOSE,
+)
+
+
+def _strip_ansi(text: str) -> str:
+    return ANSI_RE.sub("", text or "")
+
+
+def _extract_hermes_progress(text: str) -> list[str]:
+    progress: list[str] = []
+    for raw in (text or "").splitlines():
+        line = _strip_ansi(raw).strip()
+        if not line:
+            continue
+        if line.startswith("Query:"):
+            continue
+        if HERMES_PROGRESS_RE.search(line):
+            progress.append(line)
+    return progress[-80:]
+
+
+def _clean_hermes_stdout(stdout: str, progress: list[str]) -> str:
+    progress_set = set(progress)
+    kept: list[str] = []
+    skip_prefixes = (
+        "Query:",
+        "session_id:",
+        "Resume with:",
+        "Use /resume",
+    )
+    for raw in (stdout or "").splitlines():
+        line = _strip_ansi(raw).rstrip()
+        stripped = line.strip()
+        if not stripped:
+            kept.append("")
+            continue
+        if stripped in progress_set:
+            continue
+        if any(stripped.startswith(prefix) for prefix in skip_prefixes):
+            continue
+        if HERMES_PROGRESS_RE.search(stripped):
+            continue
+        kept.append(line)
+    return "\n".join(kept).strip()
+
+
 def _hermes_session_count(hermes_session_id: str) -> int:
     if not HERMES_DB.exists() or not hermes_session_id:
         return 0
@@ -578,6 +632,7 @@ class Handler(SimpleHTTPRequestHandler):
                 "ok": True,
                 "message": record,
                 "assistant": assistant_record,
+                "progress": (assistant_record or {}).get("progress", []),
             })
 
         self._json({"error": "not found"}, 404)
@@ -597,9 +652,10 @@ class Handler(SimpleHTTPRequestHandler):
             "hermes", "chat",
             "-q", user_message,
             "--resume", hermes_session_id,
-            "-Q",
             "--source", "tool",
         ]
+        before_messages = _hermes_messages(hermes_session_id, limit=2000)
+        before_len = len(before_messages)
 
         try:
             result = subprocess.run(
@@ -607,14 +663,20 @@ class Handler(SimpleHTTPRequestHandler):
                 capture_output=True,
                 text=True,
                 timeout=300,  # 5 min max — same as gateway timeout
+                env={**os.environ, "NO_COLOR": "1", "TERM": "dumb"},
             )
+            progress = _extract_hermes_progress((result.stdout or "") + "\n" + (result.stderr or ""))
             if result.returncode == 0:
-                # Extract the response text from stdout
-                # Format: session_id line, blank line, then the response
-                stdout = result.stdout.strip()
+                after_messages = _hermes_messages(hermes_session_id, limit=2000)
+                new_messages = after_messages[before_len:] if len(after_messages) >= before_len else []
+                new_assistant = [m for m in new_messages if m.get("role") == "assistant"]
+                # Extract the response text from stdout as a fallback. The
+                # Hermes DB is preferred because non-quiet single-query mode
+                # can include progress and exit-summary lines in stdout.
+                stdout = _clean_hermes_stdout(result.stdout.strip(), progress)
                 response_text = stdout
 
-                # Try to strip the session_id prefix line
+                # Try to strip the session_id prefix line from quiet-style output
                 lines = stdout.split("\n")
                 # Skip lines like "session_id: ..." and blank lines
                 content_lines = []
@@ -631,6 +693,8 @@ class Handler(SimpleHTTPRequestHandler):
                         past_header = True
 
                 response_text = "\n".join(content_lines).strip() if content_lines else stdout
+                if new_assistant:
+                    response_text = str(new_assistant[-1].get("content") or "").strip() or response_text
 
                 if response_text:
                     return {
@@ -638,7 +702,15 @@ class Handler(SimpleHTTPRequestHandler):
                         "content": response_text,
                         "ts": _now_iso(),
                         "source": "hermes",
+                        "progress": progress,
                     }
+                return {
+                    "role": "assistant",
+                    "content": "",
+                    "ts": _now_iso(),
+                    "source": "hermes",
+                    "progress": progress,
+                }
             else:
                 err = result.stderr.strip() or "hermes chat returned non-zero"
                 return {
@@ -646,6 +718,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "content": f"[Hermes error: {err}]",
                     "ts": _now_iso(),
                     "source": "hermes-error",
+                    "progress": progress,
                 }
         except subprocess.TimeoutExpired:
             return {

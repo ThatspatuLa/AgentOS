@@ -5527,7 +5527,7 @@ function zenWorkTruncateMiddle(value, max) {
 function zenWorkNormalizeHermesAction(line) {
   var raw = String(line || '').trim();
   if (!raw) return null;
-  var cleaned = raw.replace(/^[>\-\s]+/, '').trim();
+  var cleaned = raw.replace(/\x1b\[[0-9;]*m/g, '').replace(/^[>\-\s]+/, '').trim();
   var repeat = 1;
   var repeatMatch = cleaned.match(/\s*\(×(\d+)\)\s*$/);
   if (repeatMatch) {
@@ -5554,6 +5554,31 @@ function zenWorkNormalizeHermesAction(line) {
   if (noPreview && knownTool.test(noPreview[2])) {
     var noPreviewIcon = noPreview[1] && !/^[a-zA-Z_][\w-]*$/.test(noPreview[1]) ? noPreview[1] : zenToolEmoji(noPreview[2], '⚙️');
     return { icon:noPreviewIcon, label:noPreview[2], text:'', line: zenFormatToolLine(noPreview[2], {}, { emoji:noPreviewIcon, preview:'' }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
+  }
+  var cute = cleaned.match(/^┊\s*(\S+)\s+([a-z$]+)\s+(.+?)(?:\s{2,}|\s+)(\d+(?:\.\d+)?s|\d+m(?:\s+\d+s)?)$/i);
+  if (cute) {
+    var verb = cute[2].toLowerCase();
+    var cuteMap = {
+      '$': 'terminal',
+      read: 'read_file',
+      write: 'write_file',
+      patch: 'patch',
+      grep: 'search_files',
+      find: 'search_files',
+      search: 'web_search',
+      fetch: 'web_extract',
+      click: 'browser_click',
+      navigate: 'browser_navigate',
+      snapshot: 'browser_snapshot',
+      type: 'browser_type',
+      plan: 'todo',
+      skill: 'skill_view',
+      skills: 'skills_list'
+    };
+    var cuteTool = cuteMap[verb] || verb;
+    var cutePreview = zenWorkTruncateMiddle(cute[3].trim(), 64);
+    var cuteIcon = cute[1] && !/^[a-zA-Z_][\w-]*$/.test(cute[1]) ? cute[1] : zenToolEmoji(cuteTool, '⚙️');
+    return { icon:cuteIcon, label:cuteTool, text:cutePreview, line: zenFormatToolLine(cuteTool, {}, { emoji:cuteIcon, preview:cutePreview }), ts: zenWorkNow(), status:'active', repeat:repeat, source:'hermes' };
   }
   var lower = cleaned.toLowerCase();
   if (/^🗜️?\s*compacting context/i.test(cleaned) || /^compacting context/i.test(cleaned)) {
@@ -5618,6 +5643,27 @@ function zenWorkPanelHtml(task, mode) {
     + failure + complete
     + '</section>';
 }
+function zenWorkSetHtmlPreservingMarks(container, html) {
+  if (!container) return;
+  var previousMarks = {};
+  Array.from(container.querySelectorAll('[data-work-id]')).forEach(function(node) {
+    var mark = node.querySelector('.zen-work-mark');
+    var id = node.getAttribute('data-work-id');
+    var slot = node.classList.contains('zen-work-card') ? 'card' : 'panel';
+    if (id && mark) previousMarks[id + ':' + slot] = mark;
+  });
+  container.innerHTML = html;
+  Array.from(container.querySelectorAll('[data-work-id]')).forEach(function(node) {
+    var id = node.getAttribute('data-work-id');
+    var slot = node.classList.contains('zen-work-card') ? 'card' : 'panel';
+    var oldMark = previousMarks[id + ':' + slot];
+    var newMark = node.querySelector('.zen-work-mark');
+    if (oldMark && newMark) {
+      oldMark.className = newMark.className;
+      newMark.replaceWith(oldMark);
+    }
+  });
+}
 function zenWorkToggleDetails(button) {
   var panel = button && button.closest('.zen-work-panel');
   var details = panel && panel.querySelector('.zen-work-stream');
@@ -5634,8 +5680,8 @@ function zenWorkRenderPanels() {
   var active = zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks().find(function(t){ return t.status === 'running' || t.status === 'thinking'; }) || null;
   var full = document.getElementById('zen-work-panel-full');
   var drawer = document.getElementById('zen-work-panel-drawer');
-  if (full) full.innerHTML = active ? zenWorkPanelHtml(active, 'full') : '';
-  if (drawer) drawer.innerHTML = active ? zenWorkPanelHtml(active, 'drawer') : '';
+  if (full) zenWorkSetHtmlPreservingMarks(full, active ? zenWorkPanelHtml(active, 'full') : '');
+  if (drawer) zenWorkSetHtmlPreservingMarks(drawer, active ? zenWorkPanelHtml(active, 'drawer') : '');
   var mini = document.getElementById('zen-work-mini-small');
   var miniText = document.getElementById('zen-work-mini-small-text');
   if (mini) {
@@ -5660,9 +5706,9 @@ function zenWorkRenderGlobal() {
   }
   mini.style.display = 'none';
   stack.style.display = tasks.length ? 'flex' : 'none';
-  stack.innerHTML = tasks.map(function(task){
-    return '<article class="zen-work-card zen-work-card--' + task.status + '">' + zenWorkMarkHtml(task.status, 'mini') + '<button class="zen-work-card-action" onclick="zenWorkOpenActivity()" title="Open activity">' + escapeHtml(zenWorkActionText(task)) + '</button><button class="zen-work-card-btn" onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button class="zen-work-card-btn" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
-  }).join('');
+  zenWorkSetHtmlPreservingMarks(stack, tasks.map(function(task){
+    return '<article class="zen-work-card zen-work-card--' + task.status + '" data-work-id="' + escapeHtml(task.id) + '">' + zenWorkMarkHtml(task.status, 'mini') + '<button class="zen-work-card-action" onclick="zenWorkOpenActivity()" title="Open activity">' + escapeHtml(zenWorkActionText(task)) + '</button><button class="zen-work-card-btn" onclick="zenWorkToggleGlobal(true)" title="Minimize">—</button><button class="zen-work-card-btn" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Dismiss">×</button></article>';
+  }).join(''));
 }
 function zenWorkRenderHeaderStatus() {
   var task = zenWorkCurrentTask(zenChatState.activeSession);
@@ -5751,7 +5797,8 @@ function zenChatSend(view) {
   }).then(function(resp) {
     clearTimeout(runningTimer);
     var hermesContent = resp && resp.assistant && resp.assistant.content ? resp.assistant.content : '';
-    if (hermesContent) zenWorkAddHermesActions(work.id, hermesContent);
+    var hermesProgress = resp && Array.isArray(resp.progress) ? resp.progress.join('\n') : '';
+    if (hermesProgress || hermesContent) zenWorkAddHermesActions(work.id, [hermesProgress, hermesContent].filter(Boolean).join('\n'));
     zenWorkAddActivity(work.id, '🦉', 'hermes', resp && resp.assistant ? 'Hermes response received.' : 'Hermes bridge completed; refreshing session history.', 'done');
     zenWorkAddActivity(work.id, '🔄', 'refresh', 'Refreshing visible chat history from Hermes state.', 'active');
     zenWorkTransition(work.id, 'complete', {
