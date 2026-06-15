@@ -296,22 +296,103 @@ def _get_session(index: dict, session_id: str) -> dict | None:
 # Hermes DB — read-only access to Discord conversation history
 # ---------------------------------------------------------------------------
 
-def _hermes_messages(hermes_session_id: str, limit: int = 500) -> list[dict]:
-    """Read messages from Hermes state.db for a given Hermes session ID.
-    This is how Discord chat history appears in Agent OS."""
-    if not HERMES_DB.exists() or not hermes_session_id:
+# Channel title patterns — maps channel key to session title prefixes.
+# Hermes resets sessions frequently (context compaction), so a single Discord
+# channel's conversation history spans many Hermes sessions.  We aggregate
+# all sessions whose title matches one of the channel's patterns so the
+# Agent OS view shows the same full history that Discord users see.
+_CHANNEL_SESSION_PATTERNS: dict[str, list[str]] = {
+    "zen-chat": [
+        "Zen",
+        "Discord Bridge Status Confirmation",
+        "Requesting Concise Alerts",
+    ],
+    "kiyosaki-chat": [
+        "Kiyosaki",
+        "ETHUSDT 5m Strategy Backtesting Dashboard",
+    ],
+    "minato-chat": [
+        "Introducing OWL on Project Zen",
+    ],
+    "rin-chat": ["Rin"],
+    "toji-chat": ["Toji"],
+    "kazuki-chat": ["Kazuki"],
+}
+
+
+def _channel_session_ids(channel: str) -> list[str]:
+    """Return all Hermes session IDs that belong to a given Discord channel.
+
+    Uses title matching against known patterns because Hermes creates a new
+    session on each compaction/reset rather than reusing one session per
+    channel."""
+    patterns = _CHANNEL_SESSION_PATTERNS.get(channel, [])
+    if not patterns or not HERMES_DB.exists():
         return []
     try:
         conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
+        # Build WHERE clause for title patterns
+        conditions = " OR ".join(["s.title LIKE ?" for _ in patterns])
+        params = [f"{p}%" for p in patterns]
         rows = conn.execute(
-            """SELECT role, content, token_count, timestamp
-               FROM messages
-               WHERE session_id = ? AND role IN ('user','assistant')
-               ORDER BY timestamp ASC
-               LIMIT ?""",
-            (hermes_session_id, limit),
+            f"""SELECT DISTINCT s.id
+                FROM sessions s
+                JOIN messages m ON m.session_id = s.id
+                WHERE s.source LIKE '%%discord%%'
+                AND ({conditions})
+                AND m.role IN ('user','assistant')
+                AND s.title IS NOT NULL
+                GROUP BY s.id
+                HAVING COUNT(m.id) > 0""",
+            params,
         ).fetchall()
+        conn.close()
+        return [r["id"] for r in rows]
+    except Exception:
+        return []
+
+
+def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | None = None) -> list[dict]:
+    """Read messages from Hermes state.db.
+
+    If a channel is provided (or can be derived from the session index),
+    aggregates messages from ALL Hermes sessions belonging to that channel
+    so the full Discord conversation history is visible.
+    Otherwise falls back to a single session ID."""
+    if not HERMES_DB.exists() or not hermes_session_id:
+        return []
+
+    # Determine which sessions to aggregate
+    session_ids = [hermes_session_id]
+    if channel:
+        channel_ids = _channel_session_ids(channel)
+        if channel_ids:
+            session_ids = channel_ids
+
+    try:
+        conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        if len(session_ids) == 1:
+            rows = conn.execute(
+                """SELECT role, content, token_count, timestamp, session_id
+                   FROM messages
+                   WHERE session_id = ? AND role IN ('user','assistant')
+                   ORDER BY timestamp ASC
+                   LIMIT ?""",
+                (session_ids[0], limit),
+            ).fetchall()
+        else:
+            placeholders = ",".join(["?" for _ in session_ids])
+            rows = conn.execute(
+                f"""SELECT role, content, token_count, timestamp, session_id
+                    FROM messages
+                    WHERE session_id IN ({placeholders})
+                    AND role IN ('user','assistant')
+                    ORDER BY timestamp ASC
+                    LIMIT ?""",
+                (*session_ids, limit),
+            ).fetchall()
         conn.close()
         return [
             {
@@ -320,6 +401,7 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500) -> list[dict]:
                 "ts": r["timestamp"],
                 "tokens": r["token_count"],
                 "source": "hermes",
+                "hermesSessionId": r["session_id"],
             }
             for r in rows
         ]
@@ -549,15 +631,29 @@ def _clean_hermes_stdout(stdout: str, progress: list[str]) -> str:
     return "\n".join(kept).strip()
 
 
-def _hermes_session_count(hermes_session_id: str) -> int:
+def _hermes_session_count(hermes_session_id: str, channel: str | None = None) -> int:
     if not HERMES_DB.exists() or not hermes_session_id:
         return 0
     try:
         conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
-        n = conn.execute(
-            "SELECT COUNT(*) FROM messages WHERE session_id = ? AND role IN ('user','assistant')",
-            (hermes_session_id,),
-        ).fetchone()[0]
+        if channel:
+            session_ids = _channel_session_ids(channel)
+            if session_ids:
+                placeholders = ",".join(["?" for _ in session_ids])
+                n = conn.execute(
+                    f"SELECT COUNT(*) FROM messages WHERE session_id IN ({placeholders}) AND role IN ('user','assistant')",
+                    session_ids,
+                ).fetchone()[0]
+            else:
+                n = conn.execute(
+                    "SELECT COUNT(*) FROM messages WHERE session_id = ? AND role IN ('user','assistant')",
+                    (hermes_session_id,),
+                ).fetchone()[0]
+        else:
+            n = conn.execute(
+                "SELECT COUNT(*) FROM messages WHERE session_id = ? AND role IN ('user','assistant')",
+                (hermes_session_id,),
+            ).fetchone()[0]
         conn.close()
         return n
     except Exception:
@@ -637,7 +733,9 @@ class Handler(SimpleHTTPRequestHandler):
                 sm = dict(s)
                 hsid = sm.get("hermesSessionId")
                 if hsid:
-                    sm["hermesMessageCount"] = _hermes_session_count(hsid)
+                    sm["hermesMessageCount"] = _hermes_session_count(
+                        hsid, channel=sm.get("channel")
+                    )
                 out.append(sm)
             return self._json({"sessions": out, "updatedAt": index.get("updatedAt")})
 
@@ -650,7 +748,9 @@ class Handler(SimpleHTTPRequestHandler):
             sm = dict(s)
             hsid = sm.get("hermesSessionId")
             if hsid:
-                sm["hermesMessageCount"] = _hermes_session_count(hsid)
+                sm["hermesMessageCount"] = _hermes_session_count(
+                    hsid, channel=sm.get("channel")
+                )
             return self._json(sm)
 
         # GET /api/sessions/:id/messages
@@ -662,7 +762,11 @@ class Handler(SimpleHTTPRequestHandler):
             hsid = s.get("hermesSessionId")
 
             # Read from Hermes DB (Discord history)
-            hermes_msgs = _hermes_messages(hsid) if hsid else []
+            channel = s.get("channel")
+            # Use a higher limit when aggregating across channel sessions
+            # since a single Discord channel's history spans many Hermes sessions
+            msg_limit = 5000 if channel else 500
+            hermes_msgs = _hermes_messages(hsid, limit=msg_limit, channel=channel) if hsid else []
 
             # Read Agent OS local messages only for sessions that do not have
             # a Hermes link. Linked sessions use Hermes state.db as the single
@@ -706,7 +810,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "summary": ch.get("summary", ""),
                     "nextSafeGate": ch.get("nextSafeGate", ""),
                     "messageCount": ch.get("messageCount", 0),
-                    "hermesMessageCount": _hermes_session_count(hsid) if hsid else 0,
+                    "hermesMessageCount": _hermes_session_count(hsid, channel=ch.get("channel")) if hsid else 0,
                     "blockers": ch.get("blockers", []),
                     "color": ch.get("color", "#666"),
                 })

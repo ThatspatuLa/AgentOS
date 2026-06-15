@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zen — Agent OS</title>
-<link rel="stylesheet" href="agent-os.css?v=44">
+<link rel="stylesheet" href="agent-os.css?v=45">
 </head>
 <body>
 
@@ -4858,6 +4858,7 @@ function zenChatSetSession(sessionId, view) {
   // Load messages from API then render
   zenChatFetchMessages(sessionId, true).then(function(msgs) {
     ['full','drawer','small'].forEach(function(v) { zenChatRenderMessages(v); });
+    zenChatScrollToBottom(scope);
   });
   // If this is a project main session, preload rollup (async, for later use)
   if (s.type === 'main' && s.projectId) {
@@ -5211,7 +5212,7 @@ function zenChatStartRefreshTimer() {
 function zenChatScrollToBottom(view) {
   const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
   const container = document.getElementById('zen-chat' + suffix + '-messages');
-  if (container) setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+  if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 200);
 }
 
 
