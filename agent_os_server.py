@@ -781,7 +781,7 @@ def _channel_session_ids(channel: str) -> list[str]:
         return []
 
 
-def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | None = None) -> list[dict]:
+def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | None = None, since_ts: float | None = None) -> list[dict]:
     """Read messages from Hermes state.db.
 
     If a channel is provided (or can be derived from the session index),
@@ -808,25 +808,29 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
         # Fetch user + assistant + tool roles so we can identify which
         # assistant messages are intermediate (followed by tool calls).
         if len(session_ids) == 1:
-            rows = conn.execute(
-                """SELECT role, content, token_count, timestamp, session_id
-                   FROM messages
-                   WHERE session_id = ? AND role IN ('user','assistant','tool')
-                   ORDER BY timestamp ASC
-                   LIMIT ?""",
-                (session_ids[0], limit),
-            ).fetchall()
+            query = """SELECT role, content, token_count, timestamp, session_id
+               FROM messages
+               WHERE session_id = ? AND role IN ('user','assistant','tool')"""
+            params: list = [session_ids[0]]
+            if since_ts is not None:
+                query += " AND timestamp >= ?"
+                params.append(since_ts)
+            query += " ORDER BY timestamp ASC LIMIT ?"
+            params.append(limit)
+            rows = conn.execute(query, params).fetchall()
         else:
             placeholders = ",".join(["?" for _ in session_ids])
-            rows = conn.execute(
-                f"""SELECT role, content, token_count, timestamp, session_id
-                    FROM messages
-                    WHERE session_id IN ({placeholders})
-                    AND role IN ('user','assistant','tool')
-                    ORDER BY timestamp ASC
-                    LIMIT ?""",
-                (*session_ids, limit),
-            ).fetchall()
+            query = f"""SELECT role, content, token_count, timestamp, session_id
+                FROM messages
+                WHERE session_id IN ({placeholders})
+                AND role IN ('user','assistant','tool')"""
+            params = list(session_ids)
+            if since_ts is not None:
+                query += " AND timestamp >= ?"
+                params.append(since_ts)
+            query += " ORDER BY timestamp ASC LIMIT ?"
+            params.append(limit)
+            rows = conn.execute(query, params).fetchall()
         conn.close()
         # reasoning step, not a final response.
         all_msgs = [
@@ -1349,7 +1353,27 @@ class Handler(SimpleHTTPRequestHandler):
             # Use a higher limit when aggregating across channel sessions
             # since a single Discord channel's history spans many Hermes sessions
             msg_limit = 5000 if channel else 500
-            hermes_msgs = _hermes_messages(hsid, limit=msg_limit, channel=channel) if hsid else []
+
+            # Intraday filter: only return messages from today (start of day).
+            # Full history is always available via ?since=0 or ?all=1.
+            import datetime as _dt
+            since_ts = None
+            qs = urlparse(self.path).query
+            if qs:
+                params = dict(p.split("=", 1) for p in qs.split("&") if "=" in p)
+                if params.get("all") == "1":
+                    since_ts = None  # no filter, return everything
+                elif "since" in params:
+                    try:
+                        since_ts = float(params["since"])
+                    except ValueError:
+                        since_ts = None
+            if since_ts is None and "all" not in (qs or ""):
+                # Default: start of today (midnight local time)
+                _today = _dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                since_ts = _today.timestamp()
+
+            hermes_msgs = _hermes_messages(hsid, limit=msg_limit, channel=channel, since_ts=since_ts) if hsid else []
 
             # Read Agent OS local messages only for sessions that do not have
             # a Hermes link. Linked sessions use Hermes state.db as the single
@@ -1371,6 +1395,8 @@ class Handler(SimpleHTTPRequestHandler):
                 "messages": all_msgs,
                 "hermesCount": len(hermes_msgs),
                 "localCount": len(local_msgs),
+                "intraday": since_ts is not None,
+                "sinceTs": since_ts,
             })
 
         # GET /api/sessions/:id/rollup
