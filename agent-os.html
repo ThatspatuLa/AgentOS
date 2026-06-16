@@ -4816,7 +4816,7 @@ function zenChatFetchMessages(sessionId, forceRefresh) {
   }
   // Capture optimistic messages before fetch (messages added locally that aren't from server yet)
   var optimistic = (zenChatState.messagesCache[sessionId] || []).filter(function(m) {
-    return m.source === 'agent-os' && m.role === 'user';
+    return m.source === 'agent-os' && (m.role === 'user' || m.role === 'assistant');
   });
   return zenChatApi('/' + sessionId + '/messages').then(function(data) {
     // Normalize messages: convert ts (Unix seconds) to time (HH:MM) for display
@@ -5201,7 +5201,7 @@ function zenChatCreateMessageEl(m, idx) {
   return el;
 }
 
-function zenChatSyncMessages(view, previousCount) {
+function zenChatSyncMessages(view) {
   const sessionId = zenChatState.activeSession;
   const msgs = zenChatGetMessages(sessionId);
   const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
@@ -5216,11 +5216,10 @@ function zenChatSyncMessages(view, previousCount) {
   if (welcome) welcome.style.display = 'none';
 
   const rendered = container.querySelectorAll('.zen-chat-message').length;
-  const countBefore = typeof previousCount === 'number' ? previousCount : rendered;
 
-  // Normal polling appends only new messages. That avoids clearing the DOM on
-  // every refresh, which was causing visible flicker in the chat window.
-  if (rendered > msgs.length || rendered > countBefore) {
+  // If the cache shrunk (e.g. session switch or dedup), re-render from scratch.
+  // Otherwise append only new messages to avoid DOM flicker.
+  if (rendered > msgs.length) {
     zenChatRenderMessages(view);
     return;
   }
@@ -5243,12 +5242,8 @@ function zenChatAddMessage(role, content, view) {
 
 function zenChatRefreshActiveMessages(forceScroll) {
   var sessionId = zenChatState.activeSession;
-  var before = (zenChatState.messagesCache[sessionId] || []).length;
   return zenChatFetchMessages(sessionId, true).then(function() {
-    var after = (zenChatState.messagesCache[sessionId] || []).length;
-    if (after !== before) {
-      ['full','drawer','small'].forEach(function(v) { zenChatSyncMessages(v, before); });
-    }
+    ['full','drawer','small'].forEach(function(v) { zenChatSyncMessages(v); });
     if (forceScroll) zenChatScrollToBottom(zenChatState.view);
   });
 }
@@ -5612,11 +5607,12 @@ function zenWorkActionText(task) {
 function zenWorkStream(task) {
   var live = zenWorkHermesEntries(task);
   if (live.length) {
-    return live.map(function(item, idx){
+    var itemsHtml = live.map(function(item, idx){
       var active = idx === live.length - 1 && (task.status === 'thinking' || task.status === 'running');
       var preview = item.text ? '"' + item.text + '"' : '';
       return '<div class="zen-work-stream-item zen-work-stream-item--' + escapeHtml(item.status || 'active') + (active ? ' active' : '') + '"><span>' + escapeHtml(item.icon || '•') + '</span><strong>' + escapeHtml(item.label || 'activity') + '</strong><em>' + escapeHtml(preview) + '</em>' + (item.repeat && item.repeat > 1 ? '<b class="zen-work-repeat">×' + escapeHtml(item.repeat) + '</b>' : '') + '</div>';
     }).join('');
+    return '<div class="zen-work-stream-scroll">' + itemsHtml + '</div>';
   }
   return '<div class="zen-work-stream-empty">Waiting for Hermes tool progress...</div>';
 }
@@ -5752,7 +5748,8 @@ function zenWorkPanelHtml(task, mode) {
   if (!task) return '';
   var sameSession = task.sessionId === zenChatState.activeSession;
   var action = zenWorkActionText(task);
-  var detailsOpen = task.detailsOpen ? ' open' : '';
+  // Stream is open by default so activity log is visible as a scrollable strip
+  var detailsOpen = ' open';
   var notice = !sameSession ? '<div class="zen-work-attached-notice muted">Another session is working; this chat remains usable.</div>' : '';
   var failure = task.status === 'failed'
     ? '<div class="zen-work-diagnosis"><strong>Cause:</strong> ' + escapeHtml(task.cause || 'Unknown failure') + '<br><strong>Evidence:</strong> ' + escapeHtml(task.evidence || 'No additional evidence captured yet.') + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery"><button>Retry</button><button>Alter plan</button><button>Open logs</button></div></div>'
@@ -5765,9 +5762,9 @@ function zenWorkPanelHtml(task, mode) {
     : '';
   return '<section class="zen-work-panel zen-work-panel--' + task.status + ' zen-work-panel--' + mode + '" data-work-id="' + escapeHtml(task.id) + '">'
     + '<button class="zen-work-dismiss" onclick="zenWorkDismiss(\'' + task.id + '\')" title="Hide activity">×</button>'
-    + '<div class="zen-work-center">' + zenWorkMarkHtml(task.status, mode === 'full' ? 'large' : '') + '<button class="zen-work-action-line" onclick="zenWorkToggleDetails(this)" aria-expanded="' + (task.detailsOpen ? 'true' : 'false') + '">' + escapeHtml(action) + '</button></div>'
+    + '<div class="zen-work-center">' + zenWorkMarkHtml(task.status, mode === 'full' ? 'large' : '') + '<button class="zen-work-action-line" onclick="zenWorkToggleDetails(this)" aria-expanded="true">' + escapeHtml(action) + '</button></div>'
     + notice
-    + '<details class="zen-work-stream"' + detailsOpen + '><summary>Hermes actions</summary>' + zenWorkStream(task) + '</details>'
+    + '<details class="zen-work-stream"' + detailsOpen + '><summary>Task activity</summary>' + zenWorkStream(task) + '</details>'
     + failure + completeNote + complete
     + '</section>';
 }

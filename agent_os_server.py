@@ -1373,14 +1373,26 @@ class Handler(SimpleHTTPRequestHandler):
                 _today = _dt.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 since_ts = _today.timestamp()
 
-            hermes_msgs = _hermes_messages(hsid, limit=msg_limit, channel=channel, since_ts=since_ts) if hsid else []
+            # Determine effective session IDs for Hermes lookup.
+            # If the session has a direct Hermes link, use it.
+            # If it has a channel but no direct link (e.g. zen-os), aggregate
+            # from all sessions on that channel via title-pattern matching.
+            _hsid = hsid
+            if not _hsid and channel:
+                _channel_ids = _channel_session_ids(channel)
+                if _channel_ids:
+                    _hsid = _channel_ids[0]  # primary for single-session path
+                    # For channel aggregation, pass channel to _hermes_messages
+                    # so it expands to all channel session IDs internally.
+                    # We use a sentinel: set _hsid to the first ID and let
+                    # _hermes_messages handle the rest via the channel param.
+            hermes_msgs = _hermes_messages(_hsid or "", limit=msg_limit, channel=(channel if not hsid else None), since_ts=since_ts) if (_hsid or channel) else []
 
-            # Read Agent OS local messages only for sessions that do not have
-            # a Hermes link. Linked sessions use Hermes state.db as the single
-            # source of truth so Discord, Hermes Chat, and Agent OS stay aligned
-            # without local duplicate artifacts.
+            # Read Agent OS local messages only for sessions that have neither
+            # a Hermes link nor a channel aggregation path.
             local_path = SESSIONS_DIR / m["id"] / "messages.jsonl"
-            local_msgs = [] if hsid else [
+            _has_hermes_data = bool(hsid) or bool(channel)
+            local_msgs = [] if _has_hermes_data else [
                 {**rec, "source": rec.get("source") or "agent-os"}
                 for rec in _read_jsonl(local_path)
             ]
