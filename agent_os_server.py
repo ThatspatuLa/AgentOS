@@ -828,9 +828,6 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
                 (*session_ids, limit),
             ).fetchall()
         conn.close()
-
-        # Build list and identify which assistant messages are intermediate.
-        # An assistant message followed by a tool message is an internal
         # reasoning step, not a final response.
         all_msgs = [
             {
@@ -898,19 +895,24 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
                         bg_depth += 1
                         if stripped.startswith(("Command:", "Matched output:", "Output:")):
                             continue
-                        if stripped and (stripped[0] in '│─╭╮╰╯"' or
+                        if stripped and (stripped[0] in '│─╭╮╰╯"]' or
                                          stripped.startswith("Sessions:") or
                                          stripped.startswith("Agent OS")):
                             continue
                         if line.startswith(("  ", "\t")):
                             continue
+                        # A standalone ] or [ bracket on its own line is part
+                        # of the background process output block — skip it.
+                        if stripped in ("]", "[", "]["):
+                            continue
                         if bg_depth > 2 and stripped and stripped[0].isalpha():
                             in_bg = False
                             cleaned.append(line)
                             continue
-                        if bg_depth > 5:
+                        if bg_depth > 99:
+                            # Safety valve: exit bg mode after many lines.
+                            # Don't append — the line is likely still noise.
                             in_bg = False
-                            cleaned.append(line)
                             continue
                         continue
                     cleaned.append(line)
@@ -943,6 +945,14 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
                 content = content.replace("\n\n\n", "\n\n")
             msg["content"] = content.strip()
 
+        # After cleaning, filter out messages that are now empty or meaningless.
+        # These are messages that contained only noise blocks (System notes,
+        # background process output) with no actual user text.
+        filtered_msgs = [
+            msg for msg in all_msgs
+            if msg.get("content", "").strip()
+        ]
+
         # Identify which assistant messages are final responses.
         # A "final" assistant message is one that is followed by a user message
         # (or is the very last message in the session). All other assistant
@@ -950,7 +960,7 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
         # Also filter out context compaction summaries injected by Hermes.
         COMPACTION_RE = re.compile(r'^\[CONTEXT COMPACTION', re.IGNORECASE)
         skip_indices = set()
-        for i, msg in enumerate(all_msgs):
+        for i, msg in enumerate(filtered_msgs):
             if msg["role"] == "tool":
                 skip_indices.add(i)
                 continue
@@ -962,15 +972,15 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
                 # Check if this assistant message is followed by a user message
                 # or is the last message — those are final responses.
                 is_final = False
-                if i + 1 >= len(all_msgs):
+                if i + 1 >= len(filtered_msgs):
                     is_final = True  # last message in session
-                elif all_msgs[i + 1]["role"] == "user":
+                elif filtered_msgs[i + 1]["role"] == "user":
                     is_final = True  # followed by user = final response
                 if not is_final:
                     skip_indices.add(i)
 
         # Return only user messages and final assistant responses.
-        return [msg for i, msg in enumerate(all_msgs) if i not in skip_indices]
+        return [msg for i, msg in enumerate(filtered_msgs) if i not in skip_indices]
     except Exception:
         return []
 
