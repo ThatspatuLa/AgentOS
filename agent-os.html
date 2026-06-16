@@ -4814,6 +4814,10 @@ function zenChatFetchMessages(sessionId, forceRefresh) {
   if (!forceRefresh && zenChatState.messagesCache[sessionId]) {
     return Promise.resolve(zenChatState.messagesCache[sessionId]);
   }
+  // Capture optimistic messages before fetch (messages added locally that aren't from server yet)
+  var optimistic = (zenChatState.messagesCache[sessionId] || []).filter(function(m) {
+    return m.source === 'agent-os' && m.role === 'user';
+  });
   return zenChatApi('/' + sessionId + '/messages').then(function(data) {
     // Normalize messages: convert ts (Unix seconds) to time (HH:MM) for display
     var normalized = (data.messages || []).map(function(m) {
@@ -4823,7 +4827,27 @@ function zenChatFetchMessages(sessionId, forceRefresh) {
       }
       return m;
     });
-    zenChatState.messagesCache[sessionId] = normalized;
+    // Merge: keep optimistic user messages that aren't in the server response yet
+    // Match by content to avoid duplicates
+    var serverContents = {};
+    normalized.forEach(function(m) { serverContents[m.content] = true; });
+    var merged = normalized.slice();
+    optimistic.forEach(function(opt) {
+      if (!serverContents[opt.content]) {
+        // Ensure the optimistic message has a proper ts for sorting
+        if (!opt.ts || typeof opt.ts === 'string') {
+          opt.ts = new Date(opt.ts || Date.now()).getTime() / 1000;
+        }
+        if (!opt.time) {
+          var d = new Date(opt.ts * 1000);
+          opt.time = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+        merged.push(opt);
+      }
+    });
+    // Re-sort by timestamp
+    merged.sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
+    zenChatState.messagesCache[sessionId] = merged;
     return zenChatState.messagesCache[sessionId];
   }).catch(function() {
     return [];
@@ -5212,7 +5236,7 @@ function zenChatAddMessage(role, content, view) {
   const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
   // Optimistically add to cache and append without rebuilding the whole chat.
   const msgs = zenChatGetMessages(sessionId);
-  msgs.push({role, content, time, ts: now.toISOString()});
+  msgs.push({role, content, time, ts: now.getTime() / 1000, source: 'agent-os'});
   ['full','drawer','small'].forEach(function(v) { zenChatSyncMessages(v); });
   zenChatScrollToBottom(view || zenChatState.view);
 }
@@ -5994,6 +6018,13 @@ function zenChatSend(view) {
     });
     // Curate Kanban activity[] if this session has a linked task
     zenChatUpdateKanbanActivity(sessionId, reviewRequired, hermesContent);
+
+    // Add the assistant response to chat explicitly (don't wait for refresh)
+    if (hermesContent) {
+      zenChatAddMessage('assistant', hermesContent, view);
+    }
+
+    // Refresh history from server, but preserve optimistic messages
     zenChatRefreshActiveMessages(true).then(function() {
       zenChatSetStatus('idle', view);
       zenChatUpdateSendBtn(view);
