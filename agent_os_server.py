@@ -371,29 +371,240 @@ def _build_context_prefix(s: dict) -> str:
     return prefix
 
 
-def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assistant_record: dict | None) -> None:
-    """Write a hermes_turn event to the session's events.jsonl and update summary."""
+def _extract_files_touched(assistant_record: dict | None, progress: list[str], stdout: str) -> list[str]:
+    """Extract file paths touched by Hermes tool calls (conservative).
+
+    Parses progress lines and stdout for explicit file references:
+    - write_file / patch / edit tool calls with file_path arguments
+    - terminal commands that touch files (git add, cp, mv, touch)
+    - file paths mentioned in tool previews
+
+    Returns deduplicated list of file paths, max 10.
+    """
+    if not assistant_record:
+        return []
+
+    files: list[str] = []
+    seen: set[str] = set()
+
+    def _add(path: str) -> None:
+        path = str(path).strip()
+        if path and path not in seen and len(files) < 10:
+            # Only include paths that look like real files (have extension or are in known dirs)
+            if "/" in path or "." in path or path.endswith((".py", ".js", ".html", ".css", ".json", ".md", ".sh", ".txt", ".yaml", ".yml")):
+                seen.add(path)
+                files.append(path)
+
+    # Parse progress lines for tool calls
+    for line in progress:
+        line_str = str(line)
+        # Match patterns like: 📝 write_file: "agent-os.html" or ✏️ patch: "agent-os.html"
+        m = re.search(r'(?:write_file|patch|edit|create_file|update_file)[\s:]+["\x27]?([^"\x27\s,]+)["\x27]?', line_str, re.IGNORECASE)
+        if m:
+            _add(m.group(1))
+        # Match file paths in previews like: "agent-os.html" (120 chars)
+        m2 = re.search(r'["\x27]([a-zA-Z0-9_\-./]+\.(?:py|js|html|css|json|md|sh|txt|yaml|yml|toml|cfg|ini))["\x27]', line_str)
+        if m2:
+            _add(m2.group(1))
+
+    # Parse stdout for file references
+    for raw_line in (stdout or "").splitlines():
+        line = _strip_ansi(raw_line).strip()
+        # Match "File: agent-os.html" or "Writing agent-os.html" or "Patched agent-os.html"
+        m = re.search(r'(?:File|Writing|Patched|Created|Updated|Editing|Touched)[\s:]+([a-zA-Z0-9_\-./]+\.(?:py|js|html|css|json|md|sh|txt|yaml|yml|toml|cfg|ini))', line, re.IGNORECASE)
+        if m:
+            _add(m.group(1))
+        # Match git add / git commit patterns
+        m2 = re.search(r'git\s+(?:add|commit|diff)\s+.*?([a-zA-Z0-9_\-./]+\.(?:py|js|html|css|json|md|sh|txt|yaml|yml))', line)
+        if m2:
+            _add(m2.group(1))
+
+    return files
+
+
+def _extract_validation(assistant_record: dict | None, progress: list[str], stdout: str) -> list[dict]:
+    """Extract validation results from Hermes output.
+
+    Detects patterns:
+    - py_compile / python3 -m py_compile
+    - node --check
+    - git diff --check
+    - pytest / npm test / test commands
+    - API smoke checks (curl to localhost)
+    - "PASS" / "OK" / "success" after a command
+
+    Returns list of {command, status, summary} dicts, max 5.
+    """
+    if not assistant_record:
+        return []
+
+    validations: list[dict] = []
+    seen: set[str] = set()
+
+    def _add(command: str, status: str, summary: str) -> None:
+        key = f"{command}:{status}"
+        if key not in seen and len(validations) < 5:
+            seen.add(key)
+            validations.append({"command": command, "status": status, "summary": summary[:120]})
+
+    # Known validation command patterns
+    validation_patterns = [
+        (r'(?:python3?\s+-m\s+py_compile|py_compile)\s+([^\s]+)', 'py_compile'),
+        (r'(?:node\s+--check)\s+([^\s]+)', 'node-check'),
+        (r'git\s+diff\s+--check', 'git-diff-check'),
+        (r'(?:pytest|npm\s+test|python3?\s+-m\s+pytest)(?:\s+([^\s]+))?', 'test'),
+        (r'curl\s+(?:-[sS]+\s+)?https?://localhost[^\s]+', 'api-check'),
+        (r'(?:npm\s+run\s+build|python3?\s+.*\.py)', 'build'),
+    ]
+
+    # Scan stdout for validation commands
+    lines = (stdout or "").splitlines()
+    for i, raw_line in enumerate(lines):
+        line = _strip_ansi(raw_line).strip()
+        for pattern, vtype in validation_patterns:
+            m = re.search(pattern, line, re.IGNORECASE)
+            if m:
+                cmd = m.group(0).strip()[:80]
+                # Look ahead for pass/fail indicators
+                status = "pass"
+                summary = ""
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    next_line = _strip_ansi(lines[j]).strip().lower()
+                    if any(fail in next_line for fail in ["error", "fail", "traceback", "syntaxerror", "❌", "✗"]):
+                        status = "fail"
+                        summary = _strip_ansi(lines[j]).strip()[:120]
+                        break
+                    if any(pass_ in next_line for pass_ in ["pass", "ok", "success", "✅", "✓", "0 errors", "clean"]):
+                        summary = _strip_ansi(lines[j]).strip()[:120]
+                        break
+                _add(cmd, status, summary)
+
+    # Also check progress lines for validation results
+    for line in (assistant_record.get("progress", []) or []):
+        line_str = str(line)
+        if any(v in line_str.lower() for v in ["py_compile", "node --check", "git diff --check", "pytest", "test pass", "test fail"]):
+            status = "fail" if any(f in line_str.lower() for f in ["fail", "error", "❌"]) else "pass"
+            _add(line_str[:80], status, "")
+
+    return validations
+
+
+def _strip_context_and_echo(summary_text: str, context_prefix: str, user_message: str) -> str:
+    """Strip injected context block and Hermes query echo from a summary string.
+
+    Hermes echoes the full query (including context prefix) in its output.
+    This function removes that echo so stored summaries describe the result,
+    not the hidden context.
+    """
+    text = summary_text
+    # Strip context prefix if present (exact match)
+    if context_prefix and context_prefix in text:
+        text = text.replace(context_prefix, "").strip()
+    # Also try with collapsed whitespace (Hermes may reformat newlines)
+    if context_prefix:
+        collapsed_prefix = " ".join(context_prefix.split())
+        if collapsed_prefix in text and collapsed_prefix != context_prefix:
+            text = text.replace(collapsed_prefix, "").strip()
+    # Strip individual context block lines that may appear scattered
+    if context_prefix:
+        for line in context_prefix.splitlines():
+            line = line.strip()
+            if line and line in text:
+                text = text.replace(line, "").strip()
+    # Strip query echo: the user message may appear at the start of the response
+    if user_message and text.startswith(user_message):
+        text = text[len(user_message):].strip()
+    # Strip common Hermes boilerplate prefixes
+    boilerplate = [
+        "Initializing agent...",
+        "Resume this session with:",
+        "Session:",
+        "Title:",
+        "Duration:",
+        "Messages:",
+    ]
+    lines = text.splitlines()
+    cleaned: list[str] = []
+    skip = True
+    for line in lines:
+        stripped = line.strip()
+        if skip and any(stripped.startswith(bp) for bp in boilerplate):
+            continue
+        if stripped:
+            skip = False
+        cleaned.append(line)
+    # Remove empty lines from start/end and collapse multiple empty lines
+    result = "\n".join(cleaned).strip()
+    while "\n\n\n" in result:
+        result = result.replace("\n\n\n", "\n\n")
+    return result
+
+
+def _update_kanban_activity(session_id: str, task_id: str, milestone: str) -> None:
+    """Append a curated milestone to the linked Kanban task's activity[].
+
+    Caps activity at 5 entries. Persists to data/kanban-tasks.json.
+    Server-authoritative: this is the single source of truth for Kanban activity.
+    """
+    if not task_id or not milestone:
+        return
+    tasks_data = _read_json(TASKS_FILE, {"tasks": []})
+    tasks = tasks_data.get("tasks", [])
+    for i, t in enumerate(tasks):
+        if t.get("id") == task_id:
+            activity = list(t.get("activity") or [])
+            activity.append(milestone)
+            if len(activity) > 5:
+                activity = activity[-5:]
+            t["activity"] = activity
+            t["lastActive"] = "Now"
+            tasks[i] = t
+            tasks_data["tasks"] = tasks
+            _write_json(TASKS_FILE, tasks_data)
+            return
+
+
+def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assistant_record: dict | None, context_prefix: str = "") -> None:
+    """Write a hermes_turn event to the session's events.jsonl and update summary.
+
+    Also updates the linked Kanban task's activity[] (server-authoritative).
+    """
     now = _now_iso()
     # Determine status from assistant record
     status = "complete"
     summary_text = ""
-    files_touched = []
-    evidence = []
-    validation = []
+    files_touched: list[str] = []
+    evidence: list[str] = []
+    validation: list[dict] = []
+    progress: list[str] = []
+    stdout_text = ""
+    user_message = user_record.get("content", "") if user_record else ""
+
     if assistant_record:
         source = assistant_record.get("source", "")
+        progress = assistant_record.get("progress", []) or []
+        stdout_text = assistant_record.get("content", "") or ""
         if source == "hermes-error":
             status = "failed"
             summary_text = assistant_record.get("content", "")[:200]
         else:
-            summary_text = _truncate_middle(assistant_record.get("content", ""), 200)
+            # PATCH 5: Strip context block and query echo BEFORE truncating
+            raw_content = stdout_text
+            cleaned = _strip_context_and_echo(raw_content, context_prefix, user_message)
+            summary_text = _truncate_middle(cleaned, 200)
             # Extract progress lines as evidence
-            progress = assistant_record.get("progress", [])
             if progress:
                 evidence = [str(p) for p in progress[:5]]
+            # PATCH 3: Extract files touched from tool output
+            files_touched = _extract_files_touched(assistant_record, progress, stdout_text)
+            # PATCH 4: Extract validation results from output
+            validation = _extract_validation(assistant_record, progress, stdout_text)
     else:
         status = "failed"
         summary_text = "No response from Hermes"
+
+    # Final clean summary (in case truncation re-introduced partial context)
+    clean_summary = _strip_context_and_echo(summary_text, context_prefix, user_message)
 
     event = {
         "ts": now,
@@ -401,7 +612,7 @@ def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assist
         "sessionId": session_id,
         "taskId": s.get("taskId"),
         "status": status,
-        "summary": summary_text,
+        "summary": clean_summary,
         "evidence": evidence,
         "validation": validation,
         "filesTouched": files_touched,
@@ -409,20 +620,37 @@ def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assist
     }
     _append_session_event(session_id, event)
 
-    # Update session summary recentActivity with curated milestone
-    milestone = _curate_milestone(status, summary_text, evidence)
-    if milestone:
-        _update_session_recent_activity(session_id, milestone)
+    # PATCH 1: Server-side Kanban activity curation
+    task_id = s.get("taskId")
+    if task_id:
+        kanban_milestone = _curate_milestone(status, clean_summary, evidence, files_touched, validation)
+        _update_kanban_activity(session_id, task_id, kanban_milestone)
+    else:
+        # Still update session recentActivity even without linked task
+        milestone = _curate_milestone(status, clean_summary, evidence, files_touched, validation)
+        if milestone:
+            _update_session_recent_activity(session_id, milestone)
 
 
-def _curate_milestone(status: str, summary: str, evidence: list[str]) -> str:
+def _curate_milestone(status: str, summary: str, evidence: list[str], files_touched: list[str] | None = None, validation: list[dict] | None = None) -> str:
     """Create a curated milestone string for Kanban activity[] from a hermes_turn event."""
     if status == "failed":
         cause = summary[:80] if summary else "Unknown failure"
         return f"Failed: {cause}"
-    if evidence:
-        files_summary = ", ".join(evidence[:2])
+    # Prefer filesTouched over evidence for the milestone
+    ft = files_touched or []
+    if ft:
+        files_summary = ", ".join(ft[:2])
         return f"Files touched: {files_summary}"
+    if evidence:
+        ev_summary = ", ".join(str(e)[:40] for e in evidence[:2])
+        return f"Completed: {ev_summary}"
+    # Include validation results if available
+    val = validation or []
+    if val:
+        passed = sum(1 for v in val if v.get("status") == "pass")
+        total = len(val)
+        return f"Validation: {passed}/{total} passed"
     if summary:
         return _truncate_middle(summary, 60)
     return "Completed"
@@ -1222,8 +1450,36 @@ class Handler(SimpleHTTPRequestHandler):
                     s["messageCount"] = (s.get("messageCount") or 0) + 1
                     _save_index(index)
 
-                # Write hermes_turn event + update summary after Hermes responds
-                _write_hermes_turn_event(m["id"], s, record, assistant_record)
+                # PATCH 2: Write lifecycle events + hermes_turn + Kanban update
+                sid = m["id"]
+                # thinking_started event (written when user sends, before Hermes responds)
+                _append_session_event(sid, {
+                    "ts": now,
+                    "type": "thinking_started",
+                    "sessionId": sid,
+                    "taskId": s.get("taskId"),
+                    "status": "active",
+                    "summary": f"Received: {content[:80]}",
+                    "evidence": [],
+                    "validation": [],
+                    "filesTouched": [],
+                    "source": "agent-os",
+                })
+                # running_started event (written when Hermes begins processing)
+                _append_session_event(sid, {
+                    "ts": _now_iso(),
+                    "type": "running_started",
+                    "sessionId": sid,
+                    "taskId": s.get("taskId"),
+                    "status": "active",
+                    "summary": "Hermes processing request.",
+                    "evidence": [],
+                    "validation": [],
+                    "filesTouched": [],
+                    "source": "agent-os",
+                })
+                # hermes_turn event (written when Hermes responds)
+                _write_hermes_turn_event(sid, s, record, assistant_record, context_prefix=context_prefix)
 
             return self._json({
                 "ok": True,

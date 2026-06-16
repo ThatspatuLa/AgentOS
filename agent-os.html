@@ -5922,6 +5922,17 @@ function zenChatUpdateKanbanActivity(sessionId, reviewRequired, hermesContent) {
     milestone = 'Chat response complete';
   }
 
+  // PATCH 1: Avoid duplicate entries — server may have already written this milestone
+  // Check if the last activity entry matches what we'd write
+  var lastEntry = activity[activity.length - 1];
+  if (lastEntry && lastEntry === milestone) {
+    return; // server already wrote this, skip duplicate
+  }
+  // Also check if the last entry was written by server (starts with same prefix)
+  if (lastEntry && lastEntry.startsWith(milestone.substring(0, 30))) {
+    return; // likely a server-written duplicate
+  }
+
   activity.push(milestone);
   if (activity.length > 5) activity = activity.slice(-5);
   tasks[taskIndex] = Object.assign({}, task, { activity: activity });
