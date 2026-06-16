@@ -1378,15 +1378,18 @@ class Handler(SimpleHTTPRequestHandler):
             # If it has a channel but no direct link (e.g. zen-os), aggregate
             # from all sessions on that channel via title-pattern matching.
             _hsid = hsid
+            _use_channel = False
             if not _hsid and channel:
                 _channel_ids = _channel_session_ids(channel)
                 if _channel_ids:
                     _hsid = _channel_ids[0]  # primary for single-session path
-                    # For channel aggregation, pass channel to _hermes_messages
-                    # so it expands to all channel session IDs internally.
-                    # We use a sentinel: set _hsid to the first ID and let
-                    # _hermes_messages handle the rest via the channel param.
-            hermes_msgs = _hermes_messages(_hsid or "", limit=msg_limit, channel=(channel if not hsid else None), since_ts=since_ts) if (_hsid or channel) else []
+                    _use_channel = True
+            hermes_msgs = _hermes_messages(
+                _hsid or "",
+                limit=msg_limit,
+                channel=(channel if _use_channel else None),
+                since_ts=since_ts
+            ) if (_hsid or channel) else []
 
             # Read Agent OS local messages only for sessions that have neither
             # a Hermes link nor a channel aggregation path.
