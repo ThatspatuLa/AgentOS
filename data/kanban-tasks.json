@@ -13,7 +13,7 @@
       "lastActive": "Now",
       "archived": true,
       "why": "Agent OS needs a daily operating surface for project work.",
-      "nextAction": "Audit complete — awaiting new priorities from Six.",
+      "nextAction": "Audit complete \u2014 awaiting new priorities from Six.",
       "notes": "Implemented: 5-column board, task drawer, filters, search, quick-add, localStorage persistence.",
       "subtasks": [
         {
@@ -41,7 +41,8 @@
         "M4 checkpoint pushed to GitHub",
         "Kanban audit completed",
         "Archived from task drawer"
-      ]
+      ],
+      "sessionId": null
     },
     {
       "id": "task-zen-memory-world",
@@ -53,8 +54,8 @@
       "created": "2026-06-10",
       "lastActive": "Now",
       "archived": false,
-      "why": "Memory World is Zen's inner domain — a force-directed graph visualization of the entire agent system. M1–M4 (inspection, schema, exporter, visual renderer) are complete. M5–M10 remain: live data bridge, interaction layer, power design skin, integration, real data expansion, hardening.",
-      "nextAction": "M5: Live Data Bridge — connect refresh behavior to exporter/data file while preserving the working renderer.",
+      "why": "Memory World is Zen's inner domain \u2014 a force-directed graph visualization of the entire agent system. M1\u2013M4 (inspection, schema, exporter, visual renderer) are complete. M5\u2013M10 remain: live data bridge, interaction layer, power design skin, integration, real data expansion, hardening.",
+      "nextAction": "M5: Live Data Bridge \u2014 connect refresh behavior to exporter/data file while preserving the working renderer.",
       "notes": "",
       "subtasks": [
         {
@@ -139,7 +140,7 @@
           "status": "backlog",
           "description": "M6 turns Memory World from a visual graph into a usable navigation system. It should help the user find nodes, isolate systems, inspect relationships, and understand why things are connected.",
           "notes": "",
-          "nextAction": "- Add search for nodes.\n- Add focus mode for selected node.\n- Add cluster filters.\n- Add relationship highlighting.\n- Add selected-node connection list.\n- Add clear hover labels.\n- Add better click inspector behavior.\n- Add “show related” / “isolate cluster” controls.\n- Keep interactions fast and readable.",
+          "nextAction": "- Add search for nodes.\n- Add focus mode for selected node.\n- Add cluster filters.\n- Add relationship highlighting.\n- Add selected-node connection list.\n- Add clear hover labels.\n- Add better click inspector behavior.\n- Add \u201cshow related\u201d / \u201cisolate cluster\u201d controls.\n- Keep interactions fast and readable.",
           "evidence": [
             "agent-os.html",
             "agent-os.css",
@@ -222,13 +223,14 @@
       "validation": [
         "Graph loads on hash navigate",
         "0 console errors",
-        "All M5–M10 milestones have working demos"
+        "All M5\u2013M10 milestones have working demos"
       ],
       "activity": [
         "M4 Power Design pushed",
         "Graph exporter M3 complete",
         "Schema v1.0 M2 complete"
-      ]
+      ],
+      "sessionId": "zen"
     },
     {
       "id": "task-zen-fix-gh-kanban",
@@ -240,7 +242,7 @@
       "created": "2026-06-12",
       "lastActive": "Now",
       "archived": false,
-      "why": "GitHub checkpoint discipline was violated — dashboard redesign was pushed without Six review and had to be reverted. Kanban tasks were fabricated from agent instructions instead of grounded in Obsidian files. Rules: no GH pushes without Six approval, no Kanban tasks from assumptions.",
+      "why": "GitHub checkpoint discipline was violated \u2014 dashboard redesign was pushed without Six review and had to be reverted. Kanban tasks were fabricated from agent instructions instead of grounded in Obsidian files. Rules: no GH pushes without Six approval, no Kanban tasks from assumptions.",
       "nextAction": "Ensure all future GH commits are review-gated. Audit Kanban tasks against Obsidian sources.",
       "notes": "",
       "subtasks": [
@@ -270,7 +272,8 @@
         "Unarchive feature added",
         "Dashboard redesign reverted",
         "GH checkpoint rule added to SOUL.md"
-      ]
+      ],
+      "sessionId": null
     },
     {
       "id": "task-kiyosaki-trading-system",
@@ -282,7 +285,7 @@
       "created": "2026-06-09",
       "lastActive": "Now",
       "archived": false,
-      "why": "End-to-end ETH 5M ensemble trading system: 300 strategies across 10 edge classes → backtest all via Lean → ensemble meta-decision layer with weighted voting, 5 Fear/Greed market states, biweekly recalibration, monthly bench swap.",
+      "why": "End-to-end ETH 5M ensemble trading system: 300 strategies across 10 edge classes \u2192 backtest all via Lean \u2192 ensemble meta-decision layer with weighted voting, 5 Fear/Greed market states, biweekly recalibration, monthly bench swap.",
       "nextAction": "Expand from current 56 to 300 strategies using local LLM + deterministic harness.",
       "notes": "Align Subtasks with roadmap\n",
       "subtasks": [
@@ -291,7 +294,7 @@
           "status": "done"
         },
         {
-          "title": "Strategy batches 001–004 (6 strategies)",
+          "title": "Strategy batches 001\u2013004 (6 strategies)",
           "status": "done"
         },
         {
@@ -307,7 +310,7 @@
           "status": "backlog"
         },
         {
-          "title": "Backtest batch 001–004 (6)",
+          "title": "Backtest batch 001\u2013004 (6)",
           "status": "done"
         },
         {
@@ -356,7 +359,8 @@
         "56/300 strategies defined",
         "56/300 backtested",
         "Architecture documented in Swarm Project.md"
-      ]
+      ],
+      "sessionId": null
     },
     {
       "id": "task-minato-income-5k",
@@ -368,66 +372,66 @@
       "created": "2026-06-10",
       "lastActive": "Now",
       "archived": false,
-      "why": "15 Days is the single Minato revenue sprint. It combines market validation, Intelligence Engine infrastructure, lead collection, processing/enrichment, and the practical path toward the first paid offer. The goal is not just to build a system — it is to connect the system to real buyers and revenue.",
-      "nextAction": "M3 — Process, dedup + enrich collected data: read from raw_collection_events → dedup → normalize → enrich → score → produce usable lead products/offers.",
+      "why": "15 Days is the single Minato revenue sprint. It combines market validation, Intelligence Engine infrastructure, lead collection, processing/enrichment, and the practical path toward the first paid offer. The goal is not just to build a system \u2014 it is to connect the system to real buyers and revenue.",
+      "nextAction": "M3 \u2014 Process, dedup + enrich collected data: read from raw_collection_events \u2192 dedup \u2192 normalize \u2192 enrich \u2192 score \u2192 produce usable lead products/offers.",
       "notes": "",
       "subtasks": [
         {
-          "title": "M1 — Market Validation & Revenue Path",
+          "title": "M1 \u2014 Market Validation & Revenue Path",
           "status": "done",
           "description": "M1 proves that the $5K target is attached to a real buyer and not just a technical system. The goal is to identify the highest-value niche, the most likely customer, and the fastest route to a first sale. This prevents building infrastructure that nobody pays for.",
           "nextAction": "Rank all target niches by lead value and buyer demand.\nIdentify the most likely first customer.\nDefine who purchases lead lists and why.\nDefine pricing strategy for first products.\nCompare sales channels (email, Gumroad, marketplaces, agencies).\nDefine first revenue milestone.\nCreate qualification criteria for valuable leads.\nProduce a niche prioritization report before implementation."
         },
         {
-          "title": "M2 — Intelligence Engine Foundation",
+          "title": "M2 \u2014 Intelligence Engine Foundation",
           "status": "done",
           "description": "M2 creates the core storage and data architecture. It establishes the database, schemas, source attribution, confidence scoring, history tracking, and relationships required to support lead generation, audits, monitoring, and future intelligence products.",
           "nextAction": "Provision PostgreSQL environment.\nApply Intelligence Engine schema.\nCreate source attribution structure.\nCreate confidence scoring fields.\nCreate history and change tracking.\nCreate lead and business relationship tables.\nVerify migrations and database health.\nProduce architecture validation report."
         },
         {
-          "title": "M3 — Lead Collection Engine",
+          "title": "M3 \u2014 Lead Collection Engine",
           "status": "validate",
           "description": "M3 builds the first revenue-producing component. The goal is to automatically discover businesses, collect lead information, identify opportunities, and generate sellable lead datasets. This is the first stage directly connected to revenue generation.",
           "nextAction": "Build Google Maps Australia collector.\nTarget Melbourne, Sydney, Brisbane, Perth, Adelaide.\nFocus on Dentists, Trades, and Recruiters.\nCollect business contact details.\nCollect website and review information.\nDetect website presence and quality.\nStore all results in PostgreSQL.\nGenerate initial lead datasets."
         },
         {
-          "title": "M4 — Lead Qualification Engine",
+          "title": "M4 \u2014 Lead Qualification Engine",
           "status": "backlog",
           "description": "M4 transforms raw business records into valuable intelligence. Instead of simply collecting businesses, the system identifies businesses that have obvious problems or opportunities that agencies can monetize.",
           "nextAction": "Define lead qualification rules.\nDetect no website opportunities.\nDetect poor website opportunities.\nDetect low review counts.\nDetect poor ratings.\nDetect missing booking systems.\nCreate Primary Gap Rate scoring.\nGenerate qualified lead rankings.\nProduce opportunity-based exports."
         },
         {
-          "title": "M5 — Product Packaging",
+          "title": "M5 \u2014 Product Packaging",
           "status": "backlog",
           "description": "M5 converts collected intelligence into products that can actually be sold. The focus is creating niche-specific lead packs that agencies can immediately use for prospecting and sales.",
           "nextAction": "Create Dentist Lead Pack.\nCreate Trade Lead Pack.\nCreate Recruiter Lead Pack.\nBuild CSV export system.\nBuild sample datasets.\nCreate lead summaries.\nCreate outreach supporting material.\nCreate product descriptions and pricing."
         },
         {
-          "title": "M6 — Revenue Validation",
+          "title": "M6 \u2014 Revenue Validation",
           "status": "backlog",
           "description": "M6 validates that somebody is willing to pay. This is the first true business milestone. The objective is not scale. The objective is proving market demand through a real sale.",
           "nextAction": "Identify target agencies.\nBuild outreach list.\nCreate outreach templates.\nSend sample lead packs.\nCollect responses.\nTrack open and reply rates.\nTrack objections.\nSecure first paying customer.\nRecord first revenue event."
         },
         {
-          "title": "M7 — Automation Layer",
+          "title": "M7 \u2014 Automation Layer",
           "status": "backlog",
           "description": "M7 removes manual work from lead generation and delivery. Once validated, the process should run automatically through Hermes and scheduled workflows.",
           "nextAction": "Create Hermes collection jobs.\nCreate scheduled refreshes.\nCreate automated exports.\nCreate automated delivery workflows.\nCreate reporting logs.\nCreate failure recovery rules.\nCreate monitoring dashboards.\nVerify autonomous operation."
         },
         {
-          "title": "M8 — Subscription Products",
+          "title": "M8 \u2014 Subscription Products",
           "status": "backlog",
           "description": "M8 transitions from one-time sales into recurring revenue. The goal is to convert intelligence gathering into continuously updated products customers subscribe to.",
           "nextAction": "Create new business alerts.\nCreate lead refresh subscriptions.\nCreate niche monitoring reports.\nCreate weekly intelligence reports.\nCreate recurring delivery workflows.\nCreate subscriber management process.\nDefine recurring pricing.\nLaunch first subscription offer."
         },
         {
-          "title": "M9 — Intelligence Products",
+          "title": "M9 \u2014 Intelligence Products",
           "status": "backlog",
           "description": "M9 expands beyond lead lists into higher-value information products. The same data infrastructure now supports audits, reports, competitor intelligence, and business opportunity analysis.",
           "nextAction": "Create website audit system.\nCreate competitor intelligence reports.\nCreate reputation reports.\nCreate AI opportunity audits.\nCreate industry intelligence reports.\nCreate premium report templates.\nDefine high-ticket pricing.\nValidate product demand."
         },
         {
-          "title": "M10 — $5K System",
+          "title": "M10 \u2014 $5K System",
           "status": "backlog",
           "description": "M10 combines lead generation, subscriptions, audits, and intelligence products into a unified revenue engine. The objective is achieving the $5K milestone while building infrastructure that can continue compounding afterwards.",
           "nextAction": "Measure revenue by product category.\nIdentify highest-performing offers.\nRemove low-performing products.\nIncrease automation coverage.\nExpand into secondary niches.\nImprove conversion rates.\nOptimize recurring revenue.\nCreate scale roadmap.\nValidate path to $5K and beyond."
@@ -449,8 +453,9 @@
         "Merged Minato Kanban into one umbrella task",
         "M1 market validation marked done",
         "M2 Intelligence Engine foundation marked done",
-        "M3 collection complete — 1,501 raw records"
-      ]
+        "M3 collection complete \u2014 1,501 raw records"
+      ],
+      "sessionId": null
     },
     {
       "id": "task-1781326814765",
@@ -535,7 +540,7 @@
           "title": "M6: Session Memory & Summary Handling",
           "status": "backlog",
           "description": "M6 controls what Zen Chat remembers per session. The system should not save every message as memory. It should maintain structured session summaries that preserve useful state without creating bloated or noisy context.",
-          "nextAction": "Create session summary structure.\nStore project/task state.\nStore accepted decisions.\nStore rejected/altered approaches.\nStore files touched.\nStore validation proof.\nStore blockers and unresolved questions.\nStore next safe gate.\nUpdate session summary after major chat events.\nPrevent raw transcript bloat.\nCreate session recall display for “where are we up to?”",
+          "nextAction": "Create session summary structure.\nStore project/task state.\nStore accepted decisions.\nStore rejected/altered approaches.\nStore files touched.\nStore validation proof.\nStore blockers and unresolved questions.\nStore next safe gate.\nUpdate session summary after major chat events.\nPrevent raw transcript bloat.\nCreate session recall display for \u201cwhere are we up to?\u201d",
           "notes": "",
           "evidence": [
             "Roadmap provided by Six"
@@ -561,7 +566,7 @@
           "title": "M8: Chat/Plan Model Controls",
           "status": "backlog",
           "description": "M8 adds the Chat/Plan model role. This is the everyday model used for conversation, planning, summaries, diagnosis, project thinking, task discussion, and review. It should be configurable globally and overridable per session.",
-          "nextAction": "Create Chat/Plan model selector.\nCreate global default Chat/Plan model.\nCreate per-session Chat/Plan override.\nShow active Chat/Plan model in settings.\nUpdate gateway only if model changes.\nShow “already active” when unchanged.\nHandle gateway update status.\nPrevent unnecessary gateway restarts.\nPersist selected model.\nValidate model switching behavior.",
+          "nextAction": "Create Chat/Plan model selector.\nCreate global default Chat/Plan model.\nCreate per-session Chat/Plan override.\nShow active Chat/Plan model in settings.\nUpdate gateway only if model changes.\nShow \u201calready active\u201d when unchanged.\nHandle gateway update status.\nPrevent unnecessary gateway restarts.\nPersist selected model.\nValidate model switching behavior.",
           "notes": "",
           "evidence": [
             "Roadmap provided by Six"
@@ -639,7 +644,7 @@
           "title": "M14: Same-Session Queue & Attachment Logic",
           "status": "backlog",
           "description": "M14 handles what happens when the user sends a new message while execution is running in the same session. If the message adds information to the running execution, it should attach automatically. If it is a separate request, it should queue or behave according to normal session rules.",
-          "nextAction": "Detect active execution in current session.\nShow “execution running in this session” notice.\nClassify new prompt as added context or separate request.\nAuto-attach relevant context to running execution.\nQueue separate same-session requests when needed.\nAllow free chat in other sessions.\nShow queued prompt state.\nAllow user to cancel queued prompt.\nRun queued prompt after execution when appropriate.\nValidate same-session behavior.",
+          "nextAction": "Detect active execution in current session.\nShow \u201cexecution running in this session\u201d notice.\nClassify new prompt as added context or separate request.\nAuto-attach relevant context to running execution.\nQueue separate same-session requests when needed.\nAllow free chat in other sessions.\nShow queued prompt state.\nAllow user to cancel queued prompt.\nRun queued prompt after execution when appropriate.\nValidate same-session behavior.",
           "notes": "",
           "evidence": [
             "Roadmap provided by Six"
@@ -742,7 +747,7 @@
         {
           "title": "M22: Failure Diagnosis System",
           "status": "backlog",
-          "description": "M22 handles execution failure. Zen should not simply show “failed.” It must diagnose what failed, why it likely failed, what evidence supports that diagnosis, and what safe recovery options are available.",
+          "description": "M22 handles execution failure. Zen should not simply show \u201cfailed.\u201d It must diagnose what failed, why it likely failed, what evidence supports that diagnosis, and what safe recovery options are available.",
           "nextAction": "Detect token limit failure.\nDetect model quota failure.\nDetect timeout.\nDetect model/provider failure.\nDetect service failure.\nDetect validation failure.\nDetect file/path failure.\nDetect Git/GitHub failure.\nDetect permission or boundary failure.\nCreate failure diagnosis popup.\nShow likely cause.\nShow evidence/logs.\nShow safe recovery options.",
           "notes": "",
           "evidence": [
@@ -823,7 +828,7 @@
         "Agent OS Kanban shared persistence: data/kanban-tasks.json"
       ],
       "validation": [
-        "M1–M27 roadmap loaded",
+        "M1\u2013M27 roadmap loaded",
         "Subtasks remain backlog until implementation begins",
         "Notes changes from Six preserved"
       ],
@@ -833,7 +838,8 @@
         "Moved \"M2: Chat Shell & View Mode Foundation\" to Done",
         "Moved \"M3: Always-Visible Session Header\" to Done",
         "Moved \"M4: Project, Task, and Global UI Sessions\" to Work in Progress"
-      ]
+      ],
+      "sessionId": null
     }
   ]
 }

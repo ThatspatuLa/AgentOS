@@ -13,20 +13,20 @@ Serves static files and adds:
   GET/PUT  /api/sessions/:id              -> session summary + metadata
   GET      /api/sessions/:id/messages     -> reads from Hermes state.db
   POST     /api/sessions/:id/messages     -> Agent OS chat (stores locally)
-  GET      /api/sessions/:id/rollup       -> child task summaries
+  GET      /api/sessions/:id/rollup       -> child task summaries (filtered by parentSessionId)
+  GET      /api/events/:sessionId         -> session event log (events.jsonl)
   GET      /api/memory                    -> Hermes MEMORY.md + USER.md
   GET      /api/memory-world              -> data/memory-world.json
+  GET      /api/health                    -> live Hermes + git status
 
 Data layout:
   data/sessions/index.json                   -> session registry + hermesSessionId links
-  data/sessions/<sessionId>/summary.json     -> decisions, blockers, files, validation
+  data/sessions/<sessionId>/summary.json     -> decisions, blockers, files, validation, recentActivity
   data/sessions/<sessionId>/messages.jsonl   -> Agent OS chat messages (supplemental)
-  data/sessions/<sessionId>/events.jsonl     -> reserved
+  data/sessions/<sessionId>/events.jsonl     -> execution event log (hermes_turn, etc.)
   data/memory-world.json                     -> force-directed graph data
   ~/.hermes/memories/MEMORY.md               -> project rules, conventions, roadmap
   ~/.hermes/memories/USER.md                 -> user profile and preferences
-  data/sessions/<sessionId>/messages.jsonl   -> Agent OS chat messages (supplemental)
-  data/sessions/<sessionId>/events.jsonl     -> reserved
 """
 
 from __future__ import annotations
@@ -68,6 +68,7 @@ DEFAULT_SESSIONS = [
         "label": "Zen OS",
         "icon": "🖥️",
         "projectId": None,
+        "parentSessionId": None,
         "hermesSessionId": None,  # will be set to the active zen-chat Hermes session
         "channel": "zen-chat",
         "color": "#7c3aed",
@@ -77,6 +78,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M4 — Hermes webhook integration",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 0,
         "repo": str(ROOT),
         "branchPrefix": "main",
@@ -87,6 +90,7 @@ DEFAULT_SESSIONS = [
         "label": "Zen",
         "icon": "🦉",
         "projectId": "zen",
+        "parentSessionId": None,
         "hermesSessionId": "20260607_193056_683caea5",
         "channel": "zen-chat",
         "color": "#6366f1",
@@ -96,6 +100,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M4 — Zen intelligence engine scaffold",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 110,
         "repo": str(ROOT),
         "branchPrefix": "session/zen/",
@@ -106,6 +112,7 @@ DEFAULT_SESSIONS = [
         "label": "Kiyosaki",
         "icon": "📊",
         "projectId": "kiyosaki",
+        "parentSessionId": None,
         "hermesSessionId": "20260607_193646_a685023b",
         "channel": "kiyosaki-chat",
         "color": "#059669",
@@ -115,6 +122,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M3 — ETHUSDT strategy backtest complete",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 356,
         "repo": str(Path.home() / "Projects" / "Kiyosaki"),
         "branchPrefix": "session/kiyosaki/",
@@ -125,6 +134,7 @@ DEFAULT_SESSIONS = [
         "label": "Minato",
         "icon": "🔧",
         "projectId": "minato",
+        "parentSessionId": None,
         "hermesSessionId": None,
         "channel": "minato-chat",
         "color": "#d97706",
@@ -134,6 +144,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M1 — project scoping",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 0,
         "repo": str(ROOT),
         "branchPrefix": "session/minato/",
@@ -144,6 +156,7 @@ DEFAULT_SESSIONS = [
         "label": "Rin",
         "icon": "🎯",
         "projectId": "rin",
+        "parentSessionId": None,
         "hermesSessionId": "20260608_042151_b4f5cf15",
         "channel": "rin-chat",
         "color": "#dc2626",
@@ -153,6 +166,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M1 — project scoping",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 3,
         "repo": str(ROOT),
         "branchPrefix": "session/rin/",
@@ -163,6 +178,7 @@ DEFAULT_SESSIONS = [
         "label": "Toji",
         "icon": "⚡",
         "projectId": "toji",
+        "parentSessionId": None,
         "hermesSessionId": "20260608_042419_3a98b4c7",
         "channel": "toji-chat",
         "color": "#2563eb",
@@ -172,6 +188,8 @@ DEFAULT_SESSIONS = [
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M1 — project scoping",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 17,
         "repo": str(ROOT),
         "branchPrefix": "session/toji/",
@@ -182,15 +200,18 @@ DEFAULT_SESSIONS = [
         "label": "Kazuki",
         "icon": "🛡️",
         "projectId": "kazuki",
+        "parentSessionId": None,
         "hermesSessionId": None,
         "channel": "kazuki-chat",
-        "color": "#7c2d12",
-        "summary": "Kazuki — security & governance",
+        "color": "#f59e0b",
+        "summary": "Kazuki — creative & music",
         "decisions": [],
         "blockers": [],
         "filesTouched": [],
         "validationProof": [],
         "nextSafeGate": "M1 — project scoping",
+        "recentActivity": [],
+        "taskId": None,
         "messageCount": 0,
         "repo": str(ROOT),
         "branchPrefix": "session/kazuki/",
@@ -292,6 +313,119 @@ def _append_jsonl(path: Path, record: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def _append_session_event(session_id: str, event: dict) -> None:
+    """Append an event to the session's events.jsonl file."""
+    event_path = SESSIONS_DIR / session_id / "events.jsonl"
+    _append_jsonl(event_path, event)
+
+
+def _read_session_events(session_id: str) -> list[dict]:
+    """Read all events from a session's events.jsonl file."""
+    event_path = SESSIONS_DIR / session_id / "events.jsonl"
+    return _read_jsonl(event_path)
+
+
+def _update_session_recent_activity(session_id: str, milestone: str, cap: int = 10) -> None:
+    """Append a curated milestone to the session's recentActivity list."""
+    index = _load_index()
+    s = _get_session(index, session_id)
+    if not s:
+        return
+    recent = list(s.get("recentActivity") or [])
+    recent.append(milestone)
+    if len(recent) > cap:
+        recent = recent[-cap:]
+    s["recentActivity"] = recent
+    s["lastActive"] = _now_iso()
+    _save_index(index)
+
+
+def _build_context_prefix(s: dict) -> str:
+    """Build a compact context block (<500 chars) from session state for Hermes injection.
+
+    Includes: task title/status if linked, nextSafeGate, blockers, last 1-2 decisions.
+    Returns empty string if no useful context available.
+    """
+    parts = []
+    task_id = s.get("taskId")
+    if task_id:
+        parts.append(f"[Task: {task_id}]")
+    next_gate = s.get("nextSafeGate", "")
+    if next_gate:
+        parts.append(f"[Next gate: {next_gate}]")
+    blockers = s.get("blockers", [])
+    if blockers:
+        blocker_text = "; ".join(str(b) for b in blockers[:2])
+        parts.append(f"[Blockers: {blocker_text}]")
+    decisions = s.get("decisions", [])
+    if decisions:
+        dec_text = "; ".join(str(d) for d in decisions[-2:])
+        parts.append(f"[Decisions: {dec_text}]")
+    if not parts:
+        return ""
+    prefix = "\n".join(parts)
+    if len(prefix) > 500:
+        prefix = prefix[:497] + "..."
+    return prefix
+
+
+def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assistant_record: dict | None) -> None:
+    """Write a hermes_turn event to the session's events.jsonl and update summary."""
+    now = _now_iso()
+    # Determine status from assistant record
+    status = "complete"
+    summary_text = ""
+    files_touched = []
+    evidence = []
+    validation = []
+    if assistant_record:
+        source = assistant_record.get("source", "")
+        if source == "hermes-error":
+            status = "failed"
+            summary_text = assistant_record.get("content", "")[:200]
+        else:
+            summary_text = _truncate_middle(assistant_record.get("content", ""), 200)
+            # Extract progress lines as evidence
+            progress = assistant_record.get("progress", [])
+            if progress:
+                evidence = [str(p) for p in progress[:5]]
+    else:
+        status = "failed"
+        summary_text = "No response from Hermes"
+
+    event = {
+        "ts": now,
+        "type": "hermes_turn",
+        "sessionId": session_id,
+        "taskId": s.get("taskId"),
+        "status": status,
+        "summary": summary_text,
+        "evidence": evidence,
+        "validation": validation,
+        "filesTouched": files_touched,
+        "source": "hermes",
+    }
+    _append_session_event(session_id, event)
+
+    # Update session summary recentActivity with curated milestone
+    milestone = _curate_milestone(status, summary_text, evidence)
+    if milestone:
+        _update_session_recent_activity(session_id, milestone)
+
+
+def _curate_milestone(status: str, summary: str, evidence: list[str]) -> str:
+    """Create a curated milestone string for Kanban activity[] from a hermes_turn event."""
+    if status == "failed":
+        cause = summary[:80] if summary else "Unknown failure"
+        return f"Failed: {cause}"
+    if evidence:
+        files_summary = ", ".join(evidence[:2])
+        return f"Files touched: {files_summary}"
+    if summary:
+        return _truncate_middle(summary, 60)
+    return "Completed"
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -911,7 +1045,7 @@ class Handler(SimpleHTTPRequestHandler):
             children = [
                 ch
                 for ch in index["sessions"]
-                if ch.get("projectId") and ch["id"] != "zen-os"
+                if ch.get("parentSessionId") == m["id"]
             ]
             rollup = []
             for ch in children:
@@ -924,9 +1058,17 @@ class Handler(SimpleHTTPRequestHandler):
                     "messageCount": ch.get("messageCount", 0),
                     "hermesMessageCount": _hermes_session_count(hsid, channel=ch.get("channel")) if hsid else 0,
                     "blockers": ch.get("blockers", []),
+                    "taskId": ch.get("taskId"),
+                    "recentActivity": ch.get("recentActivity", []),
                     "color": ch.get("color", "#666"),
                 })
             return self._json({"sessionId": m["id"], "children": rollup})
+
+        # GET /api/events/:sessionId
+        m = self._match("api/events/:sessionId")
+        if m:
+            events = _read_session_events(m["sessionId"])
+            return self._json({"sessionId": m["sessionId"], "events": events})
 
         # GET /api/memory — Hermes MEMORY.md + USER.md
         if self._match("api/memory") is not None:
@@ -970,7 +1112,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self._json({"error": "not found"}, 404)
             body = self._read_body()
             for k in ("summary", "decisions", "blockers", "filesTouched",
-                      "validationProof", "nextSafeGate", "label"):
+                      "validationProof", "nextSafeGate", "label", "taskId",
+                      "parentSessionId"):
                 if k in body:
                     s[k] = body[k]
             s["lastActive"] = _now_iso()
@@ -1068,11 +1211,19 @@ class Handler(SimpleHTTPRequestHandler):
             # goes to Discord automatically via the gateway.
             assistant_record = None
             if role == "user" and s.get("hermesSessionId"):
-                assistant_record = self._hermes_chat(s["hermesSessionId"], content)
+                # Build compact context block from linked task + session state
+                context_prefix = _build_context_prefix(s)
+                hermes_content = content
+                if context_prefix:
+                    hermes_content = context_prefix + "\n\n" + content
+                assistant_record = self._hermes_chat(s["hermesSessionId"], hermes_content)
                 if assistant_record and not s.get("hermesSessionId"):
                     _append_jsonl(msg_path, assistant_record)
                     s["messageCount"] = (s.get("messageCount") or 0) + 1
                     _save_index(index)
+
+                # Write hermes_turn event + update summary after Hermes responds
+                _write_hermes_turn_event(m["id"], s, record, assistant_record)
 
             return self._json({
                 "ok": True,
