@@ -844,6 +844,105 @@ def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | No
             for r in rows
         ]
 
+        # Clean message content: strip Hermes CLI boilerplate,
+        # background process notifications, and other noise.
+        _BOILERPLINE_PREFIXES = tuple(
+            s.strip() for s in [
+                "Initializing agent...",
+                "Resume this session with:",
+                "Session:",
+                "Title:",
+                "Duration:",
+                "Messages:",
+                "Working directory:",
+            ]
+        )
+        _BOILERPLINE_LINES_RE = re.compile(
+            r"^(?:"
+            r"↻ Resumed session[^\n]*"
+            r"|Working directory:[^\n]*"
+            r"|Resume with:[^\n]*"
+            r"|─+"
+            r"|[─╭╮╰╯│].*"
+            r"|\s*Sessions:\s*\d+[^\n]*"
+            r"|\s+\S+\s+\|.*"
+            r"|Agent OS server starting on[^\n]*"
+            r"|Sessions:\s*\d+[^\n]*"
+            r")\n?",
+            re.MULTILINE,
+        )
+        for msg in all_msgs:
+            content = msg.get("content", "") or ""
+
+            # Strip [System note:...] blocks (multi-line, no closing bracket)
+            content = re.sub(
+                r"\[System note:[^\]]*\]\n.*?(?=\n\[IMPORTANT:|\n\[System note:|\Z)",
+                "", content, flags=re.DOTALL,
+            )
+
+            # Strip [IMPORTANT: Background process...] blocks (no closing bracket)
+            # These blocks have: [IMPORTANT:...], Command:, [Matched output:], Output:,
+            # then output lines. The actual user message starts after the block.
+            if "[IMPORTANT: Background process" in content:
+                lines = content.splitlines(True)
+                cleaned: list[str] = []
+                in_bg = False
+                bg_depth = 0
+                for line in lines:
+                    stripped = line.strip()
+                    if line.startswith("[IMPORTANT: Background process "):
+                        in_bg = True
+                        bg_depth = 0
+                        continue
+                    if in_bg:
+                        bg_depth += 1
+                        if stripped.startswith(("Command:", "Matched output:", "Output:")):
+                            continue
+                        if stripped and (stripped[0] in '│─╭╮╰╯"' or
+                                         stripped.startswith("Sessions:") or
+                                         stripped.startswith("Agent OS")):
+                            continue
+                        if line.startswith(("  ", "\t")):
+                            continue
+                        if bg_depth > 2 and stripped and stripped[0].isalpha():
+                            in_bg = False
+                            cleaned.append(line)
+                            continue
+                        if bg_depth > 5:
+                            in_bg = False
+                            cleaned.append(line)
+                            continue
+                        continue
+                    cleaned.append(line)
+                content = "".join(cleaned).strip()
+
+            # Strip out-of-band user message blocks
+            content = re.sub(
+                r"\[OUT-OF-BAND USER MESSAGE[^\]]*\][^\[]*\[/OUT-OF-BAND USER MESSAGE\]",
+                "", content, flags=re.DOTALL,
+            )
+
+            if msg["role"] == "assistant":
+                # Strip boilerplate lines
+                content = _BOILERPLINE_LINES_RE.sub("", content)
+                # Strip lines starting with known boilerplate prefixes
+                lines = content.splitlines()
+                cleaned_lines: list[str] = []
+                skip = True
+                for line in lines:
+                    stripped = line.strip()
+                    if skip and any(stripped.startswith(p) for p in _BOILERPLINE_PREFIXES):
+                        continue
+                    if stripped:
+                        skip = False
+                    cleaned_lines.append(line)
+                content = "\n".join(cleaned_lines).strip()
+
+            # Collapse multiple blank lines
+            while "\n\n\n" in content:
+                content = content.replace("\n\n\n", "\n\n")
+            msg["content"] = content.strip()
+
         # Identify which assistant messages are final responses.
         # A "final" assistant message is one that is followed by a user message
         # (or is the very last message in the session). All other assistant
