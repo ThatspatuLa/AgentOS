@@ -59,159 +59,16 @@
       "notes": "",
       "subtasks": [
         {
-          "title": "M1: System Inspection",
-          "status": "done",
-          "description": "M1 maps the existing Agent OS, Zen, Hermes, Obsidian, Sandbox, project data, and frontend structure. It proves what already exists before any schema, exporter, or visual work begins. This prevents guessing and gives Memory World a real foundation.",
-          "notes": "",
-          "nextAction": "- Inspect current Agent OS frontend files and routes.\n- Identify where the Memory page/component lives.\n- Locate generated data files and current data pipeline.\n- Locate Obsidian Project Instructions and Project Memories.\n- Locate Hermes logs/events/model state where available.\n- Locate Sandbox runs, review queues, and route outcomes.\n- Report which sources should feed Memory World first.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "generate-data.py",
-            "Obsidian project files",
-            "Hermes logs/events/model state",
-            "Sandbox runs/review queues"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
+          "title": "M1-M4: Foundation (Inspection, Schema, Exporter, Renderer)",
+          "status": "done"
         },
         {
-          "title": "M2: Graph Schema",
-          "status": "done",
-          "description": "M2 defines the Memory World data model. It decides what nodes, edges, evidence, risk, confidence, timestamps, source paths, clusters, layers, and visual identity mean. This gives the exporter and renderer one stable contract.",
-          "notes": "",
-          "nextAction": "- Define canonical node types and clusters.\n- Define canonical edge types and relationship meanings.\n- Define required fields for every node and edge.\n- Define evidence/source format.\n- Define risk and confidence rules.\n- Define visual tokens for clusters/types.\n- Define validation errors vs warnings.\n- Write schema documentation before exporter work.",
-          "evidence": [
-            "docs/MEMORY_WORLD_SCHEMA.md",
-            "data/memory-world.json"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
+          "title": "M5-M7: Live Data Bridge, Interaction Layer, Power Design",
+          "status": "backlog"
         },
         {
-          "title": "M3: Graph Exporter",
-          "status": "done",
-          "description": "M3 turns real Zen / Agent OS data into memory-world.json. This is the bridge between project/system reality and the visual graph. It must be deterministic, validated, traceable, and safe.",
-          "notes": "",
-          "nextAction": "- Build/export memory-world.json.\n- Include real nodes and cross-system edges.\n- Add validation against schema.\n- Add source/evidence fields.\n- Add no-secret protection.\n- Add deterministic output behavior.\n- Add validate-only mode.\n- Confirm full export produces expected node/edge count.\n- Confirm output survives multiple reruns cleanly.",
-          "evidence": [
-            "scripts/zen-graph-exporter.py",
-            "data/memory-world.json",
-            "docs/MEMORY_WORLD_SCHEMA.md"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M4: Visual Renderer",
-          "status": "done",
-          "description": "M4 makes Memory World visible. It renders the exported graph into an interactive visual surface so the user can review whether the system map is readable and useful.",
-          "notes": "",
-          "nextAction": "- Load memory-world.json into the Memory page.\n- Render nodes and edges.\n- Add pan, zoom, hover, click, and reset view.\n- Add basic side panel for selected node.\n- Add layer/filter controls if available.\n- Ensure the graph is not tiny, broken, or debug-looking.\n- Confirm 26 nodes / 40 edges render correctly.\n- Pause for visual review before moving on.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "data/memory-world.json"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M5: Live Data Bridge",
-          "status": "backlog",
-          "description": "M5 makes Memory World update from real exported data instead of behaving like a static demo. It connects refresh behavior to the exporter/data file while preserving the working renderer.",
-          "notes": "",
-          "nextAction": "- Confirm current JSON load path.\n- Add refresh/loading/success/error states.\n- Add last updated timestamp.\n- Re-run exporter and refresh graph.\n- Confirm node/edge count updates.\n- Prevent duplicate graph mounts.\n- Preserve hover/click/pan/zoom behavior.\n- Confirm console stays clean.\n- Do not jump to WebSocket/Graphiti yet unless required.",
-          "evidence": [
-            "data/memory-world.json",
-            "scripts/zen-graph-exporter.py",
-            "agent-os.html"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M6: Interaction Layer",
-          "status": "backlog",
-          "description": "M6 turns Memory World from a visual graph into a usable navigation system. It should help the user find nodes, isolate systems, inspect relationships, and understand why things are connected.",
-          "notes": "",
-          "nextAction": "- Add search for nodes.\n- Add focus mode for selected node.\n- Add cluster filters.\n- Add relationship highlighting.\n- Add selected-node connection list.\n- Add clear hover labels.\n- Add better click inspector behavior.\n- Add “show related” / “isolate cluster” controls.\n- Keep interactions fast and readable.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "data/memory-world.json"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M7: Power Design Skin",
-          "status": "backlog",
-          "description": "M7 applies the final Memory World visual identity so the graph feels like a premium Agent OS control-room surface instead of a plain technical graph. It should improve readability, hierarchy, and atmosphere without breaking the working renderer.",
-          "notes": "",
-          "nextAction": "- Apply the finalized Power Design visual tokens.\n- Improve node, edge, cluster, and label styling.\n- Add polished selected-node and hover states.\n- Improve empty/loading/error states visually.\n- Tune spacing, contrast, glow, and hierarchy.\n- Ensure the graph remains readable at default zoom.\n- Preserve pan, zoom, hover, click, filters, and inspector behavior.\n- Pause for visual review before integration work.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "data/memory-world.json"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M8: Agent OS Integration",
-          "status": "backlog",
-          "description": "M8 connects Memory World into the wider Agent OS experience. It should feel native to the dashboard, project pages, Kanban, navigation, and system health instead of being an isolated page.",
-          "notes": "",
-          "nextAction": "- Connect Memory World to Agent OS navigation.\n- Add project-specific entry points where useful.\n- Link graph nodes to project pages / Kanban tasks.\n- Link selected graph details to source evidence.\n- Add Memory World state to dashboard/project context where useful.\n- Preserve layout consistency with Agent OS styling.\n- Avoid making Memory World dominate pages where it does not belong.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "data/memory-world.json"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M9: Real Data Expansion",
-          "status": "backlog",
-          "description": "M9 expands Memory World beyond the first graph. It gradually connects more real system data so the graph becomes a living map of Zen, Hermes, Obsidian, Git, Sandbox, routes, models, reviews, and project history.",
-          "notes": "",
-          "nextAction": "- Add more Obsidian Project Instructions / Memories.\n- Add Hermes events/log summaries.\n- Add Sandbox runs and promotion/review states.\n- Add model/provider usage nodes.\n- Add route outcomes and gate decisions.\n- Add Git state/checkpoint events.\n- Add Kanban tasks and project activity.\n- Add warnings for stale/missing sources.\n- Keep all additions traceable through evidence/source fields.",
-          "evidence": [
-            "Obsidian project files",
-            "Hermes logs/events",
-            "Sandbox runs",
-            "Git state",
-            "Kanban DEFAULT_TASKS"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
-        },
-        {
-          "title": "M10: Hardening",
-          "status": "backlog",
-          "description": "M10 makes Memory World stable enough to keep using. It handles scale, bad data, slow machines, missing sources, validation failures, accessibility, responsive layout, and clean checkpoints.",
-          "notes": "",
-          "nextAction": "- Optimize graph performance.\n- Add malformed-data error handling.\n- Add missing-source fallback states.\n- Add stale-data warnings.\n- Test larger graph density.\n- Improve accessibility and keyboard behavior.\n- Check mobile/responsive behavior.\n- Confirm no secrets are exposed.\n- Run validation commands.\n- Prepare clean GitHub checkpoint with rollback notes.",
-          "evidence": [
-            "agent-os.html",
-            "agent-os.css",
-            "scripts/zen-graph-exporter.py",
-            "docs/MEMORY_WORLD_SCHEMA.md"
-          ],
-          "activity": [
-            "Memory World roadmap data added from Six"
-          ]
+          "title": "M8-M10: Integration, Real Data Expansion, Hardening",
+          "status": "backlog"
         }
       ],
       "evidence": [
@@ -292,55 +149,23 @@
       "notes": "Align Subtasks with roadmap\n",
       "subtasks": [
         {
-          "title": "Edge class taxonomy (10 classes)",
-          "status": "done"
-        },
-        {
-          "title": "Strategy batches 001–004 (6 strategies)",
-          "status": "done"
-        },
-        {
-          "title": "Batch 007 (50 strategies)",
-          "status": "done"
+          "title": "Edge taxonomy + Strategy specs (56/300 done)",
+          "status": "wip"
         },
         {
           "title": "Remaining 244 strategy specs",
           "status": "backlog"
         },
         {
-          "title": "Validate diversity coverage",
+          "title": "Backtesting (56/300 done)",
+          "status": "wip"
+        },
+        {
+          "title": "Ensemble meta-decision layer + weighting",
           "status": "backlog"
         },
         {
-          "title": "Backtest batch 001–004 (6)",
-          "status": "done"
-        },
-        {
-          "title": "Backtest batch 007 (50)",
-          "status": "done"
-        },
-        {
-          "title": "Backtest remaining 244 strategies",
-          "status": "backlog"
-        },
-        {
-          "title": "Design ensemble meta-decision layer",
-          "status": "backlog"
-        },
-        {
-          "title": "Define weighting formula",
-          "status": "backlog"
-        },
-        {
-          "title": "Market-state sensitivity model",
-          "status": "backlog"
-        },
-        {
-          "title": "Recalibration protocol",
-          "status": "backlog"
-        },
-        {
-          "title": "Bench-swap mechanism",
+          "title": "Market-state model + recalibration + bench-swap",
           "status": "backlog"
         }
       ],
@@ -379,64 +204,20 @@
       "notes": "",
       "subtasks": [
         {
-          "title": "M1 — Market Validation & Revenue Path",
-          "status": "done",
-          "description": "M1 proves that the $5K target is attached to a real buyer and not just a technical system. The goal is to identify the highest-value niche, the most likely customer, and the fastest route to a first sale. This prevents building infrastructure that nobody pays for.",
-          "nextAction": "Rank all target niches by lead value and buyer demand.\nIdentify the most likely first customer.\nDefine who purchases lead lists and why.\nDefine pricing strategy for first products.\nCompare sales channels (email, Gumroad, marketplaces, agencies).\nDefine first revenue milestone.\nCreate qualification criteria for valuable leads.\nProduce a niche prioritization report before implementation."
+          "title": "M1-M2: Market Validation + Intelligence Engine",
+          "status": "done"
         },
         {
-          "title": "M2 — Intelligence Engine Foundation",
-          "status": "done",
-          "description": "M2 creates the core storage and data architecture. It establishes the database, schemas, source attribution, confidence scoring, history tracking, and relationships required to support lead generation, audits, monitoring, and future intelligence products.",
-          "nextAction": "Provision PostgreSQL environment.\nApply Intelligence Engine schema.\nCreate source attribution structure.\nCreate confidence scoring fields.\nCreate history and change tracking.\nCreate lead and business relationship tables.\nVerify migrations and database health.\nProduce architecture validation report."
+          "title": "M3: Lead Collection Engine (1,501 records)",
+          "status": "validate"
         },
         {
-          "title": "M3 — Lead Collection Engine",
-          "status": "validate",
-          "description": "M3 builds the first revenue-producing component. The goal is to automatically discover businesses, collect lead information, identify opportunities, and generate sellable lead datasets. This is the first stage directly connected to revenue generation.",
-          "nextAction": "Build Google Maps Australia collector.\nTarget Melbourne, Sydney, Brisbane, Perth, Adelaide.\nFocus on Dentists, Trades, and Recruiters.\nCollect business contact details.\nCollect website and review information.\nDetect website presence and quality.\nStore all results in PostgreSQL.\nGenerate initial lead datasets."
+          "title": "M4-M6: Qualification, Product Packaging, Revenue Validation",
+          "status": "backlog"
         },
         {
-          "title": "M4 — Lead Qualification Engine",
-          "status": "backlog",
-          "description": "M4 transforms raw business records into valuable intelligence. Instead of simply collecting businesses, the system identifies businesses that have obvious problems or opportunities that agencies can monetize.",
-          "nextAction": "Define lead qualification rules.\nDetect no website opportunities.\nDetect poor website opportunities.\nDetect low review counts.\nDetect poor ratings.\nDetect missing booking systems.\nCreate Primary Gap Rate scoring.\nGenerate qualified lead rankings.\nProduce opportunity-based exports."
-        },
-        {
-          "title": "M5 — Product Packaging",
-          "status": "backlog",
-          "description": "M5 converts collected intelligence into products that can actually be sold. The focus is creating niche-specific lead packs that agencies can immediately use for prospecting and sales.",
-          "nextAction": "Create Dentist Lead Pack.\nCreate Trade Lead Pack.\nCreate Recruiter Lead Pack.\nBuild CSV export system.\nBuild sample datasets.\nCreate lead summaries.\nCreate outreach supporting material.\nCreate product descriptions and pricing."
-        },
-        {
-          "title": "M6 — Revenue Validation",
-          "status": "backlog",
-          "description": "M6 validates that somebody is willing to pay. This is the first true business milestone. The objective is not scale. The objective is proving market demand through a real sale.",
-          "nextAction": "Identify target agencies.\nBuild outreach list.\nCreate outreach templates.\nSend sample lead packs.\nCollect responses.\nTrack open and reply rates.\nTrack objections.\nSecure first paying customer.\nRecord first revenue event."
-        },
-        {
-          "title": "M7 — Automation Layer",
-          "status": "backlog",
-          "description": "M7 removes manual work from lead generation and delivery. Once validated, the process should run automatically through Hermes and scheduled workflows.",
-          "nextAction": "Create Hermes collection jobs.\nCreate scheduled refreshes.\nCreate automated exports.\nCreate automated delivery workflows.\nCreate reporting logs.\nCreate failure recovery rules.\nCreate monitoring dashboards.\nVerify autonomous operation."
-        },
-        {
-          "title": "M8 — Subscription Products",
-          "status": "backlog",
-          "description": "M8 transitions from one-time sales into recurring revenue. The goal is to convert intelligence gathering into continuously updated products customers subscribe to.",
-          "nextAction": "Create new business alerts.\nCreate lead refresh subscriptions.\nCreate niche monitoring reports.\nCreate weekly intelligence reports.\nCreate recurring delivery workflows.\nCreate subscriber management process.\nDefine recurring pricing.\nLaunch first subscription offer."
-        },
-        {
-          "title": "M9 — Intelligence Products",
-          "status": "backlog",
-          "description": "M9 expands beyond lead lists into higher-value information products. The same data infrastructure now supports audits, reports, competitor intelligence, and business opportunity analysis.",
-          "nextAction": "Create website audit system.\nCreate competitor intelligence reports.\nCreate reputation reports.\nCreate AI opportunity audits.\nCreate industry intelligence reports.\nCreate premium report templates.\nDefine high-ticket pricing.\nValidate product demand."
-        },
-        {
-          "title": "M10 — $5K System",
-          "status": "backlog",
-          "description": "M10 combines lead generation, subscriptions, audits, and intelligence products into a unified revenue engine. The objective is achieving the $5K milestone while building infrastructure that can continue compounding afterwards.",
-          "nextAction": "Measure revenue by product category.\nIdentify highest-performing offers.\nRemove low-performing products.\nIncrease automation coverage.\nExpand into secondary niches.\nImprove conversion rates.\nOptimize recurring revenue.\nCreate scale roadmap.\nValidate path to $5K and beyond."
+          "title": "M7-M10: Automation, Subscriptions, Intelligence Products, $5K System",
+          "status": "backlog"
         }
       ],
       "evidence": [
@@ -462,366 +243,39 @@
       "id": "task-1781326814765",
       "title": "Agent OS: Zen Chat",
       "project": "zen",
-      "status": "backlog",
+      "status": "wip",
       "priority": "Medium",
       "risk": "Low",
       "created": "2026-06-13",
       "lastActive": "Now",
       "archived": false,
       "why": "Added from the daily Kanban quick-add row.",
-      "nextAction": "Clarify the next safe action.",
+      "nextAction": "M5: Auto Detect Session Routing",
       "notes": "",
       "subtasks": [
         {
-          "title": "M1: Zen Chat Product Architecture",
-          "status": "done",
-          "description": "M1 defines Zen Chat as one of the main operating layers of Agent OS. The goal is to prevent this from becoming a simple bottom-right chatbot. Zen Chat must function as a conversational helper, project/task command center, review surface, and Hermes-style governed execution cockpit.",
-          "nextAction": "Define Zen Chat as the Agent OS cockpit.\nDefine its three roles: conversation, command center, review/approval.\nConfirm Hermes-style response behavior inside the UI.\nDefine planning, execution, review, and GitHub update stages.\nDefine the relationship between Zen, Hermes, sessions, models, execution, and GitHub.\nDefine what the chat can do before and after Accept.\nDefine what actions remain gated.\nCreate final architecture brief before implementation.\nConfirm this feature is treated as core Agent OS infrastructure.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M1 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M1-M4: Architecture + Shell + Header + Session UI",
+          "status": "done"
         },
         {
-          "title": "M2: Chat Shell & View Mode Foundation",
-          "status": "done",
-          "description": "M2 builds the core visual container for Zen Chat. The chat must support Small Chat, Side Drawer Chat, and Full Page Chat without changing the active session. View mode controls presentation only, not context.",
-          "nextAction": "Create bottom-right Small Chat launcher.\nCreate Small Chat floating panel.\nCreate Side Drawer Chat mode.\nCreate Full Page Chat mode.\nAllow smooth transitions between view modes.\nKeep the same active session across view changes.\nAdd consistent chat header across all views.\nAdd settings gear to every view.\nAdd responsive layout behavior.\nMatch Agent OS spacing, typography, radius, shadows, and polish.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M2 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M5-M7: Session Routing + Memory + Settings",
+          "status": "wip"
         },
         {
-          "title": "M3: Always-Visible Session Header",
-          "status": "done",
-          "description": "M3 makes session identity impossible to miss. The current session must always be visible in the chat header, no matter which chat view is open. The session label must be clickable at all times so the user can manually change the active session.",
-          "nextAction": "Show current session in every chat header.\nMake current session label clickable.\nCreate session picker interaction.\nShow project, task, or UI session type.\nShow session source: Auto Detect or Manual.\nAdd visual session switch animation.\nAdd compact session badge for Small Chat.\nAdd full session breadcrumb for Side Drawer and Full Page.\nPrevent hidden session changes.\nValidate that session identity is always visible.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M3 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M8-M11: Chat Controls + Planning State + Background Execution",
+          "status": "backlog"
         },
         {
-          "title": "M4: Project, Task, and Global UI Sessions",
-          "status": "wip",
-          "description": "M4 creates the session model. Each project has one project session. Each task has one task session. Subtasks do not have their own sessions and inherit the parent task session. Agent OS interface work uses one global Agent OS UI session.",
-          "nextAction": "Create Project Session structure.\nCreate Task Session structure.\nEnsure subtasks inherit task session.\nCreate Global Agent OS UI Session.\nDefine session metadata fields.\nStore session title, type, project, task, status, and summary.\nStore decisions, blockers, next safe gate, and recent changes.\nConnect sessions to project/task records.\nPrevent duplicate task sessions.\nCreate session initialization logic.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M4 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M12-M17: Notifications + Streaming + Review System",
+          "status": "backlog"
         },
         {
-          "title": "M5: Auto Detect Session Routing",
-          "status": "backlog",
-          "description": "M5 makes Zen Chat context-aware. By default, Zen Chat uses Auto Detect to choose the correct session based on the current page, selected project, selected task, active Kanban card, opened drawer, or recent chat topic.",
-          "nextAction": "Add Auto Detect on/off setting.\nDetect current page context.\nDetect selected project.\nDetect selected task.\nDetect opened drawer or Kanban card.\nDetect global UI editing context.\nShow visible session switch notice.\nAsk clarification before creating a new session when ambiguous.\nAllow manual override through session header.\nValidate Auto Detect with project, task, and UI pages.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M5 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M18-M24: Full-Stack Review + GitHub + Recovery + Boundaries",
+          "status": "backlog"
         },
         {
-          "title": "M6: Session Memory & Summary Handling",
-          "status": "backlog",
-          "description": "M6 controls what Zen Chat remembers per session. The system should not save every message as memory. It should maintain structured session summaries that preserve useful state without creating bloated or noisy context.",
-          "nextAction": "Create session summary structure.\nStore project/task state.\nStore accepted decisions.\nStore rejected/altered approaches.\nStore files touched.\nStore validation proof.\nStore blockers and unresolved questions.\nStore next safe gate.\nUpdate session summary after major chat events.\nPrevent raw transcript bloat.\nCreate session recall display for “where are we up to?”",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M6 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M7: Settings Gear Foundation",
-          "status": "backlog",
-          "description": "M7 creates the settings surface for Zen Chat. Settings apply instantly. The settings gear should contain model controls, Auto Detect toggle, execution recovery settings, review toggles, and notification toggles. Current session selection does not live only in settings because it must always be visible in the chat header.",
-          "nextAction": "Create settings gear panel.\nApply settings instantly.\nAdd Auto Detect on/off.\nAdd Chat/Plan model settings.\nAdd Execution model settings.\nAdd execution recovery settings.\nAdd review toggles.\nAdd notification toggles.\nAvoid cluttering the main chat header.\nPersist global settings.\nPersist per-session overrides.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M7 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M8: Chat/Plan Model Controls",
-          "status": "backlog",
-          "description": "M8 adds the Chat/Plan model role. This is the everyday model used for conversation, planning, summaries, diagnosis, project thinking, task discussion, and review. It should be configurable globally and overridable per session.",
-          "nextAction": "Create Chat/Plan model selector.\nCreate global default Chat/Plan model.\nCreate per-session Chat/Plan override.\nShow active Chat/Plan model in settings.\nUpdate gateway only if model changes.\nShow “already active” when unchanged.\nHandle gateway update status.\nPrevent unnecessary gateway restarts.\nPersist selected model.\nValidate model switching behavior.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M8 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M9: Execution Model Controls",
-          "status": "backlog",
-          "description": "M9 adds the Execution model role. This model is only activated after the user accepts a planned change. It is used for code edits, UI implementation, file changes, validation repair, and controlled execution.",
-          "nextAction": "Create Execution model selector.\nCreate global default Execution model.\nCreate per-session Execution model override.\nEnsure Execution model does not activate during normal chat.\nActivate Execution model only after Accept.\nUpdate gateway only if model changes.\nShow execution model status during background work.\nPersist model selection.\nValidate execution model handoff.\nPrevent accidental execution before approval.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M9 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M10: Planning State & First Accept / Alter Gate",
-          "status": "backlog",
-          "description": "M10 creates the first approval gate. Zen uses the Chat/Plan model to discuss and plan a change. Once a plan is ready, Zen shows a minimal blocking popup with Accept / Alter. The chat input is locked until the user chooses.",
-          "nextAction": "Create planned-change state.\nCreate blocking Accept / Alter popup.\nDisable chat input while popup is active.\nMake popup minimal and focused.\nMake Accept approve the plan.\nMake Accept activate Execution model.\nMake Accept start background execution.\nMake Alter dismiss popup.\nMake Alter unlock chat.\nPreserve chat context after Alter.\nPrevent execution without Accept.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M10 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M11: Background Execution Engine",
-          "status": "backlog",
-          "description": "M11 turns accepted plans into background work. Execution should not block all of Agent OS. It should run in the background, tied to a session, and show visible progress through a top-right notification.",
-          "nextAction": "Create execution job state.\nTie each execution to a session.\nAllow multiple executions across different sessions.\nPrevent conflicting execution inside the same session.\nCreate execution lifecycle: queued, running, reviewing, failed, complete.\nShow task/session name during execution.\nAllow execution to continue while user chats elsewhere.\nPersist execution status.\nRecover execution state after refresh.\nValidate multiple-session execution behavior.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M11 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M12: Running Task Notification Stack",
-          "status": "backlog",
-          "description": "M12 builds the running task UI. Background executions appear as stacked top-right notifications. Each shows a spinning Zen icon, task/session name, short status, click-to-expand behavior, and hide/minimize support. If hidden, a small spinning Zen icon remains.",
-          "nextAction": "Create top-right running task notifications.\nStack multiple running executions.\nShow spinning Zen icon.\nShow current status line.\nAllow click to expand details.\nAllow hide/minimize.\nKeep small spinning Zen icon when hidden.\nAdd sound on completion toggle.\nAdd failure alert toggle.\nAdd GitHub update alert toggle.\nValidate stacked notification behavior.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M12 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M13: Hermes-Style Live Action Stream",
-          "status": "backlog",
-          "description": "M13 makes execution transparent. Expanded running notifications should show a Hermes-style action stream instead of a generic spinner. The user should see what Zen/Hermes is searching, reading, editing, validating, or gating.",
-          "nextAction": "Create live action stream component.\nShow tool/action labels.\nShow read-only actions.\nShow search actions.\nShow Obsidian reads.\nShow file inspections.\nShow file edits.\nShow validation commands.\nShow boundary messages.\nShow current reasoning/status text.\nSupport examples like skill_view and search_files.\nEnsure stream feels like Hermes operating through Zen.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M13 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M14: Same-Session Queue & Attachment Logic",
-          "status": "backlog",
-          "description": "M14 handles what happens when the user sends a new message while execution is running in the same session. If the message adds information to the running execution, it should attach automatically. If it is a separate request, it should queue or behave according to normal session rules.",
-          "nextAction": "Detect active execution in current session.\nShow “execution running in this session” notice.\nClassify new prompt as added context or separate request.\nAuto-attach relevant context to running execution.\nQueue separate same-session requests when needed.\nAllow free chat in other sessions.\nShow queued prompt state.\nAllow user to cancel queued prompt.\nRun queued prompt after execution when appropriate.\nValidate same-session behavior.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M14 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M15: Completion Popup Foundation",
-          "status": "backlog",
-          "description": "M15 creates the second approval gate after execution completes. The completion popup must show Accept, Alter, Review, GitHub update plan, and Change GitHub update method. The chat is blocked until the user picks a path.",
-          "nextAction": "Create completion popup.\nShow Accept.\nShow Alter.\nShow Review.\nShow GitHub update plan.\nShow Change GitHub update method.\nLock chat while popup is active.\nMake Accept approve completed work.\nMake Alter dismiss popup and return to chat.\nPreserve completed work context after Alter.\nEnsure completion popup appears after every execution.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M15 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M16: Backend Review System",
-          "status": "backlog",
-          "description": "M16 builds backend review. Backend changes should show both a human-readable summary and raw technical evidence. Review sections should be toggles so the user can inspect as much or as little detail as needed.",
-          "nextAction": "Create backend review panel.\nAdd human summary toggle.\nAdd raw diff toggle.\nAdd files changed toggle.\nAdd validation result toggle.\nAdd risk notes toggle if needed.\nShow tests run.\nShow failed tests if any.\nShow file-level change summary.\nSupport code/backend-only changes.\nValidate backend review against real diffs.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M16 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M17: Frontend Review System",
-          "status": "backlog",
-          "description": "M17 builds frontend review. Frontend review should open Full Page Chat View and show fully functioning Previous and After patch page states. This should not use static screenshots. The user should be able to interact with the page comparison.",
-          "nextAction": "Open Full Page Chat View for frontend review.\nCreate fully functioning Previous page view.\nCreate fully functioning After patch page view.\nAdd Previous / After toggle.\nPreserve page interactivity.\nShow changed components.\nSupport layout and style review.\nSupport drawer/card/page comparison.\nAdd frontend review toggle in settings.\nValidate visual review with Agent OS pages.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M17 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M18: Full-Stack Review System",
-          "status": "backlog",
-          "description": "M18 combines frontend and backend review. If a change touches both UI and backend logic, the review must show a full-stack view: functioning page comparison, backend summary, raw diff, files changed, validation results, and risk notes.",
-          "nextAction": "Detect full-stack changes.\nEnable full-stack review toggle.\nCombine frontend Previous / After page comparison.\nCombine backend summary.\nCombine raw diff.\nCombine files changed.\nCombine validation result.\nShow risk boundaries.\nSupport review navigation between visual and code changes.\nValidate full-stack review on mixed UI/backend patch.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M18 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M19: GitHub Update Plan Display",
-          "status": "backlog",
-          "description": "M19 makes GitHub updates explicit. After execution completes, the popup must clearly state exactly how GitHub will update. Accept means the user agrees to the shown GitHub update plan with no extra confirmation.",
-          "nextAction": "Create GitHub update plan component.\nDetect likely GitHub update scenario.\nShow target GitHub item.\nShow update type.\nShow status change if any.\nShow comment/summary action if any.\nShow commit/push/PR action if any.\nMake Accept execute shown plan.\nPrevent hidden GitHub updates.\nRecord GitHub update result in session history.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M19 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M20: Change GitHub Update Method",
-          "status": "backlog",
-          "description": "M20 lets the user change how GitHub will update before accepting the completed work. This action returns the user to chat and provides three recommended GitHub update options plus a fourth natural custom option.",
-          "nextAction": "Create Change GitHub update method action.\nReturn user to chat.\nShow three recommended GitHub update options.\nShow fourth natural custom option.\nSupport natural user requests.\nTranslate natural request into GitHub action.\nSupport create task/issue.\nSupport update existing issue/task.\nSupport add comment.\nSupport status update.\nSupport commit, push, PR, or no-GitHub update where appropriate.\nUpdate completion popup with revised GitHub plan.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M20 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M21: GitHub Execution Layer",
-          "status": "backlog",
-          "description": "M21 performs the actual GitHub update after the user accepts the completion popup. The GitHub action depends on the scenario: new task, existing task update, comment, status update, commit, push, branch, PR, or project board update.",
-          "nextAction": "Implement create GitHub task/issue.\nImplement update existing task/issue.\nImplement add GitHub comment.\nImplement update status/project board.\nImplement commit local changes where appropriate.\nImplement push branch where appropriate.\nImplement open/update PR where appropriate.\nHandle GitHub API errors.\nShow GitHub update result.\nRecord final GitHub proof in session.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M21 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M22: Failure Diagnosis System",
-          "status": "backlog",
-          "description": "M22 handles execution failure. Zen should not simply show “failed.” It must diagnose what failed, why it likely failed, what evidence supports that diagnosis, and what safe recovery options are available.",
-          "nextAction": "Detect token limit failure.\nDetect model quota failure.\nDetect timeout.\nDetect model/provider failure.\nDetect service failure.\nDetect validation failure.\nDetect file/path failure.\nDetect Git/GitHub failure.\nDetect permission or boundary failure.\nCreate failure diagnosis popup.\nShow likely cause.\nShow evidence/logs.\nShow safe recovery options.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M22 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M23: Execution Recovery Settings",
-          "status": "backlog",
-          "description": "M23 adds configurable recovery behavior. Zen should not automatically recover unless configured. Manual recovery should be available. Recovery rules can define what happens for token limit, timeout, model failure, service failure, test failure, or other failure types.",
-          "nextAction": "Create recovery settings panel.\nSet manual as safe default.\nAdd token limit recovery rule.\nAdd timeout recovery rule.\nAdd model failure recovery rule.\nAdd service failure recovery rule.\nAdd test failure recovery rule.\nAdd Git/GitHub failure recovery rule.\nSupport fallback model selection.\nSupport retry with smaller context.\nSupport hard restart option only when approved/configured.\nValidate recovery rule behavior.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M23 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M24: Boundary & Permission Visualization",
-          "status": "backlog",
-          "description": "M24 ensures Zen Chat mirrors Hermes-style boundaries. The user should always know what kind of action is happening: planning, read-only, searching, editing, validating, restarting, Git checkpointing, GitHub updating, blocked boundary, or needs approval.",
-          "nextAction": "Create boundary badge system.\nShow Planning boundary.\nShow Read-only boundary.\nShow Search/inspect boundary.\nShow File edit boundary.\nShow Obsidian read/write boundary.\nShow Service restart boundary.\nShow Validation boundary.\nShow Git checkpoint boundary.\nShow GitHub update boundary.\nShow Blocked / Needs approval boundary.\nUse consistent visual language across chat, notifications, and popups.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M24 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M25: Session-Aware Chat Continuity",
-          "status": "backlog",
-          "description": "M25 makes Zen Chat usable across long projects. Users should be able to move between project chat, task chat, and UI chat without losing context. Each session should maintain its own state, summary, queued work, running execution, review history, and next safe gate.",
-          "nextAction": "Persist chat session messages.\nPersist session summaries.\nPersist running execution state.\nPersist queued prompts.\nPersist review history.\nPersist GitHub update history.\nPersist selected models.\nPersist settings overrides.\nSupport switching between sessions.\nSupport returning to previous session state.\nValidate continuity after page reload.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M25 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M26: Agent OS UI Integration",
-          "status": "backlog",
-          "description": "M26 integrates Zen Chat into the rest of Agent OS. The chat should understand current project pages, task drawers, Kanban cards, dashboards, Memory World, and Agent OS UI editing context.",
-          "nextAction": "Connect chat to project pages.\nConnect chat to task drawer.\nConnect chat to Kanban cards.\nConnect chat to dashboard context.\nConnect chat to Memory World page.\nConnect chat to global UI editing session.\nShow relevant context source.\nAllow chat to summarize current page/task.\nAllow chat to propose changes from current context.\nValidate integration across Agent OS pages.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M26 roadmap loaded into Agent OS: Zen Chat"
-          ]
-        },
-        {
-          "title": "M27: End-to-End QA & Live Validation",
-          "status": "backlog",
-          "description": "M27 validates the full Zen Chat operating loop. The goal is proving that the feature works from conversation to planning, Accept, execution, notification, review, GitHub update, failure handling, and session persistence.",
-          "nextAction": "Test Small Chat flow.\nTest Side Drawer flow.\nTest Full Page Chat flow.\nTest Project Session.\nTest Task Session.\nTest Global UI Session.\nTest Auto Detect on/off.\nTest model switching.\nTest Accept / Alter planning gate.\nTest background execution.\nTest multiple session executions.\nTest same-session queue/attach behavior.\nTest frontend Previous / After review.\nTest backend diff review.\nTest GitHub update plan.\nTest Change GitHub method.\nTest failure diagnosis.\nTest recovery settings.\nProduce final QA report before marking complete.",
-          "notes": "",
-          "evidence": [
-            "Roadmap provided by Six"
-          ],
-          "activity": [
-            "M27 roadmap loaded into Agent OS: Zen Chat"
-          ]
+          "title": "M25-M27: Session Continuity + UI Integration + E2E QA",
+          "status": "backlog"
         }
       ],
       "evidence": [
