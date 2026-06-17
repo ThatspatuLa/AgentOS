@@ -1377,16 +1377,20 @@ class Handler(SimpleHTTPRequestHandler):
                 since_ts = _today.timestamp()
 
             # Determine effective session IDs for Hermes lookup.
-            # If the session has a direct Hermes link, use it.
-            # If it has a channel but no direct link (e.g. zen-os), aggregate
-            # from all sessions on that channel via title-pattern matching.
+            # When a channel is set, always aggregate from all sessions on that
+            # channel (title-pattern matching) so the full Discord history is
+            # visible. The direct hermesSessionId is only used as a fallback
+            # when no channel is configured.
             _hsid = hsid
             _use_channel = False
-            if not _hsid and channel:
+            if channel:
                 _channel_ids = _channel_session_ids(channel)
                 if _channel_ids:
                     _hsid = _channel_ids[0]  # primary for single-session path
                     _use_channel = True
+            elif not _hsid:
+                # No channel and no direct link — nothing to read
+                pass
             hermes_msgs = _hermes_messages(
                 _hsid or "",
                 limit=msg_limit,
@@ -1537,14 +1541,17 @@ class Handler(SimpleHTTPRequestHandler):
             self._ndjson_event({"event": "accepted", "message": record})
             assistant_record = None
             try:
-                # Determine which Hermes session to use for the chat.
-                # Direct link takes priority; fall back to channel aggregation
-                # (pick the most recently active session on the channel).
-                _chat_hsid = s.get("hermesSessionId")
-                if not _chat_hsid and s.get("channel"):
+                # Determine which Hermes session to use for the chat stream.
+                # Prefer the most recent session on the channel (so new messages
+                # go to the active session, not a stale one). Fall back to the
+                # direct hermesSessionId only when no channel aggregation exists.
+                _chat_hsid = None
+                if s.get("channel"):
                     _channel_ids = _channel_session_ids(s["channel"])
                     if _channel_ids:
                         _chat_hsid = _channel_ids[-1]  # most recent session on channel
+                if not _chat_hsid:
+                    _chat_hsid = s.get("hermesSessionId")
                 if role == "user" and _chat_hsid:
                     assistant_record = self._hermes_chat_stream(
                         _chat_hsid,
@@ -1594,16 +1601,19 @@ class Handler(SimpleHTTPRequestHandler):
             s["messageCount"] = (s.get("messageCount") or 0) + 1
             _save_index(index)
 
-            # If this is a user message and the session has a Hermes link,
-            # forward to Hermes via `hermes chat` so the agent processes it
-            # with full context (memory, tools, skills) and the response
-            # goes to Discord automatically via the gateway.
+            # If this is a user message, forward to Hermes via `hermes chat`
+            # so the agent processes it with full context (memory, tools, skills)
+            # and the response goes to Discord automatically via the gateway.
+            # Prefer the most recent session on the channel; fall back to the
+            # direct hermesSessionId only when no channel aggregation exists.
             assistant_record = None
-            _chat_hsid = s.get("hermesSessionId")
-            if not _chat_hsid and s.get("channel"):
+            _chat_hsid = None
+            if s.get("channel"):
                 _channel_ids = _channel_session_ids(s["channel"])
                 if _channel_ids:
                     _chat_hsid = _channel_ids[-1]
+            if not _chat_hsid:
+                _chat_hsid = s.get("hermesSessionId")
             if role == "user" and _chat_hsid:
                 # Build compact context block from linked task + session state
                 context_prefix = _build_context_prefix(s)
