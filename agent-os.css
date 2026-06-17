@@ -6,31 +6,31 @@
 
 /* ── Design Tokens ── */
 :root {
-  /* Color — Dark Agent OS Tone */
-  --bg-base: #0a0e14;
-  --bg-surface: #111820;
-  --bg-raised: #161e2a;
-  --bg-overlay: #1c2530;
-  --bg-card: #141b25;
-  --bg-card-hover: #1a2230;
+  /* Color — Dark Agent OS Tone (toned down for chat-heavy use) */
+  --bg-base: #06080c;
+  --bg-surface: #0d121a;
+  --bg-raised: #121823;
+  --bg-overlay: #182030;
+  --bg-card: #0f1521;
+  --bg-card-hover: #141c2a;
 
-  --border-subtle: #1e2a38;
-  --border-default: #2a3a4a;
-  --border-emphasis: #3a5a6a;
-  --border-focus: #4da3ff;
+  --border-subtle: #1a2333;
+  --border-default: #232f42;
+  --border-emphasis: #344558;
+  --border-focus: rgba(99, 102, 241, 0.4);
 
   --text-primary: #e8ecf1;
-  --text-secondary: #8b9bb3;
+  --text-secondary: #8696ad;
   --text-muted: #4d5d6e;
-  --text-inverse: #0a0e14;
+  --text-inverse: #06080c;
 
-  --accent: #4da3ff;
-  --accent-hover: #6db3ff;
-  --accent-muted: rgba(77,163,255,0.12);
-  --accent-strong: #3a8fdb;
+  --accent: #818cf8;
+  --accent-hover: #95a1fa;
+  --accent-muted: rgba(129,140,248,0.14);
+  --accent-strong: #7080e0;
 
-  --success: #3fc960;
-  --success-muted: rgba(63,201,96,0.12);
+  --success: #4ec97f;
+  --success-muted: rgba(78,201,127,0.12);
   --warning: #e8b84d;
   --warning-muted: rgba(232,184,77,0.12);
   --danger: #f06258;
@@ -5595,8 +5595,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 }
 
 /* ═══ CHAT MESSAGES AREA (ChatGPT-style layout) ═══ */
-/* Centered content column ~720px, plain text without bubble backgrounds.
-   User messages right-align, assistant messages left-align.
+/* Assistant: plain text, full content column width, left-aligned.
+   User: pill-shaped bubble, max ~55% of column, right-aligned.
+   Both: aligned to a centered ~720px column with comfortable spacing.
    Timestamps hidden by default, shown on hover. */
 
 .zen-chat-messages {
@@ -5648,31 +5649,40 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 /* Avatars removed — alignment + role color tells you who wrote what. */
 .zen-chat-avatar { display: none !important; }
 
-/* Bubble is now just a content wrapper — no card, no fill, no border. */
-.zen-chat-bubble {
-  padding: 0;
-  border-radius: 0;
+/* ASSISTANT bubble: plain text, no fill, no border. */
+.zen-chat-message--assistant .zen-chat-bubble {
   background: transparent;
   border: none;
-  font-size: 15.5px;
-  line-height: 1.7;  /* ChatGPT-style loose body text */
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  min-width: 0;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-primary);
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  overflow: visible;
 }
 
-/* User text gets a soft accent color for visual distinction. */
+/* USER bubble: pill shape, soft indigo fill, white text. Capped at ~55% of
+   the 720px column so the text wraps like a focused comment rather than
+   stretching the full width like a wall of text. */
 .zen-chat-message--user .zen-chat-bubble {
-  color: var(--accent, #818cf8);
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #f1f5f9;
+  max-width: 55%; /* ChatGPT-style: user bubble doesn't fill the column */
+  min-width: 0;
+  box-sizing: border-box;
+  align-self: flex-end; /* right-align inside the message container */
 }
-.zen-chat-message--user .zen-chat-bubble strong { color: var(--accent, #818cf8); }
-.zen-chat-message--user .zen-chat-bubble a { color: var(--accent, #818cf8); }
-.zen-chat-message--assistant .zen-chat-bubble {
-  color: var(--text-primary);
+.zen-chat-message--user .zen-chat-bubble strong { color: #ffffff; font-weight: 600; }
+.zen-chat-message--user .zen-chat-bubble code.zen-md-inlinecode {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .zen-chat-bubble--markdown,
@@ -5702,67 +5712,95 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-message:hover .zen-chat-message-time { opacity: 0.7; }
 .zen-chat-message--user .zen-chat-message-time { text-align: right; }
 
-/* ═══ ZEN CHAT MARKDOWN (Discord-style rendering) ═══ */
-/* Scoped to .zen-chat-bubble--markdown so other bubble uses are untouched. */
+/* ═══ ZEN CHAT MARKDOWN (Discord/Claude-style hierarchy) ═══ */
+/* Scoped to .zen-chat-bubble--markdown so other bubble uses are untouched.
+   Goal: clear visual hierarchy — larger headings, deliberate paragraph
+   rhythm, code blocks that read as distinct, lists indented properly. */
+
 .zen-chat-bubble--markdown {
   white-space: normal; /* override the default pre-wrap so block elements flow naturally */
 }
+
+/* Reset margins on first/last child so the bubble hugs its container. */
 .zen-chat-bubble--markdown > *:first-child { margin-top: 0; }
 .zen-chat-bubble--markdown > *:last-child  { margin-bottom: 0; }
+
+/* PARAGRAPHS: tight top, deliberate bottom margin = rhythm. */
 .zen-chat-bubble--markdown p {
-  margin: 0 0 0.85em 0; /* match Discord's paragraph gap */
+  margin: 0 0 0.9em 0;
   white-space: pre-wrap;
-  line-height: 1.7; /* ChatGPT-style loose body text */
+  line-height: 1.55;
 }
 .zen-chat-bubble--markdown p:last-child { margin-bottom: 0; }
+
+/* EMPHASIS */
 .zen-chat-bubble--markdown strong { font-weight: 700; color: var(--text-primary); }
 .zen-chat-bubble--markdown em { font-style: italic; }
 .zen-chat-bubble--markdown del { opacity: 0.7; }
+
+/* HEADINGS: real size difference creates hierarchy.
+   h1 = main title (rare), h2 = section, h3 = subsection. */
 .zen-chat-bubble--markdown h1.zen-md-h,
 .zen-chat-bubble--markdown h2.zen-md-h,
 .zen-chat-bubble--markdown h3.zen-md-h {
-  margin: 0.9em 0 0.45em 0; /* match Discord's heading + paragraph gap */
+  margin: 1em 0 0.5em 0;
   font-weight: 700;
   line-height: 1.25;
   color: var(--text-primary);
+  letter-spacing: -0.01em;
 }
-.zen-chat-bubble--markdown h1.zen-md-h1 { font-size: 1.35em; }
-.zen-chat-bubble--markdown h2.zen-md-h2 { font-size: 1.2em; }
-.zen-chat-bubble--markdown h3.zen-md-h3 { font-size: 1.05em; }
+.zen-chat-bubble--markdown h1.zen-md-h1 { font-size: 1.55em; font-weight: 700; }
+.zen-chat-bubble--markdown h2.zen-md-h2 { font-size: 1.3em;  font-weight: 700; }
+.zen-chat-bubble--markdown h3.zen-md-h3 { font-size: 1.1em;  font-weight: 600; }
 .zen-chat-bubble--markdown > h1.zen-md-h:first-child,
 .zen-chat-bubble--markdown > h2.zen-md-h:first-child,
 .zen-chat-bubble--markdown > h3.zen-md-h:first-child { margin-top: 0; }
+
+/* LISTS: indented, breathing room between items. */
 .zen-chat-bubble--markdown ul,
 .zen-chat-bubble--markdown ol {
-  margin: 0 0 0.85em 0; /* match Discord's gap between lists and following text */
-  padding-left: 1.4em;
+  margin: 0 0 0.9em 0;
+  padding-left: 1.5em;
 }
-.zen-chat-bubble--markdown li { margin: 0 0 0.35em 0; }
+.zen-chat-bubble--markdown li {
+  margin: 0 0 0.4em 0;
+  line-height: 1.55;
+}
 .zen-chat-bubble--markdown li:last-child { margin-bottom: 0; }
+.zen-chat-bubble--markdown ul li { list-style: disc; }
+.zen-chat-bubble--markdown ol li { list-style: decimal; }
+
+/* BLOCKQUOTE: thick left bar, slightly muted text, like Discord. */
 .zen-chat-bubble--markdown blockquote {
-  margin: 0 0 0.85em 0; /* match Discord's gap between quotes and following text */
-  padding: 0.15em 0.75em;
-  border-left: 3px solid var(--accent, #6366f1);
+  margin: 0 0 0.9em 0;
+  padding: 0.4em 0 0.4em 1em;
+  border-left: 3px solid rgba(99, 102, 241, 0.4);
   color: var(--text-secondary);
-  background: rgba(99, 102, 241, 0.08);
-  border-radius: 0 4px 4px 0;
+  background: transparent;
+  border-radius: 0;
+  font-style: italic;
 }
+
+/* INLINE CODE: subtle background, no harsh border. */
 .zen-chat-bubble--markdown code.zen-md-inlinecode {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9em;
+  font-size: 0.88em;
   padding: 0.1em 0.4em;
   border-radius: 4px;
-  background: rgba(148, 163, 184, 0.18);
+  background: rgba(148, 163, 184, 0.14);
   color: var(--text-primary);
 }
+
+/* CODE BLOCKS: distinct block, separated, horizontally scrollable. */
 .zen-chat-bubble--markdown pre.zen-md-codeblock {
-  margin: 0 0 0.85em 0; /* match Discord's gap between code blocks and following text */
-  padding: 0.6em 0.8em;
+  margin: 0 0 0.9em 0;
+  padding: 0.7em 0.9em;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   overflow-x: auto;
   white-space: pre;
+  line-height: 1.5;
 }
 .zen-chat-bubble--markdown pre.zen-md-codeblock code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -5771,12 +5809,21 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   background: transparent;
   padding: 0;
 }
+
+/* LINKS: underlined accent. */
 .zen-chat-bubble--markdown a.zen-md-link {
-  color: #818cf8;
+  color: #a5b4fc;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.zen-chat-bubble--markdown a.zen-md-link:hover { color: #a5b4fc; }
+.zen-chat-bubble--markdown a.zen-md-link:hover { color: #c7d2fe; }
+
+/* HORIZONTAL RULE: subtle separator. */
+.zen-chat-bubble--markdown hr {
+  border: none;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  margin: 1.2em 0;
+}
 
 .zen-chat-bubble--markdown table.zen-md-table {
   width: 100%;
@@ -5815,8 +5862,8 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 /* ═══ CHAT INPUT AREA (ChatGPT-style: input grows to fill, send button inside) ═══ */
 .zen-chat-input-area {
   padding: var(--space-3) var(--space-5);
-  border-top: 1px solid var(--border-subtle);
-  background: rgba(12, 16, 24, 0.8);
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(8, 10, 16, 0.92);
   flex-shrink: 0;
   flex-grow: 0;
 }
@@ -5825,19 +5872,19 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   display: flex;
   gap: 0;
   align-items: stretch;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: rgba(18, 22, 34, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 22px;
   padding: 0;
-  transition: border-color var(--duration-fast) var(--ease-out),
-              box-shadow var(--duration-fast) var(--ease-out);
+  transition: border-color 0.15s var(--ease-out);
   max-width: 720px;     /* match content column */
   margin: 0 auto;        /* center input bar */
   width: 100%;
+  box-sizing: border-box;
 }
+/* Soft focus: subtle border tint, NO box-shadow halo. */
 .zen-chat-input-wrap:focus-within {
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
 }
 
 .zen-chat-input {
@@ -5847,7 +5894,7 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   border-radius: 0;
   padding: var(--space-3) var(--space-4);
   color: var(--text-primary);
-  font-size: 15.5px;
+  font-size: 15px;
   line-height: 1.5;
   resize: none;
   min-height: 44px;
