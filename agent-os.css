@@ -5361,8 +5361,8 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 }
 
 .zen-chat-message--assistant .zen-chat-bubble {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid var(--border-subtle);
+  background: rgba(30, 42, 64, 0.85);
+  border: 1px solid rgba(60, 80, 110, 0.6);
   color: var(--text-primary);
   border-bottom-left-radius: var(--radius-sm);
 }
@@ -5868,9 +5868,6 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
     right: 16px;
   }
 }
-
-}
-
 
 /* ═══ ZEN AGENT WORKING STATE UI ═══ */
 .zen-work-global {

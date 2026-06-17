@@ -5261,7 +5261,7 @@ function zenChatStartRefreshTimer() {
 function zenChatScrollToBottom(view) {
   const suffix = view === 'small' ? '-small' : (view === 'drawer' ? '-drawer' : '');
   const container = document.getElementById('zen-chat' + suffix + '-messages');
-  if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 200);
+  if (container) setTimeout(() => { container.scrollTo({top: container.scrollHeight, behavior: 'instant'}); }, 200);
 }
 
 
