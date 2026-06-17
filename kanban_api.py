@@ -293,6 +293,55 @@ def cmd_subtask_move(args):
     print(f"Moved subtask '{subtask['title']}': {old_status} → {args.status}")
 
 
+def cmd_subtask_delete(args):
+    data = load_tasks()
+    tasks = data["tasks"]
+    task = find_task(tasks, args.task_id)
+
+    if not task:
+        print(f"ERROR: Task {args.task_id} not found")
+        sys.exit(1)
+
+    subtask = find_subtask(task.get("subtasks", []), args.subtask)
+    if not subtask:
+        print(f"ERROR: Subtask '{args.subtask}' not found in {args.task_id}")
+        sys.exit(1)
+
+    subtask_title = subtask["title"]
+
+    if not args.force:
+        confirm = input(f"Delete subtask '{subtask_title}' from {args.task_id}? [y/N]: ")
+        if confirm.lower() != "y":
+            print("Aborted")
+            sys.exit(0)
+
+    task["subtasks"] = [s for s in task["subtasks"] if s["title"] != subtask_title]
+    task["lastActive"] = "Now"
+    task.setdefault("activity", []).append(f"Deleted subtask '{subtask_title}'")
+
+    bump_version(data)
+    save_tasks(data)
+    print(f"Deleted subtask '{subtask_title}' from {args.task_id}")
+
+
+def cmd_activity(args):
+    """Append a free-form entry to a task's activity log."""
+    data = load_tasks()
+    tasks = data["tasks"]
+    task = find_task(tasks, args.task_id)
+
+    if not task:
+        print(f"ERROR: Task {args.task_id} not found")
+        sys.exit(1)
+
+    task["lastActive"] = "Now"
+    task.setdefault("activity", []).append(args.message)
+
+    bump_version(data)
+    save_tasks(data)
+    print(f"Activity appended to {args.task_id}: {args.message}")
+
+
 def cmd_list(args):
     data = load_tasks()
     tasks = data["tasks"]
@@ -427,6 +476,17 @@ def main():
     p.add_argument("--subtask", required=True)
     p.add_argument("--status", required=True)
 
+    # subtask-delete
+    p = subparsers.add_parser("subtask-delete", help="Delete a subtask from a task")
+    p.add_argument("task_id")
+    p.add_argument("--subtask", required=True, help="Subtask title (prefix match)")
+    p.add_argument("--force", action="store_true", help="Skip confirmation prompt")
+
+    # activity
+    p = subparsers.add_parser("activity", help="Append a free-form activity log entry to a task")
+    p.add_argument("task_id")
+    p.add_argument("--message", required=True)
+
     # list
     p = subparsers.add_parser("list", help="List all tasks")
     p.add_argument("--project", default=None)
@@ -454,6 +514,8 @@ def main():
         "subtask-add": cmd_subtask_add,
         "subtask-update": cmd_subtask_update,
         "subtask-move": cmd_subtask_move,
+        "subtask-delete": cmd_subtask_delete,
+        "activity": cmd_activity,
         "list": cmd_list,
         "show": cmd_show,
         "bump-version": cmd_bump_version,
