@@ -512,14 +512,18 @@
                 <span class="zen-chat-status-dot"></span>
                 <span id="zen-chat-header-status-text">Ready</span>
               </div>
-              <div class="zen-chat-history-filter" id="zen-chat-history-filter">
-                <button class="active" data-range="intraday" onclick="zenChatSetHistoryFilter('intraday')">Intraday</button>
-                <button data-range="weekly" onclick="zenChatSetHistoryFilter('weekly')">Weekly</button>
-              </div>
-              <div class="zen-chat-view-toggle">
-                <button class="zen-chat-view-btn active" onclick="zenChatGoToView('full')" id="zen-chat-view-full">Full</button>
-                <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-view-drawer">Drawer</button>
-                <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-view-small">Small</button>
+              <div class="zen-chat-overflow-wrap">
+                <button class="zen-chat-overflow-btn" onclick="zenChatToggleOverflowMenu(event)" aria-label="More options" title="More options">⋯</button>
+                <div class="zen-chat-overflow-menu" id="zen-chat-overflow-menu" hidden>
+                  <div class="zen-chat-overflow-section-label">History</div>
+                  <button data-range="intraday" onclick="zenChatSetHistoryFilter('intraday')">Intraday</button>
+                  <button data-range="weekly" onclick="zenChatSetHistoryFilter('weekly')">Weekly</button>
+                  <div class="zen-chat-overflow-divider"></div>
+                  <div class="zen-chat-overflow-section-label">View</div>
+                  <button onclick="zenChatGoToView('full')">Full</button>
+                  <button onclick="zenChatGoToView('drawer')">Drawer</button>
+                  <button onclick="zenChatGoToView('small')">Small</button>
+                </div>
               </div>
             </div>
           </header>
@@ -5236,16 +5240,41 @@ function zenChatHistoryQueryString() {
 function zenChatSetHistoryFilter(range) {
   if (range !== 'intraday' && range !== 'weekly') return;
   zenChatState.historyFilter = range;
-  // Update button states
-  var btns = document.querySelectorAll('#zen-chat-history-filter button');
-  btns.forEach(function(b) {
+  // Update button states inside both old filter and new overflow menu
+  document.querySelectorAll('#zen-chat-history-filter button, #zen-chat-overflow-menu button[data-range]').forEach(function(b) {
     if (b.getAttribute('data-range') === range) b.classList.add('active');
     else b.classList.remove('active');
   });
+  // Close overflow menu if open
+  var menu = document.getElementById('zen-chat-overflow-menu');
+  if (menu) menu.hidden = true;
   // Clear caches and re-render
   zenChatState.messagesCache = {};
   zenChatRefreshActiveMessages(true);
 }
+
+function zenChatToggleOverflowMenu(event) {
+  event.stopPropagation();
+  var menu = document.getElementById('zen-chat-overflow-menu');
+  if (!menu) return;
+  menu.hidden = !menu.hidden;
+  // Sync the active state on history buttons when opening
+  if (!menu.hidden) {
+    var range = zenChatState.historyFilter || 'intraday';
+    menu.querySelectorAll('button[data-range]').forEach(function(b) {
+      if (b.getAttribute('data-range') === range) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+}
+
+// Close overflow menu when clicking elsewhere
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('zen-chat-overflow-menu');
+  if (!menu || menu.hidden) return;
+  if (e.target.closest('.zen-chat-overflow-wrap')) return;
+  menu.hidden = true;
+});
 
 // Load messages for a session (cached)
 function zenChatFetchMessages(sessionId, forceRefresh) {

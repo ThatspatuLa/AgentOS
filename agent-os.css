@@ -5132,6 +5132,17 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   align-items: center;
   padding: var(--space-6);
 }
+
+/* ChatGPT-style: short conversations stay pinned toward the bottom of the
+   viewport (input is the anchor). Use flex with the messages region taking
+   the remaining space, then align content to flex-end so the latest message
+   stays just above the input. Long conversations scroll naturally. */
+.zen-chat-page.zen-chat-full-mode .zen-chat-main-area > .zen-chat-messages:has(.zen-chat-message) {
+  justify-content: flex-end; /* anchor latest message near input */
+}
+.zen-chat-page.zen-chat-full-mode .zen-chat-messages:has(.zen-chat-message) {
+  padding: var(--space-5) var(--space-5);
+}
 .zen-chat-page.zen-chat-full-mode .zen-chat-welcome {
   width: 100%;
   max-width: 520px;
@@ -5333,6 +5344,82 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   color: var(--text-primary);
 }
 
+/* ═══ ZEN CHAT OVERFLOW MENU (replaces top-bar pills) ═══ */
+.zen-chat-overflow-wrap {
+  position: relative;
+}
+.zen-chat-overflow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+.zen-chat-overflow-btn:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+.zen-chat-overflow-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  z-index: 100;
+}
+.zen-chat-overflow-menu[hidden] { display: none; }
+.zen-chat-overflow-menu button {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  padding: 7px 10px;
+  font-size: 13px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+.zen-chat-overflow-menu button:hover {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--text-primary);
+}
+.zen-chat-overflow-menu button[data-range].active {
+  background: rgba(99, 102, 241, 0.18);
+  color: var(--text-primary);
+}
+.zen-chat-overflow-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 6px 10px 4px;
+}
+.zen-chat-overflow-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 4px 4px;
+}
+
 .zen-chat-main-area {
   flex: 1;
   display: flex;
@@ -5507,35 +5594,39 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   white-space: nowrap;
 }
 
-/* ═══ CHAT MESSAGES AREA ═══ */
+/* ═══ CHAT MESSAGES AREA (ChatGPT-style layout) ═══ */
+/* Centered content column ~720px, plain text without bubble backgrounds.
+   User messages right-align, assistant messages left-align.
+   Timestamps hidden by default, shown on hover. */
+
 .zen-chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-6) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-5); /* breathing room between turns */
   min-height: 0;
   scroll-behavior: smooth;
 }
 
-/* The wrapper div (containing bubble + time) inside .zen-chat-message
-   must constrain its children — without min-width: 0, flex items refuse
-   to shrink below their intrinsic content width, so wide tables/code
-   blocks blow up the entire message container. */
+/* Inner wrapper constrains children so wide tables/code blocks can't blow up
+   the message container. */
 .zen-chat-message > div {
   min-width: 0;
   max-width: 100%;
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .zen-chat-message {
   display: flex;
   gap: 0;
-  max-width: 100%;
+  max-width: 720px; /* ChatGPT-style content column */
   width: 100%;
+  margin: 0 auto;   /* center within panel */
   min-width: 0;
   animation: zenChatMessageIn 0.2s var(--ease-out);
 }
@@ -5554,39 +5645,36 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   align-self: flex-start;
 }
 
-.zen-chat-avatar {
-  display: none;
-}
+/* Avatars removed — alignment + role color tells you who wrote what. */
+.zen-chat-avatar { display: none !important; }
 
-.zen-chat-message--user .zen-chat-avatar {
-  background: linear-gradient(135deg, var(--accent), #818cf8);
-  color: #fff;
-}
-
-.zen-chat-message--assistant .zen-chat-avatar {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-}
-
+/* Bubble is now just a content wrapper — no card, no fill, no border. */
 .zen-chat-bubble {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  font-size: 15px;
-  line-height: 1.65;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  font-size: 15.5px;
+  line-height: 1.7;  /* ChatGPT-style loose body text */
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden; /* any overflowing content gets clipped, not scrolled */
+  overflow: visible;
 }
 
-/* Hard override: keep the markdown bubble wrapping as a fallback safety net.
-   The .zen-chat-bubble--markdown rule below tries to set white-space: normal
-   for block-element flow, but we need pre-wrap-style wrapping to win so long
-   unbreakable strings inside <p>, <li>, etc. still wrap. */
+/* User text gets a soft accent color for visual distinction. */
+.zen-chat-message--user .zen-chat-bubble {
+  color: var(--accent, #818cf8);
+}
+.zen-chat-message--user .zen-chat-bubble strong { color: var(--accent, #818cf8); }
+.zen-chat-message--user .zen-chat-bubble a { color: var(--accent, #818cf8); }
+.zen-chat-message--assistant .zen-chat-bubble {
+  color: var(--text-primary);
+}
+
 .zen-chat-bubble--markdown,
 .zen-chat-bubble--markdown p,
 .zen-chat-bubble--markdown li {
@@ -5602,30 +5690,17 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   max-width: 100%;
 }
 
-.zen-chat-message--user .zen-chat-bubble {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: var(--text-primary);
-  border-bottom-right-radius: var(--radius-sm);
-}
-
-.zen-chat-message--assistant .zen-chat-bubble {
-  background: rgba(30, 42, 64, 0.85);
-  border: 1px solid rgba(60, 80, 110, 0.6);
-  color: var(--text-primary);
-  border-bottom-left-radius: var(--radius-sm);
-}
-
+/* Timestamps: hidden by default, shown on hover (ChatGPT pattern) */
 .zen-chat-message-time {
   font-size: 11px;
   color: var(--text-muted);
-  margin-top: 2px;
+  opacity: 0;
   padding: 0 var(--space-1);
+  transition: opacity 0.15s var(--ease-out);
+  pointer-events: none;
 }
-
-.zen-chat-message--user .zen-chat-message-time {
-  text-align: right;
-}
+.zen-chat-message:hover .zen-chat-message-time { opacity: 0.7; }
+.zen-chat-message--user .zen-chat-message-time { text-align: right; }
 
 /* ═══ ZEN CHAT MARKDOWN (Discord-style rendering) ═══ */
 /* Scoped to .zen-chat-bubble--markdown so other bubble uses are untouched. */
@@ -5637,7 +5712,7 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-bubble--markdown p {
   margin: 0 0 0.85em 0; /* match Discord's paragraph gap */
   white-space: pre-wrap;
-  line-height: 1.5;
+  line-height: 1.7; /* ChatGPT-style loose body text */
 }
 .zen-chat-bubble--markdown p:last-child { margin-bottom: 0; }
 .zen-chat-bubble--markdown strong { font-weight: 700; color: var(--text-primary); }
@@ -5737,9 +5812,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   font-size: 0.85em;
 }
 
-/* ═══ CHAT INPUT AREA ═══ */
+/* ═══ CHAT INPUT AREA (ChatGPT-style: input grows to fill, send button inside) ═══ */
 .zen-chat-input-area {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--border-subtle);
   background: rgba(12, 16, 24, 0.8);
   flex-shrink: 0;
@@ -5748,30 +5823,37 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 
 .zen-chat-input-wrap {
   display: flex;
-  gap: var(--space-2);
-  align-items: flex-end;
+  gap: 0;
+  align-items: stretch;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+  max-width: 720px;     /* match content column */
+  margin: 0 auto;        /* center input bar */
+  width: 100%;
+}
+.zen-chat-input-wrap:focus-within {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .zen-chat-input {
   flex: 1;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: var(--space-3) var(--space-4);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: 15.5px;
   line-height: 1.5;
   resize: none;
-  min-height: 40px;
-  max-height: 120px;
+  min-height: 44px;
+  max-height: 160px;
   outline: none;
-  transition: border-color var(--duration-fast) var(--ease-out);
   font-family: inherit;
-}
-
-.zen-chat-input:focus {
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .zen-chat-input::placeholder {
@@ -5779,34 +5861,36 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 }
 
 .zen-chat-send-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #818cf8);
+  width: 44px;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  background: transparent;
   border: none;
-  color: #fff;
-  font-size: var(--text-base);
+  color: var(--text-muted);
+  font-size: var(--text-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+.zen-chat-send-btn:not(:disabled) {
+  color: var(--accent, #6366f1);
 }
 
-.zen-chat-send-btn:hover {
-  filter: brightness(1.15);
-  transform: scale(1.05);
+.zen-chat-send-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent, #818cf8);
 }
 
-.zen-chat-send-btn:active {
-  transform: scale(0.95);
+.zen-chat-send-btn:active:not(:disabled) {
+  background: rgba(99, 102, 241, 0.18);
 }
 
 .zen-chat-send-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* ═══ SMALL CHAT LAUNCHER (M2) ═══ */
