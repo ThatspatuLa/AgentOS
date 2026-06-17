@@ -1,5 +1,5 @@
 {
-  "version": 29,
+  "version": 30,
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -27,6 +27,21 @@
         {
           "title": "Quick add",
           "status": "done"
+        },
+        {
+          "title": "JSON-file architecture",
+          "status": "done",
+          "description": "Separated task data from HTML into data/kanban-tasks.json. HTML is now pure presentation, data is external."
+        },
+        {
+          "title": "kanban_api.py CLI",
+          "status": "done",
+          "description": "Python CLI for Zen to create/update/move/delete tasks and subtasks programmatically."
+        },
+        {
+          "title": "localStorage override layer",
+          "status": "done",
+          "description": "Browser edits (Six) are preserved as overrides on top of JSON file data."
         }
       ],
       "evidence": [
@@ -40,7 +55,9 @@
       "activity": [
         "M4 checkpoint pushed to GitHub",
         "Kanban audit completed",
-        "Archived from task drawer"
+        "Archived from task drawer",
+        "JSON-file architecture implemented",
+        "kanban_api.py created for Zen programmatic access"
       ]
     },
     {
