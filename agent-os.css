@@ -5466,6 +5466,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   line-height: 1.65;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .zen-chat-message--user .zen-chat-bubble {
