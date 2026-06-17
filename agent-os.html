@@ -512,17 +512,20 @@
                 <span class="zen-chat-status-dot"></span>
                 <span id="zen-chat-header-status-text">Ready</span>
               </div>
+              <div class="zen-chat-history-filter" id="zen-chat-history-filter">
+                <button class="active" data-range="intraday" onclick="zenChatSetHistoryFilter('intraday')">Intraday</button>
+                <button data-range="weekly" onclick="zenChatSetHistoryFilter('weekly')">Weekly</button>
+              </div>
+              <div class="zen-chat-view-toggle">
+                <button class="zen-chat-view-btn active" onclick="zenChatGoToView('full')" id="zen-chat-view-full">Full</button>
+                <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-view-drawer">Drawer</button>
+                <button class="zen-chat-view-btn" onclick="zenChatGoToView('small')" id="zen-chat-view-small">Small</button>
+              </div>
               <div class="zen-chat-overflow-wrap">
                 <button class="zen-chat-overflow-btn" onclick="zenChatToggleOverflowMenu(event)" aria-label="More options" title="More options">⋯</button>
                 <div class="zen-chat-overflow-menu" id="zen-chat-overflow-menu" hidden>
-                  <div class="zen-chat-overflow-section-label">History</div>
-                  <button data-range="intraday" onclick="zenChatSetHistoryFilter('intraday')">Intraday</button>
-                  <button data-range="weekly" onclick="zenChatSetHistoryFilter('weekly')">Weekly</button>
-                  <div class="zen-chat-overflow-divider"></div>
-                  <div class="zen-chat-overflow-section-label">View</div>
-                  <button onclick="zenChatGoToView('full')">Full</button>
-                  <button onclick="zenChatGoToView('drawer')">Drawer</button>
-                  <button onclick="zenChatGoToView('small')">Small</button>
+                  <div class="zen-chat-overflow-section-label">Quick actions</div>
+                  <button onclick="zenChatRefreshActiveMessages(true)">↻ Refresh messages</button>
                 </div>
               </div>
             </div>

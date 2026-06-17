@@ -5604,7 +5604,7 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   padding: var(--space-6) var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--space-7); /* more breathing room between turns (28px) */
+  gap: var(--space-8); /* generous breathing room between turns (32px) */
   min-height: 0;
   scroll-behavior: smooth;
 }
@@ -5728,9 +5728,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 /* PARAGRAPHS: tight top, deliberate bottom margin = rhythm. Larger line
    height and more space between paragraphs reads less cluttered. */
 .zen-chat-bubble--markdown p {
-  margin: 0 0 1.1em 0;
+  margin: 0 0 1.3em 0;
   white-space: pre-wrap;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 .zen-chat-bubble--markdown p:last-child { margin-bottom: 0; }
 
@@ -5757,15 +5757,15 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-bubble--markdown > h2.zen-md-h:first-child,
 .zen-chat-bubble--markdown > h3.zen-md-h:first-child { margin-top: 0; }
 
-/* LISTS: indented, breathing room between items. */
+/* LISTS: indented, generous breathing room between items. */
 .zen-chat-bubble--markdown ul,
 .zen-chat-bubble--markdown ol {
-  margin: 0 0 0.9em 0;
-  padding-left: 1.5em;
+  margin: 0 0 1.3em 0;
+  padding-left: 1.6em;
 }
 .zen-chat-bubble--markdown li {
-  margin: 0 0 0.4em 0;
-  line-height: 1.55;
+  margin: 0 0 0.55em 0;
+  line-height: 1.7;
 }
 .zen-chat-bubble--markdown li:last-child { margin-bottom: 0; }
 .zen-chat-bubble--markdown ul li { list-style: disc; }
@@ -5773,13 +5773,14 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 
 /* BLOCKQUOTE: thick left bar, slightly muted text, like Discord. */
 .zen-chat-bubble--markdown blockquote {
-  margin: 0 0 0.9em 0;
-  padding: 0.4em 0 0.4em 1em;
+  margin: 0 0 1.3em 0;
+  padding: 0.5em 0 0.5em 1.1em;
   border-left: 3px solid rgba(99, 102, 241, 0.4);
   color: var(--text-secondary);
   background: transparent;
   border-radius: 0;
   font-style: italic;
+  line-height: 1.7;
 }
 
 /* INLINE CODE: subtle background, no harsh border. */
@@ -5792,16 +5793,16 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   color: var(--text-primary);
 }
 
-/* CODE BLOCKS: distinct block, separated, horizontally scrollable. */
+/* CODE BLOCKS: distinct block, well separated, horizontally scrollable. */
 .zen-chat-bubble--markdown pre.zen-md-codeblock {
-  margin: 0 0 0.9em 0;
-  padding: 0.7em 0.9em;
+  margin: 0 0 1.3em 0;
+  padding: 0.8em 1em;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(99, 102, 241, 0.15);
   overflow-x: auto;
   white-space: pre;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 .zen-chat-bubble--markdown pre.zen-md-codeblock code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -5877,8 +5878,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 22px;
   padding: 0;
-  max-width: 720px;     /* match content column */
-  margin: 0 auto;        /* center input bar */
+  /* Full width of the chat panel, NOT constrained to 720px — the input
+     should span the entire chat area so it doesn't visually "stick out"
+     to one side relative to the message column. */
   width: 100%;
   box-sizing: border-box;
 }
