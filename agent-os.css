@@ -5654,9 +5654,9 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 6px 0;
-  font-size: 16px;
-  line-height: 1.7;
+  padding: 8px 0;
+  font-size: 16.5px;
+  line-height: 1.75;
   color: var(--text-primary);
   max-width: 100%;
   min-width: 0;
@@ -5725,10 +5725,10 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-bubble--markdown > *:first-child { margin-top: 0; }
 .zen-chat-bubble--markdown > *:last-child  { margin-bottom: 0; }
 
-/* PARAGRAPHS: tight top, deliberate bottom margin = rhythm. Larger line
-   height and more space between paragraphs reads less cluttered. */
+/* PARAGRAPHS: tight top, generous bottom margin = real rhythm so the
+   response reads less cramped. */
 .zen-chat-bubble--markdown p {
-  margin: 0 0 1.3em 0;
+  margin: 0 0 1.5em 0;
   white-space: pre-wrap;
   line-height: 1.75;
 }
@@ -5739,20 +5739,20 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 .zen-chat-bubble--markdown em { font-style: italic; }
 .zen-chat-bubble--markdown del { opacity: 0.7; }
 
-/* HEADINGS: real size difference creates hierarchy.
-   h1 = main title (rare), h2 = section, h3 = subsection. */
+/* HEADINGS: visibly larger than body text so the hierarchy reads at a
+   glance. h1 = main title, h2 = section, h3 = subsection. */
 .zen-chat-bubble--markdown h1.zen-md-h,
 .zen-chat-bubble--markdown h2.zen-md-h,
 .zen-chat-bubble--markdown h3.zen-md-h {
-  margin: 1em 0 0.5em 0;
+  margin: 1.2em 0 0.6em 0;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
   color: var(--text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
-.zen-chat-bubble--markdown h1.zen-md-h1 { font-size: 1.55em; font-weight: 700; }
-.zen-chat-bubble--markdown h2.zen-md-h2 { font-size: 1.3em;  font-weight: 700; }
-.zen-chat-bubble--markdown h3.zen-md-h3 { font-size: 1.1em;  font-weight: 600; }
+.zen-chat-bubble--markdown h1.zen-md-h1 { font-size: 1.85em; font-weight: 700; }
+.zen-chat-bubble--markdown h2.zen-md-h2 { font-size: 1.5em;  font-weight: 700; }
+.zen-chat-bubble--markdown h3.zen-md-h3 { font-size: 1.2em;  font-weight: 600; }
 .zen-chat-bubble--markdown > h1.zen-md-h:first-child,
 .zen-chat-bubble--markdown > h2.zen-md-h:first-child,
 .zen-chat-bubble--markdown > h3.zen-md-h:first-child { margin-top: 0; }
@@ -5878,9 +5878,10 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 22px;
   padding: 0;
-  /* Full width of the chat panel, NOT constrained to 720px — the input
-     should span the entire chat area so it doesn't visually "stick out"
-     to one side relative to the message column. */
+  /* Floating pill: same width as the message column (720px) and centered.
+     This visually anchors the input to the conversation above it. */
+  max-width: 720px;
+  margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
 }
