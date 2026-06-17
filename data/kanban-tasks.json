@@ -1,5 +1,5 @@
 {
-  "version": 28,
+  "version": 33,
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -278,7 +278,7 @@
     },
     {
       "id": "task-kiyosaki-trading-system",
-      "title": "Build AI Trading System",
+      "title": "Swarm Phase A \u2014 Evidence-Based Strategy Research",
       "project": "kiyosaki",
       "sessionId": null,
       "status": "wip",
@@ -287,81 +287,71 @@
       "created": "2026-06-09",
       "lastActive": "Now",
       "archived": false,
-      "why": "End-to-end ETH 5M ensemble trading system: 300 strategies across 10 edge classes \u2192 backtest all via Lean \u2192 ensemble meta-decision layer with weighted voting, 5 Fear/Greed market states, biweekly recalibration, monthly bench swap.",
-      "nextAction": "Review Obsidian 5m dashboard (40 strategies, 32 traded, all negative ExpR). Plan Phase A: evidence-based strategy research for 300 curated strategies.",
+      "why": "Revamp: previous Swarm ran 40 strategies, all negative expectancy (best STRAT_023 at -0.020R). Infrastructure (6-state engine, risk engine) works but strategy quality is the bottleneck. New direction: research 300 evidence-backed strategies from papers/GitHub/YouTube/X first, vet them, only then code the winners. Production engine: Freqtrade 2026.5.1.",
+      "nextAction": "Phase A.1: Source sweep \u2014 arxiv (regime detection, online learning, ensemble), Freqtrade community strategies on GitHub, YouTube practitioner channels (Algovibes), X trading handles. Goal: 50 thesis cards in 01_Candidates/.",
       "notes": "Align Subtasks with roadmap\n",
       "subtasks": [
         {
-          "title": "Edge class taxonomy (10 classes)",
-          "status": "done"
+          "title": "Phase A.1: Source sweep (arxiv, GitHub, YouTube, X)",
+          "status": "wip"
         },
         {
-          "title": "Strategy batches 001\u2013004 (6 strategies)",
-          "status": "done"
-        },
-        {
-          "title": "Batch 007 (50 strategies)",
-          "status": "done"
-        },
-        {
-          "title": "Remaining 244 strategy specs",
+          "title": "Phase A.2: Build 300 thesis cards in Obsidian",
           "status": "backlog"
         },
         {
-          "title": "Validate diversity coverage",
+          "title": "Phase A.3: Vet & dedup \u2192 shortlist 100",
           "status": "backlog"
         },
         {
-          "title": "Backtest batch 001\u2013004 (6)",
-          "status": "done"
-        },
-        {
-          "title": "Backtest batch 007 (50)",
-          "status": "done"
-        },
-        {
-          "title": "Backtest remaining 244 strategies",
+          "title": "Phase B.1: Code top 100 in Freqtrade",
           "status": "backlog"
         },
         {
-          "title": "Design ensemble meta-decision layer",
+          "title": "Phase B.2: First cull (300\u2192100 by ExpR > +2.0)",
           "status": "backlog"
         },
         {
-          "title": "Define weighting formula",
+          "title": "Phase B.3: Walk-forward validation (100\u219230)",
           "status": "backlog"
         },
         {
-          "title": "Market-state sensitivity model",
+          "title": "Freqtrade setup: dry-run validation on ETHUSDT 5m",
+          "status": "wip"
+        },
+        {
+          "title": "Port 6-state market state engine \u2192 Freqtrade indicator",
           "status": "backlog"
         },
         {
-          "title": "Recalibration protocol",
+          "title": "Confidence engine design (ensemble voting)",
           "status": "backlog"
         },
         {
-          "title": "Bench-swap mechanism",
+          "title": "Dynamic lineup (20 Active + 10 Bench)",
           "status": "backlog"
         }
       ],
       "evidence": [
-        "~/Projects/Kiyosaki/Swarm/01_Strategies/",
-        "~/Projects/Kiyosaki/Swarm/02_Backtests/",
-        "~/Projects/Kiyosaki/Swarm/Swarm Dashboard.md"
+        "~/freqtrade/ (Freqtrade 2026.5.1 install)",
+        "~/Obsidian/.../Swarm/Swarm.md (Phase A plan)",
+        "~/Obsidian/.../Swarm/01_Candidates/_THESIS_CARD_TEMPLATE.md",
+        "~/Obsidian/.../Swarm/_archive/ (previous Lean run, archived)"
       ],
       "validation": [
-        "All 10 edge classes represented",
-        "No duplicate strategies",
-        "Parameters implementable in Lean",
-        "Valid Lean output for all",
-        "Formula explainable",
-        "No single strategy dominates"
+        "Freqtrade installed and config validates",
+        "Old notes archived, fresh Swarm.md created",
+        "Phase A.1 underway"
       ],
       "activity": [
         "56/300 strategies defined",
         "56/300 backtested",
         "Architecture documented in Swarm Project.md",
-        "Updated nextAction: Expand from current 56 to 300 strategies using local LLM + deterministic harness. \u2192 Review Obsidian 5m dashboard (40 strategies, 32 traded, all negative ExpR). Plan Phase A: evidence-based strategy research for 300 curated strategies."
+        "Updated nextAction: Expand from current 56 to 300 strategies using local LLM + deterministic harness. \u2192 Review Obsidian 5m dashboard (40 strategies, 32 traded, all negative ExpR). Plan Phase A: evidence-based strategy research for 300 curated strategies.",
+        "Updated title: Build AI Trading System \u2192 Swarm Phase A \u2014 Evidence-Based Strategy Research",
+        "Updated why: End-to-end ETH 5M ensemble trading system: 300 strategies across 10 edge classes \u2192 backtest all via Lean \u2192 ensemble meta-decision layer with weighted voting, 5 Fear/Greed market states, biweekly recalibration, monthly bench swap. \u2192 Revamp: previous Swarm ran 40 strategies, all negative expectancy (best STRAT_023 at -0.020R). Infrastructure (6-state engine, risk engine) works but strategy quality is the bottleneck. New direction: research 300 evidence-backed strategies from papers/GitHub/YouTube/X first, vet them, only then code the winners. Production engine: Freqtrade 2026.5.1.",
+        "Updated nextAction: Review Obsidian 5m dashboard (40 strategies, 32 traded, all negative ExpR). Plan Phase A: evidence-based strategy research for 300 curated strategies. \u2192 Phase A.1: Source sweep \u2014 arxiv (regime detection, online learning, ensemble), Freqtrade community strategies on GitHub, YouTube practitioner channels (Algovibes), X trading handles. Goal: 50 thesis cards in 01_Candidates/.",
+        "REVAMP: Killed old Lean-based direction. All 40 strategies negative. New approach: evidence-based research \u2192 Freqtrade engine. Installed Freqtrade 2026.5.1 at ~/freqtrade/. Archived old Obsidian notes to _archive/. Fresh Swarm.md + _THESIS_CARD_TEMPLATE.md created."
       ]
     },
     {
