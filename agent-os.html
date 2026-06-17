@@ -690,6 +690,24 @@
         </span>
       </div>
       <div class="memory-world-controls-right">
+        <span class="memory-world-last-updated" id="memory-world-last-updated" title="Last data refresh">
+          <span class="mw-dot"></span>
+          <span class="memory-world-last-updated-text" id="memory-world-last-updated-text">never</span>
+        </span>
+        <button class="os-btn os-btn-secondary os-btn-sm memory-world-refresh-btn"
+                id="memory-world-refresh-btn"
+                onclick="refreshMemoryWorld()"
+                title="Reload data/memory-world.json">
+          <span class="btn-icon">↻</span> Refresh
+        </button>
+        <button class="memory-world-autorefresh-toggle is-on"
+                id="memory-world-autorefresh-toggle"
+                onclick="toggleMemoryWorldAutoRefresh()"
+                title="Toggle auto-refresh (polls every 5s)">
+          <span class="mw-toggle-dot"></span>
+          <span id="memory-world-autorefresh-label">LIVE</span>
+        </button>
+        <span class="memory-world-controls-divider"></span>
         <span class="memory-world-zoom-indicator" id="memory-world-zoom">100%</span>
       </div>
     </div>
@@ -3823,10 +3841,28 @@ function initMemoryWorld() {
   memoryWorldCanvas = document.getElementById('memory-world-canvas');
   if (!memoryWorldCanvas) return;
 
+  // M5: attach event listeners and canvas sizing ONCE per canvas lifetime.
+  // Repeated calls (when user re-enters Memory tab) must not leak handlers
+  // and must not resize the canvas mid-pan/zoom (which would lose state).
+  if (memoryWorldCanvas.dataset.mwInitialized === '1') {
+    // Already wired up — just make sure animation is running and data is current.
+    if (!memoryWorldRunning) startMemoryWorldAnimation();
+    // If we have no data yet (first mount raced), kick off a load.
+    if (!memoryWorldData) {
+      loadMemoryWorldData();
+    } else {
+      // Re-affirm current state to UI elements that may have been re-rendered.
+      updateMemoryWorldStats();
+      updateMemoryWorldTimestamp();
+    }
+    return;
+  }
+
+  memoryWorldCanvas.dataset.mwInitialized = '1';
   memoryWorldCtx = memoryWorldCanvas.getContext('2d');
   resizeMemoryWorldCanvas();
 
-  // Event listeners
+  // Event listeners — attached once per canvas lifetime.
   memoryWorldCanvas.addEventListener('mousedown', onMemoryWorldMouseDown);
   memoryWorldCanvas.addEventListener('mousemove', onMemoryWorldMouseMove);
   memoryWorldCanvas.addEventListener('mouseup', onMemoryWorldMouseUp);
@@ -3835,7 +3871,11 @@ function initMemoryWorld() {
 
   window.addEventListener('resize', resizeMemoryWorldCanvas);
 
-  // Load data
+  // M5: start the live data bridge — timestamp ticker + auto-refresh poll.
+  startMemoryWorldTimestampTicker();
+  if (memoryWorldAutoRefresh) startMemoryWorldAutoRefresh();
+
+  // Load data (initial — M5 refreshes handle subsequent loads).
   loadMemoryWorldData();
 }
 
@@ -3861,13 +3901,283 @@ async function loadMemoryWorldData() {
     const resp = await fetch('data/memory-world.json?t=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     memoryWorldData = await resp.json();
+    memoryWorldDataGeneratedAt = memoryWorldData.generated_at || null;
+    memoryWorldDataLoadedAt = Date.now();
     initMemoryWorldSimulation();
     buildMemoryWorldLegend();
     updateMemoryWorldStats();
+    updateMemoryWorldTimestamp();
     startMemoryWorldAnimation();
   } catch (e) {
     console.error('Failed to load memory-world.json:', e);
     showMemoryWorldError(e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MEMORY WORLD — M5: Live Data Bridge
+// Refresh behavior: reload data/memory-world.json without remounting
+// the canvas. Preserve pan/zoom/hover/click. Manual + auto-refresh.
+// ═══════════════════════════════════════════════════════════════
+
+let memoryWorldDataGeneratedAt = null;  // ISO8601 from data/memory-world.json
+let memoryWorldDataLoadedAt = null;     // Date.now() of last successful load
+let memoryWorldRefreshInFlight = false; // prevents overlapping fetches
+let memoryWorldAutoRefresh = true;
+let memoryWorldAutoRefreshTimer = null;
+const MEMORY_WORLD_AUTO_REFRESH_MS = 5000; // poll cadence for change detection
+
+// ── refreshMemoryWorld: the core of M5 ──
+// Reloads data/memory-world.json. Does NOT remount the canvas. Does NOT
+// reset transform/hover/selected. Preserves positions of nodes whose
+// id still exists. Adds new nodes with default ring layout. Removes
+// vanished nodes. Updates edges. Rebuilds legend + stats.
+async function refreshMemoryWorld(opts) {
+  opts = opts || {};
+  const silent = !!opts.silent;
+
+  if (memoryWorldRefreshInFlight) return;
+  if (!memoryWorldCanvas || !memoryWorldCtx) return;
+
+  memoryWorldRefreshInFlight = true;
+  setMemoryWorldRefreshingUI(true, silent);
+
+  try {
+    const resp = await fetch('data/memory-world.json?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const newData = await resp.json();
+
+    // No-op if the source's generated_at is unchanged.
+    if (memoryWorldDataGeneratedAt && newData.generated_at === memoryWorldDataGeneratedAt) {
+      // Still update the "last checked" timestamp so the user knows we're alive.
+      memoryWorldDataLoadedAt = Date.now();
+      updateMemoryWorldTimestamp();
+      return;
+    }
+
+    // ── State preservation across refresh ──
+    // 1) Pan/zoom transform: untouched (we never call centerMemoryWorldView here).
+    // 2) Hover: re-resolve by id because sim objects get rebuilt.
+    // 3) Selected: re-resolve by id; keep inspector open if the node still exists.
+    const preservedTransform = Object.assign({}, memoryWorldTransform);
+    const preservedHoveredId = memoryWorldHovered?.id || null;
+    const preservedSelectedId = memoryWorldSelected?.id || null;
+    const preservedLayerFilter = memoryWorldLayerFilter;
+
+    // 3b) Map old positions by id so we can preserve physics layout.
+    const oldPositions = new Map();
+    for (const sim of memoryWorldSimNodes) {
+      oldPositions.set(sim.id, { x: sim.x, y: sim.y, fixed: !!sim.fixed });
+    }
+
+    // ── Apply new data ──
+    memoryWorldData = newData;
+    memoryWorldDataGeneratedAt = newData.generated_at || null;
+    memoryWorldDataLoadedAt = Date.now();
+
+    // Build new sim arrays, preserving positions for surviving nodes.
+    rebuildMemoryWorldSimulationPreserving(oldPositions);
+
+    // ── Re-resolve hover + selected + transform ──
+    memoryWorldTransform = preservedTransform;
+    memoryWorldLayerFilter = preservedLayerFilter;
+    memoryWorldHovered = preservedHoveredId
+      ? memoryWorldSimNodes.find(n => n.id === preservedHoveredId) || null
+      : null;
+    memoryWorldSelected = preservedSelectedId
+      ? memoryWorldSimNodes.find(n => n.id === preservedSelectedId) || null
+      : null;
+
+    // Re-render inspector content for the still-selected node so any
+    // updated fields (confidence, summary, etc.) are reflected.
+    if (memoryWorldSelected) {
+      showMemoryWorldInspector(memoryWorldSelected);
+    } else {
+      hideMemoryWorldInspector();
+    }
+
+    buildMemoryWorldLegend();
+    updateMemoryWorldStats();
+    updateMemoryWorldTimestamp();
+
+    if (!memoryWorldRunning) startMemoryWorldAnimation();
+
+    // User-visible toast only for manual refresh; silent for auto-poll.
+    if (!silent) {
+      const added = memoryWorldData.nodes?.length || 0;
+      showToast(
+        'Memory World refreshed — ' + added + ' nodes, ' +
+        (memoryWorldData.edges?.length || 0) + ' edges',
+        'success'
+      );
+    }
+  } catch (e) {
+    console.error('refreshMemoryWorld failed:', e);
+    if (!silent) showToast('Refresh failed: ' + e.message, 'error');
+    updateMemoryWorldTimestamp('error');
+  } finally {
+    memoryWorldRefreshInFlight = false;
+    setMemoryWorldRefreshingUI(false, silent);
+  }
+}
+
+// rebuildMemoryWorldSimulationPreserving: like initMemoryWorldSimulation
+// but reuses cached (x, y) for nodes whose id still exists. New nodes get
+// default ring positions. Vanished nodes are dropped. Edges re-filtered.
+function rebuildMemoryWorldSimulationPreserving(oldPositions) {
+  const nodes = memoryWorldData.nodes || [];
+  const edges = memoryWorldData.edges || [];
+
+  const filteredNodes = nodes.filter(n => {
+    if (memoryWorldLayerFilter === 'all') return true;
+    return String(n.layer) === memoryWorldLayerFilter;
+  });
+
+  memoryWorldSimNodes = filteredNodes.map((node) => {
+    const cluster = NODE_TYPE_CLUSTER[node.type] || 'agents';
+    const tokens = MEMORY_WORLD_CLUSTER_TOKENS[cluster] || MEMORY_WORLD_CLUSTER_TOKENS.agents;
+
+    const cached = oldPositions.get(node.id);
+    if (cached) {
+      return {
+        id: node.id,
+        node: node,
+        cluster: cluster,
+        tokens: tokens,
+        x: cached.x,
+        y: cached.y,
+        vx: 0,
+        vy: 0,
+        fixed: !!cached.fixed,
+      };
+    }
+
+    // New node — place it on its cluster's default ring.
+    if (cluster === 'zen_core') {
+      return {
+        id: node.id,
+        node: node,
+        cluster: cluster,
+        tokens: tokens,
+        x: 0, y: 0,
+        vx: 0, vy: 0,
+        fixed: true,
+      };
+    }
+    const layer = tokens.layer;
+    const layerNodes = filteredNodes.filter(n => (NODE_TYPE_CLUSTER[n.type] || 'agents') === cluster);
+    const clusterIndex = layerNodes.indexOf(node);
+    const angle = (2 * Math.PI * clusterIndex) / Math.max(1, layerNodes.length);
+    const radius = 180 + layer * 100 + Math.random() * 50;
+    return {
+      id: node.id,
+      node: node,
+      cluster: cluster,
+      tokens: tokens,
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle),
+      vx: 0, vy: 0,
+      fixed: false,
+    };
+  });
+
+  const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+  memoryWorldEdges = edges.filter(e =>
+    filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
+  );
+}
+
+// ── UI affordances for the M5 controls ──
+function setMemoryWorldRefreshingUI(isRefreshing, silent) {
+  const btn = document.getElementById('memory-world-refresh-btn');
+  if (btn) btn.classList.toggle('is-spinning', !!isRefreshing);
+  const ts = document.getElementById('memory-world-last-updated');
+  if (ts) ts.classList.toggle('is-refreshing', !!isRefreshing);
+}
+
+function updateMemoryWorldTimestamp(statusOverride) {
+  const el = document.getElementById('memory-world-last-updated');
+  const text = document.getElementById('memory-world-last-updated-text');
+  if (!el || !text) return;
+
+  el.classList.remove('is-refreshing', 'is-stale');
+
+  if (statusOverride === 'error') {
+    text.textContent = 'refresh failed';
+    el.classList.add('is-stale');
+    return;
+  }
+
+  if (!memoryWorldDataLoadedAt) {
+    text.textContent = 'never';
+    return;
+  }
+
+  const ageMs = Date.now() - memoryWorldDataLoadedAt;
+  const ageSec = Math.floor(ageMs / 1000);
+  let label;
+  if (ageSec < 5)        label = 'just now';
+  else if (ageSec < 60)  label = ageSec + 's ago';
+  else if (ageSec < 3600) label = Math.floor(ageSec / 60) + 'm ago';
+  else                    label = Math.floor(ageSec / 3600) + 'h ago';
+
+  text.textContent = 'updated ' + label;
+
+  // Dot color: live (<10s) -> green; stale (>60s) -> warning; else muted.
+  el.classList.toggle('is-live', ageSec < 10);
+  el.classList.toggle('is-stale', ageSec >= 60);
+}
+
+// Periodic tick that refreshes the "Xs ago" label without fetching.
+function startMemoryWorldTimestampTicker() {
+  if (window.__mwTimestampTicker) return;
+  window.__mwTimestampTicker = setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    if (currentPage !== 'memory') return;
+    updateMemoryWorldTimestamp();
+  }, 1000);
+}
+
+// ── Auto-refresh polling ──
+// Polls every MEMORY_WORLD_AUTO_REFRESH_MS. Each tick fires
+// refreshMemoryWorld({ silent: true }); the refresh itself is a no-op
+// if data.generated_at hasn't changed (cheap check). When the file
+// changes on disk, the next tick triggers a real redraw.
+function startMemoryWorldAutoRefresh() {
+  if (memoryWorldAutoRefreshTimer) return;
+  memoryWorldAutoRefreshTimer = setInterval(() => {
+    if (!memoryWorldAutoRefresh) return;
+    if (document.visibilityState !== 'visible') return;
+    if (currentPage !== 'memory') return;
+    if (memoryWorldRefreshInFlight) return;
+    refreshMemoryWorld({ silent: true });
+  }, MEMORY_WORLD_AUTO_REFRESH_MS);
+}
+
+function stopMemoryWorldAutoRefresh() {
+  if (memoryWorldAutoRefreshTimer) {
+    clearInterval(memoryWorldAutoRefreshTimer);
+    memoryWorldAutoRefreshTimer = null;
+  }
+}
+
+function toggleMemoryWorldAutoRefresh() {
+  memoryWorldAutoRefresh = !memoryWorldAutoRefresh;
+  const btn = document.getElementById('memory-world-autorefresh-toggle');
+  const label = document.getElementById('memory-world-autorefresh-label');
+  if (btn) btn.classList.toggle('is-on', memoryWorldAutoRefresh);
+  if (label) label.textContent = memoryWorldAutoRefresh ? 'LIVE' : 'OFF';
+  showToast(
+    memoryWorldAutoRefresh
+      ? 'Memory World auto-refresh ON (polls every ' +
+        Math.round(MEMORY_WORLD_AUTO_REFRESH_MS / 1000) + 's)'
+      : 'Memory World auto-refresh OFF',
+    'info'
+  );
+  if (memoryWorldAutoRefresh) {
+    startMemoryWorldAutoRefresh();
+  } else {
+    stopMemoryWorldAutoRefresh();
   }
 }
 
@@ -5449,6 +5759,39 @@ function zenChatRenderMarkdown(text) {
       i++; continue;
     }
 
+    // Markdown table: | col | col | followed by |---|---| separator then rows
+    // Must be detected before paragraph fallthrough so the first row becomes header.
+    const tableMatch = /^\s*\|(.+)\|\s*$/.exec(line);
+    if (tableMatch) {
+      // Peek ahead: next line must be a separator (|---|---|...)
+      if (i + 1 < escLines.length) {
+        const sepLine = escLines[i + 1].replace(/\s+$/g, '');
+        if (/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/.test(sepLine)) {
+          // Parse header row
+          const headerCells = tableMatch[1].split('|').map(c => c.trim()).filter(c => c !== '');
+          flushParagraph(paraBuf); paraBuf = [];
+          flushList(ulBuf, false); ulBuf = [];
+          flushList(olBuf, true); olBuf = [];
+          const rowsHtml = ['<table class="zen-md-table"><thead><tr>' +
+            headerCells.map(h => '<th>' + zenChatRenderInline(h) + '</th>').join('') +
+            '</tr></thead><tbody>'];
+          i += 2; // skip header + separator
+          // Consume data rows
+          while (i < escLines.length) {
+            const dl = escLines[i].replace(/\s+$/g, '');
+            const dm = /^\s*\|(.+)\|\s*$/.exec(dl);
+            if (!dm) break;
+            const cells = dm[1].split('|').map(c => c.trim());
+            rowsHtml.push('<tr>' + cells.map(c => '<td>' + zenChatRenderInline(c) + '</td>').join('') + '</tr>');
+            i++;
+          }
+          rowsHtml.push('</tbody></table>');
+          out.push(rowsHtml.join(''));
+          continue;
+        }
+      }
+    }
+
     // Heading: # / ## / ### (we only emit up to h3; anything deeper collapses to h3)
     const hMatch = /^(#{1,6})\s+(.*)$/.exec(line);
     if (hMatch) {
@@ -5524,7 +5867,7 @@ function zenChatCreateMessageEl(m, idx) {
   const el = document.createElement('div');
   el.className = 'zen-chat-message zen-chat-message--' + m.role;
   el.dataset.key = zenChatMessageKey(m, idx || 0);
-  el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble zen-chat-bubble--markdown">' + zenChatRenderMarkdown(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
+  el.innerHTML = '<div><div class="zen-chat-bubble zen-chat-bubble--markdown">' + zenChatRenderMarkdown(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
   return el;
 }
 

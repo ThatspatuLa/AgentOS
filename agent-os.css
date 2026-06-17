@@ -3721,6 +3721,110 @@ body[data-page="kanban"] .os-main {
   text-align: center;
 }
 
+/* ── M5: Live Data Bridge Controls ── */
+.memory-world-controls-right {
+  gap: var(--space-3);
+}
+
+.memory-world-last-updated {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.memory-world-last-updated .mw-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.memory-world-last-updated.is-live .mw-dot {
+  background: var(--accent-success, #3fc960);
+  box-shadow: 0 0 6px var(--accent-success, #3fc960);
+}
+
+.memory-world-last-updated.is-refreshing .mw-dot {
+  background: var(--accent-info, #4da3ff);
+  animation: mw-dot-pulse 0.9s ease-in-out infinite;
+}
+
+.memory-world-last-updated.is-stale .mw-dot {
+  background: var(--accent-warning, #f0883e);
+}
+
+@keyframes mw-dot-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1;   transform: scale(1.15); }
+}
+
+.memory-world-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.memory-world-refresh-btn .btn-icon {
+  display: inline-block;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.memory-world-refresh-btn.is-spinning .btn-icon {
+  animation: mw-refresh-spin 0.9s linear infinite;
+}
+
+@keyframes mw-refresh-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.memory-world-autorefresh-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.memory-world-autorefresh-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default, var(--border-subtle));
+}
+
+.memory-world-autorefresh-toggle.is-on {
+  color: var(--accent-success, #3fc960);
+  border-color: var(--accent-success, #3fc960);
+}
+
+.memory-world-autorefresh-toggle .mw-toggle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.memory-world-autorefresh-toggle.is-on .mw-toggle-dot {
+  background: var(--accent-success, #3fc960);
+  box-shadow: 0 0 4px var(--accent-success, #3fc960);
+}
+
 /* ── Tooltip ── */
 .memory-world-tooltip {
   position: absolute;
@@ -5415,10 +5519,24 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   scroll-behavior: smooth;
 }
 
+/* The wrapper div (containing bubble + time) inside .zen-chat-message
+   must constrain its children — without min-width: 0, flex items refuse
+   to shrink below their intrinsic content width, so wide tables/code
+   blocks blow up the entire message container. */
+.zen-chat-message > div {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .zen-chat-message {
   display: flex;
-  gap: var(--space-3);
-  max-width: 85%;
+  gap: 0;
+  max-width: 100%;
+  width: 100%;
+  min-width: 0;
   animation: zenChatMessageIn 0.2s var(--ease-out);
 }
 
@@ -5437,15 +5555,7 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
 }
 
 .zen-chat-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-xs);
-  flex-shrink: 0;
-  margin-top: 2px;
+  display: none;
 }
 
 .zen-chat-message--user .zen-chat-avatar {
@@ -5470,6 +5580,7 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  overflow: hidden; /* any overflowing content gets clipped, not scrolled */
 }
 
 /* Hard override: keep the markdown bubble wrapping as a fallback safety net.
@@ -5591,6 +5702,40 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   text-underline-offset: 2px;
 }
 .zen-chat-bubble--markdown a.zen-md-link:hover { color: #a5b4fc; }
+
+.zen-chat-bubble--markdown table.zen-md-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.85em 0;
+  font-size: 0.9em;
+  table-layout: fixed;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.zen-chat-bubble--markdown table.zen-md-table th,
+.zen-chat-bubble--markdown table.zen-md-table td {
+  padding: 0.4em 0.7em;
+  text-align: left;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.zen-chat-bubble--markdown table.zen-md-table th {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.zen-chat-bubble--markdown table.zen-md-table tr:last-child td { border-bottom: 0; }
+.zen-chat-bubble--markdown table.zen-md-table code.zen-md-inlinecode {
+  font-size: 0.85em;
+}
 
 /* ═══ CHAT INPUT AREA ═══ */
 .zen-chat-input-area {
