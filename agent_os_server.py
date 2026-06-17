@@ -632,6 +632,251 @@ def _write_hermes_turn_event(session_id: str, s: dict, user_record: dict, assist
         if milestone:
             _update_session_recent_activity(session_id, milestone)
 
+    # Update Obsidian project memory with facts from this turn
+    _update_obsidian_memory(session_id, s, assistant_record, clean_summary, files_touched)
+
+
+# Obsidian vault path — single source of truth for project knowledge
+_OBSIDIAN_VAULT = Path.home() / "Obsidian" / "ZenVault"
+_OBSIDIAN_MEMORIES_DIR = _OBSIDIAN_VAULT / "00_System" / "Project Memories"
+
+# Map Agent OS session IDs → Obsidian memory filenames
+_SESSION_MEMORY_FILE: dict[str, str] = {
+    "zen": "Zen Memory.md",
+    "zen-os": "Zen Memory.md",
+    "rin": "Rin Memory.md",
+    "kiyosaki": "Kiyosaki Memory.md",
+    "toji": "Toji Memory.md",
+    "minato": "Minato Memory.md",
+    "kazuki": "Kazuki Memory.md",
+}
+
+
+def _update_obsidian_memory(
+    session_id: str,
+    s: dict,
+    assistant_record: dict | None,
+    summary_text: str,
+    files_touched: list[str],
+) -> None:
+    """Append durable facts from a Hermes turn to the project's Obsidian memory file.
+
+    This is the Obsidian → Hermes bridge (Gap C/E fix). After each Hermes turn,
+    we extract key facts (files touched, decisions, summary) and append them to
+    the relevant Obsidian memory file. A separate sync step compacts Obsidian
+    memories into MEMORY.md for Hermes injection.
+    """
+    memory_filename = _SESSION_MEMORY_FILE.get(session_id)
+    if not memory_filename:
+        return  # session has no Obsidian memory file
+
+    mem_path = _OBSIDIAN_MEMORIES_DIR / memory_filename
+    if not mem_path.exists():
+        return
+
+    now = _now_iso()
+    entry_lines = [f"## Turn — {now}", ""]
+
+    # Add summary of what was done
+    if summary_text:
+        entry_lines.append(f"**Summary:** {summary_text}")
+        entry_lines.append("")
+
+    # Add files touched
+    if files_touched:
+        entry_lines.append(f"**Files touched:** {', '.join(files_touched[:5])}")
+        entry_lines.append("")
+
+    # Extract decisions from assistant output (commitment language)
+    if assistant_record:
+        content = assistant_record.get("content", "") or ""
+        decisions = _extract_decisions(content)
+        if decisions:
+            entry_lines.append("**Decisions:**")
+            for d in decisions[:3]:
+                entry_lines.append(f"- {d}")
+            entry_lines.append("")
+
+    # Only write if there's meaningful content beyond the header
+    if len(entry_lines) <= 2:
+        return
+
+    entry_text = "\n".join(entry_lines) + "\n"
+
+    try:
+        existing = mem_path.read_text(encoding="utf-8")
+        # Insert new entry right after the frontmatter/header (after first --- block)
+        # Find the end of the first --- ... --- block
+        lines = existing.split("\n")
+        insert_idx = 0
+        in_header = False
+        for i, line in enumerate(lines):
+            if line.strip() == "---":
+                if not in_header:
+                    in_header = True
+                else:
+                    insert_idx = i + 1
+                    break
+
+        # Insert the new entry after the header
+        lines.insert(insert_idx, "")
+        lines.insert(insert_idx + 1, entry_text.rstrip())
+        lines.insert(insert_idx + 2, "")
+        mem_path.write_text("\n".join(lines), encoding="utf-8")
+    except Exception:
+        pass  # Obsidian update is best-effort; don't break the turn
+
+
+def _extract_decisions(content: str) -> list[str]:
+    """Extract decision/commitment statements from Hermes output.
+
+    Looks for lines with commitment language that indicate a decision was made
+    or an action was taken.
+    """
+    decisions = []
+    commitment_patterns = [
+        r"(?:I will|I'll|Let me|I'm going to|I've|I have)\s+(.+)",
+        r"(?:Fixed|Patched|Updated|Created|Added|Removed|Refactored)\s+(.+)",
+        r"(?:Decision|Decided|Chose|Selected):\s*(.+)",
+    ]
+    for line in content.split("\n"):
+        line = line.strip()
+        if not line or len(line) > 200:
+            continue
+        for pattern in commitment_patterns:
+            m = re.search(pattern, line, re.IGNORECASE)
+            if m:
+                decision = m.group(0).strip()
+                if decision and decision not in decisions:
+                    decisions.append(decision)
+                break
+    return decisions[:5]
+
+
+def _sync_obsidian_to_memory_md() -> None:
+    """Compact Obsidian project memories into MEMORY.md for Hermes injection.
+
+    This is the sync bridge: Obsidian (rich, structured) → MEMORY.md (compact,
+    Hermes-consumable). Called on server start and can be triggered periodically.
+
+    Respects Hermes's memory_char_limit (2200 chars default).
+    """
+    mem_dir = HERMES_DB.parent / "memories"
+    mem_dir.mkdir(parents=True, exist_ok=True)
+    memory_path = mem_dir / "MEMORY.md"
+
+    # Read existing MEMORY.md to preserve non-Obsidian sections
+    existing_sections: dict[str, str] = {}
+    if memory_path.exists():
+        current = memory_path.read_text(encoding="utf-8")
+        # Split into sections by § delimiter
+        parts = current.split("\n§\n")
+        for part in parts:
+            lines = part.strip().split("\n")
+            if lines:
+                # Use first line as section key
+                key = lines[0].strip()
+                existing_sections[key] = part.strip()
+
+    # Build Obsidian-derived content
+    obsidian_content: list[str] = []
+    obsidian_content.append("## Obsidian Project Memories (auto-synced)")
+    obsidian_content.append("")
+
+    # Read SOUL.md for cross-project context
+    soul_path = _OBSIDIAN_VAULT / "00_System" / "SOUL.md"
+    if soul_path.exists():
+        try:
+            soul_text = soul_path.read_text(encoding="utf-8")
+            # Extract just the key sections (user, active projects, cross-project laws)
+            soul_lines = soul_text.split("\n")
+            in_section = False
+            section_lines: list[str] = []
+            for line in soul_lines:
+                if line.startswith("## User"):
+                    in_section = "user"
+                    section_lines.append("### User")
+                    continue
+                if line.startswith("## Active Projects"):
+                    in_section = "projects"
+                    section_lines.append("### Active Projects")
+                    continue
+                if line.startswith("## Cross-Project Laws"):
+                    in_section = "laws"
+                    section_lines.append("### Cross-Project Laws")
+                    continue
+                if line.startswith("## ") and in_section:
+                    in_section = False
+                    continue
+                if in_section and line.strip():
+                    # Skip table rows, keep bullet points
+                    if not line.startswith("|") and not line.startswith("|-"):
+                        section_lines.append(line)
+            if section_lines:
+                obsidian_content.extend(section_lines[:30])  # cap SOUL contribution
+                obsidian_content.append("")
+        except Exception:
+            pass
+
+    # Read each project memory file
+    for session_id, mem_filename in _SESSION_MEMORY_FILE.items():
+        mem_path = _OBSIDIAN_MEMORIES_DIR / mem_filename
+        if not mem_path.exists():
+            continue
+        try:
+            mem_text = mem_path.read_text(encoding="utf-8")
+            # Extract the last 3 turn entries (most recent activity)
+            turn_sections = mem_text.split("## Turn — ")
+            if len(turn_sections) > 1:
+                obsidian_content.append(f"### {mem_filename.replace('.md', '').replace(' Memory', '')}")
+                # Take last 3 turns
+                for turn in turn_sections[-3:]:
+                    turn_text = turn.strip()
+                    if turn_text:
+                        # Truncate each turn to 200 chars
+                        if len(turn_text) > 200:
+                            turn_text = turn_text[:197] + "..."
+                        obsidian_content.append(turn_text)
+                        obsidian_content.append("")
+        except Exception:
+            pass
+
+    # Assemble final MEMORY.md
+    # Preserve existing non-Obsidian sections, replace Obsidian section
+    obsidian_key = "## Obsidian Project Memories (auto-synced)"
+    existing_sections[obsidian_key] = "\n".join(obsidian_content)
+
+    # Build output: non-Obsidian sections first, then Obsidian
+    output_parts: list[str] = []
+    for key, content in existing_sections.items():
+        if key != obsidian_key:
+            output_parts.append(content)
+    output_parts.append(existing_sections[obsidian_key])
+
+    final_text = "\n§\n".join(output_parts)
+
+    # Enforce char limit (2200 chars for MEMORY.md)
+    if len(final_text) > 2200:
+        # Truncate Obsidian section first
+        excess = len(final_text) - 2200
+        obsidian_section = existing_sections[obsidian_key]
+        if len(obsidian_section) > excess + 50:
+            obsidian_section = obsidian_section[:-(excess + 50)] + "\n... (truncated)"
+            existing_sections[obsidian_key] = obsidian_section
+            output_parts = []
+            for key, content in existing_sections.items():
+                if key != obsidian_key:
+                    output_parts.append(content)
+            output_parts.append(existing_sections[obsidian_key])
+            final_text = "\n§\n".join(output_parts)
+        else:
+            final_text = final_text[:2197] + "..."
+
+    try:
+        memory_path.write_text(final_text, encoding="utf-8")
+    except Exception:
+        pass  # Best-effort sync
+
 
 def _curate_milestone(status: str, summary: str, evidence: list[str], files_touched: list[str] | None = None, validation: list[dict] | None = None) -> str:
     """Create a curated milestone string for Kanban activity[] from a hermes_turn event."""
@@ -2008,6 +2253,11 @@ def main():
     mapped = sum(1 for e in hsm.values() if e.get("inferredBy") != "title_pattern")
     inferred = sum(1 for e in hsm.values() if e.get("inferredBy") == "title_pattern")
     print(f"Hermes session map: {len(hsm)} sessions ({mapped} explicit, {inferred} inferred from titles)")
+
+    # Sync Obsidian project memories → MEMORY.md (Gap C/E fix)
+    # Compacts rich Obsidian knowledge into Hermes-consumable format
+    _sync_obsidian_to_memory_md()
+    print("Obsidian → MEMORY.md sync complete")
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     try:
