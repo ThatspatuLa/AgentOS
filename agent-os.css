@@ -5469,6 +5469,26 @@ body:has(.zen-chat-page.zen-chat-full-mode) .os-main {
   overflow-wrap: anywhere;
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hard override: keep the markdown bubble wrapping as a fallback safety net.
+   The .zen-chat-bubble--markdown rule below tries to set white-space: normal
+   for block-element flow, but we need pre-wrap-style wrapping to win so long
+   unbreakable strings inside <p>, <li>, etc. still wrap. */
+.zen-chat-bubble--markdown,
+.zen-chat-bubble--markdown p,
+.zen-chat-bubble--markdown li {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.zen-chat-bubble--markdown pre.zen-md-codeblock {
+  /* Inside code blocks, allow horizontal scroll (Discord-style) but cap width */
+  max-width: 100%;
 }
 
 .zen-chat-message--user .zen-chat-bubble {
