@@ -310,6 +310,76 @@ def _write_json(path: Path, payload: dict) -> None:
     os.replace(tmp_path, path)
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# M5 — Live Data Bridge: helpers for hot-reloading data/memory-world.json
+# These pure functions are also mirrored in agent-os.html (the JS code uses
+# the same logic). Tests live in tests/test_memory_world_refresh.py.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Sub-second jitter tolerance for mtime comparison. Filesystem mtimes can
+# differ by microseconds between reads; treating that as "changed" would
+# cause spurious reloads every poll.
+_MTIME_TOLERANCE = 0.001
+
+
+def _memory_world_mtime_payload(path: Path) -> dict:
+    """Return the {mtime, size} payload served by /api/memory-world/mtime.
+
+    mtime is normalised to integer seconds so the value is stable across
+    pollers that read the same file within the same second.
+    """
+    st = path.stat()
+    return {
+        "mtime": int(st.st_mtime),
+        "size": st.st_size,
+    }
+
+
+def mtime_changed(last_known: float | None, current: float) -> bool:
+    """Polling comparator: did the file change since the last poll?
+
+    Returns True on the first poll (last_known is None) or whenever the
+    current mtime is strictly greater than the last known mtime (with a
+    small tolerance to absorb filesystem jitter).
+    """
+    if last_known is None:
+        return True
+    return current > last_known + _MTIME_TOLERANCE
+
+
+def diff_node_ids(prev_ids: list[str], new_ids: list[str]) -> tuple[list[str], list[str]]:
+    """Return (added, removed) node IDs between two snapshots.
+
+    Order-independent: the caller passes lists, but comparison is set-based.
+    Returned lists are sorted for deterministic output (and to match the
+    JS implementation, which uses Set operations and Array.from().sort()).
+    """
+    prev = set(prev_ids)
+    new = set(new_ids)
+    added = sorted(new - prev)
+    removed = sorted(prev - new)
+    return added, removed
+
+
+def format_relative_time(ts: float, now: float | None = None) -> str:
+    """Format a unix timestamp as a Discord-style '5s ago' / '2m ago' string.
+
+    Mirrors the JS helper used in the Memory World controls bar.
+    """
+    if now is None:
+        now = time.time()
+    delta = now - ts
+    if delta < 5:
+        return "just now"
+    if delta < 60:
+        return f"{int(delta)}s ago"
+    if delta < 3600:
+        return f"{int(delta // 60)}m ago"
+    if delta < 86400:
+        return f"{int(delta // 3600)}h ago"
+    return f"{int(delta // 86400)}d ago"
+
+
 def _append_jsonl(path: Path, record: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
