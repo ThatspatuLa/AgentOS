@@ -735,6 +735,9 @@ _CHANNEL_SESSION_PATTERNS: dict[str, list[str]] = {
         "Discord Bridge Status Confirmation",
         "Requesting Concise Alerts",
     ],
+    "zen-os-chat": [
+        "Zen OS",
+    ],
     "kiyosaki-chat": [
         "Kiyosaki",
         "ETHUSDT 5m Strategy Backtesting Dashboard",
