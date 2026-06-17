@@ -18,7 +18,7 @@
       "validationProof": [],
       "nextSafeGate": "M4 — Hermes webhook integration",
       "recentActivity": [],
-      "taskId": null,
+      "taskId": "task-zen-fix-gh-kanban",
       "messageCount": 1,
       "repo": "/home/spatula/Projects/ZenNew",
       "branchPrefix": "main",
@@ -52,11 +52,11 @@
         "Files touched: task-link-ok"
       ],
       "taskId": "task-zen-memory-world",
-      "messageCount": 119,
+      "messageCount": 120,
       "repo": "/home/spatula/Projects/ZenNew",
       "branchPrefix": "session/zen/",
       "createdAt": "2026-06-16T05:02:21.313039Z",
-      "lastActive": "2026-06-17T06:10:59.311725Z"
+      "lastActive": "2026-06-17T07:26:33.900101Z"
     },
     {
       "id": "kiyosaki",
@@ -75,7 +75,7 @@
       "validationProof": [],
       "nextSafeGate": "M3 — ETHUSDT strategy backtest complete",
       "recentActivity": [],
-      "taskId": null,
+      "taskId": "task-kiyosaki-trading-system",
       "messageCount": 356,
       "repo": "/home/spatula/Projects/Kiyosaki",
       "branchPrefix": "session/kiyosaki/",
@@ -99,7 +99,7 @@
       "validationProof": [],
       "nextSafeGate": "M1 — project scoping",
       "recentActivity": [],
-      "taskId": null,
+      "taskId": "task-minato-income-5k",
       "messageCount": 0,
       "repo": "/home/spatula/Projects/ZenNew",
       "branchPrefix": "session/minato/",
@@ -179,5 +179,5 @@
       "lastActive": "2026-06-16T05:02:21.313047Z"
     }
   ],
-  "updatedAt": "2026-06-17T06:10:59.311751Z"
+  "updatedAt": "2026-06-17T07:26:33.900125Z"
 }

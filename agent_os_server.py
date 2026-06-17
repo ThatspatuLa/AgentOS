@@ -878,6 +878,92 @@ def _sync_obsidian_to_memory_md() -> None:
         pass  # Best-effort sync
 
 
+def _sync_kanban_to_obsidian() -> None:
+    """Write current Kanban state to Obsidian project dashboard.
+
+    This is the Kanban → Obsidian bridge. Called on server startup and
+    after each Hermes turn that updates a task. Keeps the Obsidian
+    Project Kanban.md in sync with data/kanban-tasks.json.
+    """
+    tasks_data = _read_json(TASKS_FILE, {"tasks": []})
+    tasks = tasks_data.get("tasks", [])
+
+    lines = []
+    lines.append("---")
+    lines.append("title: Project Kanban")
+    lines.append("project: Zen / Agent OS")
+    lines.append(f"last_updated: {_now_iso()}")
+    lines.append("---")
+    lines.append("")
+    lines.append("# Project Kanban")
+    lines.append("")
+    lines.append("Auto-synced from Agent OS Kanban. Updated on server startup and after each Hermes turn.")
+    lines.append("")
+
+    # Group by status
+    status_order = ["wip", "backlog", "done", "archived"]
+    status_labels = {
+        "wip": "🔨 In Progress",
+        "backlog": "📋 Backlog",
+        "done": "✅ Done",
+        "archived": "📦 Archived",
+    }
+
+    for status in status_order:
+        if status == "archived":
+            group = [t for t in tasks if t.get("archived")]
+        else:
+            group = [t for t in tasks if t["status"] == status and not t.get("archived")]
+        if not group:
+            continue
+
+        lines.append(f"## {status_labels.get(status, status)}")
+        lines.append("")
+
+        for t in group:
+            priority = t.get("priority", "")
+            risk = t.get("risk", "")
+            lines.append(f"### {t['title']}")
+            lines.append(f"- **ID:** `{t['id']}`")
+            lines.append(f"- **Project:** {t.get('project', '—')} | **Priority:** {priority} | **Risk:** {risk}")
+            if t.get("nextAction"):
+                na = t["nextAction"].replace("\n", " ")[:120]
+                lines.append(f"- **Next:** {na}")
+            if t.get("subtasks"):
+                done = sum(1 for st in t["subtasks"] if st["status"] == "done")
+                total = len(t["subtasks"])
+                lines.append(f"- **Progress:** {done}/{total} subtasks")
+            if t.get("activity"):
+                lines.append(f"- **Recent:** {t['activity'][-1]}")
+            lines.append("")
+
+    # Summary table
+    lines.append("---")
+    lines.append("")
+    lines.append("## Summary")
+    lines.append("")
+    lines.append("| Task | Status | Project | Priority | Progress |")
+    lines.append("|:-----|:-------|:--------|:---------|:---------|")
+
+    for t in tasks:
+        if t.get("archived"):
+            continue
+        st_done = sum(1 for st in t.get("subtasks", []) if st["status"] == "done")
+        st_total = len(t.get("subtasks", []))
+        progress = f"{st_done}/{st_total}" if st_total > 0 else "—"
+        title = t["title"][:40]
+        lines.append(f"| {title} | {t['status']} | {t.get('project','—')} | {t.get('priority','—')} | {progress} |")
+
+    content = "\n".join(lines) + "\n"
+
+    try:
+        dash_path = _OBSIDIAN_VAULT / "01_Projects" / "Project Kanban.md"
+        dash_path.parent.mkdir(parents=True, exist_ok=True)
+        dash_path.write_text(content, encoding="utf-8")
+    except Exception:
+        pass  # Best-effort sync
+
+
 def _curate_milestone(status: str, summary: str, evidence: list[str], files_touched: list[str] | None = None, validation: list[dict] | None = None) -> str:
     """Create a curated milestone string for Kanban activity[] from a hermes_turn event."""
     if status == "failed":
@@ -2258,6 +2344,10 @@ def main():
     # Compacts rich Obsidian knowledge into Hermes-consumable format
     _sync_obsidian_to_memory_md()
     print("Obsidian → MEMORY.md sync complete")
+
+    # Sync Kanban → Obsidian dashboard
+    _sync_kanban_to_obsidian()
+    print("Kanban → Obsidian sync complete")
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     try:
