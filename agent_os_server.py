@@ -1534,9 +1534,17 @@ class Handler(SimpleHTTPRequestHandler):
             self._ndjson_event({"event": "accepted", "message": record})
             assistant_record = None
             try:
-                if role == "user" and s.get("hermesSessionId"):
+                # Determine which Hermes session to use for the chat.
+                # Direct link takes priority; fall back to channel aggregation
+                # (pick the most recently active session on the channel).
+                _chat_hsid = s.get("hermesSessionId")
+                if not _chat_hsid and s.get("channel"):
+                    _channel_ids = _channel_session_ids(s["channel"])
+                    if _channel_ids:
+                        _chat_hsid = _channel_ids[-1]  # most recent session on channel
+                if role == "user" and _chat_hsid:
                     assistant_record = self._hermes_chat_stream(
-                        s["hermesSessionId"],
+                        _chat_hsid,
                         content,
                         lambda payload: self._ndjson_event(payload),
                     )
@@ -1588,13 +1596,18 @@ class Handler(SimpleHTTPRequestHandler):
             # with full context (memory, tools, skills) and the response
             # goes to Discord automatically via the gateway.
             assistant_record = None
-            if role == "user" and s.get("hermesSessionId"):
+            _chat_hsid = s.get("hermesSessionId")
+            if not _chat_hsid and s.get("channel"):
+                _channel_ids = _channel_session_ids(s["channel"])
+                if _channel_ids:
+                    _chat_hsid = _channel_ids[-1]
+            if role == "user" and _chat_hsid:
                 # Build compact context block from linked task + session state
                 context_prefix = _build_context_prefix(s)
                 hermes_content = content
                 if context_prefix:
                     hermes_content = context_prefix + "\n\n" + content
-                assistant_record = self._hermes_chat(s["hermesSessionId"], hermes_content)
+                assistant_record = self._hermes_chat(_chat_hsid, hermes_content)
                 if assistant_record and not s.get("hermesSessionId"):
                     _append_jsonl(msg_path, assistant_record)
                     s["messageCount"] = (s.get("messageCount") or 0) + 1
@@ -1783,7 +1796,9 @@ class Handler(SimpleHTTPRequestHandler):
             new_assistant = [m for m in new_messages if m.get("role") == "assistant"]
             response_text = _clean_hermes_stdout(stdout, progress)
             if new_assistant:
-                response_text = str(new_assistant[-1].get("content") or "").strip() or response_text
+                db_content = str(new_assistant[-1].get("content") or "").strip()
+                if db_content:
+                    response_text = _clean_hermes_stdout(db_content, progress) or response_text
             return {
                 "role": "assistant",
                 "content": response_text,
