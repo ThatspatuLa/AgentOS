@@ -70,8 +70,8 @@ DEFAULT_SESSIONS = [
         "icon": "🖥️",
         "projectId": None,
         "parentSessionId": None,
-        "hermesSessionId": None,  # will be set to the active zen-chat Hermes session
-        "channel": "zen-chat",
+        "hermesSessionId": None,  # will be set to the active zen-os Discord channel Hermes session
+        "channel": "1516644810834841672",
         "color": "#7c3aed",
         "summary": "Agent OS · UI & Frontend · Unified dashboard view",
         "decisions": [],
@@ -1068,6 +1068,9 @@ _CHANNEL_SESSION_PATTERNS: dict[str, list[str]] = {
         "Requesting Concise Alerts",
     ],
     "zen-os-chat": [
+        "Zen OS",
+    ],
+    "1516644810834841672": [
         "Zen OS",
     ],
     "kiyosaki-chat": [

@@ -25,6 +25,7 @@ WEBHOOK_PORT = int(os.getenv("WEBHOOK_PORT", "8765").strip())
 # Channel → Session Mapping
 CHANNEL_SESSION_MAP = {
     1513076747430793289: "zen",
+    1516644810834841672: "zen-os",
     1500437316379086880: "kiyosaki",
     1500437358934233219: "minato",
     1500437397916356608: "rin",
@@ -35,6 +36,7 @@ CHANNEL_SESSION_MAP = {
 # Session → Instruction File
 SESSION_INSTRUCTIONS = {
     "zen": "Zen Instructions.md",
+    "zen-os": "Zen OS Instructions.md",
     "kiyosaki": "Kiyosaki Instructions.md",
     "minato": "Minato Instructions.md",
     "rin": "Rin Instructions.md",

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-17T08:38:43.660867Z",
+  "updatedAt": "2026-06-17T17:49:50.456792Z",
   "sessions": {
     "20260607_193056_683caea5": {
       "agentOsSession": "zen",
@@ -298,6 +298,15 @@
       "lastSeen": "2026-06-17T08:38:43.660467Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
+    },
+    "20260618_004216_3039da2d": {
+      "agentOsSession": "zen-os",
+      "channel": "1516644810834841672",
+      "projectId": null,
+      "firstSeen": "2026-06-18T00:42:16.028369",
+      "lastSeen": "2026-06-17T17:49:50.456785Z",
+      "messageCount": 244,
+      "inferredBy": "explicit"
     }
   }
 }
