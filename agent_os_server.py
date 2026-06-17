@@ -50,6 +50,7 @@ ROOT = Path(__file__).resolve().parent
 TASKS_FILE = ROOT / "data" / "kanban-tasks.json"
 SESSIONS_DIR = ROOT / "data" / "sessions"
 SESSIONS_INDEX = SESSIONS_DIR / "index.json"
+HERMES_SESSION_MAP_FILE = SESSIONS_DIR / "hermes-session-map.json"
 
 # Hermes session DB — the source of truth for Discord message history
 HERMES_DB = Path.home() / ".hermes" / "state.db"
@@ -751,37 +752,157 @@ _CHANNEL_SESSION_PATTERNS: dict[str, list[str]] = {
 }
 
 
+def _load_hermes_session_map() -> dict:
+    """Load the Hermes session → Agent OS session mapping.
+
+    Returns a dict of hermes_session_id → {
+        agentOsSession, channel, projectId, firstSeen, lastSeen, messageCount
+    }
+    """
+    data = _read_json(HERMES_SESSION_MAP_FILE, None)
+    if data is None:
+        return {}
+    return data.get("sessions", {})
+
+
+def _save_hermes_session_map(mapping: dict) -> None:
+    """Persist the Hermes session mapping."""
+    _write_json(HERMES_SESSION_MAP_FILE, {
+        "version": 1,
+        "updatedAt": _now_iso(),
+        "sessions": mapping,
+    })
+
+
+def _record_hermes_session(agent_os_session: dict, hermes_session_id: str) -> None:
+    """Record that a Hermes session belongs to an Agent OS session.
+
+    Called every time we send a message to Hermes, so we always know
+    which project/channel a Hermes session belongs to — no title guessing.
+    """
+    if not hermes_session_id:
+        return
+    mapping = _load_hermes_session_map()
+    entry = mapping.get(hermes_session_id, {})
+    now = _now_iso()
+    entry.update({
+        "agentOsSession": agent_os_session.get("id"),
+        "channel": agent_os_session.get("channel"),
+        "projectId": agent_os_session.get("projectId"),
+        "lastSeen": now,
+        "messageCount": (entry.get("messageCount") or 0) + 1,
+    })
+    if "firstSeen" not in entry:
+        entry["firstSeen"] = now
+    mapping[hermes_session_id] = entry
+    _save_hermes_session_map(mapping)
+
+
+def _rebuild_hermes_session_map() -> dict:
+    """Rebuild the mapping from existing Hermes DB + Agent OS session index.
+
+    Used on first startup to create the map from historical data.
+    Uses title pattern matching as a fallback for sessions we haven't
+    explicitly recorded yet.
+    """
+    mapping: dict = {}
+    index = _load_index()
+
+    # For each Agent OS session with a channel, find matching Hermes sessions
+    for s in index.get("sessions", []):
+        channel = s.get("channel")
+        if not channel:
+            continue
+        patterns = _CHANNEL_SESSION_PATTERNS.get(channel, [])
+        if not patterns or not HERMES_DB.exists():
+            continue
+        try:
+            conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            conditions = " OR ".join(["s.title LIKE ?" for _ in patterns])
+            params = [f"{p}%" for p in patterns]
+            rows = conn.execute(
+                f"""SELECT DISTINCT s.id, s.started_at
+                    FROM sessions s
+                    JOIN messages m ON m.session_id = s.id
+                    WHERE s.source LIKE '%%discord%%'
+                    AND ({conditions})
+                    AND m.role IN ('user','assistant')
+                    AND s.title IS NOT NULL
+                    GROUP BY s.id
+                    HAVING COUNT(m.id) > 0""",
+                params,
+            ).fetchall()
+            conn.close()
+            for r in rows:
+                hsid = r["id"]
+                if hsid not in mapping:
+                    mapping[hsid] = {
+                        "agentOsSession": s["id"],
+                        "channel": channel,
+                        "projectId": s.get("projectId"),
+                        "firstSeen": datetime.datetime.fromtimestamp(
+                            r["started_at"] or 0
+                        ).isoformat() if r["started_at"] else _now_iso(),
+                        "lastSeen": _now_iso(),
+                        "messageCount": 0,
+                        "inferredBy": "title_pattern",
+                    }
+        except Exception:
+            pass
+
+    _save_hermes_session_map(mapping)
+    return mapping
+
+
 def _channel_session_ids(channel: str) -> list[str]:
     """Return all Hermes session IDs that belong to a given Discord channel.
 
-    Uses title matching against known patterns because Hermes creates a new
-    session on each compaction/reset rather than reusing one session per
-    channel."""
+    Uses the explicit session mapping table as the primary source.
+    Falls back to title pattern matching for any sessions not yet in the map.
+    Results are merged and deduplicated, sorted by firstSeen (oldest first).
+    """
+    # Primary: use the explicit session mapping
+    mapping = _load_hermes_session_map()
+    mapped_ids = [
+        hsid for hsid, entry in mapping.items()
+        if entry.get("channel") == channel
+    ]
+
+    # Fallback: title pattern matching for unmapped sessions
     patterns = _CHANNEL_SESSION_PATTERNS.get(channel, [])
-    if not patterns or not HERMES_DB.exists():
-        return []
-    try:
-        conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
-        # Build WHERE clause for title patterns
-        conditions = " OR ".join(["s.title LIKE ?" for _ in patterns])
-        params = [f"{p}%" for p in patterns]
-        rows = conn.execute(
-            f"""SELECT DISTINCT s.id
-                FROM sessions s
-                JOIN messages m ON m.session_id = s.id
-                WHERE s.source LIKE '%%discord%%'
-                AND ({conditions})
-                AND m.role IN ('user','assistant')
-                AND s.title IS NOT NULL
-                GROUP BY s.id
-                HAVING COUNT(m.id) > 0""",
-            params,
-        ).fetchall()
-        conn.close()
-        return [r["id"] for r in rows]
-    except Exception:
-        return []
+    pattern_ids: list[str] = []
+    if patterns and HERMES_DB.exists():
+        try:
+            conn = sqlite3.connect(f"file:{HERMES_DB}?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            conditions = " OR ".join(["s.title LIKE ?" for _ in patterns])
+            params = [f"{p}%" for p in patterns]
+            rows = conn.execute(
+                f"""SELECT DISTINCT s.id
+                    FROM sessions s
+                    JOIN messages m ON m.session_id = s.id
+                    WHERE s.source LIKE '%%discord%%'
+                    AND ({conditions})
+                    AND m.role IN ('user','assistant')
+                    AND s.title IS NOT NULL
+                    GROUP BY s.id
+                    HAVING COUNT(m.id) > 0""",
+                params,
+            ).fetchall()
+            conn.close()
+            pattern_ids = [r["id"] for r in rows]
+        except Exception:
+            pass
+
+    # Merge: mapped first (they're confirmed), then pattern-matched
+    seen = set(mapped_ids)
+    result = list(mapped_ids)
+    for hsid in pattern_ids:
+        if hsid not in seen:
+            result.append(hsid)
+
+    return result
 
 
 def _hermes_messages(hermes_session_id: str, limit: int = 500, channel: str | None = None, since_ts: float | None = None) -> list[dict]:
@@ -1553,6 +1674,8 @@ class Handler(SimpleHTTPRequestHandler):
                 if not _chat_hsid:
                     _chat_hsid = s.get("hermesSessionId")
                 if role == "user" and _chat_hsid:
+                    # Record which Agent OS session this Hermes session belongs to
+                    _record_hermes_session(s, _chat_hsid)
                     assistant_record = self._hermes_chat_stream(
                         _chat_hsid,
                         content,
@@ -1615,6 +1738,8 @@ class Handler(SimpleHTTPRequestHandler):
             if not _chat_hsid:
                 _chat_hsid = s.get("hermesSessionId")
             if role == "user" and _chat_hsid:
+                # Record which Agent OS session this Hermes session belongs to
+                _record_hermes_session(s, _chat_hsid)
                 # Build compact context block from linked task + session state
                 context_prefix = _build_context_prefix(s)
                 hermes_content = content
@@ -1875,6 +2000,14 @@ def main():
     for s in idx["sessions"]:
         hsid = s.get("hermesSessionId") or "—"
         print(f"  {s['id']:12s} | hermes: {hsid:30s} | channel: {s.get('channel','—')}")
+
+    # Rebuild Hermes session → Agent OS session mapping
+    # This ensures every Hermes session is linked to its project/channel
+    # without relying solely on fragile title pattern matching
+    hsm = _rebuild_hermes_session_map()
+    mapped = sum(1 for e in hsm.values() if e.get("inferredBy") != "title_pattern")
+    inferred = sum(1 for e in hsm.values() if e.get("inferredBy") == "title_pattern")
+    print(f"Hermes session map: {len(hsm)} sessions ({mapped} explicit, {inferred} inferred from titles)")
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     try:
