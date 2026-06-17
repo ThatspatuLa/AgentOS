@@ -459,13 +459,13 @@
                     <h2 class="zen-chat-page-heading" id="zen-chat-session-title">Zen OS Session</h2>
                     <span class="zen-chat-session-chevron" id="zen-chat-full-session-chevron" aria-hidden="true">▾</span>
                   </div>
-                  <p class="zen-chat-page-subtitle" id="zen-chat-session-meta">Agent OS · UI &amp; Frontend</p>
+                  <p class="zen-chat-page-subtitle" id="zen-chat-session-meta">Agent OS · UI &amp; Frontend · #zen-os · 1516644810834841672</p>
                 </div>
                 <div class="zen-chat-session-picker" id="zen-chat-session-picker">
                   <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" data-session="zen-os" onclick="zenChatSelectSession('zen-os')">
                     <div class="zen-chat-session-picker-info">
                       <div class="zen-chat-session-picker-title">Zen OS Session</div>
-                      <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend</div>
+                      <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend · #zen-os · 1516644810834841672</div>
                     </div>
                   </div>
                   <div class="zen-chat-session-picker-item" data-session="zen" onclick="zenChatSelectSession('zen')">
@@ -870,7 +870,7 @@
       <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" onclick="zenChatSelectSession('zen-os','small');">
         <div class="zen-chat-session-picker-info">
           <div class="zen-chat-session-picker-title">Zen OS</div>
-          <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend</div>
+          <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend · #zen-os · 1516644810834841672</div>
         </div>
       </div>
       <div class="zen-chat-session-picker-item" onclick="zenChatSelectSession('zen','small');">
@@ -942,13 +942,13 @@
             <div class="zen-chat-session-title" id="zen-chat-drawer-session-title">Zen OS Session</div>
             <span class="zen-chat-session-chevron" id="zen-chat-drawer-session-chevron" aria-hidden="true">▾</span>
           </div>
-          <div class="zen-chat-session-meta" id="zen-chat-drawer-session-meta">Agent OS · UI &amp; Frontend</div>
+          <div class="zen-chat-session-meta" id="zen-chat-drawer-session-meta">Agent OS · UI &amp; Frontend · #zen-os · 1516644810834841672</div>
         </div>
         <div class="zen-chat-session-picker" id="zen-chat-drawer-session-picker">
           <div class="zen-chat-session-picker-item zen-chat-session-picker-item--active" data-session="zen-os" onclick="zenChatSelectSession('zen-os','drawer')">
             <div class="zen-chat-session-picker-info">
               <div class="zen-chat-session-picker-title">Zen OS Session</div>
-              <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend</div>
+              <div class="zen-chat-session-picker-meta">Agent OS · UI &amp; Frontend · #zen-os · 1516644810834841672</div>
             </div>
           </div>
           <div class="zen-chat-session-picker-item" data-session="zen" onclick="zenChatSelectSession('zen','drawer')">
@@ -1776,16 +1776,22 @@ async function loadKanbanTasks() {
     const fileTasks = Array.isArray(payload.tasks) ? payload.tasks : [];
     const fileVersion = payload.version || 0;
 
-    // Merge: file is base, localStorage overrides (preserves Six's browser edits)
-    kanbanTasksCache = mergeTasks(fileTasks, local.tasks);
-    kanbanSharedPersistence = false; // file-based, not API
-
-    // If local has tasks not in file (quick-adds), merge them in
-    const fileIds = new Set(fileTasks.map(t => t.id));
-    const localOnlyTasks = local.tasks.filter(t => t?.id && !fileIds.has(t.id));
-    if (localOnlyTasks.length) {
-      kanbanTasksCache = mergeTasks(kanbanTasksCache, localOnlyTasks);
+    // If file version is newer than localStorage, file wins completely
+    // (Zen's CLI updates are authoritative). Otherwise merge with localStorage overrides
+    // (preserves Six's browser edits like notes, drawer state).
+    if (fileVersion > local.storedVersion) {
+      console.log(`Kanban: file v${fileVersion} > localStorage v${local.storedVersion}, syncing from file`);
+      kanbanTasksCache = fileTasks;
+    } else {
+      kanbanTasksCache = mergeTasks(fileTasks, local.tasks);
+      // If local has tasks not in file (quick-adds), merge them in
+      const fileIds = new Set(fileTasks.map(t => t.id));
+      const localOnlyTasks = local.tasks.filter(t => t?.id && !fileIds.has(t.id));
+      if (localOnlyTasks.length) {
+        kanbanTasksCache = mergeTasks(kanbanTasksCache, localOnlyTasks);
+      }
     }
+    kanbanSharedPersistence = false; // file-based, not API
 
     localStorage.setItem('zen-os-kanban-version', String(fileVersion));
     localStorage.setItem('zen-os-kanban-tasks', JSON.stringify(kanbanTasksCache));
@@ -4768,7 +4774,7 @@ window.showPage = function(id) {
 
 // ── M1: State ──
 const ZEN_CHAT_SESSIONS = {
-  'zen-os':    {id:'zen-os',    type:'global', icon:'🖥️', label:'Zen OS',   title:'Zen OS Session',         meta:'Agent OS · UI & Frontend',  badgeClass:'zen-chat-session-badge--ui',     projectId:null,       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'main',              hermesSessionId:null,       channel:'zen-os-chat', color:'#7c3aed'},
+  'zen-os':    {id:'zen-os',    type:'global', icon:'🖥️', label:'Zen OS',   title:'Zen OS Session',         meta:'Agent OS · UI & Frontend · #zen-os · 1516644810834841672',  badgeClass:'zen-chat-session-badge--ui',     projectId:null,       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'main',              hermesSessionId:null,       channel:'1516644810834841672', color:'#7c3aed'},
   'zen':       {id:'zen',       type:'main',   icon:'🦉', label:'Zen',      title:'Zen Project Session',     meta:'Project: Zen',              badgeClass:'zen-chat-session-badge--project', projectId:'zen',       repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/zen/',       hermesSessionId:'20260615_023828_9b59a6', channel:'zen-chat',    color:'#6366f1'},
   'kiyosaki':  {id:'kiyosaki',  type:'main',   icon:'📊', label:'Kiyosaki', title:'Kiyosaki Project Session', meta:'Project: Kiyosaki',         badgeClass:'zen-chat-session-badge--project', projectId:'kiyosaki',  repo:'/home/spatula/Projects/Kiyosaki', branchPrefix:'session/kiyosaki/',  hermesSessionId:'20260613_130913_a8909b', channel:'kiyosaki-chat', color:'#059669'},
   'minato':    {id:'minato',    type:'main',   icon:'🔧', label:'Minato',   title:'Minato Project Session',  meta:'Project: Minato',           badgeClass:'zen-chat-session-badge--project', projectId:'minato',    repo:'/home/spatula/Projects/ZenNew', branchPrefix:'session/minato/',    hermesSessionId:'20260613_123151_42ef1c', channel:'minato-chat',  color:'#d97706'},
