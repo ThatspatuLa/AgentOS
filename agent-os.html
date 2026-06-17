@@ -512,6 +512,10 @@
                 <span class="zen-chat-status-dot"></span>
                 <span id="zen-chat-header-status-text">Ready</span>
               </div>
+              <div class="zen-chat-history-filter" id="zen-chat-history-filter">
+                <button class="active" data-range="intraday" onclick="zenChatSetHistoryFilter('intraday')">Intraday</button>
+                <button data-range="weekly" onclick="zenChatSetHistoryFilter('weekly')">Weekly</button>
+              </div>
               <div class="zen-chat-view-toggle">
                 <button class="zen-chat-view-btn active" onclick="zenChatGoToView('full')" id="zen-chat-view-full">Full</button>
                 <button class="zen-chat-view-btn" onclick="zenChatGoToView('drawer')" id="zen-chat-view-drawer">Drawer</button>
@@ -4782,6 +4786,7 @@ let zenChatState = {
   model: {chat: 'gpt-5.5', execution: 'gpt-5.5'},
   autoDetect: true,
   previousPage: 'dashboard',
+  historyFilter: 'intraday', // 'intraday' | 'weekly'
   // Session data loaded from API
   sessionsLoaded: false,
   sessionMeta: {},  // sessionId -> summary from API
@@ -4902,6 +4907,30 @@ function zenChatRenderSidebar() {
   });
 }
 
+// History filter helpers
+function zenChatHistoryQueryString() {
+  var range = zenChatState.historyFilter || 'intraday';
+  if (range === 'weekly') {
+    var since = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+    return '?since=' + since;
+  }
+  return ''; // server default = intraday (today only)
+}
+
+function zenChatSetHistoryFilter(range) {
+  if (range !== 'intraday' && range !== 'weekly') return;
+  zenChatState.historyFilter = range;
+  // Update button states
+  var btns = document.querySelectorAll('#zen-chat-history-filter button');
+  btns.forEach(function(b) {
+    if (b.getAttribute('data-range') === range) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+  // Clear caches and re-render
+  zenChatState.messagesCache = {};
+  zenChatRefreshActiveMessages(true);
+}
+
 // Load messages for a session (cached)
 function zenChatFetchMessages(sessionId, forceRefresh) {
   if (!forceRefresh && zenChatState.messagesCache[sessionId]) {
@@ -4911,7 +4940,9 @@ function zenChatFetchMessages(sessionId, forceRefresh) {
   var optimistic = (zenChatState.messagesCache[sessionId] || []).filter(function(m) {
     return m.source === 'agent-os' && (m.role === 'user' || m.role === 'assistant');
   });
-  return zenChatApi('/' + sessionId + '/messages').then(function(data) {
+  // Build query string based on history filter
+  var qs = zenChatHistoryQueryString();
+  return zenChatApi('/' + sessionId + '/messages' + qs).then(function(data) {
     // Normalize messages: convert ts (Unix seconds) to time (HH:MM) for display
     var normalized = (data.messages || []).map(function(m) {
       if (!m.time && m.ts) {
@@ -5286,11 +5317,208 @@ function zenChatMessageKey(m, idx) {
   return [m.ts || '', m.role || '', m.content || '', idx].join('|');
 }
 
+// ── Discord-style markdown renderer ──
+// Renders a safe subset of Discord-flavored markdown: **bold**, *italic*,
+// __underline__, ~~strikethrough~~, `inline code`, ```code blocks```,
+// # / ## / ### headings, - / * / 1. lists, > blockquotes, [text](url) links,
+// and blank-line paragraph breaks. User-supplied text is HTML-escaped first,
+// then markdown is converted to safe HTML — no external libs.
+function zenChatRenderMarkdown(text) {
+  if (text == null) return '';
+  // 1) Extract blockquote lines FIRST (before HTML-escaping) so the leading
+  //    '>' is preserved as a structural marker, not escaped to '&gt;'.
+  const lines = String(text).split('\n');
+  const quoteBuf = [];
+  const protectedQuoteBlocks = []; // [startIdx, endIdx] inclusive ranges of quote lines
+  const isQuoteLine = [];
+  for (let li = 0; li < lines.length; li++) {
+    if(/^>\s?/.test(lines[li])) {
+      isQuoteLine.push(li);
+    }
+  }
+  // Group consecutive quote-line indices into blocks.
+  const quoteLineGroups = [];
+  let cur = [];
+  for (let li = 0; li < lines.length; li++) {
+    if (/^>\s?/.test(lines[li])) {
+      cur.push(li);
+    } else {
+      if (cur.length) { quoteLineGroups.push(cur); cur = []; }
+    }
+  }
+  if (cur.length) quoteLineGroups.push(cur);
+  // For each quote-line group, replace its lines with a single placeholder line.
+  // Build a new lines array and a map of placeholder -> stripped quote content.
+  const quotePlaceholders = [];
+  const newLines = [];
+  let groupIdx = 0;
+  let lineCursor = 0;
+  while (lineCursor < lines.length) {
+    const grp = quoteLineGroups[groupIdx];
+    if (grp && grp[0] === lineCursor) {
+      // Consume this whole group as one blockquote block.
+      const content = grp.map(function(idx) { return lines[idx].replace(/^>\s?/, ''); }).join(' ');
+      const ph = '\u0000QUOTE_' + quotePlaceholders.length + '\u0000';
+      quotePlaceholders.push(content);
+      newLines.push(ph);
+      lineCursor = grp[grp.length - 1] + 1;
+      groupIdx++;
+    } else {
+      newLines.push(lines[lineCursor]);
+      lineCursor++;
+    }
+  }
+
+  // 2) HTML-escape the remaining (non-quote) text. Code blocks and inline code
+  //    are extracted into placeholders so their contents are not touched later.
+  let s = newLines.map(function(l) {
+    if (/^\u0000QUOTE_\d+\u0000$/.test(l)) return l; // skip escape for placeholders
+    return l
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }).join('\n');
+
+  const codeBlocks = [];
+  s = s.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, function(_m, lang, code) {
+    const i = codeBlocks.push({lang: lang, code: code}) - 1;
+    return '\u0000CODEBLOCK_' + i + '\u0000';
+  });
+  const inlineCodes = [];
+  s = s.replace(/`([^`\n]+)`/g, function(_m, code) {
+    const i = inlineCodes.push(code) - 1;
+    return '\u0000INLINECODE_' + i + '\u0000';
+  });
+
+  // 3) Block-level transforms run on a per-line basis. Process line by line,
+  //    then group consecutive same-type lines into a single block.
+  const escLines = s.split('\n');
+  const out = [];
+  let i = 0;
+  function flushParagraph(buf) {
+    if (buf.length === 0) return;
+    // Discord renders a single \n inside a paragraph as a line break (no joining
+    // space). Join the buffered lines with a <br> so multi-line paragraphs
+    // match Discord's spacing instead of running together with a space.
+    out.push('<p>' + zenChatRenderInline(buf.join('<br>')) + '</p>');
+  }
+  function flushList(items, ordered) {
+    if (items.length === 0) return;
+    const tag = ordered ? 'ol' : 'ul';
+    out.push('<' + tag + '>' + items.map(function(it) { return '<li>' + zenChatRenderInline(it) + '</li>'; }).join('') + '</' + tag + '>');
+  }
+
+  let paraBuf = [];
+  let ulBuf = [];
+  let olBuf = [];
+  while (i < escLines.length) {
+    const raw = escLines[i];
+    const line = raw.replace(/\s+$/g, '');
+
+    if (line === '') {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(ulBuf, false); ulBuf = [];
+      flushList(olBuf, true); olBuf = [];
+      i++; continue;
+    }
+
+    // Quote placeholder on its own line — render as blockquote
+    const qm = /^\u0000QUOTE_(\d+)\u0000$/.exec(line);
+    if (qm) {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(ulBuf, false); ulBuf = [];
+      flushList(olBuf, true); olBuf = [];
+      out.push('<blockquote>' + zenChatRenderInline(quotePlaceholders[parseInt(qm[1], 10)]) + '</blockquote>');
+      i++; continue;
+    }
+
+    // Fenced code block placeholder on its own line — render as a code block
+    if (/^\u0000CODEBLOCK_\d+\u0000$/.test(line)) {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(ulBuf, false); ulBuf = [];
+      flushList(olBuf, true); olBuf = [];
+      const idx = parseInt(line.replace(/[^\d]/g, ''), 10);
+      const cb = codeBlocks[idx];
+      out.push('<pre class="zen-md-codeblock"><code' + (cb.lang ? ' class="lang-' + escapeHtml(cb.lang) + '"' : '') + '>' + cb.code + '</code></pre>');
+      i++; continue;
+    }
+
+    // Heading: # / ## / ### (we only emit up to h3; anything deeper collapses to h3)
+    const hMatch = /^(#{1,6})\s+(.*)$/.exec(line);
+    if (hMatch) {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(ulBuf, false); ulBuf = [];
+      flushList(olBuf, true); olBuf = [];
+      const lvl = Math.min(3, hMatch[1].length);
+      out.push('<h' + lvl + ' class="zen-md-h zen-md-h' + lvl + '">' + zenChatRenderInline(hMatch[2]) + '</h' + lvl + '>');
+      i++; continue;
+    }
+
+    // Unordered list: - or * at line start
+    const ulMatch = /^[-*]\s+(.*)$/.exec(line);
+    if (ulMatch) {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(olBuf, true); olBuf = [];
+      ulBuf.push(ulMatch[1]);
+      i++; continue;
+    }
+
+    // Ordered list: 1. 2. etc.
+    const olMatch = /^\d+\.\s+(.*)$/.exec(line);
+    if (olMatch) {
+      flushParagraph(paraBuf); paraBuf = [];
+      flushList(ulBuf, false); ulBuf = [];
+      olBuf.push(olMatch[1]);
+      i++; continue;
+    }
+
+    // Anything else: paragraph
+    flushList(ulBuf, false); ulBuf = [];
+    flushList(olBuf, true); olBuf = [];
+    paraBuf.push(line);
+    i++;
+  }
+  flushParagraph(paraBuf);
+  flushList(ulBuf, false);
+  flushList(olBuf, true);
+
+  // 4) Restore inline code placeholders.
+  let html = out.join('');
+  html = html.replace(/\u0000INLINECODE_(\d+)\u0000/g, function(_m, idx) {
+    return '<code class="zen-md-inlinecode">' + inlineCodes[parseInt(idx, 10)] + '</code>';
+  });
+  // Code blocks are already restored inside the loop.
+  return html;
+}
+
+// Inline transforms: must run AFTER the text is already HTML-escaped, so we
+// only emit a small whitelist of safe tags.
+function zenChatRenderInline(text) {
+  let s = text;
+  // [text](url) — only allow http/https/mailto
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g,
+    function(_m, label, url) {
+      return '<a class="zen-md-link" href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+    }
+  );
+  // Bold: **…** (Discord also supports __…__ as bold, so we treat __ as bold too)
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  // Underline: Discord uses __…__ for underline when not adjacent to alnum.
+  // We keep __…__ as bold above (matches Discord default for most clients).
+  // Italic: *…* or _…_
+  s = s.replace(/(^|[^\w*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+  s = s.replace(/(^|[^\w_])_([^_\n]+)_/g, '$1<em>$2</em>');
+  // Strikethrough: ~~…~~
+  s = s.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+  return s;
+}
+
 function zenChatCreateMessageEl(m, idx) {
   const el = document.createElement('div');
   el.className = 'zen-chat-message zen-chat-message--' + m.role;
   el.dataset.key = zenChatMessageKey(m, idx || 0);
-  el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble">' + escapeHtml(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
+  el.innerHTML = '<div class="zen-chat-avatar">' + (m.role === 'user' ? '👤' : '🦉') + '</div><div><div class="zen-chat-bubble zen-chat-bubble--markdown">' + zenChatRenderMarkdown(m.content) + '</div><div class="zen-chat-message-time">' + (m.time || '') + '</div></div>';
   return el;
 }
 
