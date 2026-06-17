@@ -2054,7 +2054,12 @@ function openTaskDrawer(id) {
   subtaskSection.className = 'task-drawer-subtasks';
   const subtaskCount = (task.subtasks || []).filter(s => s.status === 'done' || s.status === 'running').length;
   const subtaskTotal = (task.subtasks || []).length;
-  subtaskSection.innerHTML = `<h4>📋 Subtasks <small>${subtaskCount}/${subtaskTotal} complete</small></h4>`;
+  subtaskSection.innerHTML = `
+    <div class="subtasks-header-row">
+      <h4>📋 Subtasks <small>${subtaskCount}/${subtaskTotal} complete</small></h4>
+      <button class="os-btn os-btn-secondary subtask-add-btn" onclick="showAddSubtaskForm('${task.id}')" title="Add a new subtask to this task">＋ Add</button>
+    </div>
+  `;
   const miniKanban = document.createElement('div');
   miniKanban.className = 'subtask-kanban';
   miniKanban.innerHTML = SUBTASK_COLUMNS.map(col => {
@@ -2066,13 +2071,44 @@ function openTaskDrawer(id) {
   }).join('');
   subtaskSection.appendChild(miniKanban);
 
-  // ── Bottom row: Evidence + Notes ──
+  // Inline add-subtask form (hidden by default)
+  const addForm = document.createElement('div');
+  addForm.id = `add-subtask-form-${task.id}`;
+  addForm.className = 'add-subtask-form';
+  addForm.style.display = 'none';
+  addForm.innerHTML = `
+    <input type="text" id="add-subtask-title-${task.id}" class="add-subtask-input" placeholder="New subtask title..." />
+    <select id="add-subtask-status-${task.id}" class="add-subtask-status-select">
+      <option value="backlog">Backlog</option>
+      <option value="wip" selected>WIP</option>
+      <option value="validate">Validate</option>
+      <option value="done">Done</option>
+    </select>
+    <button class="os-btn os-btn-primary" onclick="addSubtask('${task.id}')">Add</button>
+    <button class="os-btn os-btn-secondary" onclick="hideAddSubtaskForm('${task.id}')">Cancel</button>
+  `;
+  subtaskSection.appendChild(addForm);
+
+  // ── Bottom row: Evidence + Activity + Notes ──
   const bottomRow = document.createElement('div');
-  bottomRow.className = 'task-drawer-bottom-row';
+  bottomRow.className = 'task-drawer-bottom-row task-drawer-bottom-row--three';
 
   const evidenceCol = document.createElement('div');
   evidenceCol.className = 'task-drawer-bottom-col';
   evidenceCol.innerHTML = `<h4>🔗 Evidence / Links</h4><div class="task-pill-list">${(task.evidence || []).map(e => `<span>${escapeHtml(e)}</span>`).join('') || '<span style="color:var(--text-muted);font-size:var(--text-xs)">No evidence yet</span>'}</div>`;
+
+  const activityCol = document.createElement('div');
+  activityCol.className = 'task-drawer-bottom-col';
+  activityCol.innerHTML = `<h4>📜 Activity Log</h4>`;
+  const activityBox = document.createElement('div');
+  activityBox.className = 'task-activity-log';
+  const activityItems = task.activity || [];
+  if (activityItems.length === 0) {
+    activityBox.innerHTML = '<div class="task-muted" style="color:var(--text-muted);font-size:var(--text-xs)">No activity yet</div>';
+  } else {
+    activityBox.innerHTML = activityItems.map(a => `<div class="task-activity-row">${escapeHtml(a)}</div>`).join('');
+  }
+  activityCol.appendChild(activityBox);
 
   const notesCol = document.createElement('div');
   notesCol.className = 'task-drawer-bottom-col';
@@ -2088,6 +2124,7 @@ function openTaskDrawer(id) {
   notesCol.appendChild(notesTextarea);
 
   bottomRow.appendChild(evidenceCol);
+  bottomRow.appendChild(activityCol);
   bottomRow.appendChild(notesCol);
 
   // ── Build body ──
@@ -2198,6 +2235,95 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
   }
 }
 
+// ── Add subtask from drawer ──
+function showAddSubtaskForm(taskId) {
+  const form = document.getElementById(`add-subtask-form-${taskId}`);
+  if (!form) return;
+  form.style.display = 'flex';
+  const input = document.getElementById(`add-subtask-title-${taskId}`);
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function hideAddSubtaskForm(taskId) {
+  const form = document.getElementById(`add-subtask-form-${taskId}`);
+  if (!form) return;
+  form.style.display = 'none';
+}
+
+function addSubtask(taskId) {
+  const input = document.getElementById(`add-subtask-title-${taskId}`);
+  const statusSel = document.getElementById(`add-subtask-status-${taskId}`);
+  if (!input) return;
+  const title = (input.value || '').trim();
+  if (!title) {
+    input.focus();
+    input.style.borderColor = 'var(--os-danger, #e34c4c)';
+    setTimeout(() => { input.style.borderColor = ''; }, 1500);
+    return;
+  }
+  const status = statusSel ? statusSel.value : 'backlog';
+
+  const tasks = getTasks().map(t => {
+    if (t.id !== taskId) return t;
+    // Prevent duplicate titles
+    const existing = (t.subtasks || []).find(s => s.title === title);
+    if (existing) {
+      // Highlight existing instead of adding duplicate
+      return t;
+    }
+    const newSubtask = {title, status, description: '', notes: '', nextAction: '', evidence: [], activity: []};
+    return {
+      ...t,
+      subtasks: [...(t.subtasks || []), newSubtask],
+      lastActive: 'Now',
+      activity: [...(t.activity || []), `Added subtask "${title}" → ${getStatusLabel(status)}`]
+    };
+  });
+  setTasks(tasks);
+  // Re-render: drawer or board
+  if (document.getElementById('page-task-board')?.style.display === 'block') {
+    renderTaskBoard(taskId);
+  } else {
+    openTaskDrawer(taskId);
+  }
+}
+
+// ── Delete subtask ──
+function deleteSubtask(taskId, subtaskTitle) {
+  if (!confirm(`Delete subtask "${subtaskTitle}"?\n\nThis will permanently remove the subtask from this task.`)) return;
+  const tasks = getTasks().map(t => {
+    if (t.id !== taskId) return t;
+    return {
+      ...t,
+      subtasks: (t.subtasks || []).filter(s => s.title !== subtaskTitle),
+      lastActive: 'Now',
+      activity: [...(t.activity || []), `Deleted subtask "${subtaskTitle}"`]
+    };
+  });
+  setTasks(tasks);
+  closeSubtaskDrawer();
+  // Re-render drawer or board
+  if (document.getElementById('page-task-board')?.style.display === 'block') {
+    renderTaskBoard(taskId);
+  } else {
+    openTaskDrawer(taskId);
+  }
+}
+
+// ── Delete task ──
+function deleteTask(taskId) {
+  const task = findTask(taskId);
+  if (!task) return;
+  if (!confirm(`Delete task "${task.title}"?\n\nThis will permanently remove the task and all its subtasks.\n(Use Archive instead if you want to keep the history.)`)) return;
+  const tasks = getTasks().filter(t => t.id !== taskId);
+  setTasks(tasks);
+  closeTaskDrawer();
+  renderKanbanBoard();
+}
+
   // ── Subtask Detail Drawer ──
   function openSubtaskDrawer(taskId, subtaskTitle) {
     const task = findTask(taskId);
@@ -2259,7 +2385,8 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
       <button class="os-btn os-btn-secondary" onclick="moveSubtaskStatus('${taskId}','${escapeHtml(subtaskTitle)}','backlog')">Backlog</button>
       <button class="os-btn os-btn-secondary" onclick="moveSubtaskStatus('${taskId}','${escapeHtml(subtaskTitle)}','validate')">Validate</button>
       <button class="os-btn os-btn-primary" onclick="moveSubtaskStatus('${taskId}','${escapeHtml(subtaskTitle)}','done')">Done</button>
-      <button class="os-btn os-btn-danger" onclick="moveSubtaskStatus('${taskId}','${escapeHtml(subtaskTitle)}','backlog'); closeSubtaskDrawer();">Archive</button>
+      <button class="os-btn os-btn-secondary" onclick="moveSubtaskStatus('${taskId}','${escapeHtml(subtaskTitle)}','backlog'); closeSubtaskDrawer();">Archive</button>
+      <button class="os-btn os-btn-danger" onclick="deleteSubtask('${taskId}','${escapeHtml(subtaskTitle)}')" title="Permanently delete this subtask">🗑 Delete</button>
     `;
 
     const drawer = document.getElementById('subtask-drawer');
@@ -2447,6 +2574,7 @@ function cycleSubtaskStatus(taskId, subtaskTitle) {
     if (task.status === 'done') actions.push(`<button class="os-btn os-btn-primary" onclick="moveTask('${task.id}','running')">Run</button>`);
     if (task.status === 'running') actions.push(`<button class="os-btn os-btn-secondary" onclick="moveTask('${task.id}','done')">Stop Running</button>`);
     actions.push(`<button class="os-btn os-btn-danger" onclick="archiveTask('${task.id}')">Archive</button>`);
+    actions.push(`<button class="os-btn os-btn-danger" onclick="deleteTask('${task.id}')" title="Permanently delete this task" style="margin-left:8px">🗑 Delete</button>`);
   }
   return actions.join('');
 }

@@ -4079,6 +4079,78 @@ body[data-page="kanban"] .os-main {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
+.task-drawer-bottom-row--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.task-drawer-bottom-row--three .task-drawer-bottom-col textarea {
+  min-height: 100px;
+}
+
+/* ── Drawer: Activity Log ── */
+.task-activity-log {
+  max-height: 140px;
+  overflow-y: auto;
+  padding-right: 4px;
+  font-size: var(--text-xs);
+}
+.task-activity-log .task-activity-row {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(139, 155, 179, 0.08);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.task-activity-log .task-activity-row:last-child {
+  border-bottom: none;
+}
+
+/* ── Subtasks: header row + Add button + inline form ── */
+.subtasks-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+.subtasks-header-row h4 {
+  margin: 0;
+}
+.subtask-add-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+.add-subtask-form {
+  display: flex;
+  gap: 8px;
+  margin-top: var(--space-3);
+  padding: 10px;
+  background: rgba(4, 7, 12, 0.34);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  align-items: center;
+}
+.add-subtask-input {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+.add-subtask-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--accent-muted);
+}
+.add-subtask-status-select {
+  padding: 6px 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+}
 .task-drawer-bottom-col {
   background: rgba(4, 7, 12, 0.34);
   border: 1px solid rgba(139, 155, 179, 0.12);
