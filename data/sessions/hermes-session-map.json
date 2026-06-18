@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-17T17:49:50.456792Z",
+  "updatedAt": "2026-06-18T04:30:00.000000Z",
   "sessions": {
     "20260607_193056_683caea5": {
       "agentOsSession": "zen",
@@ -8,213 +8,6 @@
       "projectId": "zen",
       "firstSeen": "2026-06-07T19:30:56.883698",
       "lastSeen": "2026-06-17T08:38:43.658011Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260609_105418_ae512ca0": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-09T10:54:18.088255",
-      "lastSeen": "2026-06-17T08:38:43.658021Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260609_194328_675cee": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-09T19:43:28.254906",
-      "lastSeen": "2026-06-17T08:38:43.658023Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260609_205710_351cb9": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-09T20:57:10.155859",
-      "lastSeen": "2026-06-17T08:38:43.658024Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260609_224129_be9dcb": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-09T22:41:29.556811",
-      "lastSeen": "2026-06-17T08:38:43.658025Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260609_231828_70cc59": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-09T23:18:28.230499",
-      "lastSeen": "2026-06-17T08:38:43.658027Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_012737_0ff89b": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T01:27:37.354034",
-      "lastSeen": "2026-06-17T08:38:43.658031Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_020046_ad72b3": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T02:00:46.264196",
-      "lastSeen": "2026-06-17T08:38:43.658033Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_023648_d6f863": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T02:36:48.007953",
-      "lastSeen": "2026-06-17T08:38:43.658035Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_032623_e99fa4": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T03:26:23.071867",
-      "lastSeen": "2026-06-17T08:38:43.658036Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_164146_4108c4": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T16:41:46.743652",
-      "lastSeen": "2026-06-17T08:38:43.658038Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_165556_bff540": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T16:55:56.436667",
-      "lastSeen": "2026-06-17T08:38:43.658039Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_170448_ee6097": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T17:04:48.624259",
-      "lastSeen": "2026-06-17T08:38:43.658040Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_173032_b76ed9": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T17:30:32.159820",
-      "lastSeen": "2026-06-17T08:38:43.658042Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_175225_4d8ac9": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T17:52:25.479472",
-      "lastSeen": "2026-06-17T08:38:43.658042Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260610_215649_db3eaf0d": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-10T21:56:49.852880",
-      "lastSeen": "2026-06-17T08:38:43.658044Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260613_041636_9b87da": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-13T04:16:36.685283",
-      "lastSeen": "2026-06-17T08:38:43.658044Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260613_122843_a06d35": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-13T12:28:43.479594",
-      "lastSeen": "2026-06-17T08:38:43.658045Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260613_152032_f27efa": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-13T15:20:32.924540",
-      "lastSeen": "2026-06-17T08:38:43.658046Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260614_203554_56e2f5": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-14T20:35:54.142611",
-      "lastSeen": "2026-06-17T08:38:43.658047Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260614_204808_bf4f96": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-14T20:48:08.956329",
-      "lastSeen": "2026-06-17T08:38:43.658048Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260614_211837_acd029": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-14T21:18:37.021561",
-      "lastSeen": "2026-06-17T08:38:43.658049Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260615_023828_9b59a6": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-15T02:38:28.083500",
-      "lastSeen": "2026-06-17T08:38:43.658051Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260615_210907_71fe17": {
-      "agentOsSession": "zen",
-      "channel": "zen-chat",
-      "projectId": "zen",
-      "firstSeen": "2026-06-15T21:09:07.634718",
-      "lastSeen": "2026-06-17T08:38:43.658052Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -245,15 +38,6 @@
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
-    "20260609_113730_45e6f63f": {
-      "agentOsSession": "kiyosaki",
-      "channel": "kiyosaki-chat",
-      "projectId": "kiyosaki",
-      "firstSeen": "2026-06-09T11:37:30.339823",
-      "lastSeen": "2026-06-17T08:38:43.658982Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
     "20260613_130913_a8909b": {
       "agentOsSession": "kiyosaki",
       "channel": "kiyosaki-chat",
@@ -263,30 +47,12 @@
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
-    "20260610_120409_244b6034": {
-      "agentOsSession": "minato",
-      "channel": "minato-chat",
-      "projectId": "minato",
-      "firstSeen": "2026-06-10T12:04:09.171484",
-      "lastSeen": "2026-06-17T08:38:43.659673Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
     "20260613_123151_42ef1c": {
       "agentOsSession": "minato",
       "channel": "minato-chat",
       "projectId": "minato",
       "firstSeen": "2026-06-13T12:31:51.079247",
       "lastSeen": "2026-06-17T08:38:43.659676Z",
-      "messageCount": 0,
-      "inferredBy": "title_pattern"
-    },
-    "20260608_042151_b4f5cf15": {
-      "agentOsSession": "rin",
-      "channel": "rin-chat",
-      "projectId": "rin",
-      "firstSeen": "2026-06-08T04:21:51.090286",
-      "lastSeen": "2026-06-17T08:38:43.660081Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
