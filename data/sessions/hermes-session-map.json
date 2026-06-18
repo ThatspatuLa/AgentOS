@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-18T04:30:00.000000Z",
+  "updatedAt": "2026-06-18T04:02:14.827165Z",
   "sessions": {
     "20260607_193056_683caea5": {
       "agentOsSession": "zen",
@@ -43,8 +43,8 @@
       "channel": "kiyosaki-chat",
       "projectId": "kiyosaki",
       "firstSeen": "2026-06-13T13:09:13.262261",
-      "lastSeen": "2026-06-17T08:38:43.658983Z",
-      "messageCount": 0,
+      "lastSeen": "2026-06-18T04:02:14.827155Z",
+      "messageCount": 2,
       "inferredBy": "title_pattern"
     },
     "20260613_123151_42ef1c": {
