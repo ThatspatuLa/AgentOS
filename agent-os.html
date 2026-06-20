@@ -546,6 +546,7 @@
             </div>
           </div>
 
+          <div class="zen-chat-review-host" id="zen-chat-review-host" style="display:none"></div>
           <div class="zen-work-panel-host" id="zen-work-panel-full" aria-live="polite"></div>
 
           <!-- Status Bar -->
@@ -1758,7 +1759,7 @@ const PROJECT_COLORS = {
 const DEFAULT_TASKS = [];
 
 
-const TASKS_VERSION = 20; // Increment when DEFAULT_TASKS structure changes
+const TASKS_VERSION = 25; // Increment when DEFAULT_TASKS structure changes
 let kanbanTasksCache = [...DEFAULT_TASKS];
 let kanbanSharedPersistence = false;
 let kanbanSaveTimer = null;
@@ -5123,6 +5124,10 @@ var SESSION_API = window.location.protocol === 'file:'
   ? 'http://127.0.0.1:8765/api/sessions'
   : '/api/sessions';
 
+function zenApiRoot() {
+  return SESSION_API.replace(/\/sessions$/, '');
+}
+
 function zenChatApi(path, opts) {
   opts = opts || {};
   var url = SESSION_API + path;
@@ -5368,6 +5373,9 @@ function zenChatGetMessages(sessionId) {
 
 // ── M3: Session Header ──
 function zenChatSetSession(sessionId, view) {
+  if (typeof ZEN_REVIEW_STATE !== 'undefined' && ZEN_REVIEW_STATE.open && ZEN_REVIEW_STATE.sessionId && ZEN_REVIEW_STATE.sessionId !== sessionId) {
+    zenReviewClose();
+  }
   zenChatState.activeSession = sessionId;
   const s = ZEN_CHAT_SESSIONS[sessionId] || ZEN_CHAT_SESSIONS['zen-os'];
   const scope = view || zenChatState.view;
@@ -5991,7 +5999,7 @@ const ZEN_WORK_STATE = {
     ],
     complete: [
       { icon:'✅', label:'validated', text:'Task complete. Ready for review.' },
-      { icon:'🧭', label:'next gate', text:'Accept, alter, review, or request GitHub update plan.' }
+      { icon:'🧭', label:'next gate', text:'Accept, alter, or review.' }
     ]
   }
 };
@@ -6446,6 +6454,322 @@ function zenWorkAddHermesActions(id, content) {
     updatedAt: zenWorkNow()
   }));
 }
+
+const ZEN_REVIEW_STATE = {
+  open: false,
+  taskId: null,
+  sessionId: null,
+  mode: 'after',
+  loading: false,
+  rawOpen: false,
+  data: null,
+  error: ''
+};
+
+function zenReviewTask() {
+  return ZEN_REVIEW_STATE.taskId ? ZEN_WORK_STATE.tasks[ZEN_REVIEW_STATE.taskId] : null;
+}
+
+function zenReviewFetch(sessionId, includeRaw) {
+  var url = zenApiRoot() + '/review/diff?sessionId=' + encodeURIComponent(sessionId || zenChatState.activeSession);
+  if (includeRaw) url += '&raw=1';
+  return fetch(url).then(function(resp) {
+    if (!resp.ok) throw new Error('Review endpoint returned ' + resp.status);
+    return resp.json();
+  }).then(function(payload) {
+    if (payload && payload.ok === false) throw new Error(payload.error || 'Review endpoint failed');
+    return payload || {};
+  });
+}
+
+function zenReviewList(items, emptyText, itemClass) {
+  var list = Array.isArray(items) ? items.filter(function(item){ return item != null && String(item).trim() !== ''; }) : [];
+  if (!list.length) return '<div class="zen-review-empty">' + escapeHtml(emptyText || 'Nothing captured yet.') + '</div>';
+  return '<ul class="' + (itemClass || 'zen-review-list') + '">' + list.map(function(item) {
+    if (typeof item === 'object') {
+      return '<li>' + escapeHtml(item.summary || item.text || item.path || JSON.stringify(item)) + '</li>';
+    }
+    return '<li>' + escapeHtml(item) + '</li>';
+  }).join('') + '</ul>';
+}
+
+function zenReviewChangedFiles(files) {
+  var list = Array.isArray(files) ? files : [];
+  if (!list.length) return '<div class="zen-review-empty">No changed files reported by git.</div>';
+  return '<div class="zen-review-file-list">' + list.map(function(file) {
+    var status = escapeHtml(file.status || file.code || 'M');
+    var path = escapeHtml(file.path || file.file || String(file));
+    return '<div class="zen-review-file"><span>' + status + '</span><b>' + path + '</b></div>';
+  }).join('') + '</div>';
+}
+
+function zenReviewEvents(events) {
+  var list = Array.isArray(events) ? events.slice(-8) : [];
+  if (!list.length) return '<div class="zen-review-empty">No session event log entries found yet.</div>';
+  return '<div class="zen-review-timeline">' + list.map(function(event) {
+    var type = escapeHtml(event.type || event.event || 'activity');
+    var text = escapeHtml(event.summary || event.decision || event.status || event.line || 'Session activity recorded.');
+    var ts = escapeHtml((event.ts || '').replace('T', ' ').replace('Z', ''));
+    return '<div class="zen-review-timeline-item"><i></i><div><strong>' + type + '</strong><p>' + text + '</p><time>' + ts + '</time></div></div>';
+  }).join('') + '</div>';
+}
+
+function zenReviewComparisonHtml(mode) {
+  var after = mode !== 'previous';
+  var gate = after
+    ? '<div class="zen-review-mock-actions"><button>Accept</button><button>Alter</button><button>Review</button></div>'
+    : '<div class="zen-review-mock-actions zen-review-mock-actions--old"><button>Accept</button><button>Alter</button><button>Review</button><button>GitHub update plan</button><button>Change GitHub update method</button></div>';
+  var helper = after
+    ? 'Clean first gate. GitHub planning appears only after Accept, with execution disabled.'
+    : 'Previous gate mixed review decisions with GitHub update controls too early.';
+  var body = after
+    ? '<div class="zen-review-mock-step"><span>After Accept</span><strong>GitHub update plan</strong><p>Display-only. Confirm stays disabled until wiring is intentionally enabled.</p></div>'
+      + '<div class="zen-review-mock-diagnosis"><strong>Failure diagnosis</strong><p>What failed, likely cause, evidence/logs, and manual recovery options appear as a compact card.</p></div>'
+    : '<div class="zen-review-mock-step zen-review-mock-step--muted"><span>Issue</span><strong>Mixed intent</strong><p>The user had to parse review, alter, and GitHub choices in one crowded row.</p></div>';
+  return '<div class="zen-review-compare-stage zen-review-compare-stage--' + (after ? 'after' : 'previous') + '">'
+    + '<div class="zen-review-mock-panel">'
+    + '<div class="zen-review-mock-icon"></div>'
+    + '<p>Task complete. Ready for review.</p>'
+    + gate
+    + body
+    + '</div>'
+    + '<div class="zen-review-visual-notes">'
+    + '<strong>' + (after ? 'After patch' : 'Previous state') + '</strong>'
+    + '<p>' + helper + '</p>'
+    + '<div class="zen-review-consistency-grid">'
+    + '<span>Layout</span><span>Drawers</span><span>Chat widget</span><span>Spacing</span><span>Typography</span><span>Buttons</span><span>Cards</span><span>Animation</span>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function zenReviewRender() {
+  var host = document.getElementById('zen-chat-review-host');
+  if (!host) return;
+  if (!ZEN_REVIEW_STATE.open) {
+    host.style.display = 'none';
+    host.innerHTML = '';
+    return;
+  }
+  var task = zenReviewTask();
+  var data = ZEN_REVIEW_STATE.data || {};
+  var changed = data.changedFiles || [];
+  var validation = data.validationProof || [];
+  var risks = data.riskNotes || [];
+  var checklist = data.frontendChecklist || [];
+  var activity = data.recentActivity || [];
+  var events = data.events || [];
+  var title = (task && (task.title || task.action || task.currentAction)) || 'Review / Validate';
+  host.style.display = 'block';
+  if (ZEN_REVIEW_STATE.loading) {
+    host.innerHTML = '<section class="zen-review-shell"><div class="zen-review-loading"><div class="zen-review-spinner"></div><strong>Gathering backend evidence and frontend comparison...</strong></div></section>';
+    return;
+  }
+  if (ZEN_REVIEW_STATE.error) {
+    host.innerHTML = '<section class="zen-review-shell"><div class="zen-review-header"><div><span>Review failed</span><h3>Could not load review evidence</h3><p>' + escapeHtml(ZEN_REVIEW_STATE.error) + '</p></div><button onclick="zenReviewClose()">Back to chat</button></div></section>';
+    return;
+  }
+  host.innerHTML = '<section class="zen-review-shell">'
+    + '<div class="zen-review-header">'
+    + '<div><span>Review / Validate</span><h3>' + escapeHtml(title) + '</h3><p>Backend evidence and frontend review for the current Agent OS change. This surface is read-only.</p></div>'
+    + '<div class="zen-review-header-actions"><button onclick="zenReviewRefresh()">Refresh evidence</button><button onclick="zenReviewClose()">Back to chat</button></div>'
+    + '</div>'
+    + '<div class="zen-review-pill-row">'
+    + '<span>' + escapeHtml(String(changed.length)) + ' changed files</span>'
+    + '<span>' + escapeHtml(String(validation.length)) + ' validation notes</span>'
+    + '<span>' + escapeHtml(String(risks.length)) + ' risk notes</span>'
+    + '<span>GitHub execution disabled</span>'
+    + '</div>'
+    + '<div class="zen-review-grid">'
+    + '<article class="zen-review-panel zen-review-panel--wide"><h4>Changed files</h4>' + zenReviewChangedFiles(changed) + '</article>'
+    + '<article class="zen-review-panel"><h4>Validation proof</h4>' + zenReviewList(validation, 'No validation proof in the session summary yet.') + '</article>'
+    + '<article class="zen-review-panel"><h4>Risk notes</h4>' + zenReviewList(risks, 'No risk notes detected.') + '</article>'
+    + '<article class="zen-review-panel zen-review-panel--wide"><div class="zen-review-panel-head"><h4>Diff stat</h4><button onclick="zenReviewToggleRaw()">' + (ZEN_REVIEW_STATE.rawOpen ? 'Hide raw diff' : 'Show raw diff') + '</button></div><pre>' + escapeHtml(data.diffStat || data.status || 'No diff stat available.') + '</pre>' + (ZEN_REVIEW_STATE.rawOpen ? '<pre class="zen-review-raw">' + escapeHtml(data.rawDiff || 'Raw diff not loaded.') + '</pre>' : '') + '</article>'
+    + '<article class="zen-review-panel"><h4>Next safe gate</h4><p>' + escapeHtml(data.nextSafeGate || 'Decide whether to accept, alter, or continue review before any GitHub action.') + '</p></article>'
+    + '<article class="zen-review-panel"><h4>Recent activity</h4>' + zenReviewList(activity, 'No recent activity in the session summary yet.') + '</article>'
+    + '</div>'
+    + '<article class="zen-review-panel zen-review-frontend">'
+    + '<div class="zen-review-panel-head"><div><h4>Frontend review</h4><p>Switch between the previous gate and the patched Agent OS review flow.</p></div><div class="zen-review-switch"><button class="' + (ZEN_REVIEW_STATE.mode === 'previous' ? 'active' : '') + '" onclick="zenReviewSetMode(\'previous\')">Previous</button><button class="' + (ZEN_REVIEW_STATE.mode !== 'previous' ? 'active' : '') + '" onclick="zenReviewSetMode(\'after\')">After patch</button></div></div>'
+    + zenReviewComparisonHtml(ZEN_REVIEW_STATE.mode)
+    + '<div class="zen-review-checklist"><h5>Visual coverage</h5>' + zenReviewList(checklist, 'No frontend checklist returned by backend.') + '</div>'
+    + '</article>'
+    + '<div class="zen-review-grid">'
+    + '<article class="zen-review-panel"><h4>Session events</h4>' + zenReviewEvents(events) + '</article>'
+    + '<article class="zen-review-panel"><h4>Review controls</h4><p>Accept, Alter, and Review are recorded as session events. GitHub controls remain display-only until explicitly wired later.</p><div class="zen-review-control-row"><button onclick="zenWorkAcceptCompletion(\'' + escapeHtml((task && task.id) || '') + '\')">Accept</button><button onclick="zenWorkAlterCompletion(\'' + escapeHtml((task && task.id) || '') + '\')">Alter</button></div></article>'
+    + '</div>'
+    + '</section>';
+}
+
+function zenWorkOpenReview(id) {
+  var task = ZEN_WORK_STATE.tasks[id] || zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks()[0];
+  if (!task) return;
+  zenReviewDecision('review', task, {summary:'Full backend/frontend review opened from completion gate.'});
+  if (task.sessionId && task.sessionId !== zenChatState.activeSession) {
+    zenChatState.activeSession = task.sessionId;
+  }
+  ZEN_REVIEW_STATE.open = true;
+  ZEN_REVIEW_STATE.taskId = task.id;
+  ZEN_REVIEW_STATE.sessionId = task.sessionId || zenChatState.activeSession;
+  ZEN_REVIEW_STATE.mode = 'after';
+  ZEN_REVIEW_STATE.rawOpen = false;
+  ZEN_REVIEW_STATE.loading = true;
+  ZEN_REVIEW_STATE.error = '';
+  ZEN_REVIEW_STATE.data = null;
+  zenChatGoToView('full');
+  zenReviewRender();
+  setTimeout(function(){
+    var host = document.getElementById('zen-chat-review-host');
+    if (host) host.scrollIntoView({block:'nearest', behavior:'smooth'});
+  }, 80);
+  zenReviewFetch(ZEN_REVIEW_STATE.sessionId, false).then(function(data) {
+    ZEN_REVIEW_STATE.data = data;
+    ZEN_REVIEW_STATE.loading = false;
+    zenReviewRender();
+    setTimeout(function(){
+      var host = document.getElementById('zen-chat-review-host');
+      if (host) host.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }, 40);
+  }).catch(function(err) {
+    ZEN_REVIEW_STATE.error = err.message || String(err);
+    ZEN_REVIEW_STATE.loading = false;
+    zenReviewRender();
+  });
+}
+
+function zenReviewSetMode(mode) {
+  ZEN_REVIEW_STATE.mode = mode === 'previous' ? 'previous' : 'after';
+  zenReviewRender();
+}
+
+function zenReviewToggleRaw() {
+  ZEN_REVIEW_STATE.rawOpen = !ZEN_REVIEW_STATE.rawOpen;
+  if (ZEN_REVIEW_STATE.rawOpen && (!ZEN_REVIEW_STATE.data || !ZEN_REVIEW_STATE.data.rawDiff)) {
+    ZEN_REVIEW_STATE.loading = true;
+    zenReviewRender();
+    zenReviewFetch(ZEN_REVIEW_STATE.sessionId, true).then(function(data) {
+      ZEN_REVIEW_STATE.data = data;
+      ZEN_REVIEW_STATE.loading = false;
+      zenReviewRender();
+    }).catch(function(err) {
+      ZEN_REVIEW_STATE.error = err.message || String(err);
+      ZEN_REVIEW_STATE.loading = false;
+      zenReviewRender();
+    });
+    return;
+  }
+  zenReviewRender();
+}
+
+function zenReviewRefresh() {
+  if (!ZEN_REVIEW_STATE.open) return;
+  ZEN_REVIEW_STATE.loading = true;
+  ZEN_REVIEW_STATE.error = '';
+  zenReviewRender();
+  zenReviewFetch(ZEN_REVIEW_STATE.sessionId, ZEN_REVIEW_STATE.rawOpen).then(function(data) {
+    ZEN_REVIEW_STATE.data = data;
+    ZEN_REVIEW_STATE.loading = false;
+    zenReviewRender();
+  }).catch(function(err) {
+    ZEN_REVIEW_STATE.error = err.message || String(err);
+    ZEN_REVIEW_STATE.loading = false;
+    zenReviewRender();
+  });
+}
+
+function zenReviewClose() {
+  ZEN_REVIEW_STATE.open = false;
+  zenReviewRender();
+  setTimeout(function(){ zenChatScrollToBottom('full'); }, 50);
+}
+
+function zenReviewDecision(decision, task, extra) {
+  task = task || zenWorkCurrentTask(zenChatState.activeSession) || zenWorkActiveTasks()[0];
+  if (!task) return Promise.resolve(null);
+  extra = extra || {};
+  return fetch(SESSION_API + '/' + encodeURIComponent(task.sessionId || zenChatState.activeSession) + '/review-decision', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      decision: decision,
+      summary: extra.summary || task.action || task.currentAction || '',
+      evidence: extra.evidence || (task.evidence ? [task.evidence] : []),
+      validation: extra.validation || [],
+      filesTouched: extra.filesTouched || []
+    })
+  }).then(function(resp){ return resp.json(); }).catch(function(){ return null; });
+}
+function zenWorkCompletionHtml(task) {
+  if (!task || task.status !== 'complete' || !task.reviewRequired) return '';
+  if (task.githubStep) {
+    return '<div class="zen-work-github-step">'
+      + '<div class="zen-work-gate-kicker">GitHub update step</div>'
+      + '<strong>GitHub update plan</strong>'
+      + '<p>Display-only for now. No commit, push, issue, PR, or project-board update will run from this gate.</p>'
+      + '<div class="zen-work-github-plan"><span>Target</span><b>Current Agent OS worktree / linked task</b><span>Method</span><b>Manual review first; execution disabled</b></div>'
+      + '<div class="zen-work-completion-actions">'
+      + '<button type="button" disabled title="GitHub execution is intentionally disabled">Confirm</button>'
+      + '<button type="button" onclick="zenWorkCancelGithubStep(\'' + escapeHtml(task.id) + '\')">Cancel</button>'
+      + '<button type="button" onclick="zenWorkChangeGithubMethod(\'' + escapeHtml(task.id) + '\')">Change GitHub update method</button>'
+      + '</div>'
+      + '</div>';
+  }
+  return '<div class="zen-work-completion-actions zen-work-completion-actions--primary">'
+    + '<button type="button" onclick="zenWorkAcceptCompletion(\'' + escapeHtml(task.id) + '\')">Accept</button>'
+    + '<button type="button" onclick="zenWorkAlterCompletion(\'' + escapeHtml(task.id) + '\')">Alter</button>'
+    + '<button type="button" onclick="zenWorkOpenReview(\'' + escapeHtml(task.id) + '\')">Review</button>'
+    + '</div>';
+}
+function zenWorkFailureHtml(task) {
+  if (!task || task.status !== 'failed') return '';
+  var evidence = task.evidence || 'No additional logs captured yet.';
+  var cause = task.cause || 'Unknown failure';
+  var likely = /timeout/i.test(cause + ' ' + evidence)
+    ? 'The execution likely exceeded the safe response window or blocked on a long-running process.'
+    : /token|context/i.test(cause + ' ' + evidence)
+      ? 'The model likely hit a context or token boundary.'
+      : /network|fetch|reach|bridge/i.test(cause + ' ' + evidence)
+        ? 'The local Agent OS bridge or Hermes API path was unavailable.'
+        : 'The request stopped before a clean completion signal was received.';
+  var recovery = (task.recovery && task.recovery.length ? task.recovery : ['Review evidence', 'Alter plan', 'Retry manually']).map(function(item){
+    return '<button type="button">' + escapeHtml(item) + '</button>';
+  }).join('');
+  return '<div class="zen-work-diagnosis">'
+    + '<div class="zen-work-gate-kicker">Failure diagnosis</div>'
+    + '<div class="zen-work-diagnosis-grid">'
+    + '<div><strong>What failed</strong><p>' + escapeHtml(cause) + '</p></div>'
+    + '<div><strong>Likely cause</strong><p>' + escapeHtml(likely) + '</p></div>'
+    + '<div><strong>Evidence / logs</strong><p>' + escapeHtml(evidence) + '</p></div>'
+    + '</div>'
+    + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery">' + recovery + '</div>'
+    + '<p class="zen-work-disabled-note">Auto-recovery is disabled unless recovery settings explicitly allow it.</p>'
+    + '</div>';
+}
+function zenWorkAcceptCompletion(id) {
+  var task = ZEN_WORK_STATE.tasks[id];
+  if (!task) return;
+  zenReviewDecision('accept', task, {summary:'Completion accepted; GitHub update step displayed but execution disabled.'});
+  zenWorkSetTask(Object.assign({}, task, { githubStep: true, updatedAt: zenWorkNow() }));
+}
+function zenWorkCancelGithubStep(id) {
+  var task = ZEN_WORK_STATE.tasks[id];
+  if (!task) return;
+  zenReviewDecision('cancel-github', task, {summary:'GitHub update step cancelled; returned to completion gate.'});
+  zenWorkSetTask(Object.assign({}, task, { githubStep: false, updatedAt: zenWorkNow() }));
+}
+function zenWorkChangeGithubMethod(id) {
+  var task = ZEN_WORK_STATE.tasks[id];
+  if (!task) return;
+  zenReviewDecision('cancel-github', task, {summary:'User requested a different GitHub update method; execution remains disabled.'});
+  zenChatAddMessage('assistant', 'GitHub update method is display-only right now. Tell me the method you want, and I will update the plan without running GitHub actions.', zenChatState.view);
+  zenWorkSetTask(Object.assign({}, task, { githubStep: false, updatedAt: zenWorkNow() }));
+}
+function zenWorkAlterCompletion(id) {
+  var task = ZEN_WORK_STATE.tasks[id];
+  if (!task) return;
+  zenReviewDecision('alter', task, {summary:'Alter requested; gate dismissed and chat returned with no GitHub action.'});
+  zenWorkDismiss(id);
+  zenChatAddMessage('assistant', 'Alter noted. No GitHub action was taken. Tell me what you want changed and I will keep it inside chat until you approve a new path.', zenChatState.view);
+}
 function zenWorkPanelHtml(task, mode) {
   if (!task) return '';
   var sameSession = task.sessionId === zenChatState.activeSession;
@@ -6453,12 +6777,8 @@ function zenWorkPanelHtml(task, mode) {
   // Stream is open by default so activity log is visible as a scrollable strip
   var detailsOpen = ' open';
   var notice = !sameSession ? '<div class="zen-work-attached-notice muted">Another session is working; this chat remains usable.</div>' : '';
-  var failure = task.status === 'failed'
-    ? '<div class="zen-work-diagnosis"><strong>Cause:</strong> ' + escapeHtml(task.cause || 'Unknown failure') + '<br><strong>Evidence:</strong> ' + escapeHtml(task.evidence || 'No additional evidence captured yet.') + '<div class="zen-work-recovery-label">Recovery options</div><div class="zen-work-recovery"><button>Retry</button><button>Alter plan</button><button>Open logs</button></div></div>'
-    : '';
-  var complete = task.status === 'complete' && task.reviewRequired
-    ? '<div class="zen-work-completion-actions"><button>Accept</button><button>Alter</button><button>Review</button><button>GitHub update plan</button></div>'
-    : '';
+  var failure = zenWorkFailureHtml(task);
+  var complete = zenWorkCompletionHtml(task);
   var completeNote = task.status === 'complete' && !task.reviewRequired
     ? '<div class="zen-work-attached-notice muted">Chat response complete — no review gate needed.</div>'
     : '';
@@ -6597,6 +6917,15 @@ window.zenFormatToolLine = zenFormatToolLine;
 window.zenWorkAppendTool = zenWorkAppendTool;
 window.zenWorkRenderAll = zenWorkRenderAll;
 window.zenWorkOpenActivity = zenWorkOpenActivity;
+window.zenWorkOpenReview = zenWorkOpenReview;
+window.zenWorkAcceptCompletion = zenWorkAcceptCompletion;
+window.zenWorkAlterCompletion = zenWorkAlterCompletion;
+window.zenWorkCancelGithubStep = zenWorkCancelGithubStep;
+window.zenWorkChangeGithubMethod = zenWorkChangeGithubMethod;
+window.zenReviewSetMode = zenReviewSetMode;
+window.zenReviewToggleRaw = zenReviewToggleRaw;
+window.zenReviewRefresh = zenReviewRefresh;
+window.zenReviewClose = zenReviewClose;
 
 // ── Input ──
 function zenChatInputKeydown(e) {

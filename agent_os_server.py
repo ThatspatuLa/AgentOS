@@ -44,7 +44,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent
 TASKS_FILE = ROOT / "data" / "kanban-tasks.json"
@@ -396,6 +396,123 @@ def _read_session_events(session_id: str) -> list[dict]:
     """Read all events from a session's events.jsonl file."""
     event_path = SESSIONS_DIR / session_id / "events.jsonl"
     return _read_jsonl(event_path)
+
+
+def _session_summary_payload(session_id: str, index_session: dict | None = None) -> dict:
+    """Read session summary fields from index plus optional summary.json."""
+    summary_path = SESSIONS_DIR / session_id / "summary.json"
+    payload = _read_json(summary_path, {}) if summary_path.exists() else {}
+    if index_session:
+        for key in (
+            "id", "label", "summary", "filesTouched", "validationProof",
+            "recentActivity", "nextSafeGate", "taskId", "projectId",
+        ):
+            if key in index_session and key not in payload:
+                payload[key] = index_session.get(key)
+    payload.setdefault("filesTouched", [])
+    payload.setdefault("validationProof", [])
+    payload.setdefault("recentActivity", [])
+    payload.setdefault("nextSafeGate", "")
+    return payload
+
+
+def _run_git_readonly(args: list[str], timeout: int = 8) -> str:
+    """Run a read-only git command against this repo and return stdout."""
+    allowed = {
+        ("status", "--short"),
+        ("diff", "--stat"),
+        ("diff", "--name-status"),
+        ("diff", "--"),
+    }
+    key = tuple(args[:2]) if len(args) >= 2 else tuple(args)
+    if key not in allowed:
+        raise ValueError("unsupported read-only git command")
+    result = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    if result.returncode != 0:
+        return (result.stderr or result.stdout or "").strip()
+    return (result.stdout or "").strip()
+
+
+def _review_risk_notes(changed_files: list[dict]) -> list[str]:
+    notes: list[str] = []
+    paths = [str(f.get("path") or "") for f in changed_files]
+    if any(p.startswith("agent_os_server.py") or p.endswith(".py") for p in paths):
+        notes.append("Backend or Python files changed: confirm API behavior and syntax before accepting.")
+    if any(p.endswith((".html", ".css", ".js")) for p in paths):
+        notes.append("Frontend files changed: inspect layout, drawers, chat widget, spacing, typography, buttons, cards, animation, and visual consistency.")
+    if any(p.startswith("data/") for p in paths):
+        notes.append("Data files changed: confirm this is intended state, not temporary runtime noise.")
+    if any(p.startswith("tmp/") or "__pycache__" in p for p in paths):
+        notes.append("Temporary/generated files detected: avoid including them in the final GitHub update.")
+    if not notes:
+        notes.append("No elevated risk detected from the current file list; still review behavior before accepting.")
+    return notes
+
+
+def _git_review_payload(session_id: str = "", include_raw: bool = False) -> dict:
+    """Build read-only backend review evidence for the current worktree."""
+    status_text = _run_git_readonly(["status", "--short"])
+    stat_text = _run_git_readonly(["diff", "--stat"])
+    name_status = _run_git_readonly(["diff", "--name-status"])
+    changed_files: list[dict] = []
+    for line in name_status.splitlines():
+        parts = line.split("\t")
+        if not parts:
+            continue
+        status = parts[0].strip()
+        path = parts[-1].strip() if len(parts) > 1 else ""
+        if path:
+            changed_files.append({"status": status, "path": path})
+    if not changed_files:
+        for line in status_text.splitlines():
+            status = line[:2].strip() or "?"
+            path = line[3:].strip()
+            if path:
+                changed_files.append({"status": status, "path": path})
+
+    index = _load_index()
+    session = _get_session(index, session_id) if session_id else None
+    summary = _session_summary_payload(session_id, session) if session_id else {}
+    events = _read_session_events(session_id)[-12:] if session_id else []
+    validation = list(summary.get("validationProof") or [])
+    event_validation = [
+        item
+        for event in events
+        for item in (event.get("validation") or [])
+    ]
+    if event_validation:
+        validation.extend(event_validation[-8:])
+
+    payload = {
+        "ok": True,
+        "repo": str(ROOT),
+        "sessionId": session_id,
+        "changedFiles": changed_files,
+        "diffStat": stat_text,
+        "status": status_text,
+        "rawDiff": _run_git_readonly(["diff", "--"], timeout=12)[:60000] if include_raw else "",
+        "validationProof": validation,
+        "riskNotes": _review_risk_notes(changed_files),
+        "recentActivity": list(summary.get("recentActivity") or [])[-10:],
+        "nextSafeGate": summary.get("nextSafeGate", ""),
+        "events": events,
+        "frontendChecklist": [
+            "Layout and responsive spacing",
+            "Drawer behavior and overlays",
+            "Zen Chat widget and completion gates",
+            "Typography hierarchy and line lengths",
+            "Buttons, pills, cards, and disabled states",
+            "Motion/animation continuity",
+            "Visual consistency across full, drawer, and small chat views",
+        ],
+    }
+    return payload
 
 
 def _update_session_recent_activity(session_id: str, milestone: str, cap: int = 10) -> None:
@@ -1980,6 +2097,16 @@ class Handler(SimpleHTTPRequestHandler):
             events = _read_session_events(m["sessionId"])
             return self._json({"sessionId": m["sessionId"], "events": events})
 
+        # GET /api/review/diff?sessionId=zen-os&raw=1 — read-only worktree review
+        if self._match("api/review/diff") is not None:
+            params = parse_qs(urlparse(self.path).query)
+            session_id = (params.get("sessionId") or [""])[0]
+            include_raw = (params.get("raw") or [""])[0] == "1"
+            try:
+                return self._json(_git_review_payload(session_id, include_raw=include_raw))
+            except Exception as exc:
+                return self._json({"ok": False, "error": str(exc)}, 500)
+
         # GET /api/memory — Hermes MEMORY.md + USER.md
         if self._match("api/memory") is not None:
             memory_md = ""
@@ -2039,6 +2166,40 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json({"error": "method not allowed"}, 405)
 
         index = _load_index()
+
+        # POST /api/sessions/:id/review-decision — record gate decisions only
+        m = self._match("api/sessions/:id/review-decision")
+        if m:
+            s = _get_session(index, m["id"])
+            if not s:
+                return self._json({"error": "not found"}, 404)
+            body = self._read_body()
+            decision = str(body.get("decision") or "").strip().lower()
+            if decision not in {"accept", "alter", "review", "cancel-github", "confirm-github"}:
+                return self._json({"error": "invalid decision"}, 400)
+            now = _now_iso()
+            summary = str(body.get("summary") or "").strip()
+            event = {
+                "ts": now,
+                "type": "review_decision",
+                "sessionId": m["id"],
+                "taskId": s.get("taskId"),
+                "status": "complete" if decision == "accept" else "review",
+                "decision": decision,
+                "summary": summary or f"Review gate decision: {decision}",
+                "evidence": body.get("evidence") or [],
+                "validation": body.get("validation") or [],
+                "filesTouched": body.get("filesTouched") or [],
+                "source": "agent-os",
+            }
+            _append_session_event(m["id"], event)
+            if decision == "alter":
+                _update_session_recent_activity(m["id"], "Alter requested at review gate; returned to chat with no GitHub action.")
+            elif decision == "accept":
+                _update_session_recent_activity(m["id"], "Completion accepted; GitHub update plan shown as disabled review step.")
+            elif decision == "review":
+                _update_session_recent_activity(m["id"], "Full backend/frontend review opened from completion gate.")
+            return self._json({"ok": True, "event": event})
 
         # POST /api/sessions/:id/messages/stream
         m = self._match("api/sessions/:id/messages/stream")

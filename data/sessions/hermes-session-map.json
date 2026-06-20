@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-18T04:02:14.827165Z",
+  "updatedAt": "2026-06-19T10:54:02.220178Z",
   "sessions": {
     "20260607_193056_683caea5": {
       "agentOsSession": "zen",
       "channel": "zen-chat",
       "projectId": "zen",
       "firstSeen": "2026-06-07T19:30:56.883698",
-      "lastSeen": "2026-06-17T08:38:43.658011Z",
+      "lastSeen": "2026-06-19T10:54:02.197798Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -16,7 +16,7 @@
       "channel": "kiyosaki-chat",
       "projectId": "kiyosaki",
       "firstSeen": "2026-06-07T19:36:46.502761",
-      "lastSeen": "2026-06-17T08:38:43.658974Z",
+      "lastSeen": "2026-06-19T10:54:02.212954Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -25,7 +25,7 @@
       "channel": "kiyosaki-chat",
       "projectId": "kiyosaki",
       "firstSeen": "2026-06-09T09:28:02.834823",
-      "lastSeen": "2026-06-17T08:38:43.658979Z",
+      "lastSeen": "2026-06-19T10:54:02.212960Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -34,7 +34,7 @@
       "channel": "kiyosaki-chat",
       "projectId": "kiyosaki",
       "firstSeen": "2026-06-09T09:57:02.768963",
-      "lastSeen": "2026-06-17T08:38:43.658980Z",
+      "lastSeen": "2026-06-19T10:54:02.212963Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -43,8 +43,17 @@
       "channel": "kiyosaki-chat",
       "projectId": "kiyosaki",
       "firstSeen": "2026-06-13T13:09:13.262261",
-      "lastSeen": "2026-06-18T04:02:14.827155Z",
-      "messageCount": 2,
+      "lastSeen": "2026-06-19T10:54:02.212964Z",
+      "messageCount": 0,
+      "inferredBy": "title_pattern"
+    },
+    "20260619_024857_49e0f6": {
+      "agentOsSession": "kiyosaki",
+      "channel": "kiyosaki-chat",
+      "projectId": "kiyosaki",
+      "firstSeen": "2026-06-19T02:48:57.993557",
+      "lastSeen": "2026-06-19T10:54:02.212966Z",
+      "messageCount": 0,
       "inferredBy": "title_pattern"
     },
     "20260613_123151_42ef1c": {
@@ -52,7 +61,7 @@
       "channel": "minato-chat",
       "projectId": "minato",
       "firstSeen": "2026-06-13T12:31:51.079247",
-      "lastSeen": "2026-06-17T08:38:43.659676Z",
+      "lastSeen": "2026-06-19T10:54:02.219505Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
     },
@@ -61,18 +70,9 @@
       "channel": "toji-chat",
       "projectId": "toji",
       "firstSeen": "2026-06-08T04:24:19.904231",
-      "lastSeen": "2026-06-17T08:38:43.660467Z",
+      "lastSeen": "2026-06-19T10:54:02.220007Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
-    },
-    "20260618_004216_3039da2d": {
-      "agentOsSession": "zen-os",
-      "channel": "1516644810834841672",
-      "projectId": null,
-      "firstSeen": "2026-06-18T00:42:16.028369",
-      "lastSeen": "2026-06-17T17:49:50.456785Z",
-      "messageCount": 244,
-      "inferredBy": "explicit"
     }
   }
 }

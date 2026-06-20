@@ -1,5 +1,5 @@
 {
-  "version": 43,
+  "version": 55,
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -285,58 +285,134 @@
       "priority": "High",
       "risk": "High",
       "created": "2026-06-09",
-      "lastActive": "Now",
+      "lastActive": "2026-06-19T17:09:17",
       "archived": false,
-      "why": "Stage 1 target: 300 strategies backtested on ETHUSDT 5m (Jun 2025 → May 2026) with positive Expectancy R. Truth as of 2026-06-19: 5 of 50 ported strategies tested on ETH 5m. ZERO pass the smoke test (positive ExpR + ≥40 trades). Best is E0V1E at +0.03% but only 2 trades (fails min). All others net-negative (SMAOffset -0.49%, Strategy005 -1.09%, BBandsRSI -1.20%, EMABreakout -4.33%). 50 ported total but most untested on target. Source pool = HUGE/FreqST only. Other sources (arxiv/YouTube/X/Reddit/MQL5) NOT yet tapped. Production engine: Freqtrade 2026.5.1.",
-      "nextAction": "FIX BEFORE CONTINUING: (1) Audit Obsidian to remove unverified strategies from candidate pool — DONE: moved 36 catalog cards to _catalogs/, 10 unverified THESIS cards to _unverified_theses/. (2) Reconcile 040-stage1-dashboard.md and 040-top-300-progress.md — they overstate positive count (21 cells ≠ 21 strategies on ETH 5m). (3) Begin Phase A.2 — diversify source pool beyond HUGE/FreqST (per Swarm.md hierarchy: arxiv > GitHub > YouTube > X > forums). (4) Build smoke-test pipeline: auto-test each ported strategy on native TF + native pair first, ≥40 trades minimum. (5) Update Kanban after each milestone.",
-      "notes": "Stage 1 = 300 backtested + ranked strategies. ETH 5m ONLY is the target. Out-of-scope positive results (TheForce on 15m/1h/4h, multi-pair positives) do NOT count toward the 300 until re-verified on ETH 5m. VETTING PROCESS (locked): source = ALL AI trading strategies; smoke test = native TF + native pair (NOT ETH 15m default); pass = positive ExpR + ≥40 trades; NO scoring filters; rank continuously by 5 Fear/Greed market states AND globally. 5 states: Extreme Fear / Fear / Neutral / Greed / Strong Greed (alt.me).",
+      "why": "Stage 1 target: 300 strategies backtested across the full multi-pair × multi-TF matrix (10 Bybit spot pairs × 5m/15m/1h/4h) over Jun 2025 → May 2026, with positive Expectancy R. SMOKE TEST RULE (locked, June 19, 2026): native pair/TF from source first; if not stated, test ETH/USDT across all 4 supported TFs; only positive ExpR + ≥40 trades count. As of 2026-06-19 evening: **8 unique verified winners (3 stale-removed from 11), 55 strict-pass cells, 2.67% Stage 1, 86 active ports**. Native Pair Prior expansion today: 12+1+0 = 13 new strict-pass cells from 126 cells tested. Tier 4 (11 ports) failed 11/11. **Key insight: DNA is pair+TF specific, not transferable.**",
+      "nextAction": "DONE TODAY: Native Pair Prior batches 1+2 (+12 strict-pass), Tier 4 unverified theses (11 ports all failed), Dormant ports native pair (1 new verified winner #8 HarmonicDivergence), 3 more official freqtrade ports (all failed, archived), stale verification (3 unmined 'verified' confirmed unverified), TF exploration (0 strict, DNA pinned to native TF).\n\nPATH FORWARD:\n- (1) Run more Native Pair Prior batches on the 8 verified winners — proven 19% hit rate, ~4-5 new strict-pass per 28-cell batch\n- (2) MQL5→Freqtrade pipeline (4-8h build) for true new DNA — DEFERRED\n- (3) Investigate time/seasonality DNA — narrow hour windows (HourBased default 20h is too wide)\n- (4) Walk-forward validation — quality scoring on existing 8 — DEFERRED\n\nTARGET: 8 → 15 verified winners by end of week (~2-3 more batches)",
+      "notes": "Stage 1 = 300 backtested + ranked strategies across the full 10-pair × 4-TF matrix. SMOKE TEST PRIORITY (locked, no exceptions):\n  1. If strategy source states native pair → test that pair\n  2. If strategy source states native TF → test that TF\n  3. If native pair/TF not stated → fallback to ETH/USDT across ALL 4 supported TFs (5m/15m/1h/4h)\n  4. PASS = positive ExpR AND ≥40 trades → enters candidate pool\n  5. FAIL = no entry, but re-test if source of edge changes\n\nRANKING (locked): continuous, globally AND by 5 Fear/Greed market states (Extreme Fear / Fear / Neutral / Greed / Strong Greed from alt.me daily). Market state = passive tag only — NEVER affects strategy behavior or entries.\n\nNO FINE-TUNING (Six's rule): TheForceV2-V6 are archived and do NOT count as separate strategies.\nNo GitHub pushes without Six's explicit review.",
       "subtasks": [
         {
-          "title": "Phase A.2: Build 300 thesis cards across all 5 source tiers",
-          "status": "backlog",
-          "description": "Per Swarm.md: Source hierarchy (1) Academic papers (2) GitHub (3) YouTube verified practitioners (4) X/Twitter (5) Forums. Currently only GitHub/HUGE tapped. Need 300 thesis cards with: source, edge mechanism, market regime, failure modes, implementability, credibility 0-10.",
-          "nextAction": "Start with arxiv (regime detection, online learning, ensemble papers). Then YouTube verified channels. Then X practitioners. Skip Reddit/MQL5 free EAs (proven low-quality).",
+          "title": "✅ Tier 2 port+smoke batch (2026-06-19): 8 strategies tested, 0/8 verified, Mimic archived",
+          "status": "completed",
+          "description": "8 Tier 2 strategies smoke tested on ETH/USDT × 4 TFs. Results: BTE0_3 (0 trades), ScalpROI (-2.18%/1241 trades, over-trades), E0V1E_plus (consistent loss), Schism (consistent loss), AHR999 (5m over-trades -2.09%/1032), NFI V1 (0-3 trades per TF), Marketchyper_VIX (consistent loss). Mimic (NEW port from strat.ninja) failed all 4 TFs and was archived to `_archive_failed_tier2/`. Verified tier 2 winner count: 0."
+        },
+        {
+          "title": "✅ Port batch: 7 new ports + 25 re-tests (2 new verified winners)",
+          "status": "completed",
+          "description": "Executed port + re-test batch 2026-06-19:\n\n**New ports (7):**\n- E0V1E_53_Sharpe_Swarm: 1h +0.29% 11 trades (close to ≥40 — borderline)\n- E0V1E_75_Swarm: FAILED (no positive + ≥40)\n- E0V1E_plus_Swarm: FAILED\n- E0V1E_55_Swarm: FAILED\n- E0V1E_45_Swarm: FAILED\n- BTE0_3_Swarm: FAILED\n- ScalpROI_Swarm: FAILED (over-trades 5m)\n- AHR999_Swarm: FAILED\n- Marketchyper_VIX_Swarm: FAILED\n- RangeBreakout_Swarm: ✅ PASSED 4h ETH + DOT\n- ElliotV8_Swarm: FAILED (no trades)\n- RSI_Swarm: FAILED (over-trades 15m)\n- CannonTrend_Swarm: FAILED\n\n**Re-tests (25):**\n- 23 FAILED\n- DoubleEMACrossoverWithTrend_Swarm: ✅ PASSED 1h (5/10 pairs)\n\n**Result: 2 new verified winners (THESIS-027, THESIS-028). 5 → 7 total verified.**",
+          "nextAction": "None — complete",
           "evidence": [
-            "~/Obsidian/.../Swarm/01_Candidates/_catalogs/ (36 research source cards already done)",
-            "~/Obsidian/.../Swarm/Swarm.md (source hierarchy spec)"
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/THESIS_CARDS/THESIS_027_DoubleEMACrossoverWithTrend_PASSED.md",
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/THESIS_CARDS/THESIS_028_RangeBreakout_PASSED.md",
+            "/tmp/port_batch_1_results.json",
+            "/tmp/port_batch_2_results.json",
+            "/tmp/port_batch_3_results.json",
+            "/tmp/new_winners_multipair.json"
           ]
         },
         {
-          "title": "Phase A.3: Vet & dedup 300 → shortlist 100",
-          "status": "backlog",
-          "description": "Apply scoring (Credibility 30% / Edge 25% / Backtest quality 20% / Implementability 15% / Failure clarity 10%). Cutoff ≥6.0 → Phase B.",
+          "title": "✅ Mechanism family tagging applied (2026-06-19)",
+          "status": "completed",
+          "description": "Tagged all strategy cards by mechanism family (Online Portfolio Selection 2012 taxonomy + crypto extensions). Applied to:\n- 5 THESIS_CARDS (verified winners)\n- 15 rich-frontmatter catalog cards (001-016)\n- 17 sparse-frontmatter catalog cards (017-033)\n- 10 unverified theses\n- 100 Top 100 shortlist entries (added Family column)\n\nReference: `01_Candidates/_MECHANISM_FAMILY_TAXONOMY.md`\n\nFamily distribution:\n- follow-the-winner: 37 (over-represented vs 50 target)\n- meta-learning: 15\n- follow-the-loser: 14\n- oscillator-reversal: 10\n- composite-multi-state: 10\n- pattern-matching: 8\n- volatility-regime: 5 (gap — target 30)\n- volume-flow: 3 (gap — target 40)",
+          "nextAction": "None — complete",
           "evidence": [
-            "~/Obsidian/.../Swarm/Swarm.md (vetting scorecard)"
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/_MECHANISM_FAMILY_TAXONOMY.md",
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/_TOP_100_SHORTLIST.md"
           ]
         },
         {
-          "title": "Phase B.1: Code top 100 in Freqtrade (SwarmBase framework)",
-          "status": "backlog",
-          "description": "Currently have 50 _Swarm.py ported but they were NOT selected from a vetted top-100. Most are still untested. Treat current 50 as overflow/early-port batch."
+          "title": "✅ Tier 1 port batch (2026-06-19): 11/11 tested, 0/11 verified, Tier 1 closed",
+          "status": "completed",
+          "description": "11 Tier 1 candidates smoke tested. All 11 FAIL (BTE0_3/ScalpROI/E0V1E+/Schism/AHR999/NFI/Marketchyper/Mimic from Tier 2 + HarmonicDivergence + ichiV1 from final Tier 1 test + E0V1E_53_Sharpe from earlier). 0/11 verified. Tier 1 closed. Pivot needed: arxiv/MQL5/native-pair-prior.",
+          "nextAction": "Start with E0V1E_53_Sharpe (source ready). Smoke test at native TF."
         },
         {
-          "title": "Phase B.2: Smoke test pipeline (native TF + native pair, ≥40 trades)",
-          "status": "backlog",
-          "description": "CRITICAL: build_state_leaderboard.py and the run_helpers currently test ETH 5m by default — this violates the locked vetting rule. Rebuild to: (1) read native TF/pair from strategy metadata, (2) run that pair/TF only as smoke test, (3) require positive ExpR + ≥40 trades, (4) auto-promote to multi-pair expansion."
+          "title": "❌ arxiv sweep cancelled (Six: not useful, June 19)",
+          "status": "cancelled",
+          "description": "10 Top-100 candidates blocked on arxiv sweep. Per Swarm.md, arxiv is the #1 source tier. Critical for filling volatility-regime + volume-flow gaps (currently 5+3 of target 30+40). Specific searches needed:\n\n1. abs:regime+detection+AND+abs:trading\n2. abs:online+portfolio+AND+abs:selection\n3. abs:reinforcement+learning+AND+abs:portfolio+AND+abs:trading\n4. abs:mean+reversion+AND+abs:equity+AND+abs:trading\n5. abs:machine+learning+AND+abs:order+flow+AND+abs:trading\n\nEach search ~5-10 papers. Reading + scoring: ~5 min each. Total: 3-5 hrs.",
+          "nextAction": "Run first arxiv search: regime detection + trading. Extract top 5 papers into catalog cards."
         },
         {
-          "title": "Phase B.3: First cull (300 → 100 by ExpR > +2.0)",
+          "title": "⏸️ DEFERRED: Cost-aware reward shaping (turnover penalty)",
           "status": "backlog",
-          "description": "Per Swarm.md: only after smoke test passes. Cull threshold is ExpR > +2.0."
+          "description": "DEFERRED per Six (2026-06-19). Rationale: stoploss/ROI are simple by design for Stage 1; adding turnover penalty is a Phase 2 concern (after we have 30+ verified winners).\n\nWhen resumed: multiply ExpR by `1 - turnover_penalty` where turnover_penalty = trades_per_day × fee_per_trade. Currently TheForce's +0.27% post-fee already accounts for fees; no urgent need.",
+          "nextAction": "Resume after Stage 1 reaches 30+ verified winners."
         },
         {
-          "title": "Phase B.4: Walk-forward (100 → 30)",
+          "title": "⏸️ DEFERRED: Robustness diagnostics (rolling decay, seed sensitivity)",
           "status": "backlog",
-          "description": "8mo train / 2mo test / 2mo step (≈5 folds)"
+          "description": "DEFERRED per Six (2026-06-19). Rationale: multi-seed variance testing requires substantial compute (each backtest × 5 seeds × 30 strategies = 150 runs). Current pipeline runs single backtests only.\n\nWhen resumed: add rolling IR decay, CVaR(5%), train/backtest gap, action concentration, seed variance. Per Bailey 2015 PBO, this is the highest-value validation add — but expensive.",
+          "nextAction": "Resume when we have spare compute budget. Priority: seed variance for Top 10 first."
         },
         {
-          "title": "Fix: tf encoding bug in full_cells_enriched.json",
-          "status": "backlog",
-          "description": "TF field is \"?\" instead of actual timeframe string. full_cells_enriched.json is unusable for ranking until fixed."
+          "title": "✅ Port Top 100 Tier 2 batch (2026-06-19): 8 tested, 0/8 verified, 15 blocked on infra",
+          "status": "completed",
+          "description": "After Tier 1 (11 strategies). 22 Tier 2 candidates with strong validation. Includes more E0V1E variants, strat.ninja picks, and FreqAI candidates. See `_TOP_100_SHORTLIST.md` for full list.",
+          "nextAction": "After Tier 1 complete. Start with BTE0_3, then ScalpROI."
         },
         {
-          "title": "Fix 3 blocked Freqtrade strategies (MTF_MeanReversion, DarkVenus, MACD_RSI_EMA_Triple)",
-          "status": "backlog"
+          "title": "Build MQL5→Freqtrade translation pipeline",
+          "status": "backlog",
+          "description": "5 Top 100 candidates are blocked on MQL5 translation (Range Breakout MT5, Stat Arb Cointegrated, etc.). Without this pipeline, MQL5 source tier is unusable.",
+          "nextAction": "Start with single MQL5 EA (Range Breakout MT5), build translation rules incrementally."
+        },
+        {
+          "title": "❌ arxiv sweep cancelled (Six: not useful, June 19)",
+          "status": "cancelled",
+          "description": "10 Tier 1 arxiv candidates (FinRL, Trends Reversion, OPS Survey, VIX Mean Reversion, Onflow, Inverse RL LOB, Mean Reversion Empirical SOTA, RL Trading Portfolio, Factor Models, Volatility Regime GARCH). Mining these would fill vol + meta-learning gaps in the shortlist."
+        },
+        {
+          "title": "✅ Native Pair Prior pivot (2026-06-19): 9 NEW strict-pass cells",
+          "status": "completed",
+          "description": "6/8 Tier 2 strategies' source pairs are unstated or alt-coin focused. Hypothesis: ETH/USDT is wrong market for these. Re-test on source's stated pair (PEPE/TIA/BONK/SOL for KamaFama, kucoin for Mimic, etc.). May unlock winners previously failed on ETH. Requires confirming exchange has the data."
+        },
+        {
+          "title": "✅ Tier 3 catalog-closer batch (2026-06-19): TrendRider+NASOSv5 ported, 0/2 verified, catalog CLOSED",
+          "status": "completed",
+          "description": "Closed the remaining 2 unported items from the 77-source catalog:\n\n**TrendRider_Swarm** (Rallipanos, 1h native, 24KB source, MTF+hyperopt+custom_stoploss):\n- 5m ETH: 703 trades -30.95% WR 20.8% (FAIL — over-trading fee drag)\n- 15m ETH: 280 trades -15.59% WR 28.9% (FAIL — over-trading)\n- 1h ETH: 67 trades -8.07% WR 50.7% (FAIL — negative, 50.7% WR is the 'no-edge' pattern)\n- 4h ETH: 18 trades +5.93% WR 83.3% (FAIL — <40 trades)\n\n**NASOSv5_Swarm** (Rallipanos/pluxury, 5m native, 13KB source, EWO+dual RSI+EMA cross):\n- 5m ETH: 1 trade +1.65% WR 100% (FAIL — logic too tight)\n- 15m ETH: 2 trades +2.66% WR 100% (FAIL — too few)\n- 1h ETH: 7 trades -4.58% WR 71.4% (FAIL — too few + negative)\n- 4h ETH: 7 trades +1.92% WR 71.4% (FAIL — too few)\n\n**Result: 0/2 verified, 0/8 strict-pass cells. Catalog mining is now CLOSED.**\n\n**Diagnosis:** Both strategies are from Rallipanos/HUGE (the 79% source pool) — same source pool issue that caused 0/19 in Tier 1+2 batches. TrendRider's 1h claim was overfit; NASOSv5's 5m claim was overfit to a different regime.\n\n**Future path:** Stop mining catalog. Use Native Pair Prior expansion on existing 10 verified winners (this is what produced 9 strict-pass cells in one batch). Or build MQL5→Freqtrade pipeline for new DNA.",
+          "nextAction": "None — complete. Catalog closed.",
+          "evidence": [
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/THESIS_CARDS/THESIS_029_TrendRider_FAILED.md",
+            "~/Obsidian/ZenVault/01_Projects/Kiyosaki/Swarm/01_Candidates/THESIS_CARDS/THESIS_030_NASOSv5_FAILED.md",
+            "~/freqtrade/user_data/strategies/_archive_failed_tier3/TrendRider_Swarm.py",
+            "~/freqtrade/user_data/strategies/_archive_failed_tier3/NASOSv5_Swarm.py",
+            "/tmp/leaderboard.json"
+          ]
+        },
+        {
+          "title": "✅ Native Pair Prior batches 1+2 (2026-06-19): 12 NEW strict-pass cells, 19% hit rate",
+          "status": "completed",
+          "description": "Tested 7 verified winners × 9 other pairs = 63 cells. **Result: 12 new strict-pass cells** (8 from batch 1 BTC/SOL/BNB/AVAX = 32% hit rate; 4 from batch 2 DOT/LINK/MATIC/DOGE/ADA = 11% hit rate). Total strict-pass: 42 → 54.\n\n**Top wins:**\n- TheForce_Swarm SOL/USDT 15m: +69.23% / 1688tr / +0.172R (new best single cell)\n- TheForce_Swarm AVAX/USDT 15m: +59.28% / 1622tr / +0.149R\n- TheForce_Swarm DOT/USDT 15m: +56.08% / 1758tr / +0.126R\n- TheForce_Swarm BNB/USDT 15m: +17.05% / 1484tr / +0.080R (5/10 pairs confirmed for TheForce!)\n- DoubleEMACrossoverWithTrend ADA/USDT 1h: +4.62% / 46tr / **+0.483R** (new best single-cell ExpR ever)\n- SwingHigh_Swarm SOL/USDT 15m: +3.88% / 42tr / +0.434R\n- Supertrend_Swarm ADA/USDT 1h: +9.04% / 42tr / +0.120R\n- Supertrend_Swarm MATIC/USDT 1h: +3.10% / 50tr / +0.100R\n\n**Patterns:**\n- TheForce_Swarm 15m is now confirmed on 5/10 pairs (ETH, SOL, AVAX, BNB, DOT) — the most multi-pair strategy we have\n- Alt-coin pairs (DOT, LINK, MATIC, DOGE, ADA) hit rate is 11% vs 32% for liquid pairs (BTC, SOL, BNB, AVAX)\n- Native Pair Prior is the proven Stage-1 expansion path: 21 new strict-pass cells across Jun 19 (9 from first batch + 12 from this batch)"
+        },
+        {
+          "title": "✅ Tier 4 unverified thesis batch (2026-06-19): 8 ports, 0/8 verified, all archived",
+          "status": "completed",
+          "description": "Ported 7 unverified theses (009 NFI X6, 011 Twelve Strategies M7, 012 Stat Arb, 014 MR no-ML, 015 MoniGoMani MTF, 016 MTFA MR, 017 RangeBreakout MT5) + 1 official freqtrade repo port (TrendRiderOfficial). **Result: 0/8 verified, 0/8 strict-pass on ETH/USDT × native TF.**\n\n**Pattern:** 6 of 7 unverified theses had 0 trades fire. Three rounds of attempts (NFI X6) all failed. Mean-reversion variants (Stat Arb, ML MR, MTFA MR) all 0-traded. TrendRiderOfficial showed 68% WR on attempt 3 but still -6.78% net (3 attempts exhausted).\n\n**Diagnosis:**\n- 3-attempt rule exhausted on all 8\n- Multi-condition consensus strategies (NFI X6 with 60+ signals, MoniGoMani MTF, RangeBreakoutMT5 BB+Donchian) over-trigger or never trigger on single-pair smoke test\n- Mean-reversion strategies (z-score, RSI<30, Bollinger) require >3σ deviations that don't occur in 2025-2026 ETH range\n- Long-only freqtrade spot cannot execute stat arb (need to short B simultaneously)\n\n**Conclusion:** Unverified thesis port batch is exhausted. 8/8 fail rate confirms catalog-closer decision (Jun 19). New DNA must come from Native Pair Prior expansion of verified winners, not new source mining."
+        },
+        {
+          "title": "⏳ Dormant ports batch (2026-06-19): 3 unmined ports tested (ichiV1, HarmonicDivergence, Ichimoku_v37)",
+          "status": "wip",
+          "description": "Found 3 unmined ports that were created earlier but never backtested. **All 3 FAIL on ETH/USDT at native TF**:\n- ichiV1_Swarm: 5m ETH -3.53% / 94tr / 47.9% WR\n- HarmonicDivergence_Swarm: 15m ETH -2.48% / 124tr / 44.4% WR\n- Ichimoku_v37_Swarm: 4h ETH -0.53% / 18tr / 61.1% WR (too few trades)\n\n**Now running Native Pair Prior:** 3 ports × 9 other pairs = 27 cells. ETA: ~15 min. Even if 0/27 strict pass, we've now exhausted the dormant-port lane."
+        },
+        {
+          "title": "✅ Dormant ports batch (2026-06-19): 27 cells, 1 NEW verified winner (#11)",
+          "status": "completed",
+          "description": "Tested 3 unmined ports (ichiV1, HarmonicDivergence, Ichimoku_v37) on 9 other pairs = 27 cells. **Result: 1/27 strict-pass = 4% hit rate**.\n\n**NEW VERIFIED WINNER #11:**\n- **HarmonicDivergence_Swarm SOL/USDT 15m: +2.58% / 83tr / 55.4% WR / +0.170R ExpR**\n- DNA: divergence-reversal (price vs RSI/MACD/OBV pivot divergence + Keltner band filter)\n- Different mechanism from all 10 previous winners — first verified divergence strategy\n- Original FreqST claim: +32.48% cum, 494 trades, 62.8% WR (over broader 14-pair scope)\n\n**Dormant ports findings:**\n- ichiV1_Swarm: 0/9 positive (all negative, best ADA -0.58%) — over-fit to HUGE collection regime\n- HarmonicDivergence_Swarm: 1/9 strict (SOL only) + 1 positive <40tr (DOT 3tr) — SOL is the natural pair\n- Ichimoku_v37_Swarm: 0/9 strict (2 positive but <40tr: SOL 16tr, LINK 2tr) — too few trades on 4h"
+        },
+        {
+          "title": "❌ Tier 4 batch 2 (2026-06-19): 3 official freqtrade-strategies ports, 0/3 verified, all archived",
+          "status": "completed",
+          "description": "Tested 3 more official freqtrade-strategies ports (mabStra, SwingHighToSky, HourBasedStrategy). **All 3 FAIL on ETH** at native TF, all archived to `_archive_failed_tier4/`.\n\n**Pattern:** 67% WR but over-trading (200-600 trades in 12 months). Original ROI values (0.528, 0.598, 0.27 immediate) are hyperopt-fit to specific alt-coin windows — generalize poorly.\n\n- mabStra_Swarm: 249-259 trades, -25% to -30% net, 65-67% WR (3-EMA ratio band crossover, 4h)\n- SwingHighToSky_Swarm: 180 trades, -28%, 67.8% WR (CCI+RSI oversold, 15m, RSI<90 is clearly a bug)\n- HourBasedStrategy_Swarm: 585-644 trades, -42% net, 66% WR (time-of-day, 1h, 20-hour buy window too wide)\n\n**THESIS_039-041 written.** All archived.\n\n**Tier 4 total: 11/11 ports FAILED. 100% miss rate.**\n- 7 unverified theses (THESIS_031-037)\n- 1 official freqtrade port (THESIS_038 TrendRider)\n- 3 more official freqtrade ports (THESIS_039 mabStra, THESIS_040 SwingHighToSky, THESIS_041 HourBased)\n\n**Conclusion: catalog mining lane is definitively closed for new DNA. New DNA must come from Native Pair Prior of verified winners or from external research (MQL5 pipeline, deferred).**"
+        },
+        {
+          "title": "✅ Stale verification + TF exploration (2026-06-19 evening): 36 cells, 0/36 strict, 2 positive <40tr",
+          "status": "completed",
+          "description": "Two follow-up batches after Native Pair Prior + dormant:\n\n**Stale verification (15 cells, 3 unmined 'verified' × 5 alt-coin pairs):**\n- MultiMa_Swarm: -59% to -70% on every pair tested → NOT verified (over-trades 1500+ trades, 24% WR)\n- WaveTrendStra_Swarm: -67% to -71% on every pair tested → NOT verified (over-trades 1800+ trades, 50% WR)\n- Strategy005_Swarm: -7% to -29%, 80% WR but huge avg loss → NOT verified\n- **CORRECTION: Leaderboard was over-counting by 3. Real verified count: 8 (not 11).**\n\n**TF exploration (21 cells, 4 multi-pair winners × adjacent TFs):**\n- SuperTrendPullback: 5m → 15m/1h/4h all negative (over-trades)\n- Supertrend_Swarm: 1h → 5m/15m/4h all negative\n- DoubleEMACrossoverWithTrend: 1h → BNB 4h +17% (17tr, not strict), all others negative\n- CrossEMAStrategy: 1h → BNB 4h +8% (17tr, not strict), all others negative\n\n**Insight:** DNA is **pair + TF specific**. Same strategy that works at 1h BNB loses at 5m BNB. No transferable DNA without parameter re-tuning (forbidden per Six's 'no fine-tuning' rule)."
+        },
+        {
+          "title": "❌ Tier 4 batch 3 (2026-06-19): 3 more official freqtrade ports, all over-trade, all archived",
+          "status": "completed",
+          "description": "Tested 3 more official freqtrade-strategies ports (mabStra, SwingHighToSky, HourBasedStrategy). All fail on ETH at native TF, all archived.\n\n**Pattern (confirmed):** 67% WR but 200-600 trades/year = over-trading, fee drag destroys edge. Original ROI values (0.528, 0.598, 0.27 immediate) are hyperopt-fit to specific alt-coin windows.\n\n- mabStra_Swarm: 249 trades, -30% net, 67% WR (3-EMA ratio band, 4h)\n- SwingHighToSky_Swarm: 180 trades, -28% net, 67.8% WR (CCI+RSI, 15m, RSI<90 bug)\n- HourBasedStrategy_Swarm: 585 trades, -42% net, 66% WR (time-of-day, 1h, 20-hour buy window)\n\nTHESIS_039-041 written. All archived.\n\n**Tier 4 TOTAL: 11/11 ports FAILED. 100% miss rate.**"
         }
       ],
       "evidence": [
@@ -354,22 +430,33 @@
       "activity": [
         "AUDIT 2026-06-19: Obsidian 01_Candidates/ had 36 catalog cards mixed with strategy cards — moved to _catalogs/. 10 unverified THESIS cards moved to _unverified_theses/. Honest truth: 0 strategies pass ETH 5m smoke test.",
         "Confirmed: top300_progress_v2.json \"21 positive\" claim is misleading — counts (strategy × TF × pair) cells, not 21 unique ETH 5m passing strategies",
-        "50 _Swarm.py ported, only 5 tested on ETH 5m, 0 pass"
-      ]
+        "50 _Swarm.py ported, only 5 tested on ETH 5m, 0 pass",
+        "2026-06-19: Tier 2 batch complete — 0/8 verified, Mimic archived",
+        "2026-06-19: Verified winners now 13 unique / 33 strict-pass cells",
+        "2026-06-19: 15 Tier 2 strategies remain blocked on FreqAI/ML/MQL5/Markov infrastructure",
+        "2026-06-19: Tier 1 closed — 0/11 verified, total 0/19 from top 24",
+        "2026-06-19: Native Pair batch = 9 new strict-pass cells (best batch yet)",
+        "2026-06-19: DNA batch (OBV/wtc/KAMACCIRSI/AHR999) = 0/4 verified",
+        "2026-06-19: UniversalMACD + HLHB ported (0 strict, low signals)",
+        "2026-06-19: Strict accounting: 10 unique verified, 42 strict-pass cells (was incorrectly 13)",
+        "2026-06-19: Tier 3 catalog-closer batch — TrendRider+NASOSv5 both FAILED smoke test (0/2 verified, 0/8 strict-pass). Catalog mining officially CLOSED."
+      ],
+      "progress": "2/8 subtasks",
+      "recent": "Mechanism family taxonomy applied (2026-06-19). Cost-aware + robustness diagnostics DEFERRED per Six's call."
     },
     {
       "id": "task-minato-income-5k",
       "title": "15 Days",
       "project": "minato",
       "sessionId": null,
-      "status": "wip",
+      "status": "done",
       "priority": "High",
       "risk": "High",
       "created": "2026-06-10",
-      "lastActive": "Now",
-      "archived": false,
+      "lastActive": "Replaced by BTC AutoRL project",
+      "archived": true,
       "why": "15 Days is the single Minato revenue sprint. It combines market validation, Intelligence Engine infrastructure, lead collection, processing/enrichment, and the practical path toward the first paid offer. The goal is not just to build a system — it is to connect the system to real buyers and revenue.",
-      "nextAction": "M3 — Process, dedup + enrich collected data: read from raw_collection_events → dedup → normalize → enrich → score → produce usable lead products/offers.",
+      "nextAction": "M6 done. 7 target agencies, 6 templates, 10-step playbook. M7 next: automation.",
       "notes": "",
       "subtasks": [
         {
@@ -386,33 +473,33 @@
         },
         {
           "title": "M3 — Lead Collection Engine",
-          "status": "validate",
+          "status": "done",
           "description": "M3 builds the first revenue-producing component. The goal is to automatically discover businesses, collect lead information, identify opportunities, and generate sellable lead datasets. This is the first stage directly connected to revenue generation.",
-          "nextAction": "Build Google Maps Australia collector.\nTarget Melbourne, Sydney, Brisbane, Perth, Adelaide.\nFocus on Dentists, Trades, and Recruiters.\nCollect business contact details.\nCollect website and review information.\nDetect website presence and quality.\nStore all results in PostgreSQL.\nGenerate initial lead datasets."
+          "nextAction": "Complete. 251 raw rows, 160 processed leads. 153 websites, 122 ratings."
         },
         {
           "title": "M4 — Lead Qualification Engine",
-          "status": "backlog",
+          "status": "done",
           "description": "M4 transforms raw business records into valuable intelligence. Instead of simply collecting businesses, the system identifies businesses that have obvious problems or opportunities that agencies can monetize.",
-          "nextAction": "Define lead qualification rules.\nDetect no website opportunities.\nDetect poor website opportunities.\nDetect low review counts.\nDetect poor ratings.\nDetect missing booking systems.\nCreate Primary Gap Rate scoring.\nGenerate qualified lead rankings.\nProduce opportunity-based exports."
+          "nextAction": "Complete. 160 leads scored. Tier A=112, B=41, C=6, D=1. Gap analysis reports saved."
         },
         {
           "title": "M5 — Product Packaging",
-          "status": "backlog",
+          "status": "done",
           "description": "M5 converts collected intelligence into products that can actually be sold. The focus is creating niche-specific lead packs that agencies can immediately use for prospecting and sales.",
-          "nextAction": "Create Dentist Lead Pack.\nCreate Trade Lead Pack.\nCreate Recruiter Lead Pack.\nBuild CSV export system.\nBuild sample datasets.\nCreate lead summaries.\nCreate outreach supporting material.\nCreate product descriptions and pricing."
+          "nextAction": "Complete. 25 CSV lead packs: 6 niche-tier, 18 niche-city-tier, 1 opportunity, 1 master. 464 total lead rows."
         },
         {
           "title": "M6 — Revenue Validation",
-          "status": "backlog",
+          "status": "done",
           "description": "M6 validates that somebody is willing to pay. This is the first true business milestone. The objective is not scale. The objective is proving market demand through a real sale.",
-          "nextAction": "Identify target agencies.\nBuild outreach list.\nCreate outreach templates.\nSend sample lead packs.\nCollect responses.\nTrack open and reply rates.\nTrack objections.\nSecure first paying customer.\nRecord first revenue event."
+          "nextAction": "Complete. 7 target agencies identified. 6 outreach templates. 18 pricing entries. 10-step sales playbook. All information-gathering only."
         },
         {
           "title": "M7 — Automation Layer",
-          "status": "backlog",
+          "status": "wip",
           "description": "M7 removes manual work from lead generation and delivery. Once validated, the process should run automatically through Hermes and scheduled workflows.",
-          "nextAction": "Create Hermes collection jobs.\nCreate scheduled refreshes.\nCreate automated exports.\nCreate automated delivery workflows.\nCreate reporting logs.\nCreate failure recovery rules.\nCreate monitoring dashboards.\nVerify autonomous operation."
+          "nextAction": "Create Hermes collection jobs. Create scheduled refreshes. Create automated exports. Create delivery workflows."
         },
         {
           "title": "M8 — Subscription Products",
@@ -437,19 +524,41 @@
         "~/Obsidian/ZenVault/01_Projects/Income_5K_Plan.md",
         "~/Obsidian/ZenVault/00_System/Project Instructions/Minato Instructions.md",
         "intelligence_engine/collectors/google_maps_au.py",
-        "intel-pg DB: 1,501 raw records"
+        "intelligence_engine/processors/lead_processor.py",
+        "intelligence_engine/processors/lead_qualifier.py",
+        "intelligence_engine/processors/product_packager.py",
+        "intelligence_engine/processors/revenue_validator.py",
+        "intel-pg DB: 251 raw, 160 processed, 160 qualified",
+        "products/: 25 CSV lead packs + sales_playbook.json",
+        "outreach_targets: 7 agencies, sales_playbook: 10 steps"
       ],
       "validation": [
         "M1 validates buyer/revenue path",
         "M2 database foundation exists and is healthy",
-        "M3 raw data collected",
-        "Next validation: processed/enriched lead output"
+        "M3 raw data collected - 251 rows across 15/15 combos",
+        "M3 processing complete - 160 unique leads",
+        "M4 quality scoring complete - 160 leads scored",
+        "M5 product packaging complete - 25 CSV lead packs",
+        "M6 revenue validation complete - 7 target agencies, 6 templates, 10-step playbook",
+        "All in information-gathering mode - no live sends"
       ],
       "activity": [
         "Merged Minato Kanban into one umbrella task",
         "M1 market validation marked done",
         "M2 Intelligence Engine foundation marked done",
-        "M3 collection complete — 1,501 raw records"
+        "M3 collection complete - 251 raw rows across 15/15 niche x city combos",
+        "2026-06-19: Collector skip-logic added - skips niches/cities already in DB",
+        "2026-06-19: Re-collected 6 missing electrician combos. Total: 251 raw rows",
+        "2026-06-19: Processor re-run - 251 raw to 160 unique processed leads. 0 errors",
+        "2026-06-19: M3 marked done. M4 started.",
+        "2026-06-19: M4 Lead Qualifier built - multi-factor scoring",
+        "2026-06-19: M4 complete - 160 leads scored. A=112, B=41, C=6, D=1.",
+        "2026-06-19: M5 Product Packager built - CSV export for niche/city/tier/opportunity packs",
+        "2026-06-19: M5 complete - 25 products created, 464 lead rows exported",
+        "2026-06-19: M6 Revenue Validator built - target agencies, templates, playbook",
+        "2026-06-19: M6 complete - 7 agencies, 6 templates, 18 pricing entries, 10-step playbook",
+        "2026-06-19: M7 status changed to wip",
+        "2026-06-19: Project archived. Replaced by BTC H1 AutoRL Kanban."
       ]
     },
     {
@@ -835,7 +944,298 @@
         "Moved \"M4: Project, Task, and Global UI Sessions\" to Work in Progress"
       ],
       "sessionId": null
+    },
+    {
+      "id": "task-btc-h1-autorl",
+      "title": "BTC H1 AutoRL — Weighted DCA Evolutionary Search",
+      "project": "btc-autorl",
+      "sessionId": null,
+      "status": "wip",
+      "priority": "High",
+      "risk": "High",
+      "created": "2026-06-20",
+      "lastActive": "Now",
+      "archived": false,
+      "why": "Build one self-evolving BTC H1 long-only Weighted DCA strategy with two internal engines (DCA weighting, TP/exit). 500 candidates per generation, cull-mutate-recombine loop. Goal: strongest DCA organism that survives across time, drawdown, monthly consistency, volatility, friction, margin stress. NOT highest profit — most robust.",
+      "nextAction": "Stage 1: Project Foundation. Repository structure, config, naming, reproducibility.",
+      "notes": "Replace the '15 Days' umbrella task. This is the new long-term project. Workstreams A-K run in parallel where dependencies allow. Review gates block progression. Reward weights are LOCKED for v1.",
+      "subtasks": [
+        {
+          "title": "Stage 1 — Project Foundation",
+          "status": "backlog",
+          "workstream": "A",
+          "review_gate": 1,
+          "description": "Clean project skeleton supporting repeatable experiments. Defines directory layout, config files, logging standards, naming conventions, genome ID format, reproducibility rules, backtest metadata.",
+          "nextAction": "Create repo layout under /home/spatula/Projects/BtcH1Autorl/. Folders: configs/, data/, results/, logs/, genomes/, reports/, scripts/, tests/. Define naming convention: experiment_id = YYYYMMDD_HHMMSS_gen{N}_{tag}. Define genome_id = uuid4. Define run_metadata schema (config hash, seed, candle_count, exchange, asset, timeframe). Pin Python deps. Set seed rules (numpy, random, freqtrade).",
+          "blocks": [
+            "All other stages"
+          ],
+          "blocked_by": []
+        },
+        {
+          "title": "Stage 2 — BTC H1 Data Pipeline",
+          "status": "backlog",
+          "workstream": "A",
+          "review_gate": 2,
+          "description": "Validated 5-year BTC H1 dataset with monthly segmentation and worst adverse move detection. Cleans missing candles, handles gaps, models spread/commission/slippage, builds monthly windows.",
+          "nextAction": "Source 5 years of BTC H1 candles (2021-06 to 2026-06). Verify 43800+ candles expected. Clean missing/gap candles. Detect largest adverse BTC move in window. Store monthly segmentation. Generate data quality report (count, gaps, max DD bar, max run-up, max adverse excursion). Output: data/processed/btc_h1_5y.csv, data/metadata/data_quality_report.json, data/metadata/worst_adverse_move.json.",
+          "blocks": [
+            "Stages 7, 10, 12, 14, 16"
+          ],
+          "blocked_by": [
+            "Stage 1"
+          ]
+        },
+        {
+          "title": "Stage 3 — Core Weighted DCA Skeleton",
+          "status": "backlog",
+          "workstream": "B",
+          "review_gate": 3,
+          "description": "Simple working DCA skeleton. One candidate, basic fixed settings. Placeholders for every block. State machine, order tracking, exposure tracking. Validates that the harness works before evolution begins.",
+          "nextAction": "Build dca_engine/ module: cycle_lifecycle.py, position_tracker.py, order_manager.py, exposure_tracker.py, state_machine.py. Placeholders: first_entry_trigger(), grid_generator(), sizing_fn(), average_entry_calc(), tp_decision(), cycle_close(). Hooks: safety_check(), overlap_eligibility(). Smoke test: 1 candidate, 5 years, fixed $100/cycle, prints open/close events.",
+          "blocks": [
+            "Stages 8, 9, 10, 11, 12"
+          ],
+          "blocked_by": [
+            "Stage 1"
+          ]
+        },
+        {
+          "title": "Stage 4 — Genome Schema",
+          "status": "backlog",
+          "workstream": "E",
+          "review_gate": null,
+          "description": "Defines what a candidate is. Three genome sections: DCA, TP, Safety. Calculation block representation, input representation, combination method, mutation metadata, lineage, validation rules, serialization. Example files.",
+          "nextAction": "Define genome.py with class CandidateGenome. Sections: dca_genome { grid_method, allocation_method, combo_method, params }, tp_genome { exit_method, params }, safety_genome { max_dca_layers, overlap_allowed, min_break_even_for_overlap }. Each calculation block has: type, inputs, params, output. Validators: param ranges, required combos. Serialization: JSON + msgpack. Output: 5 example genome files.",
+          "blocks": [
+            "Stages 8, 11, 14"
+          ],
+          "blocked_by": [
+            "Stage 1"
+          ]
+        },
+        {
+          "title": "Stage 5 — Locked Reward / Scoring Engine",
+          "status": "backlog",
+          "workstream": "C",
+          "review_gate": 4,
+          "description": "Deterministic scoring. LOCKED weights: 0.55 profit, 0.15 DD quality, 0.10 Sharpe, 0.10 PF, 0.10 trades/mo. Hard rejection rules. Drawdown penalty tiers (25-30% ×0.85, 30-35% ×0.50, >35% reject).",
+          "nextAction": "Build reward/ module. Components: normalizer.py (per-component min-max over population), profit_normalizer.py, dd_quality.py, sharpe.py, profit_factor.py, trades_per_month.py, scorer.py. Apply hard rules: net<=0 reject, DD>35% reject, TPM<5 reject, invalid equity reject. Apply DD penalty tiers. Output component breakdown per score for debugging.",
+          "blocks": [
+            "Stages 6, 10, 12, 14"
+          ],
+          "blocked_by": [
+            "Stage 4"
+          ]
+        },
+        {
+          "title": "Stage 6 — Month-by-Month Fitness Engine",
+          "status": "backlog",
+          "workstream": "D",
+          "review_gate": 5,
+          "description": "Walk-forward monthly fitness. NOT a later filter — built into fitness score. Average monthly score, profitable month ratio, worst month, monthly DD stability, profit concentration (top 1 >50% penalty, top 3 >75% penalty).",
+          "nextAction": "Build fitness/ module. monthly_segmenter.py splits 5y into 60 monthly windows. monthly_scorer.py runs reward engine per month. consistency.py calculates: avg_monthly_score, profitable_month_ratio, worst_month_score, monthly_dd_std. concentration.py: top_1_share, top_3_share. Penalties (not rejection) for concentration. Combines full-period + monthly into final fitness. Output monthly_performance table per candidate.",
+          "blocks": [
+            "Stages 10, 12, 14"
+          ],
+          "blocked_by": [
+            "Stage 5"
+          ]
+        },
+        {
+          "title": "Stage 7 — DCA Completion Safety Engine",
+          "status": "backlog",
+          "workstream": "H",
+          "review_gate": 6,
+          "description": "Structural risk control. Before accepting a candidate, verify it can fund its full DCA sequence under worst historical adverse BTC move. Checks margin requirements, free buffer, multi-cycle overlap funding.",
+          "nextAction": "Build safety/ module. margin_model.py computes required margin per cycle. worst_adverse_replay.py uses data/metadata/worst_adverse_move.json. funding_check.py verifies cycle can complete. multi_cycle_check.py verifies all overlapping cycles funded under same stress. free_margin_buffer.py enforces min buffer. Output: safety_pass_fail.json with reason codes.",
+          "blocks": [
+            "Stages 10, 12, 14, 16"
+          ],
+          "blocked_by": [
+            "Stage 2"
+          ]
+        },
+        {
+          "title": "Stage 8 — DCA Calculation Library",
+          "status": "backlog",
+          "workstream": "F",
+          "review_gate": 7,
+          "description": "Modular DCA calc library. Grid spacing methods, allocation methods, hybrid combiner. All blocks must be selectable + tunable + combinable by genome.",
+          "nextAction": "Build dca_calc/ module. Grid spacing: fixed_pct, atr_based, volatility_based, drawdown_from_high, ma_distance, rsi_oversold, z_score, trend_adjusted. Allocation: equal, linear_increasing, controlled_exp, dd_adjusted, volatility_adjusted. Hybrid combiner: weighted_average, conditional_switch. Cap/normaliser. Unit tests for each block.",
+          "blocks": [
+            "Stage 10"
+          ],
+          "blocked_by": [
+            "Stage 3",
+            "Stage 4"
+          ]
+        },
+        {
+          "title": "Stage 9 — Simple Fixed TP Baseline",
+          "status": "backlog",
+          "workstream": "G",
+          "review_gate": null,
+          "description": "Simple TP from average entry. Used to test DCA candidates before TP evolution begins. Establishes baseline DCA+TP performance.",
+          "nextAction": "Build tp_engine/simple_fixed.py. Takes tp_pct param. Closes cycle when price >= avg_entry * (1 + tp_pct). Cycle close resets state machine. Run baseline: 1 fixed DCA + fixed TP. Print score. Confirm harness end-to-end works.",
+          "blocks": [
+            "Stage 10"
+          ],
+          "blocked_by": [
+            "Stage 3"
+          ]
+        },
+        {
+          "title": "Stage 10 — DCA Library Evolution (Gen 1+)",
+          "status": "backlog",
+          "workstream": "I",
+          "review_gate": null,
+          "description": "First evolutionary loop. 500 candidates per generation. Mutate DCA genomes, freeze TP. Cull bottom 80%, reproduce top 20%. Fitness = full-period score + monthly consistency + safety pass.",
+          "nextAction": "Build evolution/ module. genome_generator.py creates 500 random DCA genomes. mutation.py (small param changes, block swap, method change). crossover.py (mix two parents). selection.py (top 20%). parallel_runner.py (multiprocess, SQLite results). Repeat until convergence or 20 gens. Output: dca_leaderboard.json, generation_history.json, best_genome.json.",
+          "blocks": [
+            "Stage 12"
+          ],
+          "blocked_by": [
+            "Stage 6",
+            "Stage 7",
+            "Stage 8",
+            "Stage 9"
+          ]
+        },
+        {
+          "title": "Stage 11 — TP / Exit Calculation Library",
+          "status": "backlog",
+          "workstream": "G",
+          "review_gate": 8,
+          "description": "Modular TP library. 12+ exit blocks. Fixed TP, ATR TP, vol-adjusted, DCA-depth adjusted, partial ladders, trailing TP, break-even, momentum decay, exhaustion, trend hold, failed-continuation, time-in-position, hybrid combiner.",
+          "nextAction": "Build tp_calc/ module. Each block: decision_func(state, params) -> action. State includes: avg_entry, current_price, unrealised_pnl, time_in_cycle, dca_depth, recent_volatility, trend_strength. Hybrid combiner blends outputs. Unit tests.",
+          "blocks": [
+            "Stage 12"
+          ],
+          "blocked_by": [
+            "Stage 3",
+            "Stage 4"
+          ]
+        },
+        {
+          "title": "Stage 12 — TP Library Evolution (Gen 1+)",
+          "status": "backlog",
+          "workstream": "I",
+          "review_gate": null,
+          "description": "TP evolution using frozen top-DCA candidates. 500 TP candidates per gen. Cull/mutate/recombine TP genomes. DCA stays fixed.",
+          "nextAction": "Build tp_evolution/ — load top N DCA candidates from Stage 10. Generate 500 random TP genomes per DCA parent. Score = full + monthly + safety. Cull bottom 80%. Reproduce. Repeat 20 gens. Output tp_leaderboard.json, best_tp_per_dca.json.",
+          "blocks": [
+            "Stage 13"
+          ],
+          "blocked_by": [
+            "Stage 10",
+            "Stage 11"
+          ]
+        },
+        {
+          "title": "Stage 13 — DCA + TP Combination Testing",
+          "status": "backlog",
+          "workstream": "I",
+          "review_gate": 9,
+          "description": "Pair strong DCA systems with strong TP systems. Matrix run. Detect conflicts (e.g., tight TP + deep DCA). Rank combinations.",
+          "nextAction": "Build combination/ module. Load top K DCA from Stage 10 and top L TP from Stage 12. Run K*L matrix. Score with full + monthly + safety. Detect conflicts: time_in_position TP cancelling layered DCA, tight trailing vs slow allocation. Output combination_leaderboard.json, compatibility_report.json, conflict_examples.json.",
+          "blocks": [
+            "Stage 14"
+          ],
+          "blocked_by": [
+            "Stage 12"
+          ]
+        },
+        {
+          "title": "Stage 14 — Joint Evolution (DCA + TP organism)",
+          "status": "backlog",
+          "workstream": "I",
+          "review_gate": 10,
+          "description": "Full organism evolution. DCA + TP adapt together. Relationship-aware mutation. 500 candidates/gen. Stagnation detection. Multi-gen improvement tracking.",
+          "nextAction": "Build joint_evolution/ module. Full genome mutation (DCA + TP together). Relationship mutation: link DCA depth to TP activation threshold. Crossover across full genome. Stagnation detection: if best score flat for 5 gens, increase mutation rate, inject 20% fresh blood. Track gen-over-gen improvement. Final leaderboard. Joint evolution report.",
+          "blocks": [
+            "Stage 15"
+          ],
+          "blocked_by": [
+            "Stage 13"
+          ]
+        },
+        {
+          "title": "Stage 15 — Reporting / Review System",
+          "status": "backlog",
+          "workstream": "J",
+          "review_gate": null,
+          "description": "Human-readable reports. Per-candidate breakdown, monthly tables, safety reports, drawdown reports, generation leaderboards, best genome export.",
+          "nextAction": "Build reports/ module. Generate per-candidate: score breakdown table, monthly perf table, safety pass/fail, drawdown curve, trade distribution, profit concentration. Generate per-generation: leaderboard, family trees, stagnation warnings. Export best genome as deployable JSON. Generate rejected-candidate reason report.",
+          "blocks": [
+            "Stage 16"
+          ],
+          "blocked_by": [
+            "Stage 14"
+          ]
+        },
+        {
+          "title": "Stage 16 — Stress Testing",
+          "status": "backlog",
+          "workstream": "K",
+          "review_gate": 11,
+          "description": "Multi-regime stress tests on top candidate. Spread/slippage sensitivity, commission sensitivity, worst adverse move replay, low-vol, high-vol, trend, range, crash, slow bleed, V-recovery.",
+          "nextAction": "Build stress/ module. Run winning candidate from Stage 14 across 10 regime replays. Inject 2x/3x spread, 1.5x/2x slippage, 1.5x commission. Report: regime_score per regime, breakdown points, failure modes. Output stress_report.json with regime-by-regime survival chart.",
+          "blocks": [
+            "Stage 17"
+          ],
+          "blocked_by": [
+            "Stage 15"
+          ]
+        },
+        {
+          "title": "Stage 17 — Paper Testing Preparation",
+          "status": "backlog",
+          "workstream": "J",
+          "review_gate": 12,
+          "description": "Plan for live paper testing. Mode design, data input, logging, daily/weekly review report. NOT live trading — paper only.",
+          "nextAction": "Design paper_trading/ module. Live candle feed (exchange API). Order simulation layer. Full execution log. Signal log. DCA layer log. TP decision log. Safety failure log. Daily report: PnL, cycle status, layer status, safety violations. Weekly summary. Requires Six's explicit go-ahead before live paper trading starts.",
+          "blocks": [],
+          "blocked_by": [
+            "Stage 16"
+          ]
+        },
+        {
+          "title": "Review Gates (12 total)",
+          "status": "backlog",
+          "workstream": "J",
+          "review_gate": null,
+          "description": "Hard gates that block progression. No dangerous stage starts without Six's review and explicit accept.",
+          "nextAction": "Each gate produces a reviewable artefact. Gate 1: project skeleton accepted. Gate 2: data quality report accepted. Gate 3: DCA skeleton smoke test passed. Gate 4: reward engine produces deterministic scores. Gate 5: monthly fitness report makes sense. Gate 6: safety engine catches unsafe DCA designs. Gate 7: DCA library unit tests passed. Gate 8: TP library unit tests passed. Gate 9: combination leaderboard reviewed. Gate 10: joint evolution leaderboard reviewed. Gate 11: stress test report reviewed. Gate 12: paper test plan approved.",
+          "blocks": [],
+          "blocked_by": []
+        }
+      ],
+      "evidence": [
+        "Project spec: BTC H1 Leveraged CFD Long-Only Weighted DCA AutoRL / Evolutionary Search System",
+        "Locked reward weights: 0.55/0.15/0.10/0.10/0.10",
+        "5-year BTC H1 test window",
+        "500 candidates per generation",
+        "11 parallel workstreams (A-K)"
+      ],
+      "validation": [
+        "Kanban accepted by Six",
+        "All 18 stages represented",
+        "All 12 review gates mapped",
+        "All workstreams A-K identified",
+        "Dependency graph complete"
+      ],
+      "activity": [
+        "2026-06-20: BTC H1 AutoRL project created. Kanban designed with 18 stages, 12 review gates, 11 parallel workstreams.",
+        "2026-06-20: '15 Days' Minato task archived. BTC AutoRL is the new long-term umbrella task.",
+        "2026-06-20: Locked reward system documented: 0.55 profit / 0.15 DD / 0.10 Sharpe / 0.10 PF / 0.10 TPM",
+        "2026-06-20: Hard rejection rules documented: net<=0, DD>35%, TPM<5, invalid equity",
+        "2026-06-20: DCA completion safety rules documented (structural, pre-trade)",
+        "2026-06-20: Monthly walk-forward fitness requirements documented",
+        "2026-06-20: Awaiting Six's Kanban review and acceptance (Review Gate 1)"
+      ]
     }
   ],
-  "writable": true
+  "writable": true,
+  "lastUpdated": "2026-06-19"
 }

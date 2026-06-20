@@ -6998,6 +6998,447 @@ body.zen-chat-active .zen-work-global {
   display: none !important;
 }
 
+/* ── Zen Review / Validate surface ── */
+.zen-chat-review-host {
+  flex: 0 0 auto;
+  padding: 0 var(--space-6) var(--space-4);
+}
+.zen-review-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  border: 1px solid rgba(139,155,179,0.13);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(77,163,255,0.12), transparent 34%),
+    linear-gradient(145deg, rgba(12,17,25,0.96), rgba(5,8,13,0.96));
+  box-shadow: 0 24px 80px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.04);
+  padding: var(--space-5);
+  color: var(--text-secondary);
+}
+.zen-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.zen-review-header span,
+.zen-work-gate-kicker {
+  display: block;
+  color: color-mix(in srgb, var(--zen) 68%, white);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.zen-review-header h3 {
+  margin: 5px 0 6px;
+  color: var(--text-primary);
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+.zen-review-header p,
+.zen-review-panel p,
+.zen-work-github-step p,
+.zen-work-diagnosis p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.zen-review-header-actions,
+.zen-review-control-row,
+.zen-review-switch,
+.zen-work-completion-actions,
+.zen-work-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.zen-review-header-actions button,
+.zen-review-panel-head button,
+.zen-review-switch button,
+.zen-review-control-row button,
+.zen-work-completion-actions button,
+.zen-work-recovery button {
+  border: 1px solid rgba(139,155,179,0.16);
+  border-radius: 999px;
+  background: rgba(8,12,18,0.68);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.zen-review-header-actions button:hover,
+.zen-review-panel-head button:hover,
+.zen-review-switch button:hover,
+.zen-review-control-row button:hover,
+.zen-work-completion-actions button:hover,
+.zen-work-recovery button:hover {
+  color: var(--text-primary);
+  border-color: rgba(77,163,255,0.34);
+  background: rgba(77,163,255,0.08);
+}
+.zen-work-completion-actions button:disabled,
+.zen-work-completion-actions button:disabled:hover {
+  cursor: not-allowed;
+  opacity: 0.48;
+  color: var(--text-muted);
+  border-color: rgba(139,155,179,0.12);
+  background: rgba(8,12,18,0.42);
+}
+.zen-work-completion-actions--primary {
+  justify-content: center;
+  margin-top: var(--space-3);
+}
+.zen-review-switch {
+  padding: 4px;
+  border: 1px solid rgba(139,155,179,0.12);
+  border-radius: 999px;
+  background: rgba(2,6,12,0.36);
+}
+.zen-review-switch button {
+  border-color: transparent;
+  background: transparent;
+  padding: 7px 11px;
+}
+.zen-review-switch button.active {
+  color: #dbeafe;
+  border-color: rgba(77,163,255,0.28);
+  background: rgba(77,163,255,0.12);
+}
+.zen-review-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+.zen-review-pill-row span {
+  padding: 7px 10px;
+  border: 1px solid rgba(139,155,179,0.12);
+  border-radius: 999px;
+  background: rgba(8,12,18,0.62);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.zen-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.zen-review-panel {
+  border: 1px solid rgba(139,155,179,0.12);
+  border-radius: 18px;
+  background: rgba(5,9,15,0.58);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.zen-review-panel--wide {
+  grid-column: 1 / -1;
+}
+.zen-review-panel h4,
+.zen-review-checklist h5 {
+  margin: 0 0 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+.zen-review-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: 10px;
+}
+.zen-review-panel-head h4,
+.zen-review-panel-head p {
+  margin: 0;
+}
+.zen-review-panel pre {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 13px;
+  background: rgba(2,6,12,0.64);
+  border: 1px solid rgba(139,155,179,0.09);
+  color: #cbd5e1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.zen-review-raw {
+  margin-top: 10px !important;
+  max-height: 380px !important;
+}
+.zen-review-file-list,
+.zen-review-timeline,
+.zen-review-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zen-review-file {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(8,12,18,0.64);
+  border: 1px solid rgba(139,155,179,0.08);
+}
+.zen-review-file span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(77,163,255,0.12);
+  color: #bfdbfe;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+.zen-review-file b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.zen-review-list li {
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(8,12,18,0.46);
+  border: 1px solid rgba(139,155,179,0.08);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+.zen-review-empty {
+  padding: 12px;
+  border-radius: 13px;
+  color: var(--text-muted);
+  background: rgba(139,155,179,0.055);
+  border: 1px dashed rgba(139,155,179,0.12);
+  font-size: 13px;
+}
+.zen-review-frontend {
+  margin-bottom: var(--space-4);
+}
+.zen-review-compare-stage {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(260px, 0.75fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+.zen-review-mock-panel {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  min-height: 260px;
+  padding: var(--space-5);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(77,163,255,0.13), transparent 42%),
+    rgba(2,6,12,0.52);
+  border: 1px solid rgba(139,155,179,0.11);
+}
+.zen-review-compare-stage--previous .zen-review-mock-panel {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(245,158,11,0.12), transparent 42%),
+    rgba(2,6,12,0.52);
+}
+.zen-review-mock-icon {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(125,211,252,0.9);
+  border-right-color: rgba(125,211,252,0.28);
+  box-shadow: 0 0 34px rgba(77,163,255,0.18);
+}
+.zen-review-mock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.zen-review-mock-actions button {
+  border: 1px solid rgba(139,155,179,0.15);
+  border-radius: 999px;
+  background: rgba(8,12,18,0.68);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+}
+.zen-review-mock-actions button:first-child {
+  color: #bbf7d0;
+  border-color: rgba(34,197,94,0.28);
+  background: rgba(34,197,94,0.10);
+}
+.zen-review-mock-actions--old button:nth-child(n+4) {
+  color: #fde68a;
+  border-color: rgba(245,158,11,0.30);
+  background: rgba(245,158,11,0.10);
+}
+.zen-review-mock-step,
+.zen-review-mock-diagnosis {
+  width: min(100%, 440px);
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(8,12,18,0.62);
+  border: 1px solid rgba(77,163,255,0.16);
+}
+.zen-review-mock-step span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.zen-review-mock-step strong,
+.zen-review-mock-diagnosis strong,
+.zen-review-visual-notes strong {
+  display: block;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.zen-review-mock-step--muted {
+  border-color: rgba(245,158,11,0.18);
+}
+.zen-review-mock-diagnosis {
+  border-color: rgba(245,158,11,0.20);
+  background: rgba(245,158,11,0.06);
+}
+.zen-review-visual-notes {
+  padding: var(--space-4);
+  border-radius: 18px;
+  background: rgba(8,12,18,0.44);
+  border: 1px solid rgba(139,155,179,0.10);
+}
+.zen-review-consistency-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+.zen-review-consistency-grid span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(77,163,255,0.08);
+  border: 1px solid rgba(77,163,255,0.12);
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: 700;
+}
+.zen-review-checklist {
+  margin-top: var(--space-4);
+}
+.zen-review-timeline-item {
+  display: grid;
+  grid-template-columns: 12px minmax(0,1fr);
+  gap: 10px;
+}
+.zen-review-timeline-item i {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--zen);
+  box-shadow: 0 0 0 4px rgba(77,163,255,0.10);
+}
+.zen-review-timeline-item strong {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+.zen-review-timeline-item p {
+  margin: 2px 0;
+}
+.zen-review-timeline-item time {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.zen-review-loading {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.zen-review-spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(77,163,255,0.18);
+  border-top-color: rgba(125,211,252,0.88);
+  animation: zenWorkOrbit 1.6s linear infinite;
+}
+.zen-work-github-step,
+.zen-work-diagnosis {
+  width: min(100%, 680px);
+  margin: var(--space-3) auto 0;
+  padding: var(--space-3);
+  border-radius: 16px;
+  background: rgba(5,9,15,0.62);
+  border: 1px solid rgba(139,155,179,0.12);
+}
+.zen-work-github-plan {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: var(--space-3) 0;
+  padding: 11px;
+  border-radius: 13px;
+  background: rgba(2,6,12,0.48);
+}
+.zen-work-github-plan span,
+.zen-work-recovery-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.zen-work-github-plan b {
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.zen-work-diagnosis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.zen-work-diagnosis-grid > div {
+  padding: 10px;
+  border-radius: 13px;
+  background: rgba(2,6,12,0.42);
+  border: 1px solid rgba(139,155,179,0.08);
+}
+.zen-work-diagnosis-grid strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.zen-work-recovery-label {
+  margin: 12px 0 7px;
+}
+.zen-work-disabled-note {
+  margin-top: 10px !important;
+  font-size: 12px;
+}
+
 @keyframes zenWorkOrbit {
   from { transform: rotate(0turn); }
   to { transform: rotate(1turn); }
@@ -7012,4 +7453,14 @@ body.zen-chat-active .zen-work-global {
   .zen-work-panel-meta { grid-template-columns: 1fr 1fr; }
   .zen-work-stream-item { grid-template-columns: 22px 76px minmax(0, 1fr) auto; }
   .zen-work-stream-item time { display: none; }
+  .zen-chat-review-host { padding: 0 var(--space-3) var(--space-3); }
+  .zen-review-shell { padding: var(--space-4); border-radius: 18px; }
+  .zen-review-header,
+  .zen-review-grid,
+  .zen-review-compare-stage,
+  .zen-work-diagnosis-grid {
+    grid-template-columns: 1fr;
+  }
+  .zen-review-header { display: grid; }
+  .zen-review-panel--wide { grid-column: auto; }
 }
