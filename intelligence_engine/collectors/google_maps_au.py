@@ -8,6 +8,7 @@ Outputs raw JSONL for processing pipeline.
 import asyncio
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -33,7 +34,7 @@ SOURCE_NAME = "google_maps_au"
 DB_DSN = os.environ.get("INTELLIGENCE_DB_DSN", "postgresql://intelligence:password@localhost:5432/intelligence")
 
 # Collector settings
-MAX_PER_SEARCH = 50
+MAX_PER_SEARCH = 100
 SCROLL_PAUSE = 2.0
 DETAIL_PAUSE = 1.0
 REQUEST_TIMEOUT = 60000  # Increased to 60s
@@ -91,82 +92,112 @@ class GoogleMapsAUCollector:
     
     async def _collect_niche_city(self, page, niche: str, city: str) -> int:
         """Collect businesses for one niche in one city."""
+        # Skip if we already have data for this combo (avoids re-running on
+        # already-collected niche+city combinations, e.g. across restart cycles).
+        existing = await self.db_pool.fetchval(
+            "SELECT COUNT(*) FROM raw_collection_events WHERE metadata->>'niche' = $1 AND metadata->>'city' = $2",
+            niche, city
+        )
+        if existing and existing > 0:
+            print(f"  ⏭ {niche} in {city}: {existing} already collected, skipping")
+            return 0
+
         query = f"{niche} in {city}"
         url = f"https://www.google.com/maps/search/{query.replace(' ', '+')}"
-        
+
         await page.goto(url, wait_until=NAVIGATION_WAIT, timeout=REQUEST_TIMEOUT)
-        
+
         # Wait for results feed
         try:
             await page.wait_for_selector('[role="feed"]', timeout=15000)
         except:
             return 0
-        
-        # Scroll to load more results
+
         feed = page.locator('[role="feed"]')
-        for _ in range(8):
-            await feed.evaluate("el => el.scrollTop = el.scrollHeight")
-            await asyncio.sleep(SCROLL_PAUSE)
-        
         results = []
+        seen_place_ids = set()
+        all_hrefs_ordered = []  # preserves discovery order for the first 100 unique
+        seen_hrefs = set()
         consecutive_failures = 0
-        
-        while len(results) < MAX_PER_SEARCH:
-            # Re-get cards each iteration (page may have changed after go_back)
-            cards = await page.locator('[role="feed"] > div').all()
-            
-            # Filter to valid business cards (have a.hfpxzc link and are visible)
-            valid_cards = []
-            for card in cards:
+
+        # PHASE 1: scroll the feed to discover as many cards as possible.
+        # Each scroll triggers Google Maps lazy-loads. We collect unique hrefs.
+        MAX_SCROLL_PASSES = 30
+        SCROLL_PAUSE_BETWEEN = 1.5
+        prev_card_count = -1
+        for scroll_pass in range(MAX_SCROLL_PASSES):
+            await feed.evaluate("el => el.scrollTop = el.scrollHeight")
+            await asyncio.sleep(SCROLL_PAUSE_BETWEEN)
+            cards_now = await page.locator('[role="feed"] > div').all()
+            current_count = len(cards_now)
+            print(f"    [scroll {scroll_pass+1}] {current_count} cards visible")
+            if current_count == prev_card_count:
+                # No new cards loaded — bottom of feed
+                break
+            prev_card_count = current_count
+
+            # Snapshot new hrefs from this scroll pass
+            for card in cards_now:
                 link = card.locator('a.hfpxzc').first
                 if await link.count() > 0:
-                    valid_cards.append(card)
-            
-            if not valid_cards:
-                print(f"    No valid cards found")
+                    href = await link.get_attribute('href')
+                    if href and href not in seen_hrefs:
+                        seen_hrefs.add(href)
+                        all_hrefs_ordered.append(href)
+
+            if len(all_hrefs_ordered) >= MAX_PER_SEARCH:
                 break
-            
-            # Try each valid card we haven't processed yet
-            progress = False
-            for i, card in enumerate(valid_cards):
-                if len(results) >= MAX_PER_SEARCH:
-                    break
-                try:
-                    data = await self._extract_card(page, card, niche, city)
-                    if data:
-                        results.append(data)
-                        progress = True
-                        consecutive_failures = 0
-                        print(f"    ✓ {data['name']}")
-                        # Write immediately to avoid losing data on timeout
-                        await self.raw_storage.write(
-                            source_id=SOURCE_ID,
-                            source_record_id=data["place_id"],
-                            raw_data=data,
-                            metadata={"niche": niche, "city": city, "collector": "google_maps_au"}
-                        )
-                    else:
-                        consecutive_failures += 1
-                except Exception as e:
-                    print(f"    Card extraction failed: {e}")
+
+        print(f"    [discovery] {len(all_hrefs_ordered)} unique cards ready")
+
+        # PHASE 2: visit each discovered href and extract data.
+        # This bypasses feed overlay interception entirely (no card clicks).
+        for i, href in enumerate(all_hrefs_ordered):
+            if len(results) >= MAX_PER_SEARCH:
+                break
+            try:
+                data = await self._extract_card(page, href, niche, city)
+                if data:
+                    place_id = data.get("place_id", "")
+                    if place_id and place_id in seen_place_ids:
+                        continue
+                    if place_id:
+                        seen_place_ids.add(place_id)
+                    results.append(data)
+                    consecutive_failures = 0
+                    print(f"    ✓ {data['name']}")
+                    await self.raw_storage.write(
+                        source_id=SOURCE_ID,
+                        source_record_id=data["place_id"],
+                        raw_data=data,
+                        metadata={"niche": niche, "city": city, "collector": "google_maps_au"}
+                    )
+                else:
                     consecutive_failures += 1
-            
-            if not progress:
-                if consecutive_failures >= 3:
-                    print(f"    Too many failures, stopping")
+                    if consecutive_failures >= 5:
+                        print(f"    Too many extraction failures, stopping")
+                        break
+            except Exception as e:
+                print(f"    Card extraction failed: {e}")
+                consecutive_failures += 1
+                if consecutive_failures >= 5:
+                    print(f"    Too many extraction failures, stopping")
                     break
-                # Try scrolling more
-                await feed.evaluate("el => el.scrollTop = el.scrollHeight")
-                await asyncio.sleep(SCROLL_PAUSE)
-        
+
         return len(results)
     
-    async def _extract_card(self, page, card, niche: str, city: str) -> dict | None:
-        """Extract data from a business card by clicking and reading detail panel."""
-        # Click the card div with force (bypasses feed container interception)
-        await card.click(force=True)
+    async def _extract_card(self, page, href: str, niche: str, city: str) -> dict | None:
+        """Extract data from a business by navigating to its place URL.
+
+        Navigating directly via the captured href (instead of clicking the card
+        div) is more reliable because:
+        1. No feed overlay interception — we load the place page directly.
+        2. No stale-locator timeouts — the href is a plain string, not a Locator
+           object that re-resolves against the DOM at click time.
+        """
+        await page.goto(href, timeout=30000)
         await asyncio.sleep(DETAIL_PAUSE)
-        
+
         # Wait for detail panel - wait for name element
         try:
             await page.wait_for_selector('h1.DUwDvf', timeout=10000)
@@ -203,15 +234,53 @@ class GoogleMapsAUCollector:
                 break
         
         # Website
+        # Google Maps renders the website link with a leading private-use font glyph
+        # (e.g. \ue803 for the globe icon). The real domain is in the href as a redirect
+        # URL like https://www.google.com/url?q=https://example.com&... Prefer the href
+        # and unwrap the redirect. Fall back to text only after stripping junk chars.
         website = ""
-        web_els = await page.locator('[data-item-id="authority"] .Io6YTe, a[data-item-id="authority"]').all()
+        from urllib.parse import urlparse, parse_qs
+        web_els = await page.locator(
+            '[data-item-id="authority"] .Io6YTe, '
+            'a[data-item-id="authority"], '
+            'button[data-item-id="authority"]'
+        ).all()
         for el in web_els:
-            text = await el.text_content()
             href = await el.get_attribute("href")
-            if text and text.strip():
-                website = text.strip()
-            elif href and href.startswith("http"):
-                website = href
+            text = await el.text_content() or ""
+
+            # 1) Try the href first — usually a Google redirect with the real URL in ?q=
+            if href:
+                cleaned_href = href.strip()
+                if cleaned_href.startswith("http"):
+                    try:
+                        parsed = urlparse(cleaned_href)
+                        # Google redirect wrapper: /url?q=<real>&...
+                        if parsed.hostname and parsed.hostname.endswith("google.com") and parsed.path == "/url":
+                            qs = parse_qs(parsed.query)
+                            real = qs.get("q", [""])[0]
+                            if real:
+                                website = real
+                        else:
+                            website = cleaned_href
+                    except Exception:
+                        website = cleaned_href
+
+            # 2) Fallback to visible text, stripped of leading junk chars
+            if not website and text.strip():
+                # Strip leading private-use area + symbols (globe icon)
+                cleaned = re.sub(r"^[\ue000-\uf8ff\U0001f300-\U0001faff\W_]+", "", text.strip())
+                # Drop Google Maps prefixes
+                for prefix in ("Website · ", "Website: ", "website: "):
+                    if cleaned.lower().startswith(prefix.lower()):
+                        cleaned = cleaned[len(prefix):]
+                # If text contains a real URL, use that; otherwise treat as bare domain
+                m = re.search(r"https?://\S+", cleaned)
+                if m:
+                    website = m.group(0)
+                elif cleaned and "." in cleaned and " " not in cleaned:
+                    website = "https://" + cleaned.lower()
+
             if website:
                 break
         

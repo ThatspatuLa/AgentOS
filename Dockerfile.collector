@@ -6,4 +6,4 @@ RUN apt-get update && apt-get install -y python3-pip && pip install playwright a
 
 COPY intelligence_engine /workspace/intelligence_engine
 
-CMD ["python3", "-m", "intelligence_engine.collectors.google_maps_au"]
+CMD ["python3", "-u", "-m", "intelligence_engine.collectors.google_maps_au"]

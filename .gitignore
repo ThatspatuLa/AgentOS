@@ -6,3 +6,8 @@ bot/__pycache__/
 data/sessions/*/messages.jsonl
 data/sessions/*/events.jsonl
 data/sessions/index.json
+
+# Intelligence engine runtime artefacts — outputs, never source.
+products/
+tmp/*.log
+intelligence_engine/collectors/debug_*.py
