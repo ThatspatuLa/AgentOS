@@ -15,6 +15,9 @@ Serves static files and adds:
   POST     /api/sessions/:id/messages     -> Agent OS chat (stores locally)
   GET      /api/sessions/:id/rollup       -> child task summaries (filtered by parentSessionId)
   GET      /api/events/:sessionId         -> session event log (events.jsonl)
+  GET      /api/operator/inspect          -> local/Tailscale read-only project inspection
+  GET      /api/operator/screenshot       -> local/Tailscale authenticated screenshot capture
+  POST     /api/operator/run              -> local/Tailscale classified operator command runner
   GET      /api/memory                    -> Hermes MEMORY.md + USER.md
   GET      /api/memory-world              -> data/memory-world.json
   GET      /api/health                    -> live Hermes + git status
@@ -32,14 +35,21 @@ Data layout:
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime
+import hmac
+import hashlib
+import ipaddress
 import json
 import os
 import re
+import secrets
+import shlex
 import sqlite3
 import shutil
 import subprocess
 import sys
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
@@ -57,6 +67,30 @@ HERMES_DB = Path.home() / ".hermes" / "state.db"
 HERMES_AGENT_DIR = Path.home() / ".hermes" / "hermes-agent"
 HERMES_PYTHON = HERMES_AGENT_DIR / "venv" / "bin" / "python"
 ZEN_HERMES_PROGRESS_PREFIX = "__ZEN_HERMES_PROGRESS__"
+OPERATOR_PROJECT_REGISTRY = {
+    "zen-new": ROOT,
+    "zen": Path("/home/spatula/Projects/Zen"),
+    "kiyosaki": Path("/home/spatula/Projects/Kiyosaki"),
+}
+OPERATOR_DATA_DIR = ROOT / "data" / "operator"
+OPERATOR_TOKEN_FILE = OPERATOR_DATA_DIR / ".token"
+OPERATOR_AUDIT_FILE = OPERATOR_DATA_DIR / "audit.jsonl"
+OPERATOR_PENDING_FILE = OPERATOR_DATA_DIR / "pending-approvals.json"
+OPERATOR_TOKEN_TTL_SECONDS = 24 * 60 * 60
+OPERATOR_TAILSCALE_NET = ipaddress.ip_network("100.64.0.0/10")
+OPERATOR_SAFE_COMMANDS = {"ls", "cat", "grep", "rg", "ps", "git", "find", "wc", "head", "tail", "pwd"}
+OPERATOR_REVIEW_COMMANDS = {"python", "python3", "pip", "npm", "systemctl", "service", "xdg-open", "google-chrome", "playwright", "touch", "mkdir", "cp", "mv", "tee"}
+OPERATOR_BLOCKED_COMMANDS = {"sudo", "su", "rm", "shred", "chmod", "chown", "ssh", "scp", "curl", "wget", "nc", "ncat", "env", "printenv", "export"}
+OPERATOR_SECRET_MARKERS = (".env", ".token", "secret", "secrets", "credential", "credentials", "private_key", "id_rsa", "github_token", "api_key")
+OPERATOR_TREE_SKIP = {
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    "node_modules",
+    ".venv",
+    "venv",
+}
 
 # ---------------------------------------------------------------------------
 # Defaults — sessions are created on first server start if missing
@@ -398,6 +432,140 @@ def _read_session_events(session_id: str) -> list[dict]:
     return _read_jsonl(event_path)
 
 
+def _b64url(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).decode("ascii").rstrip("=")
+
+
+def _b64url_json(payload: dict) -> str:
+    return _b64url(json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+
+
+def _operator_token_record() -> dict:
+    OPERATOR_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    now = int(time.time())
+    record = _read_json(OPERATOR_TOKEN_FILE, {}) if OPERATOR_TOKEN_FILE.exists() else {}
+    if not record.get("secret") or int(record.get("expiresAt") or 0) <= now:
+        secret = secrets.token_urlsafe(32)
+        payload = {"iat": now, "exp": now + OPERATOR_TOKEN_TTL_SECONDS, "scope": "operator"}
+        payload_part = _b64url_json(payload)
+        sig = _b64url(hmac.new(secret.encode("utf-8"), payload_part.encode("ascii"), hashlib.sha256).digest())
+        record = {
+            "issuedAt": payload["iat"],
+            "expiresAt": payload["exp"],
+            "secret": secret,
+            "token": f"op.{payload_part}.{sig}",
+        }
+        with NamedTemporaryFile("w", encoding="utf-8", dir=str(OPERATOR_DATA_DIR), delete=False) as tmp:
+            json.dump(record, tmp, ensure_ascii=False, indent=2)
+            tmp.write("\n")
+            tmp_path = Path(tmp.name)
+        os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, OPERATOR_TOKEN_FILE)
+        os.chmod(OPERATOR_TOKEN_FILE, 0o600)
+    return record
+
+
+def _operator_token_valid(token: str) -> bool:
+    record = _operator_token_record()
+    expected = str(record.get("token") or "")
+    if not token or not expected or not hmac.compare_digest(token, expected):
+        return False
+    parts = token.split(".")
+    if len(parts) != 3 or parts[0] != "op":
+        return False
+    secret = str(record.get("secret") or "")
+    sig = _b64url(hmac.new(secret.encode("utf-8"), parts[1].encode("ascii"), hashlib.sha256).digest())
+    if not hmac.compare_digest(sig, parts[2]):
+        return False
+    return int(record.get("expiresAt") or 0) > int(time.time())
+
+
+def _operator_remote_allowed(remote: str) -> bool:
+    if remote in {"127.0.0.1", "::1"}:
+        return True
+    try:
+        return ipaddress.ip_address(remote) in OPERATOR_TAILSCALE_NET
+    except ValueError:
+        return False
+
+
+def _operator_audit(action_type: str, target: str, result: str, **extra) -> None:
+    record = {
+        "ts": _now_iso(),
+        "action_type": action_type,
+        "target": target,
+        "result": result,
+        "approver": extra.get("approver"),
+        "session_id": extra.get("session_id"),
+    }
+    for key in ("project", "remote", "status", "reason", "action_class"):
+        if key in extra and extra[key] is not None:
+            record[key] = extra[key]
+    _append_jsonl(OPERATOR_AUDIT_FILE, record)
+
+
+def _operator_logs(session_id: str = "", limit: int = 60) -> list[dict]:
+    rows = _read_jsonl(OPERATOR_AUDIT_FILE)
+    if session_id:
+        rows = [row for row in rows if str(row.get("session_id") or "") == session_id]
+    return rows[-limit:]
+
+
+def _operator_proof_payload(session_id: str = "") -> dict:
+    logs = _operator_logs(session_id)
+    return {
+        "operatorLogs": logs,
+        "commandTranscript": [
+            row for row in logs
+            if row.get("action_type") in {"run", "inspect"}
+        ],
+        "fileAccess": [
+            row for row in logs
+            if row.get("action_type") == "inspect" or row.get("target") in {"operator/inspect"}
+        ],
+        "networkCalls": [
+            {
+                "ts": row.get("ts"),
+                "remote": row.get("remote"),
+                "target": row.get("target"),
+                "result": row.get("result"),
+                "status": row.get("status"),
+            }
+            for row in logs
+            if row.get("remote")
+        ],
+        "screenshots": [
+            row for row in logs
+            if row.get("action_type") == "screenshot"
+        ],
+    }
+
+
+def _operator_screenshot_payload() -> tuple[dict, int]:
+    tool = shutil.which("grim") or shutil.which("scrot")
+    if not tool:
+        return {"ok": False, "error": "no screenshot tool available (grim/scrot)"}, 501
+    out = Path("/tmp") / f"agent-os-operator-screenshot-{secrets.token_hex(6)}.png"
+    cmd = [tool, str(out)] if Path(tool).name == "grim" else [tool, str(out)]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
+        if proc.returncode != 0 or not out.exists():
+            return {"ok": False, "error": (proc.stderr or proc.stdout or "screenshot failed").strip()}, 500
+        raw = out.read_bytes()
+        return {
+            "ok": True,
+            "mime": "image/png",
+            "bytes": len(raw),
+            "dataUrl": "data:image/png;base64," + base64.b64encode(raw).decode("ascii"),
+            "capturedAt": _now_iso(),
+        }, 200
+    finally:
+        try:
+            out.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
 def _session_summary_payload(session_id: str, index_session: dict | None = None) -> dict:
     """Read session summary fields from index plus optional summary.json."""
     summary_path = SESSIONS_DIR / session_id / "summary.json"
@@ -437,6 +605,268 @@ def _run_git_readonly(args: list[str], timeout: int = 8) -> str:
     if result.returncode != 0:
         return (result.stderr or result.stdout or "").strip()
     return (result.stdout or "").strip()
+
+
+def _operator_project_root(project: str) -> Path | None:
+    root = OPERATOR_PROJECT_REGISTRY.get(str(project or "").strip())
+    if not root:
+        return None
+    try:
+        return root.resolve(strict=True)
+    except FileNotFoundError:
+        return None
+
+
+def _operator_safe_child(path: Path, root: Path) -> bool:
+    try:
+        path.resolve(strict=False).relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def _operator_tree(root: Path, max_depth: int = 3, max_entries: int = 220) -> tuple[list[dict], list[str]]:
+    entries: list[dict] = []
+    blocked: list[str] = []
+
+    def walk(path: Path, depth: int) -> None:
+        if len(entries) >= max_entries or depth > max_depth:
+            return
+        try:
+            children = sorted(path.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+        except OSError:
+            return
+        for child in children:
+            if len(entries) >= max_entries:
+                return
+            rel = child.relative_to(root).as_posix()
+            if child.name in OPERATOR_TREE_SKIP:
+                continue
+            if not _operator_safe_child(child, root):
+                blocked.append(rel)
+                continue
+            is_dir = child.is_dir()
+            entries.append({
+                "path": rel,
+                "type": "dir" if is_dir else "file",
+                "depth": depth,
+            })
+            if is_dir and not child.is_symlink():
+                walk(child, depth + 1)
+
+    walk(root, 1)
+    return entries, blocked
+
+
+def _operator_extension_counts(root: Path, max_files: int = 8000) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    seen = 0
+    for path in root.rglob("*"):
+        if seen >= max_files:
+            break
+        if any(part in OPERATOR_TREE_SKIP for part in path.relative_to(root).parts):
+            continue
+        if not _operator_safe_child(path, root) or not path.is_file():
+            continue
+        seen += 1
+        suffix = path.suffix.lower() or "[no extension]"
+        counts[suffix] = counts.get(suffix, 0) + 1
+    return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:40])
+
+
+def _run_operator_git(root: Path, args: list[str], timeout: int = 5) -> str:
+    allowed = {
+        ("status", "--short"),
+        ("log", "--oneline", "-10"),
+    }
+    if tuple(args) not in allowed:
+        raise ValueError("unsupported operator git command")
+    result = subprocess.run(
+        ["git", *args],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    return (result.stdout if result.returncode == 0 else (result.stderr or result.stdout)).strip()
+
+
+def _operator_inspect_payload(project: str) -> tuple[dict, int]:
+    root = _operator_project_root(project)
+    if not root:
+        return {
+            "ok": False,
+            "error": "unknown project",
+            "project": project,
+            "availableProjects": sorted(OPERATOR_PROJECT_REGISTRY.keys()),
+        }, 404
+    tree, blocked = _operator_tree(root)
+    payload = {
+        "ok": True,
+        "project": project,
+        "root": str(root),
+        "generatedAt": _now_iso(),
+        "safety": {
+            "scope": "localhost-only",
+            "mode": "read-only",
+            "registryLocked": True,
+            "arbitraryCommands": False,
+            "blockedSymlinkEscapes": blocked,
+        },
+        "tree": {
+            "maxDepth": 3,
+            "entries": tree,
+        },
+        "git": {
+            "statusShort": _run_operator_git(root, ["status", "--short"]),
+            "logOneline": _run_operator_git(root, ["log", "--oneline", "-10"]),
+        },
+        "fileCountsByExtension": _operator_extension_counts(root),
+    }
+    return payload, 200
+
+
+def _operator_secret_path(value: str) -> bool:
+    lower = str(value or "").lower()
+    return any(marker in lower for marker in OPERATOR_SECRET_MARKERS)
+
+
+def _operator_command_paths_ok(tokens: list[str], root: Path) -> tuple[bool, str]:
+    for token in tokens[1:]:
+        if not token or token.startswith("-"):
+            continue
+        if any(ch in token for ch in (";", "|", "&", "`", "$(", ">", "<")):
+            return False, "shell control syntax is blocked"
+        if _operator_secret_path(token):
+            return False, "secret-like paths are blocked"
+        looks_like_path = "/" in token or token.startswith(".") or (root / token).exists()
+        if not looks_like_path:
+            continue
+        try:
+            target = (Path(token) if Path(token).is_absolute() else root / token).resolve(strict=False)
+            target.relative_to(root)
+        except ValueError:
+            return False, "path escapes registered project root"
+    return True, ""
+
+
+def _operator_classify_command(command: str, project: str) -> dict:
+    root = _operator_project_root(project)
+    if not root:
+        return {"action_class": "blocked", "reason": "unknown project", "tokens": [], "root": None}
+    try:
+        tokens = shlex.split(command or "")
+    except ValueError as exc:
+        return {"action_class": "blocked", "reason": f"invalid command syntax: {exc}", "tokens": [], "root": root}
+    if not tokens:
+        return {"action_class": "blocked", "reason": "empty command", "tokens": [], "root": root}
+    base = Path(tokens[0]).name
+    joined = " ".join(tokens).lower()
+    if any(marker in joined for marker in ("github push", "git push", "production trading", "exchange api", "private key")):
+        return {"action_class": "blocked", "reason": "blocked high-risk operation", "tokens": tokens, "root": root}
+    if base in OPERATOR_BLOCKED_COMMANDS:
+        return {"action_class": "blocked", "reason": f"{base} is blocked", "tokens": tokens, "root": root}
+    if base == "git":
+        if tokens in (["git", "status"], ["git", "status", "--short"], ["git", "log", "--oneline", "-10"]):
+            return {"action_class": "safe", "reason": "fixed read-only git command", "tokens": tokens, "root": root}
+        if len(tokens) > 1 and tokens[1] == "push":
+            return {"action_class": "blocked", "reason": "git push is blocked", "tokens": tokens, "root": root}
+        return {"action_class": "review", "reason": "project-local git command requires approval", "tokens": tokens, "root": root}
+    if base in OPERATOR_REVIEW_COMMANDS:
+        return {"action_class": "review", "reason": f"{base} requires approval", "tokens": tokens, "root": root}
+    if base not in OPERATOR_SAFE_COMMANDS:
+        return {"action_class": "review", "reason": "unknown command requires approval", "tokens": tokens, "root": root}
+    paths_ok, reason = _operator_command_paths_ok(tokens, root)
+    if not paths_ok:
+        return {"action_class": "blocked", "reason": reason, "tokens": tokens, "root": root}
+    return {"action_class": "safe", "reason": "read-only allowlist command", "tokens": tokens, "root": root}
+
+
+def _operator_safe_env() -> dict[str, str]:
+    safe = {}
+    for key in ("PATH", "LANG", "LC_ALL", "HOME"):
+        if key in os.environ:
+            safe[key] = os.environ[key]
+    for key in list(safe.keys()):
+        upper = key.upper()
+        if upper.endswith(("_KEY", "_TOKEN", "_SECRET")) or "PASSWORD" in upper:
+            safe.pop(key, None)
+    return safe
+
+
+def _operator_command_hash(command: str, root: Path) -> str:
+    return hashlib.sha256(f"{root}\n{command}".encode("utf-8")).hexdigest()
+
+
+def _operator_pending_approval(project: str, command: str, reason: str, session_id: str | None = None) -> dict:
+    root = _operator_project_root(project)
+    now = int(time.time())
+    pending = _read_json(OPERATOR_PENDING_FILE, {"items": []})
+    item = {
+        "id": secrets.token_hex(8),
+        "ts": _now_iso(),
+        "expiresAt": now + 5 * 60,
+        "project": project,
+        "working_dir": str(root) if root else "",
+        "command": command,
+        "sha256": _operator_command_hash(command, root or ROOT),
+        "reason": reason,
+        "status": "pending",
+        "session_id": session_id,
+    }
+    pending["items"] = [i for i in pending.get("items", []) if int(i.get("expiresAt") or 0) > now and i.get("status") == "pending"]
+    pending["items"].append(item)
+    _write_json(OPERATOR_PENDING_FILE, pending)
+    return item
+
+
+def _operator_run_payload(project: str, command: str, session_id: str | None = None) -> tuple[dict, int]:
+    decision = _operator_classify_command(command, project)
+    root = decision.get("root")
+    action_class = decision["action_class"]
+    reason = decision["reason"]
+    tokens = decision["tokens"]
+    if action_class == "blocked":
+        return {
+            "ok": False,
+            "action_class": "blocked",
+            "reason": reason,
+            "project": project,
+            "command": command,
+        }, 403
+    if action_class == "review":
+        pending = _operator_pending_approval(project, command, reason, session_id=session_id)
+        return {
+            "ok": False,
+            "action_class": "review",
+            "reason": reason,
+            "approval": pending,
+        }, 202
+    assert isinstance(root, Path)
+    try:
+        proc = subprocess.run(
+            tokens,
+            cwd=root,
+            env=_operator_safe_env(),
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "action_class": "safe", "reason": "command timed out", "project": project, "command": command}, 408
+    stdout = (proc.stdout or "")[:12000]
+    stderr = (proc.stderr or "")[:4000]
+    return {
+        "ok": proc.returncode == 0,
+        "action_class": "safe",
+        "project": project,
+        "working_dir": str(root),
+        "command": command,
+        "exitCode": proc.returncode,
+        "stdout": stdout,
+        "stderr": stderr,
+        "stdoutSha256": hashlib.sha256((proc.stdout or "").encode("utf-8")).hexdigest(),
+    }, 200 if proc.returncode == 0 else 422
 
 
 def _review_risk_notes(changed_files: list[dict]) -> list[str]:
@@ -502,6 +932,7 @@ def _git_review_payload(session_id: str = "", include_raw: bool = False) -> dict
         "recentActivity": list(summary.get("recentActivity") or [])[-10:],
         "nextSafeGate": summary.get("nextSafeGate", ""),
         "events": events,
+        "operatorProof": _operator_proof_payload(session_id),
         "frontendChecklist": [
             "Layout and responsive spacing",
             "Drawer behavior and overlays",
@@ -1931,6 +2362,12 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write((json.dumps(event, ensure_ascii=False) + "\n").encode("utf-8"))
         self.wfile.flush()
 
+    def _operator_bearer(self) -> str:
+        auth = str(self.headers.get("Authorization") or "")
+        if not auth.startswith("Bearer "):
+            return ""
+        return auth.split(" ", 1)[1].strip()
+
     def _read_body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
         if length:
@@ -2097,6 +2534,51 @@ class Handler(SimpleHTTPRequestHandler):
             events = _read_session_events(m["sessionId"])
             return self._json({"sessionId": m["sessionId"], "events": events})
 
+        # GET /api/operator/inspect?project=zen-new — M1A localhost-only read-only inspection
+        if self._match("api/operator/inspect") is not None:
+            remote = self.client_address[0] if self.client_address else ""
+            params = parse_qs(urlparse(self.path).query)
+            project = (params.get("project") or [""])[0]
+            if not _operator_remote_allowed(remote):
+                _operator_audit("inspect", "operator/inspect", "denied", project=project, remote=remote, status=403, reason="non-local non-tailnet client")
+                return self._json({"ok": False, "error": "operator inspect is local-or-tailscale only"}, 403)
+            if not _operator_token_valid(self._operator_bearer()):
+                _operator_audit("inspect", "operator/inspect", "denied", project=project, remote=remote, status=401, reason="missing or invalid bearer token")
+                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            payload, status = _operator_inspect_payload(project)
+            _operator_audit(
+                "inspect",
+                "operator/inspect",
+                "ok" if status < 400 else "denied",
+                project=project,
+                remote=remote,
+                status=status,
+                reason=payload.get("error"),
+                action_class="safe",
+            )
+            return self._json(payload, status)
+
+        # GET /api/operator/screenshot — authenticated read-only screen capture
+        if self._match("api/operator/screenshot") is not None:
+            remote = self.client_address[0] if self.client_address else ""
+            if not _operator_remote_allowed(remote):
+                _operator_audit("screenshot", "operator/screenshot", "denied", remote=remote, status=403, reason="non-local non-tailnet client")
+                return self._json({"ok": False, "error": "operator screenshot is local-or-tailscale only"}, 403)
+            if not _operator_token_valid(self._operator_bearer()):
+                _operator_audit("screenshot", "operator/screenshot", "denied", remote=remote, status=401, reason="missing or invalid bearer token")
+                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            payload, status = _operator_screenshot_payload()
+            _operator_audit(
+                "screenshot",
+                "operator/screenshot",
+                "ok" if status < 400 else "failed",
+                remote=remote,
+                status=status,
+                reason=payload.get("error"),
+                action_class="safe",
+            )
+            return self._json(payload, status)
+
         # GET /api/review/diff?sessionId=zen-os&raw=1 — read-only worktree review
         if self._match("api/review/diff") is not None:
             params = parse_qs(urlparse(self.path).query)
@@ -2166,6 +2648,33 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json({"error": "method not allowed"}, 405)
 
         index = _load_index()
+
+        # POST /api/operator/run — M2 classified command runner
+        if self._match("api/operator/run") is not None:
+            remote = self.client_address[0] if self.client_address else ""
+            body = self._read_body()
+            project = str(body.get("project") or "zen-new").strip()
+            command = str(body.get("command") or "").strip()
+            session_id = body.get("session_id") or body.get("sessionId")
+            if not _operator_remote_allowed(remote):
+                _operator_audit("run", "operator/run", "denied", project=project, remote=remote, status=403, reason="non-local non-tailnet client")
+                return self._json({"ok": False, "error": "operator run is local-or-tailscale only"}, 403)
+            if not _operator_token_valid(self._operator_bearer()):
+                _operator_audit("run", "operator/run", "denied", project=project, remote=remote, status=401, reason="missing or invalid bearer token")
+                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            payload, status = _operator_run_payload(project, command, session_id=session_id)
+            _operator_audit(
+                "run",
+                "operator/run",
+                "ok" if status < 300 else ("pending" if status == 202 else "denied"),
+                project=project,
+                remote=remote,
+                status=status,
+                reason=payload.get("reason") or payload.get("error"),
+                action_class=payload.get("action_class"),
+                session_id=session_id,
+            )
+            return self._json(payload, status)
 
         # POST /api/sessions/:id/review-decision — record gate decisions only
         m = self._match("api/sessions/:id/review-decision")
@@ -2544,7 +3053,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
 
 

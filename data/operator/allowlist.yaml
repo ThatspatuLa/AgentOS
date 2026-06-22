@@ -1,0 +1,66 @@
+version: 1
+scope: "Agent OS Remote Local Operator"
+boundaries:
+  safe: "read-only, project-scoped, no network, no secret/env access"
+  review: "side-effect or unknown commands require approval before execution"
+  blocked: "high-risk commands are rejected outright"
+safe_commands:
+  - ls
+  - cat
+  - grep
+  - rg
+  - ps
+  - git status
+  - git status --short
+  - git log --oneline -10
+  - find
+  - wc
+  - head
+  - tail
+  - pwd
+review_commands:
+  - python
+  - python3
+  - pip
+  - npm
+  - systemctl
+  - service
+  - xdg-open
+  - google-chrome
+  - playwright
+  - touch
+  - mkdir
+  - cp
+  - mv
+  - tee
+blocked_commands:
+  - sudo
+  - su
+  - rm
+  - shred
+  - chmod
+  - chown
+  - ssh
+  - scp
+  - curl
+  - wget
+  - nc
+  - ncat
+  - env
+  - printenv
+  - export
+blocked_markers:
+  - ".env"
+  - ".token"
+  - secret
+  - credential
+  - private_key
+  - id_rsa
+  - github_token
+  - api_key
+approval:
+  ttl_seconds: 300
+  binding:
+    - command
+    - working_dir
+    - sha256

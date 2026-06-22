@@ -6514,6 +6514,22 @@ function zenReviewEvents(events) {
   }).join('') + '</div>';
 }
 
+function zenReviewProofRows(rows, emptyText) {
+  var list = Array.isArray(rows) ? rows.slice(-8) : [];
+  if (!list.length) return '<div class="zen-review-empty">' + escapeHtml(emptyText || 'No proof entries yet.') + '</div>';
+  return '<div class="zen-review-proof-list">' + list.map(function(row) {
+    var title = row.action_type || row.target || 'operator';
+    var status = row.status ? 'HTTP ' + row.status : (row.result || 'recorded');
+    var detail = row.command || row.reason || row.project || row.remote || row.target || 'Operator event recorded.';
+    var ts = String(row.ts || '').replace('T', ' ').replace('Z', '');
+    return '<div class="zen-review-proof-row">'
+      + '<div><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(detail) + '</p></div>'
+      + '<span>' + escapeHtml(status) + '</span>'
+      + '<time>' + escapeHtml(ts) + '</time>'
+      + '</div>';
+  }).join('') + '</div>';
+}
+
 function zenReviewComparisonHtml(mode) {
   var after = mode !== 'previous';
   var gate = after
@@ -6559,6 +6575,8 @@ function zenReviewRender() {
   var checklist = data.frontendChecklist || [];
   var activity = data.recentActivity || [];
   var events = data.events || [];
+  var operatorProof = data.operatorProof || {};
+  var operatorLogs = operatorProof.operatorLogs || [];
   var title = (task && (task.title || task.action || task.currentAction)) || 'Review / Validate';
   host.style.display = 'block';
   if (ZEN_REVIEW_STATE.loading) {
@@ -6578,6 +6596,7 @@ function zenReviewRender() {
     + '<span>' + escapeHtml(String(changed.length)) + ' changed files</span>'
     + '<span>' + escapeHtml(String(validation.length)) + ' validation notes</span>'
     + '<span>' + escapeHtml(String(risks.length)) + ' risk notes</span>'
+    + '<span>' + escapeHtml(String(operatorLogs.length)) + ' operator proof rows</span>'
     + '<span>GitHub execution disabled</span>'
     + '</div>'
     + '<div class="zen-review-grid">'
@@ -6592,6 +6611,15 @@ function zenReviewRender() {
     + '<div class="zen-review-panel-head"><div><h4>Frontend review</h4><p>Switch between the previous gate and the patched Agent OS review flow.</p></div><div class="zen-review-switch"><button class="' + (ZEN_REVIEW_STATE.mode === 'previous' ? 'active' : '') + '" onclick="zenReviewSetMode(\'previous\')">Previous</button><button class="' + (ZEN_REVIEW_STATE.mode !== 'previous' ? 'active' : '') + '" onclick="zenReviewSetMode(\'after\')">After patch</button></div></div>'
     + zenReviewComparisonHtml(ZEN_REVIEW_STATE.mode)
     + '<div class="zen-review-checklist"><h5>Visual coverage</h5>' + zenReviewList(checklist, 'No frontend checklist returned by backend.') + '</div>'
+    + '</article>'
+    + '<article class="zen-review-panel zen-review-panel--wide zen-review-proof">'
+    + '<div class="zen-review-panel-head"><div><h4>Review / Proof View</h4><p>Operator evidence appears here only for Zen/Hermes/executor actions. Manual Control clicks stay out of this proof trail.</p></div></div>'
+    + '<div class="zen-review-proof-grid">'
+    + '<section><h5>Command transcript</h5>' + zenReviewProofRows(operatorProof.commandTranscript, 'No operator commands recorded yet.') + '</section>'
+    + '<section><h5>File access</h5>' + zenReviewProofRows(operatorProof.fileAccess, 'No inspected files recorded yet.') + '</section>'
+    + '<section><h5>Network calls</h5>' + zenReviewProofRows(operatorProof.networkCalls, 'No operator network calls recorded yet.') + '</section>'
+    + '<section><h5>Screenshots</h5>' + zenReviewProofRows(operatorProof.screenshots, 'No screenshot captures recorded yet.') + '</section>'
+    + '</div>'
     + '</article>'
     + '<div class="zen-review-grid">'
     + '<article class="zen-review-panel"><h4>Session events</h4>' + zenReviewEvents(events) + '</article>'
