@@ -1,5 +1,5 @@
 {
-  "version": 55,
+  "version": 64,
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -48,11 +48,11 @@
       "title": "Agent OS: Memory World",
       "project": "zen",
       "sessionId": "zen",
-      "status": "wip",
+      "status": "backlog",
       "priority": "High",
       "risk": "Medium",
       "created": "2026-06-10",
-      "lastActive": "Now",
+      "lastActive": "2026-06-22",
       "archived": false,
       "why": "Memory World is Zen's inner domain — a force-directed graph visualization of the entire agent system. M1–M4 (inspection, schema, exporter, visual renderer) are complete. M5–M10 remain: live data bridge, interaction layer, power design skin, integration, real data expansion, hardening.",
       "nextAction": "M5: Live Data Bridge — connect refresh behavior to exporter/data file while preserving the working renderer.",
@@ -230,7 +230,8 @@
         "Schema v1.0 M2 complete",
         "Completed: Initializing agent... ↻ Resumed session 20260607_193056_683c",
         "Chat response complete",
-        "Completed: Initializing agent... ↻ Resumed session 20260607_193056_683c"
+        "Completed: Initializing agent... ↻ Resumed session 20260607_193056_683c",
+        "2026-06-22: Moved wip → backlog (Six: refocusing on new task, returning to this later)"
       ]
     },
     {
@@ -238,11 +239,11 @@
       "title": "Fix GH and Kanban",
       "project": "zen",
       "sessionId": null,
-      "status": "wip",
+      "status": "backlog",
       "priority": "High",
       "risk": "Medium",
       "created": "2026-06-12",
-      "lastActive": "Now",
+      "lastActive": "2026-06-22",
       "archived": false,
       "why": "GitHub checkpoint discipline was violated — dashboard redesign was pushed without Six review and had to be reverted. Kanban tasks were fabricated from agent instructions instead of grounded in Obsidian files. Rules: no GH pushes without Six approval, no Kanban tasks from assumptions.",
       "nextAction": "Ensure all future GH commits are review-gated. Audit Kanban tasks against Obsidian sources.",
@@ -273,7 +274,8 @@
       "activity": [
         "Unarchive feature added",
         "Dashboard redesign reverted",
-        "GH checkpoint rule added to SOUL.md"
+        "GH checkpoint rule added to SOUL.md",
+        "2026-06-22: Moved wip → backlog (Six: refocusing on new task, returning to this later)"
       ]
     },
     {
@@ -453,7 +455,7 @@
       "priority": "High",
       "risk": "High",
       "created": "2026-06-10",
-      "lastActive": "Replaced by BTC AutoRL project",
+      "lastActive": "Now",
       "archived": true,
       "why": "15 Days is the single Minato revenue sprint. It combines market validation, Intelligence Engine infrastructure, lead collection, processing/enrichment, and the practical path toward the first paid offer. The goal is not just to build a system — it is to connect the system to real buyers and revenue.",
       "nextAction": "M6 done. 7 target agencies, 6 templates, 10-step playbook. M7 next: automation.",
@@ -543,22 +545,954 @@
         "All in information-gathering mode - no live sends"
       ],
       "activity": [
-        "Merged Minato Kanban into one umbrella task",
-        "M1 market validation marked done",
-        "M2 Intelligence Engine foundation marked done",
-        "M3 collection complete - 251 raw rows across 15/15 niche x city combos",
-        "2026-06-19: Collector skip-logic added - skips niches/cities already in DB",
-        "2026-06-19: Re-collected 6 missing electrician combos. Total: 251 raw rows",
-        "2026-06-19: Processor re-run - 251 raw to 160 unique processed leads. 0 errors",
-        "2026-06-19: M3 marked done. M4 started.",
-        "2026-06-19: M4 Lead Qualifier built - multi-factor scoring",
-        "2026-06-19: M4 complete - 160 leads scored. A=112, B=41, C=6, D=1.",
-        "2026-06-19: M5 Product Packager built - CSV export for niche/city/tier/opportunity packs",
-        "2026-06-19: M5 complete - 25 products created, 464 lead rows exported",
-        "2026-06-19: M6 Revenue Validator built - target agencies, templates, playbook",
-        "2026-06-19: M6 complete - 7 agencies, 6 templates, 18 pricing entries, 10-step playbook",
-        "2026-06-19: M7 status changed to wip",
-        "2026-06-19: Project archived. Replaced by BTC H1 AutoRL Kanban."
+        "Completed: Six — that message looks like a stray/au",
+        "Completed: Six — confirmed: that's a test, not a re",
+        "Files touched: final_status.json",
+        "Files touched: final_status.json",
+        "Completed: ┊ 💻 preparing terminal…, Six — that last block is a real cron mes"
+      ]
+    },
+    {
+      "id": "task-btc-h1-autorl",
+      "title": "BTC H1 AutoRL — Weighted DCA Evolutionary Search",
+      "project": "minato",
+      "sessionId": null,
+      "status": "wip",
+      "priority": "High",
+      "risk": "High",
+      "created": "2026-06-20",
+      "lastActive": "Stage 1 pushed to GitHub — proceeding with parallel lanes",
+      "why": "Build ONE self-evolving BTC H1 long-only Weighted DCA strategy using Freqtrade-compatible architecture. Custom research engine for evolution; Freqtrade for data, indicators, config compatibility, and eventual deployment. Two evolving engines: DCA weighting/accumulation + TP/exit/harvest. 500 candidates per generation, cull-mutate-recombine. Goal: most robust organism across time, drawdown, monthly consistency, volatility, friction, margin stress — NOT highest profit curve. GATE 0 = Kanban accepted. After Gate 0, parallel work permitted across foundation, data, reward, genome schema, reporting shell, and library design lanes. Gating rule: no stage begins before its required dependency gates are signed off — independent parallel stages may proceed after Gate 0.",
+      "nextAction": "Gate 0 ACCEPTED (2026-06-20). Parallel work may begin across Stages 1, 2, 4, 5, 8, 11, 15 (foundation + data + schema + reward + libraries + reporting shell). Stage 5 starts after Stage 1 only (synthetic-data unit tests first); Phase 2 integration with Stage 3 required before Stage 10 unblocks. Stage 15 reporting shell starts after Stage 1 + Stage 5 interface draft; final integration depends on Stages 5+6+7. Buffer_pct in Stage 7 is configurable, default 20%, NOT hardcoded. Stage 12 loads exactly top 5 DCA parents from Stage 10 leaderboard (frozen). Stage 18 gating rule preserves parallelism — dependency-based, not sequential chain.",
+      "notes": "",
+      "subtasks": [
+        {
+          "id": "st00",
+          "title": "Gate 0 — Kanban Accepted",
+          "stage": 0,
+          "workstream": "A",
+          "status": "ready",
+          "goal": "Obtain Six's explicit acceptance of this Kanban before any implementation begins.",
+          "why": "Per Six's hard rule: 'Do not start implementation yet.' All downstream work depends on this gate.",
+          "detailedSubtasks": [
+            "Present revised Kanban to Six",
+            "Six reviews structure, dependencies, acceptance criteria",
+            "Six accepts or requests changes",
+            "Only then does Stage 1 begin",
+            "ADDITIONAL LOCK: After Gate 0 acceptance, parallel work MAY begin across: foundation (Stage 1), data pipeline (Stage 2), reward engine (Stage 5), genome schema (Stage 4), reporting Phase 1 (Stage 15), and library design (Stages 8, 11). No stage can begin until its dependencies are satisfied."
+          ],
+          "acceptanceCriteria": [
+            "Six replies with explicit 'Kanban accepted' or equivalent approval",
+            "All blocking questions on framework/margin/TP-budget answered (resolved 2026-06-20)",
+            "Six has explicitly approved parallel multi-lane work after Gate 0"
+          ],
+          "dependencies": [],
+          "parallelWith": [],
+          "risk": "Low",
+          "expectedOutput": "Approval message from Six recorded in activity log.",
+          "reviewGate": 0,
+          "nextAction": "Wait for Six's approval before any code is written."
+        },
+        {
+          "id": "st01",
+          "title": "Stage 1 — Project Foundation + Freqtrade-aware Skeleton",
+          "stage": 1,
+          "workstream": "A",
+          "status": "done",
+          "goal": "Create clean project skeleton that supports repeatable experiments, Freqtrade-compatible config, and config-driven (not hardcoded) leverage/margin/cost assumptions.",
+          "why": "Without a skeleton that is Freqtrade-compatible and config-driven, future stages will leak hardcoded values that block stress testing and live deployment.",
+          "detailedSubtasks": [
+            "Create repo at /home/spatula/Projects/BtcH1Autorl/ with subfolders: configs/, data/raw/, data/processed/, data/metadata/, results/, logs/, genomes/, reports/, scripts/, tests/, paper_trading/",
+            "Pin Python deps in requirements.txt (freqtrade, pandas, numpy, ta, plotly, pytest, msgpack)",
+            "Define Freqtrade-compatible config files in configs/freqtrade/ (user_data/config.json style) including: starting_balance, stake_currency, stake_amount, leverage (via margin mode config), margin_mode, contract_size, min_trade_size, stake_precision, amount_precision, fee, exchange config with dry_run flag",
+            "Define experiment config schema in configs/experiments/ with per-experiment overrides for: starting_balance, leverage, margin_mode (isolated/cross), maintenance_margin_pct, liquidation_buffer_pct, contract_size, min_trade_size, stake_precision, amount_precision, fee_pct, spread_pips, slippage_pct, funding_rate_per_8h (optional), overnight_cost_model (optional), dry_run bool, log_level",
+            "Define research-engine config in configs/research/ for: candidates_per_gen (500), parallel_workers, base_seed, sqlite_path, results_dir",
+            "Implement config loader (Python) that merges Freqtrade config + experiment overrides into a single immutable Settings object",
+            "Define experiment ID format: YYYYMMDD_HHMMSS_gen{N}_{slug}",
+            "Define candidate ID format: {experiment_id}_cand{NNNN}",
+            "Define genome ID format: uuid4",
+            "Define lineage metadata: parent_a_id, parent_b_id, mutation_ops[], generation_index",
+            "Define run metadata JSON schema: experiment_id, candidate_id, genome_id, settings snapshot, git_commit, python_version, started_at, finished_at, exit_reason",
+            "Define versioned outputs: every run writes immutable JSON/CSV/msgpack to results/{experiment_id}/",
+            "Logging standards: structured JSON logs at logs/{experiment_id}.jsonl, plus human-readable stdout",
+            "Reproducibility: numpy.random.default_rng(seed), Python random.seed, freqtrade set_seeds, all seeds captured in run metadata",
+            "Initialise git repo, .gitignore (results, logs, __pycache__, venv), README.md",
+            "CI/lint basics: ruff or flake8 config, pytest config"
+          ],
+          "acceptanceCriteria": [
+            "Repo structure exists and matches spec",
+            "Sample config validates and loads",
+            "Loader returns identical Settings across runs with same input (deterministic)",
+            "Experiment ID + candidate ID + genome ID generators produce expected format",
+            "Run metadata schema documented in docs/run_metadata.md",
+            "Freqtrade can read configs/freqtrade/config.json without errors"
+          ],
+          "dependencies": [
+            "st00"
+          ],
+          "parallelWith": [
+            "st02",
+            "st04"
+          ],
+          "risk": "Low",
+          "expectedOutput": "Repo skeleton + config schema + Settings loader + ID generators + reproducibility seeds. Reviewable artefact: docs/run_metadata.md + sample run_metadata.json.",
+          "reviewGate": 1,
+          "nextAction": "Completed — verified passing 112 tests, ruff clean, pushed to GitHub",
+          "lastActive": "Gate 1 ready for Six review"
+        },
+        {
+          "id": "st02",
+          "title": "Stage 2 — BTC H1 Data Pipeline + Worst Adverse Move Detection",
+          "stage": 2,
+          "workstream": "B",
+          "status": "done",
+          "goal": "Validated 5-year BTC H1 dataset with monthly segmentation, worst adverse move detection (H1 peak-to-trough), and Freqtrade-compatible output.",
+          "why": "Garbage in, garbage out. Stress replay and safety checks depend on accurate worst-adverse detection. Freqtrade compatibility ensures we can reuse indicators.",
+          "detailedSubtasks": [
+            "Source 5y BTC H1 candles (2021-06-20 to 2026-06-20 target, ~43,800 candles) — Freqtrade data directory format (json/feather/parquet)",
+            "Loader module: data/pipeline/loader.py reads OHLCV into pandas DataFrame with UTC timestamps",
+            "Cleaning: detect and report missing candles, broker/session gaps, zero-volume rows, anomalous wicks",
+            "Cleaning: forward-fill gaps up to N candles (configurable, default 3) and flag fills",
+            "Spread assumption: store spread in basis points per candle (constant default + optional intraday model)",
+            "Commission model: per-side fee in percent, configurable",
+            "Slippage model: per-side slippage in bps, configurable",
+            "Output FeQ-compat format: data/processed/btc_h1_5y.feather (Freqtrade-readable)",
+            "Monthly windows generator: split 5y into 60 monthly segments, save as data/metadata/monthly_windows.json with start/end timestamps",
+            "Full-period window: data/metadata/full_period.json with start/end",
+            "Worst adverse move detector: scan H1 candles for largest peak-to-trough percentage decline",
+            "Save data/metadata/worst_adverse_move.json containing: start_time, end_time, duration_hours, duration_days, percentage_decline, start_price, end_price, recovery_time_hours, full_candle_path_csv, replay_file_path",
+            "Generate data/metadata/data_quality_report.json: total_candles, missing_pct, longest_gap, zero_volume_pct, session_gaps, spread_avg, spread_max",
+            "Validate all outputs load correctly"
+          ],
+          "acceptanceCriteria": [
+            "Loader returns ~43,800 rows for 5y H1",
+            "Monthly windows count = 60",
+            "Worst adverse move is detected and persisted with full path",
+            "Data quality report generated",
+            "Freqtrade can load the feather file (verify with freqtrade list-data)",
+            "All metadata files present in data/metadata/"
+          ],
+          "dependencies": [
+            "st01"
+          ],
+          "parallelWith": [
+            "st03",
+            "st04",
+            "st05"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "data/processed/btc_h1_5y.feather + data/metadata/{worst_adverse_move.json, monthly_windows.json, full_period.json, data_quality_report.json}.",
+          "reviewGate": 2,
+          "nextAction": "Completed — verified passing 112 tests, ruff clean, pushed to GitHub"
+        },
+        {
+          "id": "st03",
+          "title": "Stage 3 — Core Weighted DCA Skeleton",
+          "stage": 3,
+          "workstream": "C",
+          "status": "done",
+          "goal": "Working DCA skeleton that runs ONE candidate through Freqtrade-compatible data with placeholders for every block — proves harness end-to-end before evolution.",
+          "why": "Must validate the engine runs at all before scaling to 500 candidates. Placeholder architecture lets later stages plug in without refactor.",
+          "detailedSubtasks": [
+            "dca_engine/ module: cycle_lifecycle.py (states: idle, armed, layering, harvesting, closed, failed)",
+            "dca_engine/position_tracker.py: avg_entry, total_layers, exposure_notional, unrealised_pnl",
+            "dca_engine/order_manager.py: place_limit_order, cancel_order, fill tracking, partial fill handling",
+            "dca_engine/exposure_tracker.py: per-cycle and total exposure accounting",
+            "dca_engine/state_machine.py: cycle state transitions with guard conditions",
+            "First-entry trigger placeholder: fires at first eligible candle after experiment start",
+            "Grid generation placeholder: returns fixed % spacing for now (genome-controlled later)",
+            "Position sizing placeholder: returns fixed notional per layer (genome-controlled later)",
+            "Order/layer tracking: layers[] list with timestamp, price, qty, fee",
+            "Hybrid trigger logic: price-trigger with optional confirmation (RSI/MA/vol agreement) — both opt-in per genome, default off",
+            "TP placeholder: fixed TP from avg_entry (genome-controlled later)",
+            "Cycle close/reset logic: closes at TP, resets to idle",
+            "Overlap eligibility placeholder: check existing cycle >= break-even, margin check passes, then allow new cycle",
+            "Safety check hooks: pre-trade, post-trade, pre-layer, post-close",
+            "Backtest harness: research/backtest/run_backtest.py wraps the engine and produces per-candidate trade log + equity curve",
+            "Smoke test: run 1 candidate with fixed settings, verify equity curve, trades list, and cycle state transitions are correct"
+          ],
+          "acceptanceCriteria": [
+            "1-candidate smoke test runs end-to-end on full 5y dataset without errors",
+            "Cycle state machine transitions are correct (idle → layering → harvesting → closed)",
+            "Trade log captures every fill with timestamp/price/qty/fee",
+            "Equity curve reconciles with trade log",
+            "Position tracker accurately reports avg_entry, total_layers, exposure",
+            "Hybrid trigger logic (price + optional confirmation) is wired but defaults to price-only"
+          ],
+          "dependencies": [
+            "st01",
+            "st02"
+          ],
+          "parallelWith": [
+            "st04",
+            "st05",
+            "st06"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "dca_engine/ module + research/backtest/run_backtest.py + smoke test artefact (results/smoke_st3/{trades.csv, equity.csv, run_metadata.json}).",
+          "reviewGate": 3,
+          "nextAction": "Completed — 24 tests pass, 5y backtest in 1.06s, real BTC integration with Stage 5 verified, pushed to GitHub"
+        },
+        {
+          "id": "st04",
+          "title": "Stage 4 — Genome Schema (framework-aware, serialisable)",
+          "stage": 4,
+          "workstream": "D",
+          "status": "done",
+          "goal": "Clear schema defining what a candidate IS, how evolution mutates it, and how it maps to backtest config — framework-aware (not Freqtrade-hardcoded) so we can later export to IStrategy.",
+          "why": "Without a stable schema, evolution is impossible. Must serialise cleanly, validate strictly, and round-trip deterministically.",
+          "detailedSubtasks": [
+            "genome/__init__.py exporting CandidateGenome dataclass",
+            "Sections: dca_genome, tp_genome, safety_genome, settings_overrides",
+            "dca_genome: grid_method (one of fixed_pct, atr, volatility, drawdown_from_high, ma_distance, rsi_oversold, z_score, trend_adjusted), grid_params (dict), allocation_method (one of equal, linear_increasing, controlled_exp, drawdown_adjusted, volatility_adjusted), allocation_params, combo_method (weighted_average | conditional_switch), combo_params",
+            "dca_genome: trigger_mode (price_only | price_with_confirmation), confirmation_indicators (list, e.g. [rsi_below, ma_above]), max_dca_layers",
+            "tp_genome: exit_method (one of fixed, atr, vol_adjusted, dca_depth_adjusted, partial_ladder, trailing, break_even, momentum_decay, exhaustion, trend_hold, failed_continuation, time_in_position, hybrid), exit_params",
+            "safety_genome: max_dca_layers, overlap_allowed (bool), min_break_even_for_overlap_pct (default 0.0), require_buffer_pct (default 20)",
+            "settings_overrides: optional per-candidate overrides for leverage, fee, spread, slippage, funding_rate (validated against Stage 1 schema)",
+            "Mutation metadata: mutation_ops list (e.g. {op: 'param_perturb', gene: 'grid_pct', from: 1.5, to: 1.7})",
+            "Lineage metadata: parent_a_id, parent_b_id (nullable), generation_index, mutation_seed",
+            "Validation rules: required keys, type checks, param bounds, mutually exclusive flags",
+            "Serialization: to_json(), from_json(), to_msgpack(), from_msgpack() — all deterministic",
+            "Genome hash: sha256(canonical_json) — used as genome_id when not user-supplied",
+            "Export function: to_freqtrade_strategy_params() — generates IStrategy-compatible dict for later deployment (no actual IStrategy yet)",
+            "5 example genome JSON files in genomes/examples/: simple_fixed, atr_grid, hybrid_trigger, partial_ladder_tp, trailing_tp"
+          ],
+          "acceptanceCriteria": [
+            "CandidateGenome dataclass defined with all sections",
+            "round-trip JSON serialise → deserialise produces equal object (deep equal)",
+            "Validation rejects invalid genomes with clear errors",
+            "Genome hash is deterministic",
+            "to_freqtrade_strategy_params() generates a valid dict structure",
+            "5 example genomes load without errors"
+          ],
+          "dependencies": [
+            "st01"
+          ],
+          "parallelWith": [
+            "st02",
+            "st03",
+            "st05",
+            "st06"
+          ],
+          "risk": "Low",
+          "expectedOutput": "genome/ module + 5 example genomes + docs/genome_schema.md.",
+          "reviewGate": null,
+          "nextAction": "Completed — verified passing 112 tests, ruff clean, pushed to GitHub"
+        },
+        {
+          "id": "st05",
+          "title": "Stage 5 — Locked Reward / Scoring Engine",
+          "stage": 5,
+          "workstream": "E",
+          "status": "done",
+          "goal": "Deterministic, explainable scoring engine using LOCKED weights (0.55 profit / 0.15 DD quality / 0.10 Sharpe / 0.10 PF / 0.10 TPM) with hard rejection and DD penalty tiers.",
+          "why": "Fitness must be comparable across generations. Component-level breakdown ensures we can debug why a candidate won or lost. Locked weights for v1 — no evolving the reward.",
+          "detailedSubtasks": [
+            "reward/__init__.py exposing compute_score(equity_curve, trades_df, settings) -> ScoreResult",
+            "profit_normalizer: sigmoid or rank-based scaling of net_profit_pct to [0,1]",
+            "drawdown_quality_normalizer: function of (max_dd_pct, recovery_time, dd_duration) -> [0,1]; lower DD + faster recovery = higher",
+            "sharpe_normalizer: scaled Sharpe ratio to [0,1]",
+            "profit_factor_normalizer: (gross_profit / gross_loss) clamped and scaled to [0,1]",
+            "trades_per_month_normalizer: TPM value, saturating curve so 5 → ~0.3, 20 → ~0.7, 40+ → 1.0",
+            "Hard rejection rules (REJECT, not score): net_profit <= 0, drawdown > 35%, tpm < 5, invalid initial_deposit or final_equity (NaN/inf), too_few_trades (configurable threshold, default 30)",
+            "DD penalty tiers: 25-30% DD multiply score by 0.85; 30-35% DD multiply score by 0.50; >35% reject",
+            "Invalid data handling: if any required input is NaN/inf, return RejectedResult with reason='invalid_data'",
+            "Score debug output: per-component breakdown {profit_score, dd_quality_score, sharpe_score, pf_score, tpm_score, dd_penalty_multiplier, hard_reject_reason}",
+            "Score component report: structured JSON including raw inputs, normalised components, weighted contributions, final score",
+            "Lock weights via constants in reward/weights.py — no env override in v1",
+            "Unit tests: verify LOCKED weights, hard rejects, DD penalty tiers, each normalizer edge case using SYNTHETIC equity/trade data (works without Stage 3 output)",
+            "PHASE 1 (early, after Stage 1): unit tests with synthetic equity curves + synthetic trades DataFrames — does NOT need Stage 3",
+            "PHASE 2 (before Stage 10 unblocks): real integration test against Stage 3 backtest output (sample equity curve + trades). Edge cases from real output (NaN, empty trades, single-trade months) all return correct RejectedResult or scored result. This MUST pass before Stage 10 begins."
+          ],
+          "acceptanceCriteria": [
+            "All 5 normalizers produce values in [0,1]",
+            "Weights match locked spec: 0.55/0.15/0.10/0.10/0.10 (sum = 1.00)",
+            "Hard rejects return RejectedResult with reason code",
+            "DD penalty multipliers applied at correct thresholds",
+            "Score breakdown JSON includes all components",
+            "Unit tests cover 20+ edge cases including all hard rejects",
+            "Deterministic across runs (no random state)",
+            "PHASE 1: synthetic-data unit tests pass after Stage 1 (no Stage 3 dependency required)",
+            "PHASE 2 (gating Stage 10): real integration test against Stage 3 backtest output succeeds — sample equity curve + trades",
+            "PHASE 2 edge cases from real output (NaN, empty trades, single-trade months) return correct RejectedResult or scored result"
+          ],
+          "dependencies": [
+            "st01"
+          ],
+          "parallelWith": [
+            "st02",
+            "st04"
+          ],
+          "risk": "Low",
+          "expectedOutput": "reward/ module + docs/score_components.md + unit tests passing.",
+          "reviewGate": 4,
+          "nextAction": "Completed — verified passing 112 tests, ruff clean, pushed to GitHub"
+        },
+        {
+          "id": "st06",
+          "title": "Stage 6 — Month-by-Month Fitness Engine",
+          "stage": 6,
+          "workstream": "F",
+          "status": "backlog",
+          "goal": "Fitness layer that combines full-period score with month-by-month survival quality — built into scoring, not applied later as a filter.",
+          "why": "Candidates that win on 5y profit alone often depend on one lucky month. We need month-by-month survival as part of the score itself.",
+          "detailedSubtasks": [
+            "fitness/__init__.py exposing compute_fitness(trades_df, equity_curve, monthly_windows, settings) -> FitnessResult",
+            "monthly_segmenter: split trades/equity curve into 60 monthly buckets by candle timestamp",
+            "monthly_scorer: call compute_score() per month window, return per-month ScoreResult list",
+            "consistency.py: avg_monthly_score, profitable_month_ratio, worst_month_score, monthly_dd_std",
+            "concentration.py: top_1_month_profit_share, top_3_month_profit_share (against total 5y profit)",
+            "Penalties (not rejection) for monthly consistency: profitable_month_ratio < 0.45 → multiplier 0.7; top_1_share > 0.5 → multiplier 0.85; top_3_share > 0.75 → multiplier 0.85 (multiplicative composition)",
+            "Recovery analysis: count months after a losing month that recover to prior equity peak (proxy for resilience)",
+            "Final fitness formula: fitness = full_period_score × consistency_multiplier × concentration_multiplier × recovery_multiplier (where recovery_multiplier is 1.0 in v1, placeholder for future use)",
+            "Monthly score report table: DataFrame exportable as CSV with columns [month, score, profit, dd, sharpe, pf, tpm, profitable]",
+            "Edge cases: month with 0 trades (use neutral score, don't reject); month with <5 trades (apply tpm penalty)"
+          ],
+          "acceptanceCriteria": [
+            "Monthly segmentation produces exactly 60 buckets for 5y data",
+            "Consistency metrics computed correctly (verified against hand-calculated sample)",
+            "Concentration penalties apply at correct thresholds",
+            "Final fitness = base_score × all multipliers",
+            "Monthly report CSV generated",
+            "Unit tests cover: 0-trade months, all-losing months, one-lucky-month case, recovery after losing month"
+          ],
+          "dependencies": [
+            "st05",
+            "st02"
+          ],
+          "parallelWith": [
+            "st03",
+            "st04",
+            "st07"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "fitness/ module + monthly report generator + unit tests.",
+          "reviewGate": 5,
+          "nextAction": "After Stages 2+5: build segmenter, monthly scorer, consistency + concentration logic, fitness formula, tests."
+        },
+        {
+          "id": "st07",
+          "title": "Stage 7 — DCA Completion Safety Engine",
+          "stage": 7,
+          "workstream": "G",
+          "status": "backlog",
+          "goal": "Structural safety engine that proves each candidate can complete its planned DCA sequence under worst-case stress — independent of drawdown score.",
+          "why": "Drawdown measures damage AFTER. Safety prevents suicidal DCA design BEFORE live deployment. This is a pre-trade structural check.",
+          "detailedSubtasks": [
+            "safety/__init__.py exposing check_completion(candidate_state, settings, worst_adverse_move) -> SafetyResult",
+            "margin_model.py: required_margin = (total_planned_notional / leverage) × margin_mode_multiplier (isolated=1.0, cross=0.5)",
+            "funding_check.py: total_holding_cost = estimated_holding_hours × funding_rate_per_8h × average_exposure (using either real funding data or configurable estimated funding parameter)",
+            "worst_adverse_replay.py: replays worst_adverse_move candle path against candidate's planned DCA layers, computing margin state at each candle",
+            "funding_check.py: verifies candidate can fund every planned layer (entry 1 through N) under stress, assuming worst_adverse_move unfolds",
+            "free_margin_buffer.py: enforces minimum buffer above required margin at every stress candle — buffer is CONFIGURABLE per experiment via Settings (default 20%, NOT hardcoded)",
+            "multi_cycle_check.py: for each candidate where overlap_allowed=True, simulate all overlapping active cycles under same stress, verify aggregate margin never breaches liquidation buffer",
+            "unrealistic_margin_rejection: if any layer in plan requires more margin than account can sustain (even before stress), reject",
+            "dca_failure_reason reporting: each failure mode has a reason code (INSUFFICIENT_FUNDING, BUFFER_BREACH, OVERLAP_UNDERFUNDED, LIQUIDATION_RISK, INVALID_PLAN)",
+            "safety_pass_fail.json output: per-candidate {passed: bool, reasons: [], margin_trajectory: [...], buffer_trajectory: [...], buffer_pct_used: <float>}",
+            "Safety engine MUST use the same leverage/margin/funding assumptions as the candidate's settings (from settings_overrides if set, otherwise experiment defaults)",
+            "Buffer_pct is read from settings (experiment-level override) OR from candidate safety_genome.require_buffer_pct; falls back to default 20% ONLY if neither is set. Documented in safety/buffer.md."
+          ],
+          "acceptanceCriteria": [
+            "Safety engine correctly identifies clearly-underfunded candidates",
+            "Worst-adverse replay produces deterministic margin trajectory",
+            "Multi-cycle check correctly rejects overlap plans that breach buffer",
+            "Buffer breach detected with reason code BUFFER_BREACH",
+            "Buffer_pct is read from settings/safety_genome, NOT hardcoded",
+            "Different buffer_pct values (e.g. 10%, 20%, 30%) produce different pass/fail outcomes for same candidate",
+            "Safety result includes enough detail to debug why a candidate failed",
+            "Unit tests: clearly-safe plan passes, clearly-unsafe plan fails with correct reason",
+            "Safety uses same leverage/funding as backtest settings"
+          ],
+          "dependencies": [
+            "st02",
+            "st03"
+          ],
+          "parallelWith": [
+            "st04",
+            "st05",
+            "st06"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "safety/ module + worst_adverse_replay integration + safety_pass_fail report format + unit tests.",
+          "reviewGate": 6,
+          "nextAction": "After Stages 2+3: implement margin model, worst-adverse replay, funding check, multi-cycle check, reason codes. Buffer_pct pulled from settings (default 20%, overridable per experiment and per candidate)."
+        },
+        {
+          "id": "st08",
+          "title": "Stage 8 — DCA Calculation Library",
+          "stage": 8,
+          "workstream": "H",
+          "status": "backlog",
+          "goal": "Modular DCA calculation library with selectable grid spacing, allocation, and combination methods — each block independent, testable, genome-selectable.",
+          "why": "Evolution needs interchangeable parts. Library blocks must be plug-and-play so genomes can pick any combination.",
+          "detailedSubtasks": [
+            "dca_calc/__init__.py exposing compute_next_layer(state, params) -> LayerDecision",
+            "Grid spacing blocks: fixed_pct, atr_based, volatility_based, drawdown_from_high, ma_distance, rsi_oversold, z_score, trend_adjusted — each as separate module with signature (state, params) -> next_trigger_price",
+            "Allocation blocks: equal, linear_increasing, controlled_exp, drawdown_adjusted, volatility_adjusted — each returns next_layer_notional",
+            "Combination blocks: weighted_average (combine multiple grid spacing outputs), conditional_switch (pick based on regime indicator)",
+            "Cap/normalisation: allocation_cap_pct (max % of account per layer), exposure_normaliser (keep total exposure within target)",
+            "Hybrid trigger logic: price_trigger(state) -> bool, optional confirmation(confirmation_indicators, state) -> bool — both must agree if confirmation enabled",
+            "Each block: pure function signature, no global state, returns typed dataclass",
+            "Unit tests: each block tested against hand-calculated expected outputs (5+ tests per block)"
+          ],
+          "acceptanceCriteria": [
+            "8+ grid spacing blocks implemented",
+            "5+ allocation blocks implemented",
+            "Combination blocks implemented",
+            "Cap/normalisation working",
+            "Hybrid trigger (price + confirmation) wired and toggleable",
+            "Unit tests: 5+ tests per block, all passing",
+            "Library can be invoked from dca_engine without modification"
+          ],
+          "dependencies": [
+            "st03"
+          ],
+          "parallelWith": [
+            "st05",
+            "st06",
+            "st07",
+            "st09"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "dca_calc/ module + unit tests passing + docs/blocks.md describing each block.",
+          "reviewGate": 7,
+          "nextAction": "After Stage 3: implement blocks one per module, write tests, document."
+        },
+        {
+          "id": "st09",
+          "title": "Stage 9 — Simple Fixed TP Baseline",
+          "stage": 9,
+          "workstream": "I",
+          "status": "backlog",
+          "goal": "Simple TP system used to test DCA candidates end-to-end before TP evolution begins — fixed TP from avg_entry × (1 + tp_pct).",
+          "why": "Need a working TP path before evolution can run. Simple TP isolates DCA evolution from TP complexity.",
+          "detailedSubtasks": [
+            "tp_engine/simple_fixed.py: take tp_pct param, fire when price >= avg_entry * (1 + tp_pct)",
+            "Cycle close on TP: close entire position, reset cycle to idle",
+            "TP debug reporting: log trigger candle, trigger price, avg_entry, total_pnl, cycle_duration",
+            "Baseline run: 1 fixed DCA + fixed TP run end-to-end",
+            "Baseline score report: full reward engine output for baseline"
+          ],
+          "acceptanceCriteria": [
+            "Simple TP closes cycle correctly when trigger hit",
+            "Debug report includes all required fields",
+            "Baseline run produces score_report.json",
+            "End-to-end smoke test passes (DCA skeleton + fixed TP)"
+          ],
+          "dependencies": [
+            "st03",
+            "st05"
+          ],
+          "parallelWith": [
+            "st06",
+            "st07",
+            "st08"
+          ],
+          "risk": "Low",
+          "expectedOutput": "tp_engine/simple_fixed.py + baseline_run report.",
+          "reviewGate": null,
+          "nextAction": "After Stages 3+5: implement simple TP, run baseline, save report."
+        },
+        {
+          "id": "st10",
+          "title": "Stage 10 — DCA Library Evolution (Gen 1+, 500 candidates/gen)",
+          "stage": 10,
+          "workstream": "J",
+          "status": "backlog",
+          "goal": "First evolutionary loop: search DCA calculation systems while TP remains simple. 500 candidates per generation, cull-mutate-recombine.",
+          "why": "First real evolution. Must prove the loop works and produces meaningful candidates. TP is frozen so any improvement is purely from DCA choices.",
+          "detailedSubtasks": [
+            "evolution/__init__.py exposing run_generation(genome_list, settings, backtest_fn) -> GenerationResult",
+            "genome_generator.py: random valid CandidateGenome with TP frozen to simple_fixed",
+            "mutation.py: param_perturb (small Gaussian noise), block_swap (swap grid method), method_change (random new block), param_jitter, layer_count_change",
+            "crossover.py: single-point, two-point, uniform crossover with repair (validate after)",
+            "selection.py: top 20% by fitness, plus elitism (top 5 always survive), plus 10% fresh blood",
+            "parallel_runner.py: multiprocess.Pool or ProcessPoolExecutor, SQLite write per candidate (results.db), per-candidate run_metadata.json, graceful failure handling",
+            "Generation loop: gen1 random → gen2+ from cull/mutate/recombine → repeat until convergence or 20 generations",
+            "Stagnation detection: if best fitness flat for 5 generations, increase mutation_rate (×1.5), inject 20% fresh blood",
+            "Generation result ranking: per-generation leaderboard JSON",
+            "DCA leaderboard: cumulative across all generations, top 50",
+            "DCA family comparison: which grid_methods, allocation_methods, combo_methods appear most in top candidates",
+            "DCA experiment report: human-readable markdown summary",
+            "HARD COMPUTE BUDGET (LOCKED): cap each early run at 8 hours wall time per stage. On cap reached: save leaderboard, generation_history, best_genome, and unfinished status to results/. Stop early on convergence (best fitness plateau) or stagnation (5 gens flat). Later full runs (post-tuning) may use 20 generations uncapped."
+          ],
+          "acceptanceCriteria": [
+            "500 candidates run per generation within compute budget (target: <30 min/gen on 8-core, hard cap 8h per stage for early runs)",
+            "Best fitness improves (or plateaus with explanation) over generations within budget",
+            "DCA leaderboard has at least 50 entries after generations within budget",
+            "Stagnation detected correctly on synthetic flat scenario",
+            "Family comparison shows useful patterns",
+            "All genomes serialise/validate",
+            "Safety engine rejects unsafe candidates before they consume compute (early exit)",
+            "If capped at 8h: unfinished_status.json written with remaining generations and last-known best"
+          ],
+          "dependencies": [
+            "st02",
+            "st03",
+            "st04",
+            "st05",
+            "st06",
+            "st07",
+            "st08",
+            "st09",
+            "st15_minimum_reporting"
+          ],
+          "parallelWith": [
+            "st11"
+          ],
+          "risk": "High",
+          "expectedOutput": "results/{experiment_id}/dca_leaderboard.json + generation_history.json + best_genome.json + experiment_report.md. Frozen for Stage 12.",
+          "reviewGate": null,
+          "nextAction": "After Stages 2-9 + minimum reporting: build evolution runner, run gen 1-5, analyse family patterns."
+        },
+        {
+          "id": "st11",
+          "title": "Stage 11 — TP / Exit Calculation Library",
+          "stage": 11,
+          "workstream": "I",
+          "status": "backlog",
+          "goal": "Modular TP/exit library — 12+ exit blocks, each testable, combinable, genome-selectable. Includes partial ladders, trailing, time exits, regime exits.",
+          "why": "TP evolution needs interchangeable exit blocks just like DCA. Library must cover fixed, volatility-aware, ladder, trailing, and time/regime exits.",
+          "detailedSubtasks": [
+            "tp_calc/__init__.py exposing decide_exit(state, params) -> ExitDecision",
+            "Blocks: fixed TP, ATR TP, volatility-adjusted TP, DCA-depth-adjusted TP, partial TP ladder, trailing TP, break-even recovery exit, momentum decay exit, move exhaustion exit, trend-strength hold logic, failed-continuation exit, time-in-position exit",
+            "Hybrid combiner: weighted_average across multiple exits (e.g. min of trailing vs fixed), conditional_switch (regime-dependent)",
+            "Each block signature: (state, params) -> ExitDecision(action in {hold, partial_close, full_close}, trigger_price, fraction, reason)",
+            "Partial ladder: configurable ladder levels (e.g. close 30% at +50%, close 30% at +100%, trail remaining)",
+            "Trailing TP: trailing_pct from peak, activation_threshold (e.g. only trail after +25%)",
+            "Time-in-position: close after N candles if not closed by other rules",
+            "Each block: pure function, no global state",
+            "Unit tests: each block 5+ tests, hybrid combiner 3+ tests"
+          ],
+          "acceptanceCriteria": [
+            "12+ TP blocks implemented",
+            "Hybrid combiner works",
+            "Partial ladder configurable",
+            "Trailing TP has activation threshold",
+            "Unit tests: 5+ per block, all passing",
+            "Library invokable from dca_engine cycle close logic"
+          ],
+          "dependencies": [
+            "st03"
+          ],
+          "parallelWith": [
+            "st08",
+            "st10"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "tp_calc/ module + unit tests + docs/blocks.md.",
+          "reviewGate": 8,
+          "nextAction": "In parallel with Stage 8: implement TP blocks, tests, docs."
+        },
+        {
+          "id": "st12",
+          "title": "Stage 12 — TP Library Evolution (performance-weighted, diversity-protected)",
+          "stage": 12,
+          "workstream": "J",
+          "status": "backlog",
+          "goal": "Evolutionary loop searching TP/exit systems using top DCA candidates. Total 500-candidate budget per generation, distributed performance-weighted across top 5 DCA parents with min exploration per parent.",
+          "why": "TP performance depends on DCA behaviour. Performance-weighted budget focuses compute on promising DCA without starving mid-tier candidates.",
+          "detailedSubtasks": [
+            "tp_evolution/__init__.py",
+            "EXPLICIT: TP evolution loads the TOP 5 DCA candidates from Stage 10 dca_leaderboard.json (sorted by fitness, descending). These 5 parents are frozen for the entire Stage 12 run.",
+            "Performance-weighted TP budget allocation (default unless scores are close): Rank1=160, Rank2=120, Rank3=90, Rank4=70, Rank5=60; cap any single parent at 40% of total; if scores within 5%, fall back to even split",
+            "For each selected DCA parent, generate that many random TP genomes (using TP library from Stage 11), freeze the DCA genome",
+            "Score each candidate: full + monthly + safety (same fitness as Stage 10)",
+            "Cull bottom 80%, mutate/crossover top 20% to produce next gen",
+            "Repeat for 20 generations OR until convergence",
+            "TP leaderboard: cumulative top 50 TP genomes per DCA parent",
+            "TP family comparison: which exit methods/blocks dominate",
+            "TP experiment report per DCA parent: best TP, mean TP fitness, fitness curve",
+            "Stagnation detection same as Stage 10",
+            "HARD COMPUTE BUDGET (LOCKED): cap each early run at 8 hours wall time per stage. On cap reached: save leaderboard, generation_history, best_genome, and unfinished status to results/. Stop early on convergence (best fitness plateau) or stagnation (5 gens flat). Later full runs (post-tuning) may use 20 generations uncapped."
+          ],
+          "acceptanceCriteria": [
+            "Total TP candidate budget per generation = 500",
+            "TP evolution loads EXACTLY the top 5 parents from Stage 10 dca_leaderboard.json (frozen throughout run)",
+            "Allocation follows weighted rule with cap and close-score fallback",
+            "TP leaderboards generated per parent",
+            "Stagnation detection works",
+            "Best TP per parent stored for Stage 13",
+            "Total compute per generation is bounded (no runaway)",
+            "If capped at 8h: leaderboard, generation_history.json, best_genome.json, and unfinished_status.json are all present in results/",
+            "Convergence detected within budget OR unfinished_status.json written"
+          ],
+          "dependencies": [
+            "st10",
+            "st11"
+          ],
+          "parallelWith": [
+            "st13"
+          ],
+          "risk": "High",
+          "expectedOutput": "results/{experiment_id}/tp_leaderboard.json + best_tp_per_dca.json + tp_family_comparison.json.",
+          "reviewGate": null,
+          "nextAction": "After Stages 10+11: load top 5 parents from Stage 10 dca_leaderboard.json (sorted by fitness), implement weighted allocator (160/120/90/70/60 with 40% cap, even split if close), run TP evolution. Freeze DCA parents throughout."
+        },
+        {
+          "id": "st13",
+          "title": "Stage 13 — DCA + TP Combination Testing",
+          "stage": 13,
+          "workstream": "J",
+          "status": "backlog",
+          "goal": "Pair strong DCA × strong TP candidates and run the matrix. Detect conflicts. Produce combination leaderboard for Stage 14.",
+          "why": "Best DCA + best TP may not compose. Some TP behaviours (tight trailing, time exits) conflict with DCA layering (which needs room to fill layers).",
+          "detailedSubtasks": [
+            "combination/__init__.py",
+            "Load top K=5 DCA candidates from Stage 10 leaderboard (sorted by fitness) and top L=10 TP candidates per DCA from Stage 12",
+            "Run K*L = 5*10 = 50 combination matrix per generation (LOCKED)",
+            "Detect known conflicts: time_in_position TP < max_dca_layers × estimated_dca_completion_time; tight trailing TP + slow allocation method (e.g. linear_increasing); break-even recovery TP + DCA-depth-adjusted TP (both react to similar signals)",
+            "Compatibility scoring: combo_score = full × monthly × safety, plus a conflict_penalty multiplier (0.7 if known conflict present)",
+            "Combination leaderboard: top 50 combos",
+            "Combination report: per-combo {dca_id, tp_id, combo_score, conflict_flags, monthly table, drawdown}"
+          ],
+          "acceptanceCriteria": [
+            "Exactly 50 combinations run per generation (5 DCA × 10 TP, LOCKED)",
+            "Known conflicts correctly flagged",
+            "Combo leaderboard has 50 entries",
+            "Combo report includes monthly table per candidate",
+            "Best 20 combos staged for joint evolution seed"
+          ],
+          "dependencies": [
+            "st10",
+            "st12"
+          ],
+          "parallelWith": [
+            "st14"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "results/{experiment_id}/combination_leaderboard.json + compatibility_report.json.",
+          "reviewGate": 9,
+          "nextAction": "After Stages 10+12: load K=5 and L=10, run 50-combo matrix, detect conflicts, produce leaderboard + top 20 for Stage 14."
+        },
+        {
+          "id": "st14",
+          "title": "Stage 14 — Joint Evolution (DCA + TP organism)",
+          "stage": 14,
+          "workstream": "J",
+          "status": "backlog",
+          "goal": "Full organism evolution where accumulation (DCA) and harvest (TP) adapt together. Final evolutionary loop before reporting/stress.",
+          "why": "Once DCA + TP separately are near-best, joint mutation can find relationships (e.g. tighter TP works because of specific DCA depth) that frozen combinations miss.",
+          "detailedSubtasks": [
+            "joint_evolution/__init__.py",
+            "Seed population: top N=20 combos from Stage 13 (LOCKED)",
+            "Per generation, 500 candidates composed as: 20 elite seeds (untouched), 360 mutated/crossover descendants (from elite pool + previous gen), 120 fresh random genomes (LOCKED breakdown — NOT 480 random)",
+            "Full-genome mutation: mutate DCA section OR TP section OR both, plus relationship mutations",
+            "Relationship mutations: link DCA depth to TP activation (e.g. tighter TP for higher max_dca_layers); link allocation aggressiveness to trailing_pct",
+            "Joint crossover: crossover DCA from parent A with TP from parent B",
+            "Stagnation detection: if best fitness flat 5 gens, boost mutation_rate ×1.5 and inject 20% fresh blood",
+            "Track gen-over-gen improvement: per-generation best/median/mean fitness, fitness deltas",
+            "Final leaderboard: top 50 joint-evolved candidates",
+            "Joint evolution report: best genome, fitness curve, family analysis",
+            "HARD COMPUTE BUDGET (LOCKED): cap each early run at 8 hours wall time per stage. On cap reached: save leaderboard, generation_history, best_genome, and unfinished status to results/. Stop early on convergence (best fitness plateau) or stagnation (5 gens flat). Later full runs (post-tuning) may use 20 generations uncapped."
+          ],
+          "acceptanceCriteria": [
+            "500 candidates per generation composed exactly as: 20 elite + 360 mutated/crossover + 120 fresh random (LOCKED)",
+            "Relationship mutations discovered (or attempted) correctly",
+            "Stagnation detection works",
+            "Final leaderboard with 50+ entries",
+            "Fitness curve shows improvement or plateau with diagnostic explanation",
+            "Best genome is storable + serialisable + convertible to IStrategy params",
+            "If capped at 8h: leaderboard, generation_history.json, best_genome.json, and unfinished_status.json are all present in results/",
+            "Convergence detected within budget OR unfinished_status.json written"
+          ],
+          "dependencies": [
+            "st13"
+          ],
+          "parallelWith": [],
+          "risk": "High",
+          "expectedOutput": "results/{experiment_id}/joint_evolution/{leaderboard.json, fitness_curve.json, best_genome.json, joint_report.md}.",
+          "reviewGate": 10,
+          "nextAction": "After Stage 13: build joint evolution runner with 20+360+120 composition, run until convergence or 20 gens."
+        },
+        {
+          "id": "st15",
+          "title": "Stage 15 — Reporting / Review System",
+          "stage": 15,
+          "workstream": "K",
+          "status": "done",
+          "goal": "Clear reports so Six can review why a candidate won or failed. Includes per-candidate score breakdown, monthly table, safety report, drawdown curve, trade distribution, profit concentration, leaderboards, rejected-candidate reasons.",
+          "why": "Without reporting, evolution is a black box. Reviews are blocked.",
+          "detailedSubtasks": [
+            "reports/__init__.py with submodules per report type",
+            "PHASE 0 (REPORTING SHELL — starts after Stage 1): report module skeleton, interfaces, data classes for candidate_summary, score_breakdown, generation_leaderboard, best_genome export. Module imports + empty method signatures, tested with synthetic dicts. Does NOT need Stage 5/6/7 output yet — uses interfaces + stub data.",
+            "PHASE 0 (after Stage 5 interface draft): integrate with Stage 5 ScoreResult interface, accept equity_curve + trades_df + Settings as input. Tested with synthetic ScoreResult.",
+            "PHASE 1 (minimum, must unblock Stage 10): candidate_summary.md, score breakdown table, generation leaderboard, rejected-candidate reason report, best_genome.json export, generation_history.json (LOCKED scope). Reports consume real Stage 5/6/7 output. FINAL integration of the reporting module depends on Stages 5, 6, and 7 — Stage 15 shell + Phase 0 stub renders must integrate with real outputs from all three before Stage 10.",
+            "PHASE 2 (post-evolution polish, does NOT block Stage 10): PNG charts (drawdown curve, equity curve, trade distribution)",
+            "Per-candidate: candidate_summary.md (auto-generated) — id, genome, settings, score breakdown, monthly table, safety result",
+            "Score breakdown table: full Markdown table per candidate",
+            "Monthly performance table: 60-row table per candidate",
+            "DCA safety report: passed/failed, reason codes, margin trajectory",
+            "Profit concentration: top-1-month share, top-3-month share",
+            "Generation leaderboard: Markdown table per generation",
+            "Best genome export: best_genome.json",
+            "Generation history export: generation_history.json (per-gen best/mean/median fitness)",
+            "Rejected candidate reason report: per-generation rejection breakdown by reason code",
+            "Human-readable experiment summary: experiment_report.md synthesises key findings (Phase 2)"
+          ],
+          "acceptanceCriteria": [
+            "PHASE 0 reporting shell starts after Stage 1 with module skeleton + interfaces + tested stub-data rendering",
+            "PHASE 0 integrates with Stage 5 ScoreResult interface after Stage 5 interface draft is stable",
+            "candidate_summary.md generated for any single candidate",
+            "Score breakdown table is correct and readable",
+            "Monthly table matches the monthly_segmenter output (from Stage 6 once integrated)",
+            "Generation leaderboard renders to Markdown",
+            "best_genome.json exported and serialisable",
+            "generation_history.json exported with per-gen metrics",
+            "Rejected reason report aggregates across candidates",
+            "PHASE 1 (minimum) reporting in place before Stage 10 begins (LOCKED scope: summary + breakdown + leaderboard + rejected reasons + best_genome.json + generation_history.json)",
+            "PNG charts are PHASE 2 and do NOT block Stage 10",
+            "FINAL integration depends on Stages 5, 6, and 7 (Stage 15 shell + Phase 0 must integrate with real outputs from all three before Stage 10)"
+          ],
+          "dependencies": [
+            "st01"
+          ],
+          "parallelWith": [
+            "st02",
+            "st03",
+            "st04",
+            "st05",
+            "st08",
+            "st09",
+            "st10",
+            "st11",
+            "st12",
+            "st13"
+          ],
+          "risk": "Low",
+          "expectedOutput": "reports/ module + experiment_report.md for any generation or final run.",
+          "reviewGate": null,
+          "nextAction": "Completed — verified passing 112 tests, ruff clean, pushed to GitHub"
+        },
+        {
+          "id": "st16",
+          "title": "Stage 16 — Stress Testing (10 regimes)",
+          "stage": 16,
+          "workstream": "L",
+          "status": "backlog",
+          "goal": "Run winning joint-evolved candidate through 10 stress regimes to find where it breaks.",
+          "why": "Backtest best-case is not reality. Stress testing reveals fragility to spreads, slippage, regime shifts, crashes.",
+          "detailedSubtasks": [
+            "stress/__init__.py",
+            "Stress test runs on top 10 candidates from Stage 14 joint-evolution leaderboard (LOCKED — Option B)",
+            "Harsh spread/slippage: spread ×3, slippage ×2 from base settings",
+            "Commission sensitivity: fee ×1.5, ×2, ×3",
+            "Worst historical adverse move replay: replay the exact worst_adverse_move against the candidate's plan",
+            "Low-volatility regime: filter candles to bottom-quartile ATR, rerun",
+            "High-volatility regime: filter candles to top-quartile ATR, rerun",
+            "Strong trend regime: filter to trending windows (ADX>25 or equivalent), rerun",
+            "Sideways range regime: filter to range-bound windows (ADX<20), rerun",
+            "Sharp crash regime: filter to windows with >X% drop in N hours",
+            "Slow bleed regime: filter to windows with sustained -X% over N days",
+            "V-shaped recovery regime: filter to drop-then-recover patterns",
+            "Stress test report: per-candidate × per-regime matrix (10×10), full reward score, monthly table, drawdown, comparison to base"
+          ],
+          "acceptanceCriteria": [
+            "All 10 stress regimes run on top 10 candidates (100 total runs per generation set)",
+            "Stress report includes per-candidate × per-regime matrix",
+            "Comparison table shows degradation vs base for each candidate",
+            "Identifies weakest regime per candidate AND identifies most-robust candidate across regimes"
+          ],
+          "dependencies": [
+            "st14",
+            "st02"
+          ],
+          "parallelWith": [
+            "st17"
+          ],
+          "risk": "Medium",
+          "expectedOutput": "results/{experiment_id}/stress/{per_regime.json, stress_report.md}.",
+          "reviewGate": 11,
+          "nextAction": "After Stage 14: load top 10 from joint-evolution leaderboard, run all 10 regimes × 10 candidates, produce stress matrix."
+        },
+        {
+          "id": "st17",
+          "title": "Stage 17 — Paper Testing Preparation (no live deployment)",
+          "stage": 17,
+          "workstream": "M",
+          "status": "backlog",
+          "goal": "Plan and tooling for paper testing the winning candidate outside historical backtest — does NOT include going live.",
+          "why": "Backtest ≠ live. Paper test catches execution realism, signal latency, exchange behaviour, slippage reality. Must be designed and approved before paper mode starts.",
+          "detailedSubtasks": [
+            "paper_trading/__init__.py — paper mode framework",
+            "Live data input plan: Freqtrade live data fetch + 1H candle stream",
+            "Execution logging: every signal, every simulated order, every fill",
+            "Signal logging: DCA layer triggers, TP triggers, overlap decisions",
+            "DCA layer logging: per-layer timestamp, price, qty, fee, buffer state",
+            "TP decision logging: which TP rule fired, why, with what fraction",
+            "Safety failure logging: any safety check breach (overlap, buffer, margin)",
+            "Daily report: PnL, cycle status, layer status, safety breaches",
+            "Weekly summary: rolling equity curve, drawdown, fitness recomputed on live data",
+            "Paper deployment plan: separate Freqtrade dry_run=true config, IStrategy exported from best_genome.json",
+            "Requires explicit Six approval BEFORE paper mode starts (Gate 12)"
+          ],
+          "acceptanceCriteria": [
+            "Paper trading framework module complete",
+            "All log streams implemented and tested in dry-run",
+            "Daily/weekly reports generate correctly",
+            "IStrategy export from best_genome.json validates",
+            "Freqtrade dry_run config loads and starts (manual verification by Six)",
+            "Six's explicit Gate 12 approval before paper mode starts"
+          ],
+          "dependencies": [
+            "st14",
+            "st16"
+          ],
+          "parallelWith": [],
+          "risk": "Medium",
+          "expectedOutput": "paper_trading/ module + IStrategy export + dry_run config + daily/weekly report templates.",
+          "reviewGate": 12,
+          "nextAction": "After Stages 14+16: design paper framework. Six's Gate 12 approval required before execution."
+        },
+        {
+          "id": "st18",
+          "title": "Stage 18 — Review Gates Registry",
+          "stage": 18,
+          "workstream": "K",
+          "status": "backlog",
+          "goal": "Explicit gate artifacts and gate definitions so no dangerous stage starts without review.",
+          "why": "Six wants explicit checkpoints. Each gate produces a reviewable artefact.",
+          "detailedSubtasks": [
+            "Gate 0: Kanban accepted (Six's approval of this Kanban)",
+            "Gate 1: Project foundation accepted (Stage 1 artefact: repo + config schema + loader)",
+            "Gate 2: Data pipeline validated (Stage 2 artefact: feather file + metadata + worst-adverse report)",
+            "Gate 3: DCA skeleton works (Stage 3 artefact: smoke test results + trade log + equity curve)",
+            "Gate 4: Reward engine verified (Stage 5 artefact: unit tests + score breakdown examples + Phase 2 integration test)",
+            "Gate 5: Monthly fitness verified (Stage 6 artefact: consistency + concentration tests + sample report)",
+            "Gate 6: DCA safety verified (Stage 7 artefact: clearly-safe vs clearly-unsafe test cases + reason codes)",
+            "Gate 7: DCA library accepted (Stage 8 artefact: block tests + docs)",
+            "Gate 8: TP library accepted (Stage 11 artefact: block tests + docs)",
+            "Gate 9: Combination results reviewed (Stage 13 artefact: combination leaderboard + conflict examples)",
+            "Gate 10: Joint evolution results reviewed (Stage 14 artefact: leaderboard + fitness curve + best genome)",
+            "Gate 11: Stress testing reviewed (Stage 16 artefact: stress report + weakest-regime analysis)",
+            "Gate 12: Paper testing approved (Stage 17 artefact: framework + IStrategy export + Six's explicit go-ahead)",
+            "Gating rule (PARALLELISM-PRESERVING): No stage begins before its required DEPENDENCY gates are signed off. Independent parallel stages may proceed after Gate 0 is accepted, even if sibling stages are still in progress."
+          ],
+          "acceptanceCriteria": [
+            "All 13 gate definitions documented (Gate 0 + Gates 1-12)",
+            "Each gate has a named reviewable artefact",
+            "Six has explicit sign-off recorded in activity log per gate",
+            "Gating rule preserves parallelism: independent stages proceed after Gate 0; dependent stages wait only on their declared dependencies, not on sibling/parallel stages",
+            "Dependency gates are derived from each stage's declared dependencies, not a fixed sequential chain"
+          ],
+          "dependencies": [],
+          "parallelWith": [],
+          "risk": "Low",
+          "expectedOutput": "docs/review_gates.md + per-gate sign-off log entries.",
+          "reviewGate": null,
+          "nextAction": "Maintain gate log as each gate is cleared. Apply dependency-based gating (not sequential chain) — Stages 1, 2, 4, 5, 8, 11, 15 may proceed in parallel after Gate 0 once their direct dependencies are satisfied."
+        }
+      ],
+      "evidence": [
+        "Kanban JSON saved to data/kanban-tasks.json as task-btc-h1-autorl",
+        "Lock decisions documented in subtask descriptions",
+        "Reward weights locked: 0.55/0.15/0.10/0.10/0.10",
+        "Hard rejection rules documented",
+        "DD penalty tiers documented (25-30% ×0.85, 30-35% ×0.50)",
+        "TP evolution budget policy: performance-weighted top 5 (160/120/90/70/60, cap 40%, even split if scores close)",
+        "DCA triggers: hybrid (price + optional confirmation)",
+        "Margin model: CFD-style configurable with funding/overnight cost",
+        "Freqtrade coupling: data + indicators + config + deployment; custom engine for evolution",
+        "LOCKED Stage 13: K=5 DCA × L=10 TP = 50 combinations",
+        "LOCKED Stage 14: 500 candidates = 20 elite + 360 mutated/crossover + 120 fresh random",
+        "LOCKED Stage 16: stress test top 10 joint-evolution candidates (Option B)",
+        "LOCKED compute budget: 8h hard cap per evolution stage for early runs, stop on convergence/stagnation, save leaderboard + history + best genome + unfinished status on cap",
+        "LOCKED reporting Phase 1 scope: summary + breakdown + leaderboard + rejected reasons + best_genome.json + generation_history.json (PNG charts are Phase 2, do not block Stage 10)",
+        "LOCKED Reward Engine Stage 5: depends on Stage 3, unit-test with synthetic data first, real integration validated before Stage 10",
+        "LOCKED Gate 0 = Kanban accepted, no implementation before Gate 0, parallel work permitted after Gate 0 across foundation/data/reward/schema/reporting/library-design lanes",
+        "AMENDMENT 1: Stage 5 dependencies loosened to [st01] only; Phase 1 = synthetic unit tests; Phase 2 = real integration with Stage 3 required before Stage 10",
+        "AMENDMENT 2: Stage 7 buffer_pct is configurable per experiment and per candidate safety_genome.require_buffer_pct; default 20% only as fallback; NOT hardcoded",
+        "AMENDMENT 3: Stage 18 gating rule preserves parallelism — 'No stage begins before its required dependency gates are signed off. Independent parallel stages may proceed after Gate 0'",
+        "AMENDMENT 4: Stage 15 starts earlier as reporting shell after Stage 1 + Stage 5 interface draft; final integration depends on Stages 5+6+7",
+        "AMENDMENT 5: Stage 12 explicitly loads top 5 DCA parents from Stage 10 dca_leaderboard.json, frozen throughout run",
+        "GATE 0 ACCEPTED 2026-06-20 — parallel work may begin across foundation/data/schema/reward/library-design/reporting-shell lanes",
+        "Stage 1 files: configs/__init__.py, configs/loader.py, configs/ids.py, configs/metadata.py, configs/freqtrade/config.json, configs/experiments/default.json, configs/research/default.json, requirements.txt, pyproject.toml, README.md, docs/run_metadata.md, .gitignore, tests/conftest.py, tests/test_loader.py, tests/test_ids.py, tests/test_metadata.py, scripts/smoke_stage1.py. Git: 2 commits.",
+        "GitHub repo: https://github.com/ThatspatuLa/BtcH1Autorl (public, master branch, 2 commits)"
+      ],
+      "validation": [
+        "13 gates defined (Gate 0 + Gates 1-12)",
+        "18 stages present (1-18)",
+        "13 workstreams defined (A-M, K used for Reporting + Review Gates registry)",
+        "Stage 10 dependencies explicitly listed per Six's spec",
+        "Every card has id/title/stage/workstream/status/goal/why/detailedSubtasks/acceptanceCriteria/dependencies/parallelWith/risk/expectedOutput/reviewGate/nextAction",
+        "All tasks status=backlog or ready except the umbrella itself which is wip awaiting Gate 0",
+        "All 6 clarifying questions answered and locked into subtasks",
+        "Gate 0 explicitly defined as Kanban acceptance gate",
+        "Stage 5 dependencies updated (now depends on st03, parallelWith narrowed)",
+        "Compute budget cap (8h) applied to Stages 10, 12, 14",
+        "Stage 14 candidate composition locked: 20/360/120",
+        "Stage 13 matrix size locked: 50 combinations",
+        "Stage 16 candidate pool locked: top 10 from joint evolution",
+        "All 5 final amendments applied per Six's instruction",
+        "Stage 5 dependencies corrected: st01 only (was incorrectly st01+st03); parallel work restored",
+        "Stage 7 buffer_pct configurable, not hardcoded; default 20% is fallback only",
+        "Stage 18 gating wording preserves parallelism — dependency-based, not sequential",
+        "Stage 15 starts as shell after Stage 1 + Stage 5 interface draft; integration later",
+        "Stage 12 explicit: top 5 DCA parents from Stage 10 dca_leaderboard, frozen",
+        "Gate 0 ACCEPTED — implementation may begin on Stage 1, 2, 4, 5, 8, 11, 15 in parallel",
+        "Stage 1 implementation complete: 34 pytest tests pass, smoke test passes, ruff lint clean, Freqtrade loads config"
+      ],
+      "activity": [
+        "2026-06-20: BTC H1 AutoRL project Kanban created (v1)",
+        "2026-06-20: '15 Days' Minato task archived (already archived in prior commit)",
+        "2026-06-20: Six requested revision — keep Freqtrade, config-driven not hardcoded, expand every card, add broker/account config task, fix Gate 1 wording, add Stage 10 deps, fix TP budget, expand cards, return JSON only",
+        "2026-06-20: Clarifying questions answered: Freqtrade coupling = hybrid (Freqtrade for data/indicators/config/deployment + custom research engine for evolution)",
+        "2026-06-20: TP budget policy confirmed: top 5 DCA parents, weighted (160/120/90/70/60), 40% cap, even split fallback",
+        "2026-06-20: DCA triggers confirmed: hybrid (price + optional confirmation)",
+        "2026-06-20: Margin model confirmed: CFD-style configurable with funding/overnight cost, configurable per experiment",
+        "2026-06-20: Revised Kanban written to data/kanban-tasks.json with every card expanded per spec",
+        "2026-06-20: Awaiting Six's Gate 0 acceptance before any implementation begins",
+        "2026-06-20: Six locked all 6 clarifying questions: Stage 13 matrix=50 (K=5×L=10), Stage 14 composition=20 elite+360 mutate/crossover+120 fresh, Stage 16=Option B (top 10), compute budget=8h cap per evolution stage with unfinished_status on cap, reporting Phase 1 scope locked (no PNGs blocking Stage 10), Stage 5 depends on Stage 3 with integration test required before Stage 10, Gate 0=Kanban acceptance with parallel work permitted after.",
+        "2026-06-20: Final 5 amendments applied. Gate 0 ACCEPTED. Stage 5 deps loosened to [st01] (Phase 1 synthetic tests; Phase 2 integration with Stage 3 required before Stage 10). Stage 7 buffer_pct now configurable (default 20% fallback only). Stage 18 gating rule reworded to preserve parallelism (dependency-based, not sequential). Stage 15 starts as reporting shell after Stage 1 + Stage 5 interface draft; final integration depends on Stages 5+6+7. Stage 12 explicit: loads top 5 DCA parents from Stage 10 dca_leaderboard.json, frozen throughout run. Parallel implementation may now begin across Stages 1, 2, 4, 5, 8, 11, 15.",
+        "2026-06-20: Stage 1 implementation complete. Project scaffolded at /home/spatula/Projects/BtcH1Autorl/. configs/loader.py (immutable Settings, deterministic, three-tier merge research<experiment<freqtrade). configs/ids.py (experiment_id, candidate_id, genome_id, run_id formats per spec). configs/metadata.py (RunMetadata dataclass + JSON round-trip). configs/freqtrade/config.json (Freqtrade-compatible, dry_run, H1, BTC/USDT, leverage=5, margin_mode=isolated). configs/experiments/default.json (configurable buffer_pct, wall_time_budget_seconds=28800=8h). configs/research/default.json (candidates_per_gen=500 LOCKED, parallel_workers=8, base_seed=42). requirements.txt pinned, pyproject.toml pytest+ruff config. 34 pytest tests pass, scripts/smoke_stage1.py end-to-end smoke passes, ruff lint clean, freqtrade show-config reads config.json successfully. Git: 2 commits locally. Stage 1 DONE — Gate 1 ready for Six's review.",
+        "2026-06-20: Stage 1 pushed to GitHub: https://github.com/ThatspatuLa/BtcH1Autorl (public). gh repo create --public --source=. --push. 2 commits on master branch. Proceeding with parallel lanes per Kanban.",
+        "2026-06-21: Project renamed btc-autorl -> minato per Six. Minato is now solely responsible for DCA Evolution."
+      ],
+      "progress": "Stage 1 DONE + PUSHED to GitHub (https://github.com/ThatspatuLa/BtcH1Autorl). Parallel lanes now proceeding: Stage 4 (genome schema), Stage 5 Phase 1 (reward engine — synthetic), Stage 15 Phase 0 (reporting shell), Stage 2 (data pipeline), Stage 8+11 (libraries).",
+      "recent": "Final 5 amendments applied. Gate 0 accepted. Parallel work begins across Stages 1, 2, 4, 5, 8, 11, 15.",
+      "lastAction": "Completed Stage 3 (DCA engine skeleton + backtest runner). 6/18 stages done.",
+      "lastUpdated": "2026-06-20T22:00:00Z",
+      "stage_progress": "6/18 complete (1, 2, 3, 4, 5, 15). Real BTC 5y data flows through DCA engine → Stage 5 reward engine end-to-end.",
+      "session_log": [
+        {
+          "date": "2026-06-20",
+          "stages_completed": [
+            "st01",
+            "st02",
+            "st04",
+            "st05",
+            "st15"
+          ],
+          "summary": "Foundation + data + genome + reward + reporting shell shipped. 112 tests pass.",
+          "key_findings": [
+            "BTC H1 5y real data: 44,290 candles after cleaning",
+            "Worst adverse move: -77.2% over 376 days (2021-11 to 2022-11)",
+            "BTC buy-and-hold hard-rejected by reward engine (77.2% DD > 35% cap)",
+            "Stage 5 Phase 2 integration verified end-to-end"
+          ],
+          "github_commits": 4
+        },
+        {
+          "date": "2026-06-20",
+          "stages_completed": [
+            "st03"
+          ],
+          "summary": "DCA engine skeleton + backtest runner. 24 new tests, 136 total.",
+          "key_findings": [
+            "Backtest performance: 44k candles in 1.06s → 10k backtests in ~3h (within 8h cap)",
+            "71 cycles opened+closed on 5y with placeholder sizing (1.5% grid, 2% TP)",
+            "Final equity +2.5%, max DD 2.3% — well within 35% cap",
+            "Rejected by Stage 5 for tpm<5 (1.2 trades/month) — placeholder sizing too conservative, evolution will fix",
+            "Real BTC 5y data → Stage 5 reward engine integration verified end-to-end"
+          ],
+          "github_commits": 5,
+          "next_unblocked": [
+            "st06 (Monthly Fitness)",
+            "st07 (Safety Engine)",
+            "st08 (DCA Library)",
+            "st11 (TP Library)"
+          ]
+        }
       ]
     },
     {
@@ -946,296 +1880,302 @@
       "sessionId": null
     },
     {
-      "id": "task-btc-h1-autorl",
-      "title": "BTC H1 AutoRL — Weighted DCA Evolutionary Search",
-      "project": "btc-autorl",
+      "id": "task-zen-remote-local-operator",
+      "title": "Agent OS: Remote Local Operator",
+      "project": "zen",
       "sessionId": null,
-      "status": "wip",
+      "status": "backlog",
       "priority": "High",
       "risk": "High",
-      "created": "2026-06-20",
+      "created": "2026-06-21",
       "lastActive": "Now",
       "archived": false,
-      "why": "Build one self-evolving BTC H1 long-only Weighted DCA strategy with two internal engines (DCA weighting, TP/exit). 500 candidates per generation, cull-mutate-recombine loop. Goal: strongest DCA organism that survives across time, drawdown, monthly consistency, volatility, friction, margin stress. NOT highest profit — most robust.",
-      "nextAction": "Stage 1: Project Foundation. Repository structure, config, naming, reproducibility.",
-      "notes": "Replace the '15 Days' umbrella task. This is the new long-term project. Workstreams A-K run in parallel where dependencies allow. Review gates block progression. Reward weights are LOCKED for v1.",
+      "why": "Six needs to access and operate the local computer from phone/Discord while overseas. Zen/Hermes should eventually inspect files, run safe commands, use browser/computer tools, show what it is doing, and route risky actions through Review/Validate. This is not only a coding executor. It is a remote-control and observation foundation for the entire agent system.",
+      "nextAction": "M0: Tailscale proof — verify computer and phone connect privately. Zero code. Then M1A: localhost-only read-only inspect endpoint with fixed project registry.",
+      "notes": "Three views required:\n- Operator View (default mobile): top 60% live screen, bottom 40% Zen Chat\n- Manual Control View: full-screen remote desktop, floating controls, no proof trail for manual clicks\n- Review/Proof View: command transcript, files touched, screenshots, validation, errors, approvals\n\nProof Trail only for Zen/Hermes/executor actions. Manual Control logs only session start/end/errors.\n\nBoundaries (locked):\n- SAFE: read-only, no side effects, no network, no env access → auto-run\n- REVIEW: file writes, project-local git, dep installs, services, browser → approval required\n- BLOCKED: sudo, rm -rf, outside project root, secrets/keys, GitHub push, production trading → hard no\n- No GitHub pushes from operator session (existing Review/Validate gate only)\n- No production trading actions from operator session\n- Approval TTL: 5 min, bound to (command, working_dir, sha256), max 20 REVIEW/hour\n- M8 (Zen/Hermes Desktop Control) is HIGH RISK and deferred — re-evaluate before build\n\nProject registry (M1A+): fixed map, no path traversal.\n  zen-new → /home/spatula/Projects/ZenNew\n  zen → /home/spatula/Projects/Zen\n  kiyosaki → /home/spatula/Projects/Kiyosaki",
       "subtasks": [
         {
-          "title": "Stage 1 — Project Foundation",
+          "title": "M0: Tailscale proof",
           "status": "backlog",
-          "workstream": "A",
-          "review_gate": 1,
-          "description": "Clean project skeleton supporting repeatable experiments. Defines directory layout, config files, logging standards, naming conventions, genome ID format, reproducibility rules, backtest metadata.",
-          "nextAction": "Create repo layout under /home/spatula/Projects/BtcH1Autorl/. Folders: configs/, data/, results/, logs/, genomes/, reports/, scripts/, tests/. Define naming convention: experiment_id = YYYYMMDD_HHMMSS_gen{N}_{tag}. Define genome_id = uuid4. Define run_metadata schema (config hash, seed, candle_count, exchange, asset, timeframe). Pin Python deps. Set seed rules (numpy, random, freqtrade).",
-          "blocks": [
-            "All other stages"
+          "description": "Computer and phone connect privately via Tailscale. No Agent OS code changes. Verify ping both directions, document Tailscale IPs and ACL config.",
+          "nextAction": "1. Run tailscale status on desktop, note Tailscale IP.\n2. Install Tailscale on phone, connect.\n3. Phone → ping <desktop-tailscale-ip>.\n4. Desktop → ping <phone-tailscale-ip>.\n5. Document both IPs and any firewall rules needed.",
+          "evidence": [
+            "tailscale status output",
+            "Tailscale ACL config"
           ],
-          "blocked_by": []
-        },
-        {
-          "title": "Stage 2 — BTC H1 Data Pipeline",
-          "status": "backlog",
-          "workstream": "A",
-          "review_gate": 2,
-          "description": "Validated 5-year BTC H1 dataset with monthly segmentation and worst adverse move detection. Cleans missing candles, handles gaps, models spread/commission/slippage, builds monthly windows.",
-          "nextAction": "Source 5 years of BTC H1 candles (2021-06 to 2026-06). Verify 43800+ candles expected. Clean missing/gap candles. Detect largest adverse BTC move in window. Store monthly segmentation. Generate data quality report (count, gaps, max DD bar, max run-up, max adverse excursion). Output: data/processed/btc_h1_5y.csv, data/metadata/data_quality_report.json, data/metadata/worst_adverse_move.json.",
-          "blocks": [
-            "Stages 7, 10, 12, 14, 16"
+          "validation": [
+            "ping works both directions on Tailscale IPs",
+            "tailscale status shows both nodes connected",
+            "Tailscale IPs documented"
           ],
-          "blocked_by": [
-            "Stage 1"
+          "risk": "Near-zero",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 3 — Core Weighted DCA Skeleton",
+          "title": "M1A: Localhost-only read-only inspect endpoint",
           "status": "backlog",
-          "workstream": "B",
-          "review_gate": 3,
-          "description": "Simple working DCA skeleton. One candidate, basic fixed settings. Placeholders for every block. State machine, order tracking, exposure tracking. Validates that the harness works before evolution begins.",
-          "nextAction": "Build dca_engine/ module: cycle_lifecycle.py, position_tracker.py, order_manager.py, exposure_tracker.py, state_machine.py. Placeholders: first_entry_trigger(), grid_generator(), sizing_fn(), average_entry_calc(), tp_decision(), cycle_close(). Hooks: safety_check(), overlap_eligibility(). Smoke test: 1 candidate, 5 years, fixed $100/cycle, prints open/close events.",
-          "blocks": [
-            "Stages 8, 9, 10, 11, 12"
+          "description": "Add GET /api/operator/inspect to agent_os_server.py. Binds to 127.0.0.1 only. No auth. No Tailscale. No arbitrary command execution. Only fixed read-only git commands are allowed (git status --short, git log --oneline -10). Uses a fixed project registry map instead of building paths from user input.",
+          "nextAction": "1. Define fixed project registry: {zen-new: /home/spatula/Projects/ZenNew, zen: /home/spatula/Projects/Zen, kiyosaki: /home/spatula/Projects/Kiyosaki}.\n2. Add GET /api/operator/inspect?project=<name> endpoint to agent_os_server.py.\n3. Validate project name against registry — reject unknown names.\n4. Return: directory tree (3 levels), git status --short, git log --oneline -10, file count by extension.\n5. Constrain all reads to the registered project root — no symlink escape.\n6. Test: curl http://127.0.0.1:8765/api/operator/inspect?project=zen-new",
+          "evidence": [
+            "agent_os_server.py"
           ],
-          "blocked_by": [
-            "Stage 1"
-          ]
-        },
-        {
-          "title": "Stage 4 — Genome Schema",
-          "status": "backlog",
-          "workstream": "E",
-          "review_gate": null,
-          "description": "Defines what a candidate is. Three genome sections: DCA, TP, Safety. Calculation block representation, input representation, combination method, mutation metadata, lineage, validation rules, serialization. Example files.",
-          "nextAction": "Define genome.py with class CandidateGenome. Sections: dca_genome { grid_method, allocation_method, combo_method, params }, tp_genome { exit_method, params }, safety_genome { max_dca_layers, overlap_allowed, min_break_even_for_overlap }. Each calculation block has: type, inputs, params, output. Validators: param ranges, required combos. Serialization: JSON + msgpack. Output: 5 example genome files.",
-          "blocks": [
-            "Stages 8, 11, 14"
+          "validation": [
+            "curl http://127.0.0.1:8765/api/operator/inspect?project=zen-new returns valid JSON in <2s",
+            "Unknown project name returns 404",
+            "Only fixed read-only git commands are executed — no arbitrary command execution",
+            "Path traversal attempts are rejected (e.g., project=../../etc)",
+            "Symlink escape from project root is blocked",
+            "Zero write actions logged"
           ],
-          "blocked_by": [
-            "Stage 1"
+          "risk": "Near-zero",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 5 — Locked Reward / Scoring Engine",
+          "title": "M1B: Auth + event audit",
           "status": "backlog",
-          "workstream": "C",
-          "review_gate": 4,
-          "description": "Deterministic scoring. LOCKED weights: 0.55 profit, 0.15 DD quality, 0.10 Sharpe, 0.10 PF, 0.10 trades/mo. Hard rejection rules. Drawdown penalty tiers (25-30% ×0.85, 30-35% ×0.50, >35% reject).",
-          "nextAction": "Build reward/ module. Components: normalizer.py (per-component min-max over population), profit_normalizer.py, dd_quality.py, sharpe.py, profit_factor.py, trades_per_month.py, scorer.py. Apply hard rules: net<=0 reject, DD>35% reject, TPM<5 reject, invalid equity reject. Apply DD penalty tiers. Output component breakdown per score for debugging.",
-          "blocks": [
-            "Stages 6, 10, 12, 14"
+          "description": "Add bearer-token authentication to all /api/operator/* endpoints. Add structured audit logging for every operator action to data/operator/audit.jsonl.",
+          "nextAction": "1. Add HMAC-signed bearer token auth middleware (24h TTL).\n2. Store token in data/operator/.token (chmod 600).\n3. Every /api/operator/* request validated against token — 401 if missing/invalid.\n4. Every operator action logged to data/operator/audit.jsonl: {ts, action_type, target, result, approver, session_id}.\n5. Audit log is append-only — operator cannot modify or delete entries.",
+          "evidence": [
+            "agent_os_server.py",
+            "data/operator/audit.jsonl",
+            "data/operator/.token"
           ],
-          "blocked_by": [
-            "Stage 4"
-          ]
-        },
-        {
-          "title": "Stage 6 — Month-by-Month Fitness Engine",
-          "status": "backlog",
-          "workstream": "D",
-          "review_gate": 5,
-          "description": "Walk-forward monthly fitness. NOT a later filter — built into fitness score. Average monthly score, profitable month ratio, worst month, monthly DD stability, profit concentration (top 1 >50% penalty, top 3 >75% penalty).",
-          "nextAction": "Build fitness/ module. monthly_segmenter.py splits 5y into 60 monthly windows. monthly_scorer.py runs reward engine per month. consistency.py calculates: avg_monthly_score, profitable_month_ratio, worst_month_score, monthly_dd_std. concentration.py: top_1_share, top_3_share. Penalties (not rejection) for concentration. Combines full-period + monthly into final fitness. Output monthly_performance table per candidate.",
-          "blocks": [
-            "Stages 10, 12, 14"
+          "validation": [
+            "Unauthenticated request to /api/operator/inspect returns 401",
+            "Authenticated request returns 200",
+            "Every request creates exactly one audit entry",
+            "Audit entries cannot be deleted or modified by operator"
           ],
-          "blocked_by": [
-            "Stage 5"
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 7 — DCA Completion Safety Engine",
+          "title": "M1C: Tailscale-only exposure",
           "status": "backlog",
-          "workstream": "H",
-          "review_gate": 6,
-          "description": "Structural risk control. Before accepting a candidate, verify it can fund its full DCA sequence under worst historical adverse BTC move. Checks margin requirements, free buffer, multi-cycle overlap funding.",
-          "nextAction": "Build safety/ module. margin_model.py computes required margin per cycle. worst_adverse_replay.py uses data/metadata/worst_adverse_move.json. funding_check.py verifies cycle can complete. multi_cycle_check.py verifies all overlapping cycles funded under same stress. free_margin_buffer.py enforces min buffer. Output: safety_pass_fail.json with reason codes.",
-          "blocks": [
-            "Stages 10, 12, 14, 16"
+          "description": "Bind agent_os_server.py to Tailscale interface. Phone can reach it. Non-Tailscale cannot.",
+          "nextAction": "1. Change server bind from 0.0.0.0 to Tailscale IP (100.64.x.x).\n2. Add firewall rule: port 8765 only accepts from 100.64.0.0/10.\n3. Verify: curl from phone on Tailscale succeeds.\n4. Verify: curl from non-Tailscale host fails with connection refused.",
+          "evidence": [
+            "agent_os_server.py",
+            "iptables/nftables rule",
+            "tailscale status"
           ],
-          "blocked_by": [
-            "Stage 2"
-          ]
-        },
-        {
-          "title": "Stage 8 — DCA Calculation Library",
-          "status": "backlog",
-          "workstream": "F",
-          "review_gate": 7,
-          "description": "Modular DCA calc library. Grid spacing methods, allocation methods, hybrid combiner. All blocks must be selectable + tunable + combinable by genome.",
-          "nextAction": "Build dca_calc/ module. Grid spacing: fixed_pct, atr_based, volatility_based, drawdown_from_high, ma_distance, rsi_oversold, z_score, trend_adjusted. Allocation: equal, linear_increasing, controlled_exp, dd_adjusted, volatility_adjusted. Hybrid combiner: weighted_average, conditional_switch. Cap/normaliser. Unit tests for each block.",
-          "blocks": [
-            "Stage 10"
+          "validation": [
+            "curl http://100.64.x.x:8765/api/operator/inspect succeeds from phone",
+            "curl from non-Tailscale host fails with connection refused",
+            "Auth still required (M1B) — Tailscale + bearer token = two layers"
           ],
-          "blocked_by": [
-            "Stage 3",
-            "Stage 4"
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 9 — Simple Fixed TP Baseline",
+          "title": "M1D: Discord /inspect command",
           "status": "backlog",
-          "workstream": "G",
-          "review_gate": null,
-          "description": "Simple TP from average entry. Used to test DCA candidates before TP evolution begins. Establishes baseline DCA+TP performance.",
-          "nextAction": "Build tp_engine/simple_fixed.py. Takes tp_pct param. Closes cycle when price >= avg_entry * (1 + tp_pct). Cycle close resets state machine. Run baseline: 1 fixed DCA + fixed TP. Print score. Confirm harness end-to-end works.",
-          "blocks": [
-            "Stage 10"
+          "description": "Wire Discord slash command to the inspect endpoint. Returns formatted Discord embed.",
+          "nextAction": "1. Add /inspect <project> slash command handler.\n2. Uses bearer token from M1B for API call.\n3. Response formatted as Discord embed (not raw JSON).\n4. Error handling: project not found, server unreachable, auth failure.\n5. Test from Discord mobile app.",
+          "evidence": [
+            "Discord bot handler",
+            "agent_os_server.py"
           ],
-          "blocked_by": [
-            "Stage 3"
-          ]
-        },
-        {
-          "title": "Stage 10 — DCA Library Evolution (Gen 1+)",
-          "status": "backlog",
-          "workstream": "I",
-          "review_gate": null,
-          "description": "First evolutionary loop. 500 candidates per generation. Mutate DCA genomes, freeze TP. Cull bottom 80%, reproduce top 20%. Fitness = full-period score + monthly consistency + safety pass.",
-          "nextAction": "Build evolution/ module. genome_generator.py creates 500 random DCA genomes. mutation.py (small param changes, block swap, method change). crossover.py (mix two parents). selection.py (top 20%). parallel_runner.py (multiprocess, SQLite results). Repeat until convergence or 20 gens. Output: dca_leaderboard.json, generation_history.json, best_genome.json.",
-          "blocks": [
-            "Stage 12"
+          "validation": [
+            "/inspect zen-new in Discord returns formatted embed with project tree",
+            "/inspect nonexistent returns error message",
+            "Works in Discord mobile app"
           ],
-          "blocked_by": [
-            "Stage 6",
-            "Stage 7",
-            "Stage 8",
-            "Stage 9"
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 11 — TP / Exit Calculation Library",
+          "title": "M2: Read-only command runner + approval gate",
           "status": "backlog",
-          "workstream": "G",
-          "review_gate": 8,
-          "description": "Modular TP library. 12+ exit blocks. Fixed TP, ATR TP, vol-adjusted, DCA-depth adjusted, partial ladders, trailing TP, break-even, momentum decay, exhaustion, trend hold, failed-continuation, time-in-position, hybrid combiner.",
-          "nextAction": "Build tp_calc/ module. Each block: decision_func(state, params) -> action. State includes: avg_entry, current_price, unrealised_pnl, time_in_cycle, dca_depth, recent_volatility, trend_strength. Hybrid combiner blends outputs. Unit tests.",
-          "blocks": [
-            "Stage 12"
+          "description": "Extend M1 to run SAFE-classified commands automatically and surface REVIEW-classified commands as approval requests in Discord. BLOCKED commands are hard-rejected.",
+          "nextAction": "1. Create data/operator/allowlist.yaml with SAFE/REVIEW/BLOCKED classification.\n2. Implement command classifier: parse tokens, match against allowlist.\n3. SAFE commands (ls, cat, grep, ps, git status, find, wc, head, tail) run immediately.\n4. REVIEW commands (file writes, project-local git, dep installs, services, browser) wait for approval.\n5. BLOCKED commands (sudo, rm -rf, outside project root, secrets, GitHub push, production trading) hard-rejected.\n6. Approval: Discord embed with [Approve][Deny][Edit] buttons, 5 min TTL.\n7. Approval binding: bound to (command, working_dir, sha256(command)).\n8. Rate limit: max 20 REVIEW/hour, max 5/session without continue.\n9. Strip all *_KEY, *_TOKEN, *_SECRET env vars before exec.\n10. Log every command to audit.jsonl with exit code, stdout hash, approver.",
+          "evidence": [
+            "agent_os_server.py",
+            "data/operator/allowlist.yaml",
+            "data/operator/audit.jsonl"
           ],
-          "blocked_by": [
-            "Stage 3",
-            "Stage 4"
-          ]
-        },
-        {
-          "title": "Stage 12 — TP Library Evolution (Gen 1+)",
-          "status": "backlog",
-          "workstream": "I",
-          "review_gate": null,
-          "description": "TP evolution using frozen top-DCA candidates. 500 TP candidates per gen. Cull/mutate/recombine TP genomes. DCA stays fixed.",
-          "nextAction": "Build tp_evolution/ — load top N DCA candidates from Stage 10. Generate 500 random TP genomes per DCA parent. Score = full + monthly + safety. Cull bottom 80%. Reproduce. Repeat 20 gens. Output tp_leaderboard.json, best_tp_per_dca.json.",
-          "blocks": [
-            "Stage 13"
+          "validation": [
+            "100% of SAFE commands run without approval",
+            "100% of BLOCKED commands are rejected with reason",
+            "100% of REVIEW commands wait for approval",
+            "Approval cannot be replayed for a different command",
+            "Rate limit triggers at 21st REVIEW action per hour",
+            "Env vars (MINIMAX_API_KEY, GITHUB_TOKEN, etc) absent from child process env"
           ],
-          "blocked_by": [
-            "Stage 10",
-            "Stage 11"
+          "risk": "Medium",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 13 — DCA + TP Combination Testing",
+          "title": "M3: Review/Proof View",
           "status": "backlog",
-          "workstream": "I",
-          "review_gate": 9,
-          "description": "Pair strong DCA systems with strong TP systems. Matrix run. Detect conflicts (e.g., tight TP + deep DCA). Rank combinations.",
-          "nextAction": "Build combination/ module. Load top K DCA from Stage 10 and top L TP from Stage 12. Run K*L matrix. Score with full + monthly + safety. Detect conflicts: time_in_position TP cancelling layered DCA, tight trailing vs slow allocation. Output combination_leaderboard.json, compatibility_report.json, conflict_examples.json.",
-          "blocks": [
-            "Stage 14"
+          "description": "Extend the existing Review/Validate surface to show executor proof trails. New panes: command transcript, file access log, Zen screenshots, network calls. Manual Control View does NOT generate proof trails.",
+          "nextAction": "1. Extend _git_review_payload to include operator_logs from audit.jsonl filtered by session_id.\n2. Add 4 new panes to zenReviewRender: command transcript, file access, network calls, screenshots.\n3. Add GET /api/operator/screenshot endpoint (grim/scrot on Linux).\n4. On review close, generate proof bundle ZIP with all session artifacts.\n5. Extend audit.jsonl schema: action_class (safe/review/blocked), approver fields.\n6. Verify Manual Control View clicks do NOT appear in proof trail.",
+          "evidence": [
+            "agent_os_server.py",
+            "agent-os.html",
+            "agent-os.css",
+            "data/operator/audit.jsonl"
           ],
-          "blocked_by": [
-            "Stage 12"
-          ]
-        },
-        {
-          "title": "Stage 14 — Joint Evolution (DCA + TP organism)",
-          "status": "backlog",
-          "workstream": "I",
-          "review_gate": 10,
-          "description": "Full organism evolution. DCA + TP adapt together. Relationship-aware mutation. 500 candidates/gen. Stagnation detection. Multi-gen improvement tracking.",
-          "nextAction": "Build joint_evolution/ module. Full genome mutation (DCA + TP together). Relationship mutation: link DCA depth to TP activation threshold. Crossover across full genome. Stagnation detection: if best score flat for 5 gens, increase mutation rate, inject 20% fresh blood. Track gen-over-gen improvement. Final leaderboard. Joint evolution report.",
-          "blocks": [
-            "Stage 15"
+          "validation": [
+            "Review/Proof View shows 4 new panes",
+            "Proof bundle ZIP contains all session artifacts",
+            "Screenshot captures current desktop at 1920x1080",
+            "Manual Control View clicks are absent from proof trail"
           ],
-          "blocked_by": [
-            "Stage 13"
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 15 — Reporting / Review System",
+          "title": "M4: Discord command interface — operator UI",
           "status": "backlog",
-          "workstream": "J",
-          "review_gate": null,
-          "description": "Human-readable reports. Per-candidate breakdown, monthly tables, safety reports, drawdown reports, generation leaderboards, best genome export.",
-          "nextAction": "Build reports/ module. Generate per-candidate: score breakdown table, monthly perf table, safety pass/fail, drawdown curve, trade distribution, profit concentration. Generate per-generation: leaderboard, family trees, stagnation warnings. Export best genome as deployable JSON. Generate rejected-candidate reason report.",
-          "blocks": [
-            "Stage 16"
+          "description": "Full Discord operator UI with commands, status streaming, screenshots, and approvals.",
+          "nextAction": "1. Add slash commands: /inspect, /run, /status, /services, /screenshot, /tail, /approve, /deny, /abort.\n2. Embed streaming: edit in place every 30-60s during long runs.\n3. Wire approval buttons to pending review queue.\n4. /tail <service> with last N lines, 60s refresh.\n5. Channel routing: Zen OS channel for operator, #zen-chat for chat.\n6. Mobile test: every command tappable from phone Discord client.",
+          "evidence": [
+            "Discord bot handler",
+            "agent_os_server.py"
           ],
-          "blocked_by": [
-            "Stage 14"
-          ]
-        },
-        {
-          "title": "Stage 16 — Stress Testing",
-          "status": "backlog",
-          "workstream": "K",
-          "review_gate": 11,
-          "description": "Multi-regime stress tests on top candidate. Spread/slippage sensitivity, commission sensitivity, worst adverse move replay, low-vol, high-vol, trend, range, crash, slow bleed, V-recovery.",
-          "nextAction": "Build stress/ module. Run winning candidate from Stage 14 across 10 regime replays. Inject 2x/3x spread, 1.5x/2x slippage, 1.5x commission. Report: regime_score per regime, breakdown points, failure modes. Output stress_report.json with regime-by-regime survival chart.",
-          "blocks": [
-            "Stage 17"
+          "validation": [
+            "All 9 slash commands work in Discord mobile app",
+            "Long-running command shows 5 embed updates (not 5 separate messages)",
+            "Approval button click reaches operator session in <2s",
+            "Screenshot attached to Discord message has correct context"
           ],
-          "blocked_by": [
-            "Stage 15"
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Stage 17 — Paper Testing Preparation",
+          "title": "M5A: Mobile dashboard shell",
           "status": "backlog",
-          "workstream": "J",
-          "review_gate": 12,
-          "description": "Plan for live paper testing. Mode design, data input, logging, daily/weekly review report. NOT live trading — paper only.",
-          "nextAction": "Design paper_trading/ module. Live candle feed (exchange API). Order simulation layer. Full execution log. Signal log. DCA layer log. TP decision log. Safety failure log. Daily report: PnL, cycle status, layer status, safety violations. Weekly summary. Requires Six's explicit go-ahead before live paper trading starts.",
-          "blocks": [],
-          "blocked_by": [
-            "Stage 16"
+          "description": "Build the 3 mobile views with placeholder/screenshot screen panel. Operator View is default. Manual Control View has no proof trail. Screen panel is placeholder until M7 (noVNC).",
+          "nextAction": "1. Scaffold mobile web app under /m (vanilla HTML/CSS/JS).\n2. Auth: same bearer-token flow as desktop.\n3. Operator View (default): top 60% placeholder screen, bottom 40% Zen Chat.\n4. Manual Control View: full-screen remote desktop area, floating controls (back, keyboard, zoom, disconnect).\n5. Review/Proof View: command transcript, files, screenshots, validation, errors, approvals.\n6. Live status via Server-Sent Events.\n7. Tap-to-approve for pending actions.\n8. Service start/stop/restart controls.\n9. Test on iOS Safari + Android Chrome over Tailscale.",
+          "evidence": [
+            "agent-os-mobile.html",
+            "agent-os-mobile.css",
+            "agent_os_server.py (SSE routes)"
+          ],
+          "validation": [
+            "Dashboard loads in <2s on 4G",
+            "Live status updates appear in <1s",
+            "Tap-to-approve reaches operator in <1s",
+            "Manual Control View clicks generate no proof trail entries",
+            "All 3 views accessible and navigable on phone"
+          ],
+          "risk": "Low",
+          "activity": [
+            "Task created 2026-06-21"
           ]
         },
         {
-          "title": "Review Gates (12 total)",
+          "title": "M6: Browser/Playwright control",
           "status": "backlog",
-          "workstream": "J",
-          "review_gate": null,
-          "description": "Hard gates that block progression. No dangerous stage starts without Six's review and explicit accept.",
-          "nextAction": "Each gate produces a reviewable artefact. Gate 1: project skeleton accepted. Gate 2: data quality report accepted. Gate 3: DCA skeleton smoke test passed. Gate 4: reward engine produces deterministic scores. Gate 5: monthly fitness report makes sense. Gate 6: safety engine catches unsafe DCA designs. Gate 7: DCA library unit tests passed. Gate 8: TP library unit tests passed. Gate 9: combination leaderboard reviewed. Gate 10: joint evolution leaderboard reviewed. Gate 11: stress test report reviewed. Gate 12: paper test plan approved.",
-          "blocks": [],
-          "blocked_by": []
+          "description": "Generalize existing Playwright (from google_maps_au.py) into a general browser control tool.",
+          "nextAction": "1. Refactor Playwright out of google_maps_au.py into intelligence_engine/operator/browser.py.\n2. Add /api/operator/browser/* endpoints: open, click, type, screenshot, close, navigate.\n3. Classification: navigate = safe, click/type = review, file upload = blocked.\n4. Wire Discord commands: !browser <url>, !browser click <selector>, !browser type <text>, !browser screenshot.\n5. Screenshot attached to every browser action.\n6. Browser session tracked in audit.jsonl.",
+          "evidence": [
+            "intelligence_engine/operator/browser.py",
+            "agent_os_server.py",
+            "data/operator/audit.jsonl"
+          ],
+          "validation": [
+            "Browser session controllable from Discord",
+            "Every click/type sends screenshot back to Discord",
+            "File upload is blocked",
+            "Browser actions appear in Review/Proof View"
+          ],
+          "risk": "Medium",
+          "activity": [
+            "Task created 2026-06-21"
+          ]
+        },
+        {
+          "title": "M7: noVNC live observation",
+          "status": "backlog",
+          "description": "Replace placeholder screen panel in Operator View with real live noVNC over Tailscale. This unblocks M5A's placeholder → real screen swap.",
+          "nextAction": "1. Install tigervnc-standalone-server + novnc on desktop.\n2. Configure VNC: display :1, password-protected, 1920x1080, 30fps.\n3. noVNC serves on localhost:6080, exposed via Tailscale.\n4. Add /observe Discord command that returns Tailscale URL.\n5. Two-layer auth: Tailscale ACL + noVNC password.\n6. Auto-disconnect after 30 min idle.\n7. Mobile test: open URL in iOS Safari full-screen, verify <100ms input latency.",
+          "evidence": [
+            "vnc-server.service (systemd)",
+            "novnc.service (systemd)",
+            "Tailscale ACL"
+          ],
+          "validation": [
+            "Phone sees desktop in real time at 30fps",
+            "Input latency <100ms on same Tailscale network",
+            "Auto-disconnect after 30 min idle",
+            "VNC password cannot be brute-forced (rate limit)"
+          ],
+          "risk": "Medium",
+          "activity": [
+            "Task created 2026-06-21"
+          ]
+        },
+        {
+          "title": "M8: Zen/Hermes Desktop Control (DEFERRED — re-evaluate before build)",
+          "status": "backlog",
+          "description": "Agent controls the desktop: mouse moves, clicks, keyboard input, screen recording. Uses xdotool (X11) or ydotool (Wayland). scrcpy for Android mirroring. Every desktop action requires approval. Every action screenshotted before/after. Full proof trail in Review/Proof View. This is the highest-risk phase — re-evaluate with Six before building.",
+          "nextAction": "1. Re-evaluate with Six: do we need full desktop control, or is M7 (observation) + M6 (browser) sufficient?\n2. If yes: add xdotool/ydotool wrapper with SAFE/REVIEW/BLOCKED classification.\n3. If yes: add scrcpy for Android mirroring.\n4. If yes: every desktop action requires approval, every action screenshotted before/after.\n5. If no: archive this milestone, document decision in task notes.",
+          "evidence": [
+            "intelligence_engine/operator/desktop.py (new, conditional)",
+            "scrcpy config (conditional)"
+          ],
+          "validation": [
+            "Decision recorded in task notes: build M8 or archive",
+            "If built: every desktop action requires approval",
+            "If built: every desktop action screenshotted before/after",
+            "If built: no action can reach blocked paths even via desktop"
+          ],
+          "risk": "High",
+          "activity": [
+            "Task created 2026-06-21",
+            "M8 flagged for re-evaluation before any build"
+          ]
         }
       ],
       "evidence": [
-        "Project spec: BTC H1 Leveraged CFD Long-Only Weighted DCA AutoRL / Evolutionary Search System",
-        "Locked reward weights: 0.55/0.15/0.10/0.10/0.10",
-        "5-year BTC H1 test window",
-        "500 candidates per generation",
-        "11 parallel workstreams (A-K)"
+        "agent-os.html",
+        "agent-os.css",
+        "agent_os_server.py",
+        "data/operator/audit.jsonl (new)",
+        "data/operator/allowlist.yaml (new)",
+        "intelligence_engine/collectors/google_maps_au.py (Playwright basis)",
+        "Tailscale ACL config (existing)",
+        "Discord gateway (existing)"
       ],
       "validation": [
-        "Kanban accepted by Six",
-        "All 18 stages represented",
-        "All 12 review gates mapped",
-        "All workstreams A-K identified",
-        "Dependency graph complete"
+        "M0: Tailscale ping works both ways",
+        "M1A: curl localhost inspect returns valid JSON, only fixed read-only git commands run, project registry enforced",
+        "M1B: Unauthenticated → 401, audit log append-only",
+        "M1C: Tailscale IP reachable, non-Tailscale rejected",
+        "M1D: Discord /inspect returns formatted embed",
+        "M2: SAFE auto-run, REVIEW waits, BLOCKED rejected, rate limits work",
+        "M3: Review/Proof View shows 4 panes, manual clicks absent from proof trail",
+        "M4: All 9 Discord commands work on mobile",
+        "M5A: 3 views load on phone, Operator View default, no proof trail for manual clicks",
+        "M6: Browser controllable from Discord, screenshots on every action",
+        "M7: noVNC live at 30fps, <100ms latency, auto-disconnect works",
+        "M8: Decision recorded before any build"
       ],
       "activity": [
-        "2026-06-20: BTC H1 AutoRL project created. Kanban designed with 18 stages, 12 review gates, 11 parallel workstreams.",
-        "2026-06-20: '15 Days' Minato task archived. BTC AutoRL is the new long-term umbrella task.",
-        "2026-06-20: Locked reward system documented: 0.55 profit / 0.15 DD / 0.10 Sharpe / 0.10 PF / 0.10 TPM",
-        "2026-06-20: Hard rejection rules documented: net<=0, DD>35%, TPM<5, invalid equity",
-        "2026-06-20: DCA completion safety rules documented (structural, pre-trade)",
-        "2026-06-20: Monthly walk-forward fitness requirements documented",
-        "2026-06-20: Awaiting Six's Kanban review and acceptance (Review Gate 1)"
+        "Architecture report delivered (2026-06-21)",
+        "10 milestones defined with boundaries, validation, and risks",
+        "Task added to Zen backlog"
       ]
     }
   ],
   "writable": true,
-  "lastUpdated": "2026-06-19"
+  "lastUpdated": "2026-06-21"
 }

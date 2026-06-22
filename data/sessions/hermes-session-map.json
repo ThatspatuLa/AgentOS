@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-19T10:54:02.220178Z",
+  "updatedAt": "2026-06-22T08:46:01.916631Z",
   "sessions": {
     "20260607_193056_683caea5": {
       "agentOsSession": "zen",
@@ -73,6 +73,22 @@
       "lastSeen": "2026-06-19T10:54:02.220007Z",
       "messageCount": 0,
       "inferredBy": "title_pattern"
+    },
+    "20260622_101949_d7093d": {
+      "agentOsSession": "minato",
+      "channel": "minato-chat",
+      "projectId": "minato",
+      "lastSeen": "2026-06-22T08:44:33.132712Z",
+      "messageCount": 1,
+      "firstSeen": "2026-06-22T08:44:33.132712Z"
+    },
+    "20260620_202313_402001": {
+      "agentOsSession": "minato",
+      "channel": "minato-chat",
+      "projectId": "minato",
+      "lastSeen": "2026-06-22T08:46:01.916621Z",
+      "messageCount": 4,
+      "firstSeen": "2026-06-22T08:44:50.025416Z"
     }
   }
 }
