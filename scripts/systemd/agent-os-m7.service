@@ -1,0 +1,13 @@
+[Unit]
+Description=Zen Agent OS desktop observation bridge
+After=network-online.target graphical-session.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/spatula/Projects/ZenNew
+ExecStart=/home/spatula/Projects/ZenNew/scripts/operator_m7_start.sh
+RemainAfterExit=yes
+TimeoutStartSec=25
+
+[Install]
+WantedBy=default.target

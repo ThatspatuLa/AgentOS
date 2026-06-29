@@ -17,7 +17,16 @@ Serves static files and adds:
   GET      /api/events/:sessionId         -> session event log (events.jsonl)
   GET      /api/operator/inspect          -> local/Tailscale read-only project inspection
   GET      /api/operator/screenshot       -> local/Tailscale authenticated screenshot capture
+  GET      /api/operator/observe/status   -> local/Tailscale authenticated noVNC readiness
+  GET      /api/operator/status           -> local/Tailscale authenticated operator status
+  GET/POST  /api/operator/browser/*       -> local/Tailscale browser observation/control
+  GET/POST  /api/operator/brain/*         -> local/Tailscale visible-browser brain loop
+  POST     /api/operator/desktop-intent    -> local/Tailscale natural desktop/browser action bridge
+  GET      /api/operator/approvals        -> local/Tailscale pending approval queue
+  GET      /api/operator/audit            -> local/Tailscale operator audit/proof rows
+  POST     /api/operator/pair             -> local/Tailscale one-time phone pairing
   POST     /api/operator/run              -> local/Tailscale classified operator command runner
+  POST     /api/operator/approval         -> local/Tailscale approval state update
   GET      /api/memory                    -> Hermes MEMORY.md + USER.md
   GET      /api/memory-world              -> data/memory-world.json
   GET      /api/health                    -> live Hermes + git status
@@ -45,16 +54,22 @@ import os
 import re
 import secrets
 import shlex
+import socket
 import sqlite3
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from urllib.parse import parse_qs, urlparse
+from urllib import error as urllib_error
+from urllib import request as urllib_request
+from urllib.parse import parse_qs, quote, urlparse
+
+from intelligence_engine.operator.browser import BrowserOperator
 
 ROOT = Path(__file__).resolve().parent
 TASKS_FILE = ROOT / "data" / "kanban-tasks.json"
@@ -74,14 +89,42 @@ OPERATOR_PROJECT_REGISTRY = {
 }
 OPERATOR_DATA_DIR = ROOT / "data" / "operator"
 OPERATOR_TOKEN_FILE = OPERATOR_DATA_DIR / ".token"
+OPERATOR_PAIR_FILE = OPERATOR_DATA_DIR / ".pairing-code"
+OPERATOR_TOTP_FILE = OPERATOR_DATA_DIR / ".totp-secret"
 OPERATOR_AUDIT_FILE = OPERATOR_DATA_DIR / "audit.jsonl"
 OPERATOR_PENDING_FILE = OPERATOR_DATA_DIR / "pending-approvals.json"
+OPERATOR_BROWSER_TASKS_FILE = OPERATOR_DATA_DIR / "browser-tasks.json"
+OPERATOR_ARTIFACT_DIR = OPERATOR_DATA_DIR / "artifacts"
+OPERATOR_SCREENSHOT_DIR = OPERATOR_ARTIFACT_DIR / "screenshots"
+OPERATOR_BROWSER_DIR = OPERATOR_ARTIFACT_DIR / "browser"
+OPERATOR_CAPTURE_HELPER = ROOT / "scripts" / "operator_capture_helper.py"
+OPERATOR_CAPTURE_SERVICE_URL = os.environ.get("OPERATOR_CAPTURE_SERVICE_URL", "http://127.0.0.1:8771")
+OPERATOR_VISION_MODEL = os.environ.get("OPERATOR_VISION_MODEL", "").strip()
+OPERATOR_BRAIN_USE_HERMES = os.environ.get("OPERATOR_BRAIN_USE_HERMES", "").strip() == "1"
+OPERATOR_OLLAMA_URL = os.environ.get("OPERATOR_OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
+OPERATOR_VNC_DISPLAY = os.environ.get("OPERATOR_VNC_DISPLAY", ":2")
+OPERATOR_VNC_CHROME_PROFILE = OPERATOR_ARTIFACT_DIR / "vnc-chrome-profile"
+OPERATOR_VNC_PORT = int(os.environ.get("OPERATOR_VNC_PORT", "5902"))
+OPERATOR_NOVNC_PORT = int(os.environ.get("OPERATOR_NOVNC_PORT", "6080"))
+OPERATOR_RDP_PORT = int(os.environ.get("OPERATOR_RDP_PORT", "3389"))
+OPERATOR_TAILSCALE_IP = os.environ.get("OPERATOR_TAILSCALE_IP", "").strip()
+if not OPERATOR_TAILSCALE_IP and shutil.which("tailscale"):
+    try:
+        OPERATOR_TAILSCALE_IP = subprocess.run(
+            ["tailscale", "ip", "-4"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        ).stdout.strip()
+    except Exception:
+        OPERATOR_TAILSCALE_IP = ""
 OPERATOR_TOKEN_TTL_SECONDS = 24 * 60 * 60
 OPERATOR_TAILSCALE_NET = ipaddress.ip_network("100.64.0.0/10")
 OPERATOR_SAFE_COMMANDS = {"ls", "cat", "grep", "rg", "ps", "git", "find", "wc", "head", "tail", "pwd"}
 OPERATOR_REVIEW_COMMANDS = {"python", "python3", "pip", "npm", "systemctl", "service", "xdg-open", "google-chrome", "playwright", "touch", "mkdir", "cp", "mv", "tee"}
 OPERATOR_BLOCKED_COMMANDS = {"sudo", "su", "rm", "shred", "chmod", "chown", "ssh", "scp", "curl", "wget", "nc", "ncat", "env", "printenv", "export"}
 OPERATOR_SECRET_MARKERS = (".env", ".token", "secret", "secrets", "credential", "credentials", "private_key", "id_rsa", "github_token", "api_key")
+OPERATOR_BROWSER_TASK_THREADS: dict[str, threading.Thread] = {}
 OPERATOR_TREE_SKIP = {
     ".git",
     "__pycache__",
@@ -91,6 +134,7 @@ OPERATOR_TREE_SKIP = {
     ".venv",
     "venv",
 }
+OPERATOR_BROWSER = BrowserOperator(OPERATOR_BROWSER_DIR)
 
 # ---------------------------------------------------------------------------
 # Defaults — sessions are created on first server start if missing
@@ -127,7 +171,7 @@ DEFAULT_SESSIONS = [
         "projectId": "zen",
         "parentSessionId": None,
         "hermesSessionId": "20260607_193056_683caea5",
-        "channel": "zen-chat",
+        "channel": "1519228976344727674",
         "color": "#6366f1",
         "summary": "Project Zen — intelligence engine, monitoring, monetization",
         "decisions": [],
@@ -465,6 +509,118 @@ def _operator_token_record() -> dict:
     return record
 
 
+def _operator_pair_record() -> dict:
+    OPERATOR_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    now = int(time.time())
+    record = _read_json(OPERATOR_PAIR_FILE, {}) if OPERATOR_PAIR_FILE.exists() else {}
+    if not record.get("code") or int(record.get("expiresAt") or 0) <= now:
+        record = {
+            "code": f"{secrets.randbelow(1000000):06d}",
+            "issuedAt": now,
+            "expiresAt": now + 10 * 60,
+        }
+        with NamedTemporaryFile("w", encoding="utf-8", dir=str(OPERATOR_DATA_DIR), delete=False) as tmp:
+            json.dump(record, tmp, ensure_ascii=False, indent=2)
+            tmp.write("\n")
+            tmp_path = Path(tmp.name)
+        os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, OPERATOR_PAIR_FILE)
+        os.chmod(OPERATOR_PAIR_FILE, 0o600)
+    return record
+
+
+def _operator_totp_record() -> dict:
+    OPERATOR_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    record = _read_json(OPERATOR_TOTP_FILE, {}) if OPERATOR_TOTP_FILE.exists() else {}
+    if not record.get("secret"):
+        secret = base64.b32encode(secrets.token_bytes(20)).decode("ascii").rstrip("=")
+        record = {
+            "secret": secret,
+            "issuer": "Agent OS",
+            "account": f"operator@{os.uname().nodename if hasattr(os, 'uname') else 'local'}",
+            "createdAt": _now_iso(),
+            "digits": 6,
+            "period": 30,
+            "algorithm": "SHA1",
+        }
+        with NamedTemporaryFile("w", encoding="utf-8", dir=str(OPERATOR_DATA_DIR), delete=False) as tmp:
+            json.dump(record, tmp, ensure_ascii=False, indent=2)
+            tmp.write("\n")
+            tmp_path = Path(tmp.name)
+        os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, OPERATOR_TOTP_FILE)
+        os.chmod(OPERATOR_TOTP_FILE, 0o600)
+    return record
+
+
+def _operator_totp_uri(record: dict | None = None) -> str:
+    record = record or _operator_totp_record()
+    issuer = str(record.get("issuer") or "Agent OS")
+    account = str(record.get("account") or "operator")
+    label = quote(f"{issuer}:{account}", safe="")
+    params = (
+        f"secret={quote(str(record.get('secret') or ''), safe='')}"
+        f"&issuer={quote(issuer, safe='')}"
+        "&algorithm=SHA1&digits=6&period=30"
+    )
+    return f"otpauth://totp/{label}?{params}"
+
+
+def _operator_totp_code(secret: str, timestep: int | None = None) -> str:
+    clean = str(secret or "").replace(" ", "").upper()
+    padded = clean + ("=" * ((8 - len(clean) % 8) % 8))
+    key = base64.b32decode(padded, casefold=True)
+    counter = int(time.time() // 30) if timestep is None else int(timestep)
+    digest = hmac.new(key, counter.to_bytes(8, "big"), hashlib.sha1).digest()
+    offset = digest[-1] & 0x0F
+    value = int.from_bytes(digest[offset:offset + 4], "big") & 0x7FFFFFFF
+    return f"{value % 1000000:06d}"
+
+
+def _operator_totp_valid(code: str, record: dict | None = None) -> bool:
+    value = str(code or "").strip().replace(" ", "")
+    if not re.fullmatch(r"\d{6}", value):
+        return False
+    record = record or _operator_totp_record()
+    secret = str(record.get("secret") or "")
+    if not secret:
+        return False
+    current_step = int(time.time() // 30)
+    for drift in (-1, 0, 1):
+        if hmac.compare_digest(value, _operator_totp_code(secret, current_step + drift)):
+            return True
+    return False
+
+
+def _operator_pair_payload(code: str) -> tuple[dict, int]:
+    if _operator_totp_valid(code):
+        token = _operator_token_record()
+        return {
+            "ok": True,
+            "method": "totp",
+            "token": token.get("token"),
+            "tokenExpiresAt": datetime.datetime.fromtimestamp(int(token.get("expiresAt") or 0), datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        }, 200
+    record = _operator_pair_record()
+    now = int(time.time())
+    if int(record.get("expiresAt") or 0) <= now:
+        return {"ok": False, "error": "pairing code expired"}, 410
+    if not hmac.compare_digest(str(code or "").strip(), str(record.get("code") or "")):
+        return {"ok": False, "error": "invalid authenticator or backup pairing code"}, 401
+    token = _operator_token_record()
+    # Rotate code immediately after successful pairing.
+    try:
+        OPERATOR_PAIR_FILE.unlink(missing_ok=True)
+    except OSError:
+        pass
+    return {
+        "ok": True,
+        "method": "backup-code",
+        "token": token.get("token"),
+        "tokenExpiresAt": datetime.datetime.fromtimestamp(int(token.get("expiresAt") or 0), datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+    }, 200
+
+
 def _operator_token_valid(token: str) -> bool:
     record = _operator_token_record()
     expected = str(record.get("token") or "")
@@ -498,7 +654,7 @@ def _operator_audit(action_type: str, target: str, result: str, **extra) -> None
         "approver": extra.get("approver"),
         "session_id": extra.get("session_id"),
     }
-    for key in ("project", "remote", "status", "reason", "action_class"):
+    for key in ("project", "remote", "status", "reason", "action_class", "backend", "path", "bytes", "error", "helperMode", "source", "url", "title", "mime", "command", "exitCode", "presentation", "taskId", "kind"):
         if key in extra and extra[key] is not None:
             record[key] = extra[key]
     _append_jsonl(OPERATOR_AUDIT_FILE, record)
@@ -517,7 +673,7 @@ def _operator_proof_payload(session_id: str = "") -> dict:
         "operatorLogs": logs,
         "commandTranscript": [
             row for row in logs
-            if row.get("action_type") in {"run", "inspect"}
+            if row.get("action_type") in {"run", "inspect", "desktop"}
         ],
         "fileAccess": [
             row for row in logs
@@ -536,34 +692,1593 @@ def _operator_proof_payload(session_id: str = "") -> dict:
         ],
         "screenshots": [
             row for row in logs
-            if row.get("action_type") == "screenshot"
+            if row.get("action_type") == "screenshot" or row.get("target") == "operator/browser/screenshot"
         ],
     }
 
 
-def _operator_screenshot_payload() -> tuple[dict, int]:
-    tool = shutil.which("grim") or shutil.which("scrot")
-    if not tool:
-        return {"ok": False, "error": "no screenshot tool available (grim/scrot)"}, 501
-    out = Path("/tmp") / f"agent-os-operator-screenshot-{secrets.token_hex(6)}.png"
-    cmd = [tool, str(out)] if Path(tool).name == "grim" else [tool, str(out)]
+def _operator_capture_service_payload() -> tuple[dict | None, int | None]:
+    url = OPERATOR_CAPTURE_SERVICE_URL.rstrip("/") + "/capture"
+    req = urllib_request.Request(url, data=b"{}", method="POST", headers={"Content-Type": "application/json"})
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
-        if proc.returncode != 0 or not out.exists():
-            return {"ok": False, "error": (proc.stderr or proc.stdout or "screenshot failed").strip()}, 500
-        raw = out.read_bytes()
-        return {
-            "ok": True,
-            "mime": "image/png",
-            "bytes": len(raw),
-            "dataUrl": "data:image/png;base64," + base64.b64encode(raw).decode("ascii"),
-            "capturedAt": _now_iso(),
-        }, 200
-    finally:
+        with urllib_request.urlopen(req, timeout=8) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+            payload = json.loads(raw or "{}")
+            payload.setdefault("source", "capture-service")
+            return payload, resp.status
+    except urllib_error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
         try:
-            out.unlink(missing_ok=True)
+            payload = json.loads(raw or "{}")
+        except json.JSONDecodeError:
+            payload = {"ok": False, "error": raw.strip()[:500] or str(exc)}
+        payload.setdefault("source", "capture-service")
+        return payload, exc.code
+    except (urllib_error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        return None, None
+
+
+def _operator_screenshot_payload() -> tuple[dict, int]:
+    if not OPERATOR_CAPTURE_HELPER.exists():
+        return {
+            "ok": False,
+            "backend": "",
+            "path": "",
+            "error": "desktop capture helper is missing",
+            "reason": str(OPERATOR_CAPTURE_HELPER),
+            "attempts": [],
+        }, 501
+    day_dir = OPERATOR_SCREENSHOT_DIR / datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
+    service_payload, service_status = _operator_capture_service_payload()
+    if service_payload is not None:
+        service_payload.setdefault("helperMode", "service")
+        if not service_payload.get("ok"):
+            service_payload.setdefault("path", "")
+            service_payload.setdefault("backend", "")
+            service_payload.setdefault("error", "screenshot unavailable")
+            service_payload.setdefault("reason", "Capture service did not produce a PNG artifact")
+            return service_payload, service_status or 503
+        payload = service_payload
+    else:
+        payload = None
+    if payload is None:
+        helper_mode = "one-shot"
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(OPERATOR_CAPTURE_HELPER), "--out-dir", str(day_dir)],
+                capture_output=True,
+                text=True,
+                timeout=25,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "ok": False,
+                "backend": "desktop-capture-helper",
+                "path": "",
+                "error": "desktop capture helper timed out",
+                "reason": "Helper exceeded outer Agent OS timeout",
+                "helperMode": helper_mode,
+                "attempts": [],
+            }, 504
+
+        try:
+            payload = json.loads(proc.stdout or "{}")
+            payload.setdefault("helperMode", helper_mode)
+        except json.JSONDecodeError:
+            return {
+                "ok": False,
+                "backend": "desktop-capture-helper",
+                "path": "",
+                "error": "desktop capture helper returned invalid JSON",
+                "reason": (proc.stderr or proc.stdout or "").strip()[:500],
+                "helperMode": helper_mode,
+                "attempts": [],
+            }, 500
+
+        if not payload.get("ok"):
+            payload.setdefault("path", "")
+            payload.setdefault("backend", "")
+            payload.setdefault("error", (proc.stderr or "screenshot unavailable").strip()[:500])
+            payload.setdefault("reason", "No screenshot artifact produced")
+            return payload, 503
+
+    payload.setdefault("helperMode", "service")
+    path = Path(str(payload.get("path") or ""))
+    try:
+        resolved = path.resolve(strict=True)
+        screenshot_root = OPERATOR_SCREENSHOT_DIR.resolve(strict=False)
+        if not str(resolved).startswith(str(screenshot_root) + os.sep):
+            return {
+                "ok": False,
+                "backend": payload.get("backend") or "desktop-capture-helper",
+                "path": str(path),
+                "error": "desktop capture helper returned an unsafe artifact path",
+                "reason": "Artifact path escaped operator screenshot directory",
+                "attempts": payload.get("attempts") or [],
+            }, 500
+        raw = resolved.read_bytes()
+    except OSError as exc:
+        return {
+            "ok": False,
+            "backend": payload.get("backend") or "desktop-capture-helper",
+            "path": str(path),
+            "error": str(exc),
+            "reason": "Screenshot artifact could not be read",
+            "attempts": payload.get("attempts") or [],
+        }, 500
+
+    payload["mime"] = "image/png"
+    payload["bytes"] = len(raw)
+    payload["dataUrl"] = "data:image/png;base64," + base64.b64encode(raw).decode("ascii")
+    return payload, 200
+
+
+def _operator_browser_payload(action: str, body: dict | None = None) -> tuple[dict, int]:
+    body = body or {}
+    try:
+        if action == "status":
+            return OPERATOR_BROWSER.status(), 200
+        if action == "open":
+            return OPERATOR_BROWSER.open(str(body.get("url") or "")), 200
+        if action == "screenshot":
+            return OPERATOR_BROWSER.screenshot(), 200
+        if action == "close":
+            return OPERATOR_BROWSER.close(), 200
+        if action in {"click", "type"}:
+            detail = body.get("selector") if action == "click" else body.get("text")
+            return {
+                "ok": False,
+                "action_class": "review",
+                "reason": f"browser {action} requires review before live control is enabled",
+                "action": action,
+                "detail": str(detail or "")[:300],
+            }, 202
+        return {"ok": False, "error": "unknown browser action"}, 404
+    except ValueError as exc:
+        return {"ok": False, "error": str(exc), "action_class": "blocked"}, 400
+    except Exception as exc:
+        return {"ok": False, "error": str(exc), "action_class": "failed"}, 500
+
+
+OPERATOR_SITE_ALIASES = {
+    "woolworths": "https://www.woolworths.com.au",
+    "woolies": "https://www.woolworths.com.au",
+    "coles": "https://www.coles.com.au",
+    "google": "https://www.google.com",
+}
+
+
+def _operator_url_from_text(text: str) -> str:
+    raw = str(text or "").strip()
+    lower = raw.lower()
+    direct = re.search(r"https?://[^\s\"'<>]+", raw, flags=re.I)
+    if direct:
+        return direct.group(0).rstrip(".,)")
+    domain = re.search(r"\b(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s\"'<>]*)?", lower, flags=re.I)
+    if domain:
+        value = domain.group(0).rstrip(".,)")
+        return value if value.startswith(("http://", "https://")) else f"https://{value}"
+    for name, url in OPERATOR_SITE_ALIASES.items():
+        if name in lower:
+            return url
+    if "firefox" in lower and any(word in lower for word in ("open", "launch", "start")):
+        return "about:blank"
+    return ""
+
+
+def _operator_desktop_url_safe(url: str) -> tuple[bool, str]:
+    if not url or any(ch.isspace() for ch in url):
+        return False, "empty or invalid URL"
+    parsed = urlparse(url)
+    if parsed.scheme in {"http", "https"} and parsed.netloc:
+        return True, ""
+    if url == "about:blank":
+        return True, ""
+    return False, "only http(s) URLs and about:blank are allowed"
+
+
+def _operator_desktop_env() -> dict:
+    env = {
+        "HOME": str(Path.home()),
+        "LANG": os.environ.get("LANG", "en_US.UTF-8"),
+        "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin:/snap/bin"),
+        "XDG_RUNTIME_DIR": f"/run/user/{os.getuid()}",
+        "DBUS_SESSION_BUS_ADDRESS": f"unix:path=/run/user/{os.getuid()}/bus",
+        "DISPLAY": ":0",
+        "WAYLAND_DISPLAY": "wayland-0",
+        "XAUTHORITY": f"/run/user/{os.getuid()}/.mutter-Xwaylandauth.LWY4Q3",
+    }
+    try:
+        proc = subprocess.run(
+            ["systemctl", "--user", "show-environment"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        for line in (proc.stdout or "").splitlines():
+            if "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            if key in {"HOME", "LANG", "PATH", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS", "DISPLAY", "WAYLAND_DISPLAY", "XAUTHORITY", "XDG_CURRENT_DESKTOP", "XDG_SESSION_TYPE"}:
+                env[key] = value
+    except Exception:
+        pass
+    return env
+
+
+def _operator_desktop_presentation(text: str) -> str:
+    lower = str(text or "").lower()
+    if any(term in lower for term in ("full screen", "fullscreen", "full-screen", "kiosk")):
+        return "fullscreen"
+    if any(term in lower for term in ("split screen", "split-screen", "side by side", "left side", "right side", "left and right")):
+        return "split-requested"
+    return "window"
+
+
+def _operator_complex_browser_task(text: str) -> bool:
+    lower = str(text or "").lower()
+    task_markers = (
+        "add ", "cart", "basket", "checkout", "buy ", "order ",
+        "search", "find", "ingredients", "recipe", "lasagna", "meal",
+        "choose", "select", "quantity", "cheap", "cheapest",
+    )
+    return any(marker in lower for marker in task_markers)
+
+
+def _operator_browser_task_plan(text: str, url: str) -> list[dict]:
+    lower = str(text or "").lower()
+    if any(term in lower for term in ("lasagna", "lasagne")):
+        ingredients = [
+            "budget lasagne sheets",
+            "budget beef mince or lentils",
+            "pasta sauce or passata",
+            "ricotta or cottage cheese",
+            "shredded mozzarella or tasty cheese",
+            "onion",
+            "garlic",
+        ]
+        return [
+            {"id": "open-store", "title": "Open Woolworths in a visible task window", "status": "done", "risk": "safe"},
+            {"id": "choose-list", "title": "Use a cheap lasagna ingredient list", "status": "planned", "risk": "safe", "items": ingredients},
+            {"id": "search-items", "title": "Search Woolworths for each ingredient and prefer budget/private-label options", "status": "planned", "risk": "review"},
+            {"id": "add-cart", "title": "Add selected ingredients to cart", "status": "needs_approval", "risk": "cart_change"},
+            {"id": "review-cart", "title": "Show cart total and substitutions before checkout", "status": "blocked_until_cart_done", "risk": "review"},
+            {"id": "stop-payment", "title": "Stop before checkout/payment", "status": "blocked", "risk": "blocked"},
+        ]
+    return [
+        {"id": "open-site", "title": f"Open {url} in a visible task window", "status": "done", "risk": "safe"},
+        {"id": "inspect-page", "title": "Inspect page and identify required browser actions", "status": "planned", "risk": "safe"},
+        {"id": "review-actions", "title": "Request approval before clicks, typing, cart changes, or purchases", "status": "needs_approval", "risk": "review"},
+        {"id": "execute-reviewed", "title": "Execute approved browser actions with proof screenshots", "status": "blocked_until_approval", "risk": "review"},
+    ]
+
+
+def _operator_browser_task_summary(plan: list[dict]) -> str:
+    lines = []
+    for index, step in enumerate(plan, start=1):
+        title = str(step.get("title") or "").strip()
+        status = str(step.get("status") or "planned").replace("_", " ")
+        lines.append(f"{index}. {title} [{status}]")
+        items = step.get("items")
+        if isinstance(items, list) and items:
+            lines.append("   Items: " + ", ".join(str(item) for item in items[:10]))
+    return "\n".join(lines)
+
+
+def _operator_create_browser_task(goal: str, url: str, presentation: str, open_payload: dict) -> tuple[dict, dict]:
+    now = int(time.time())
+    task_id = "bt-" + secrets.token_hex(5)
+    plan = _operator_browser_task_plan(goal, url)
+    task = {
+        "id": task_id,
+        "ts": _now_iso(),
+        "updatedAt": _now_iso(),
+        "expiresAt": now + 60 * 60,
+        "status": "needs_approval",
+        "goal": goal,
+        "url": url,
+        "presentation": presentation,
+        "plan": plan,
+        "riskNotes": [
+            "Cart-changing browser actions require approval.",
+            "Checkout/payment remains blocked.",
+            "Each approved click/type action should produce proof before/after.",
+        ],
+        "evidence": [
+            {
+                "type": "desktop-open",
+                "url": url,
+                "command": open_payload.get("command"),
+                "exitCode": open_payload.get("exitCode"),
+                "ts": _now_iso(),
+            }
+        ],
+    }
+    store = _read_json(OPERATOR_BROWSER_TASKS_FILE, {"items": []})
+    items = []
+    for item in store.get("items", []):
+        if int(item.get("expiresAt") or 0) <= now:
+            continue
+        if item.get("status") in {"complete", "cancelled"}:
+            continue
+        if item.get("url") == url and str(item.get("goal") or "").strip().lower() == goal.strip().lower():
+            item["status"] = "superseded"
+            item["updatedAt"] = _now_iso()
+            item["supersededBy"] = task_id
+        items.append(item)
+    items.append(task)
+    _write_json(OPERATOR_BROWSER_TASKS_FILE, {"items": items})
+    pending = _read_json(OPERATOR_PENDING_FILE, {"items": []})
+    pending_items = []
+    for item in pending.get("items", []):
+        if int(item.get("expiresAt") or 0) <= now or item.get("status") != "pending":
+            pending_items.append(item)
+            continue
+        if item.get("kind") == "browser-task" and item.get("url") == url:
+            item["status"] = "superseded"
+            item["resolvedAt"] = _now_iso()
+            item["reason"] = f"{item.get('reason') or 'Browser task approval'} Superseded by {task_id}."
+        pending_items.append(item)
+    _write_json(OPERATOR_PENDING_FILE, {"items": pending_items})
+    approval = _operator_pending_approval(
+        "zen-new",
+        f"browser-task:{task_id}:approve-cart-changing-steps",
+        "Approve supervised browser/cart actions for this task. Checkout/payment stays blocked.",
+        session_id="mobile-operator",
+        extra={"kind": "browser-task", "taskId": task_id, "url": url},
+        ttl_seconds=60 * 60,
+    )
+    return task, approval
+
+
+def _operator_browser_tasks_payload(include_all: bool = False) -> dict:
+    now = int(time.time())
+    store = _read_json(OPERATOR_BROWSER_TASKS_FILE, {"items": []})
+    items = list(store.get("items") or [])
+    if not include_all:
+        items = [
+            item for item in items
+            if int(item.get("expiresAt") or 0) > now and item.get("status") not in {"complete", "cancelled", "superseded"}
+        ]
+    return {"ok": True, "items": items[-20:]}
+
+
+def _operator_update_browser_task(task_id: str, status: str, note: str = "") -> dict | None:
+    if not task_id:
+        return None
+    store = _read_json(OPERATOR_BROWSER_TASKS_FILE, {"items": []})
+    items = list(store.get("items") or [])
+    found = None
+    for item in items:
+        if item.get("id") != task_id:
+            continue
+        item["status"] = status
+        item["updatedAt"] = _now_iso()
+        if note:
+            item.setdefault("activity", []).append({
+                "ts": _now_iso(),
+                "type": "operator",
+                "summary": note,
+            })
+        found = item
+        break
+    if found:
+        _write_json(OPERATOR_BROWSER_TASKS_FILE, {"items": items})
+    return found
+
+
+def _operator_browser_task_item(task_id: str) -> dict | None:
+    if not task_id:
+        return None
+    store = _read_json(OPERATOR_BROWSER_TASKS_FILE, {"items": []})
+    for item in store.get("items") or []:
+        if item.get("id") == task_id:
+            return item
+    return None
+
+
+def _operator_browser_task_mutate(task_id: str, mutator) -> dict | None:
+    store = _read_json(OPERATOR_BROWSER_TASKS_FILE, {"items": []})
+    items = list(store.get("items") or [])
+    found = None
+    for item in items:
+        if item.get("id") != task_id:
+            continue
+        mutator(item)
+        item["updatedAt"] = _now_iso()
+        found = item
+        break
+    if found:
+        _write_json(OPERATOR_BROWSER_TASKS_FILE, {"items": items})
+    return found
+
+
+def _operator_task_activity(task_id: str, summary: str, kind: str = "brain", **extra) -> dict | None:
+    def mutate(item: dict) -> None:
+        row = {"ts": _now_iso(), "type": kind, "summary": summary}
+        row.update({k: v for k, v in extra.items() if v not in (None, "")})
+        activity = list(item.get("activity") or [])
+        activity.append(row)
+        item["activity"] = activity[-80:]
+
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_task_evidence(task_id: str, evidence: dict) -> dict | None:
+    def mutate(item: dict) -> None:
+        row = {"ts": _now_iso(), **evidence}
+        rows = list(item.get("evidence") or [])
+        rows.append(row)
+        item["evidence"] = rows[-80:]
+
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_task_plan_status(task_id: str, step_id: str, status: str) -> dict | None:
+    def mutate(item: dict) -> None:
+        for step in item.get("plan") or []:
+            if step.get("id") == step_id:
+                step["status"] = status
+
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_brain_memory(task: dict | None) -> dict:
+    return dict((task or {}).get("brain") or {})
+
+
+def _operator_brain_memory_update(task_id: str, **updates) -> dict | None:
+    def mutate(item: dict) -> None:
+        brain = dict(item.get("brain") or {})
+        for key, value in updates.items():
+            if value is not None:
+                brain[key] = value
+        item["brain"] = brain
+
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_brain_memory_append(task_id: str, key: str, value: dict, cap: int = 40) -> dict | None:
+    def mutate(item: dict) -> None:
+        brain = dict(item.get("brain") or {})
+        rows = list(brain.get(key) or [])
+        rows.append(value)
+        brain[key] = rows[-cap:]
+        item["brain"] = brain
+
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_brain_progress(task_id: str, stage: str, summary: str, state: str = "running", **extra) -> dict | None:
+    now = _now_iso()
+
+    def mutate(item: dict) -> None:
+        brain = dict(item.get("brain") or {})
+        current = {"stage": stage, "summary": summary, "state": state, "ts": now}
+        current.update({k: v for k, v in extra.items() if v not in (None, "")})
+        brain["currentAction"] = current
+        progress = list(brain.get("progress") or [])
+        progress.append(current)
+        brain["progress"] = progress[-80:]
+        item["brain"] = brain
+
+    _operator_task_activity(task_id, summary, stage, state=state, **extra)
+    return _operator_browser_task_mutate(task_id, mutate)
+
+
+def _operator_vnc_xauthority() -> str:
+    configured = os.environ.get("XAUTHORITY") or ""
+    if configured and Path(configured).exists():
+        return configured
+    runtime = Path(f"/run/user/{os.getuid()}")
+    for candidate in sorted(runtime.glob(".mutter-Xwaylandauth.*")):
+        if candidate.exists():
+            return str(candidate)
+    home_auth = Path.home() / ".Xauthority"
+    return str(home_auth) if home_auth.exists() else ""
+
+
+def _operator_vnc_env() -> dict:
+    env = {
+        **os.environ,
+        "DISPLAY": OPERATOR_VNC_DISPLAY,
+        "XDG_SESSION_TYPE": "x11",
+        "NO_AT_BRIDGE": "1",
+    }
+    env.pop("WAYLAND_DISPLAY", None)
+    xauthority = _operator_vnc_xauthority()
+    if xauthority:
+        env["XAUTHORITY"] = xauthority
+    return env
+
+
+def _operator_brain_cdp_json(path: str, timeout: float = 0.5) -> dict | None:
+    try:
+        with urllib_request.urlopen(f"http://127.0.0.1:9222{path}", timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8", errors="replace"))
+    except Exception:
+        return None
+
+
+def _operator_visible_browser_ready() -> bool:
+    return bool(_operator_brain_cdp_json("/json/version"))
+
+
+def _operator_chrome_binary() -> str:
+    for name in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser"):
+        path = shutil.which(name)
+        if path:
+            return path
+    return ""
+
+
+def _operator_visible_browser_open_url(url: str, presentation: str = "window") -> tuple[dict, int]:
+    safe, reason = _operator_desktop_url_safe(url)
+    if not safe:
+        return {"ok": False, "handled": True, "action_class": "blocked", "reason": reason, "url": url}, 400
+    chrome = _operator_chrome_binary()
+    if not chrome:
+        return {"ok": False, "handled": True, "action_class": "failed", "reason": "google-chrome/chromium not found", "url": url}, 501
+
+    OPERATOR_VNC_CHROME_PROFILE.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        chrome,
+        f"--user-data-dir={OPERATOR_VNC_CHROME_PROFILE}",
+        "--remote-debugging-address=127.0.0.1",
+        "--remote-debugging-port=9222",
+        "--no-first-run",
+        "--disable-extensions",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--ozone-platform=x11",
+        "--window-position=10,10",
+        "--window-size=1220,980",
+    ]
+    if presentation == "fullscreen":
+        cmd.append("--start-fullscreen")
+    cmd.extend(["--new-window", url])
+    if _operator_visible_browser_ready():
+        action = _operator_brain_apply_action({"type": "open_url", "url": url}, approved=True)
+        return {
+            "ok": bool(action.get("ok")),
+            "handled": True,
+            "action_class": "safe" if action.get("ok") else "failed",
+            "action": "open-url",
+            "url": url,
+            "presentation": presentation,
+            "command": "cdp: Page.goto",
+            "exitCode": 0 if action.get("ok") else 1,
+            "message": f"Opened {url} in the visible Operator browser.",
+            "brain": action,
+        }, 200 if action.get("ok") else 500
+    try:
+        subprocess.Popen(
+            cmd,
+            env=_operator_vnc_env(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as exc:
+        return {"ok": False, "handled": True, "action_class": "failed", "reason": str(exc), "url": url, "command": " ".join(cmd)}, 500
+    deadline = time.time() + 8
+    while time.time() < deadline:
+        if _operator_visible_browser_ready():
+            return {
+                "ok": True,
+                "handled": True,
+                "action_class": "safe",
+                "action": "open-url",
+                "url": url,
+                "presentation": presentation,
+                "command": " ".join(shlex.quote(part) for part in cmd),
+                "exitCode": 0,
+                "message": f"Opened {url} in the visible Operator browser.",
+            }, 200
+        time.sleep(0.25)
+    return {
+        "ok": False,
+        "handled": True,
+        "action_class": "failed",
+        "reason": "visible Operator browser did not expose remote debugging in time",
+        "url": url,
+        "command": " ".join(shlex.quote(part) for part in cmd),
+        "exitCode": 1,
+    }, 500
+
+
+def _operator_brain_with_page(callback) -> dict:
+    if not _operator_visible_browser_ready():
+        return {"ok": False, "error": "visible Operator browser is not running", "reason": "open a browser task first"}
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception as exc:
+        return {"ok": False, "error": "playwright is not installed", "reason": str(exc)}
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.connect_over_cdp("http://127.0.0.1:9222", timeout=5000)
+            try:
+                context = browser.contexts[0] if browser.contexts else browser.new_context()
+                page = None
+                for candidate in context.pages:
+                    if not candidate.url.startswith("devtools://"):
+                        page = candidate
+                        break
+                page = page or context.new_page()
+                return callback(page)
+            finally:
+                browser.close()
+    except Exception as exc:
+        return {"ok": False, "error": str(exc), "reason": "visible browser control failed"}
+
+
+def _operator_control_label(item: dict) -> str:
+    return str(item.get("text") or item.get("placeholder") or item.get("ariaLabel") or item.get("href") or item.get("tag") or "").strip()
+
+
+def _operator_brain_visual_heuristics(dom: dict) -> dict:
+    controls = list(dom.get("controls") or [])
+    viewport = dom.get("viewport") or {}
+    width = int(viewport.get("width") or 1)
+    height = int(viewport.get("height") or 1)
+
+    def region(item: dict) -> str:
+        x = int(item.get("x") or 0)
+        y = int(item.get("y") or 0)
+        vertical = "top" if y < height * 0.28 else "bottom" if y > height * 0.72 else "middle"
+        horizontal = "left" if x < width * 0.33 else "right" if x > width * 0.66 else "center"
+        return f"{vertical}-{horizontal}"
+
+    scroll_y = int(dom.get("scrollY") or 0)
+    scroll_height = int(dom.get("scrollHeight") or height)
+    search_controls = []
+    add_controls = []
+    modal_controls = []
+    for item in controls:
+        label = _operator_control_label(item).lower()
+        tag = str(item.get("tag") or "")
+        kind = " ".join(str(item.get(key) or "") for key in ("type", "role", "placeholder", "ariaLabel")).lower()
+        if tag in {"input", "textarea"} and ("search" in label or "search" in kind or not search_controls):
+            search_controls.append({**item, "region": region(item), "label": _operator_control_label(item)})
+        is_header = int(item.get("y") or 0) < 90
+        is_cart = re.search(r"\b(view cart|your cart|\$\d|cart has|checkout)\b", label)
+        if re.search(r"\b(add|add to cart|add to trolley|buy)\b", label) and not is_cart and not is_header:
+            add_controls.append({**item, "region": region(item), "label": _operator_control_label(item)})
+        if re.search(r"\b(accept|allow|close|not now|skip|later|postcode|suburb|sign in)\b", label):
+            modal_controls.append({**item, "region": region(item), "label": _operator_control_label(item)})
+
+    hints = []
+    if search_controls:
+        first = search_controls[0]
+        hints.append(f"Likely search/input control near {first.get('region')}: {first.get('label') or first.get('placeholder') or 'input'}")
+    if add_controls:
+        hints.append(f"{len(add_controls)} visible Add/cart control(s), first near {add_controls[0].get('region')}.")
+    if modal_controls:
+        labels = ", ".join((_operator_control_label(item) or item.get("tag") or "control")[:40] for item in modal_controls[:4])
+        hints.append(f"Possible modal/banner controls visible: {labels}.")
+    if not hints:
+        hints.append("No obvious search/add/modal controls detected from geometry.")
+
+    return {
+        "source": "geometry-dom",
+        "summary": " ".join(hints),
+        "scroll": {"y": scroll_y, "height": scroll_height, "viewport": height},
+        "searchControls": search_controls[:8],
+        "addControls": add_controls[:12],
+        "modalControls": modal_controls[:8],
+    }
+
+
+def _operator_brain_vision_summary(image_path: str, dom: dict) -> dict:
+    heuristic = _operator_brain_visual_heuristics(dom)
+    if not OPERATOR_VISION_MODEL or not image_path:
+        return heuristic
+    path = Path(image_path)
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return heuristic
+    prompt = (
+        "Describe the visible browser screen for a computer-control agent. "
+        "Focus on search bars, buttons, modals, product cards, cart indicators, and where the next safe click likely is. "
+        "Do not invent hidden information. Keep it under 120 words."
+    )
+    body = json.dumps({
+        "model": OPERATOR_VISION_MODEL,
+        "prompt": prompt,
+        "images": [base64.b64encode(raw).decode("ascii")],
+        "stream": False,
+    }).encode("utf-8")
+    req = urllib_request.Request(
+        OPERATOR_OLLAMA_URL + "/api/generate",
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib_request.urlopen(req, timeout=20) as resp:
+            payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+        text = str(payload.get("response") or "").strip()
+        if text:
+            heuristic["source"] = f"ollama:{OPERATOR_VISION_MODEL}"
+            heuristic["modelSummary"] = text[:1200]
+            heuristic["summary"] = text[:1200]
+    except Exception as exc:
+        heuristic["visionError"] = str(exc)[:300]
+    return heuristic
+
+
+def _operator_brain_observe(task_id: str = "") -> dict:
+    def capture(page) -> dict:
+        OPERATOR_BROWSER_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        path = OPERATOR_BROWSER_DIR / f"brain-{task_id or 'snapshot'}-{stamp}.png"
+        try:
+            page.wait_for_load_state("domcontentloaded", timeout=2500)
+        except Exception:
+            pass
+        screenshot_error = ""
+        try:
+            raw = page.screenshot(path=str(path), full_page=False)
+        except Exception as exc:
+            raw = b""
+            screenshot_error = str(exc)
+        dom = page.evaluate(
+            """() => {
+                const visible = (el) => {
+                  const rect = el.getBoundingClientRect();
+                  const style = window.getComputedStyle(el);
+                  return rect.width > 4 && rect.height > 4 && style.visibility !== 'hidden' && style.display !== 'none';
+                };
+                const compact = (value) => String(value || '').replace(/\\s+/g, ' ').trim().slice(0, 140);
+                const collectControls = () => {
+                  const roots = [document];
+                  const controls = [];
+                  for (let i = 0; i < roots.length; i += 1) {
+                    const root = roots[i];
+                    for (const el of Array.from(root.querySelectorAll('*'))) {
+                      if (el.shadowRoot) roots.push(el.shadowRoot);
+                      if (el.matches('input, textarea, button, a, [role="button"], [aria-label], select')) controls.push(el);
+                    }
+                  }
+                  return controls;
+                };
+                const controls = collectControls()
+                  .filter(visible).map((el, index) => {
+                    const rect = el.getBoundingClientRect();
+                    return {
+                      index,
+                      tag: el.tagName.toLowerCase(),
+                      role: el.getAttribute('role') || '',
+                      type: el.getAttribute('type') || '',
+                      text: compact(el.innerText || el.textContent || el.value || el.getAttribute('aria-label') || el.getAttribute('placeholder') || el.getAttribute('title')),
+                      placeholder: compact(el.getAttribute('placeholder')),
+                      ariaLabel: compact(el.getAttribute('aria-label')),
+                      href: compact(el.getAttribute('href')),
+                      x: Math.round(rect.x),
+                      y: Math.round(rect.y),
+                      w: Math.round(rect.width),
+                      h: Math.round(rect.height),
+                      shadow: el.getRootNode && el.getRootNode() instanceof ShadowRoot
+                    };
+                  })
+                  .sort((a, b) => (a.y - b.y) || (a.x - b.x))
+                  .slice(0, 220);
+                const bodyText = document.body ? document.body.innerText : '';
+                const text = compact(bodyText);
+                const cartText = (bodyText.match(/Your Cart has[\\s\\S]{0,140}/i) || [''])[0].replace(/\\s+/g, ' ').trim();
+                const cartCountMatch = cartText.match(/Your Cart has\\s+(\\d+)/i);
+                const cartValueMatch = cartText.match(/\\$\\s*([0-9]+(?:\\.[0-9]{2})?)/);
+                return {
+                  controls,
+                  text,
+                  cart: {
+                    text: cartText,
+                    count: cartCountMatch ? Number(cartCountMatch[1]) : null,
+                    value: cartValueMatch ? cartValueMatch[1] : ''
+                  },
+                  viewport: {width: window.innerWidth, height: window.innerHeight},
+                  scrollY: Math.round(window.scrollY || document.documentElement.scrollTop || 0),
+                  scrollHeight: Math.round(document.documentElement.scrollHeight || document.body.scrollHeight || 0)
+                };
+            }"""
+        )
+        observation = {
+            "ok": True,
+            "url": page.url,
+            "title": page.title(),
+            "capturedAt": _now_iso(),
+            "screenshot": {
+                "ok": bool(raw),
+                "path": str(path) if raw else "",
+                "bytes": len(raw),
+                "error": screenshot_error,
+            },
+            "dom": dom,
+        }
+        observation["visual"] = _operator_brain_vision_summary(str(path) if raw else "", dom)
+        if raw and task_id:
+            _operator_task_evidence(task_id, {
+                "type": "brain-screenshot",
+                "path": str(path),
+                "bytes": len(raw),
+                "url": page.url,
+                "title": page.title(),
+                "visualSummary": (observation.get("visual") or {}).get("summary"),
+            })
+        return observation
+
+    payload = _operator_brain_with_page(capture)
+    if task_id and payload.get("ok"):
+        visual = payload.get("visual") or {}
+        _operator_brain_progress(
+            task_id,
+            "observe",
+            f"Observed {payload.get('title') or payload.get('url')}. {visual.get('summary') or ''}".strip(),
+            "done",
+            path=(payload.get("screenshot") or {}).get("path"),
+        )
+        _operator_brain_memory_update(
+            task_id,
+            lastObservation={
+                "ts": _now_iso(),
+                "url": payload.get("url"),
+                "title": payload.get("title"),
+                "visual": visual.get("summary"),
+            },
+        )
+    return payload
+
+
+def _operator_brain_observation_text(observation: dict) -> str:
+    dom = observation.get("dom") or {}
+    controls = dom.get("controls") or []
+    control_lines = []
+    for item in controls[:30]:
+        label = item.get("text") or item.get("placeholder") or item.get("ariaLabel") or item.get("href") or item.get("tag")
+        control_lines.append(
+            f"- #{item.get('index')} {item.get('tag')} {item.get('type') or item.get('role')}: {label} "
+            f"at ({item.get('x')},{item.get('y')}) {item.get('w')}x{item.get('h')}"
+        )
+    return "\n".join([
+        f"URL: {observation.get('url')}",
+        f"Title: {observation.get('title')}",
+        f"Visual summary: {((observation.get('visual') or {}).get('summary') or '')[:900]}",
+        f"Visible text: {(dom.get('text') or '')[:600]}",
+        "Visible controls:",
+        *control_lines,
+    ])[:5000]
+
+
+def _operator_json_from_text(text: str) -> dict | None:
+    decoder = json.JSONDecoder()
+    for match in re.finditer(r"\{", text or ""):
+        try:
+            value, _ = decoder.raw_decode(text[match.start():])
+        except Exception:
+            continue
+        if isinstance(value, dict):
+            return value
+    return None
+
+
+def _operator_brain_goal_terms(goal: str) -> list[str]:
+    lower = goal.lower()
+    if any(term in lower for term in ("lasagna", "lasagne")):
+        return ["lasagne sheets", "pasta sauce", "canned lentils", "cottage cheese", "shredded mozzarella", "brown onion", "garlic"]
+    quoted = re.findall(r"['\"]([^'\"]{2,80})['\"]", goal)
+    if quoted:
+        return quoted[:12]
+    return []
+
+
+def _operator_brain_fallback_plan(goal: str, observation: dict, task: dict | None = None) -> dict:
+    url = str(observation.get("url") or "")
+    lower_goal = goal.lower()
+    if "woolworths" in lower_goal or "woolies" in lower_goal:
+        terms = _operator_brain_goal_terms(goal)
+        done_terms = set((task or {}).get("brain", {}).get("completedTerms") or [])
+        current = next((term for term in terms if term not in done_terms), "")
+        if terms and not current:
+            return {
+                "thought": "All planned ingredient searches have been handled; the cart needs user review before checkout.",
+                "action": {"type": "done", "reason": "ready_for_cart_review"},
+                "safety": "review",
+            }
+        query_text = " ".join(parse_qs(urlparse(url).query).get("searchTerm") or [""]).lower()
+        if current and current.lower() not in query_text:
+            return {
+                "thought": f"I need to search Woolworths for {current}.",
+                "action": {"type": "open_url", "url": f"https://www.woolworths.com.au/shop/search/products?searchTerm={quote(current)}"},
+                "safety": "safe",
+            }
+        if current:
+            controls = ((observation.get("dom") or {}).get("controls") or [])
+            dom = observation.get("dom") or {}
+            scroll_y = int(dom.get("scrollY") or 0)
+            label_for = lambda c: str(c.get("text") or c.get("ariaLabel") or c.get("placeholder") or "")
+            add = next((
+                c for c in controls
+                if re.search(r"\badd\b", label_for(c), re.I)
+                and not re.search(r"\b(view cart|your cart|\$\d|checkout|cart has)\b", label_for(c), re.I)
+                and int(c.get("y") or 0) >= 90
+            ), None)
+            if add:
+                return {
+                    "thought": f"I found an Add control for {current}.",
+                    "action": {"type": "click", "target": add.get("text") or add.get("ariaLabel") or "Add", "markTermComplete": current},
+                    "safety": "cart_change",
+                }
+            if scroll_y > 1400:
+                return {
+                    "thought": f"I overscrolled past the {current} product results; I need to return to the top of the result list.",
+                    "action": {"type": "press", "key": "Home"},
+                    "safety": "safe",
+                }
+            return {
+                "thought": f"I am on the search page for {current}; I need a visible Add button.",
+                "action": {"type": "scroll", "direction": "down"},
+                "safety": "safe",
+            }
+    if not url or url == "about:blank":
+        target = _operator_url_from_text(goal) or "https://www.google.com"
+        return {"thought": f"I need to open {target}.", "action": {"type": "open_url", "url": target}, "safety": "safe"}
+    return {"thought": "I need user review before choosing the next general action.", "action": {"type": "ask_user", "question": "I can see the page, but need a clearer next instruction before acting."}, "safety": "review"}
+
+
+def _operator_zen_hermes_session_id() -> str:
+    try:
+        index = _load_index()
+        session = _get_session(index, "zen")
+        if not session:
+            return ""
+        if session.get("channel"):
+            ids = _channel_session_ids(str(session.get("channel")))
+            if ids:
+                return ids[-1]
+        return str(session.get("hermesSessionId") or "")
+    except Exception:
+        return ""
+
+
+def _operator_brain_plan_with_hermes(goal: str, observation: dict, task: dict | None = None) -> dict:
+    if not OPERATOR_BRAIN_USE_HERMES:
+        plan = _operator_brain_fallback_plan(goal, observation, task)
+        plan["source"] = "local-planner"
+        return plan
+    hsid = _operator_zen_hermes_session_id()
+    if not hsid:
+        return _operator_brain_fallback_plan(goal, observation, task)
+    prompt = (
+        "You are the Agent OS Local Operator Brain. Choose the next browser action from the current visible browser state.\n"
+        "Return JSON only, no markdown. Schema:\n"
+        '{"thought":"short reason","safety":"safe|cart_change|review|blocked","action":{"type":"open_url|fill|click|press|scroll|wait|ask_user|done","target":"optional visible label","text":"optional text","url":"optional url","direction":"down|up","question":"optional"}}\n'
+        "Allowed actions: open_url, fill, click, press, scroll, wait, ask_user, done.\n"
+        "Never checkout, pay, place an order, enter payment details, or handle passwords. Use ask_user for login/payment/checkout.\n"
+        "Prefer DOM labels and visible controls over coordinates. If a cart-changing click is needed, set safety to cart_change.\n\n"
+        f"User goal:\n{goal}\n\n"
+        f"Task memory:\n{json.dumps((task or {}).get('brain') or {}, ensure_ascii=False)[:1200]}\n\n"
+        f"Current observation:\n{_operator_brain_observation_text(observation)}"
+    )
+    try:
+        cmd, env = _hermes_chat_command(hsid, prompt)
+        proc = subprocess.run(cmd, env=env, cwd=ROOT, capture_output=True, text=True, timeout=12)
+        output = _clean_hermes_stdout(proc.stdout or "", _extract_hermes_progress(proc.stdout or ""))
+        parsed = _operator_json_from_text(output) or _operator_json_from_text(proc.stdout or "")
+        if isinstance(parsed, dict) and isinstance(parsed.get("action"), dict):
+            parsed.setdefault("thought", "Hermes chose the next visible browser action.")
+            parsed.setdefault("safety", "review")
+            parsed.setdefault("source", "hermes")
+            return parsed
+    except Exception:
+        pass
+    return _operator_brain_fallback_plan(goal, observation, task)
+
+
+def _operator_brain_action_needs_approval(action: dict, safety: str, approved: bool) -> tuple[bool, str]:
+    text = " ".join(str(action.get(k) or "") for k in ("type", "target", "text", "url")).lower()
+    blocked_terms = ("checkout", "place order", "payment", "pay now", "card number", "password", "sign in", "log in", "login")
+    if any(term in text for term in blocked_terms):
+        return True, "blocked high-risk browser action"
+    if safety in {"cart_change", "review"} and not approved:
+        return True, "approval required before this browser action"
+    return False, ""
+
+
+def _operator_brain_dismiss_overlays(page) -> list[str]:
+    try:
+        return page.evaluate(
+            """() => {
+                const visible = (el) => {
+                  const rect = el.getBoundingClientRect();
+                  const style = window.getComputedStyle(el);
+                  return rect.width > 4 && rect.height > 4 && style.visibility !== 'hidden' && style.display !== 'none';
+                };
+                const label = (el) => [el.innerText, el.textContent, el.value, el.getAttribute('aria-label'), el.getAttribute('title')].join(' ').replace(/\\s+/g, ' ').trim();
+                const safePatterns = [/^accept( all)?$/i, /^allow$/i, /^ok$/i, /^got it$/i, /^not now$/i, /^maybe later$/i, /^close$/i, /^dismiss$/i, /^skip$/i];
+                    const collectControls = () => {
+                      const roots = [document];
+                      const controls = [];
+                      for (let i = 0; i < roots.length; i += 1) {
+                        const root = roots[i];
+                        for (const el of Array.from(root.querySelectorAll('*'))) {
+                          if (el.shadowRoot) roots.push(el.shadowRoot);
+                          if (el.matches('button, [role="button"], a, input[type="button"], input[type="submit"], [aria-label]')) controls.push(el);
+                        }
+                      }
+                      return controls;
+                    };
+                    const controls = collectControls().filter(visible);
+                const clicked = [];
+                for (const el of controls) {
+                  const text = label(el);
+                  if (!text || !safePatterns.some(re => re.test(text))) continue;
+                  el.click();
+                  clicked.push(text.slice(0, 80));
+                  if (clicked.length >= 2) break;
+                }
+                return clicked;
+            }"""
+        ) or []
+    except Exception:
+        return []
+
+
+def _operator_brain_apply_action_once(page, action: dict) -> dict:
+    action_type = str(action.get("type") or "").strip().lower()
+    if action_type in {"done", "ask_user"}:
+        return {"ok": True, "action": action, "stopped": True}
+    try:
+        page.wait_for_load_state("domcontentloaded", timeout=2500)
+    except Exception:
+        pass
+    if action_type == "open_url":
+        url = str(action.get("url") or "").strip()
+        safe, reason = _operator_desktop_url_safe(url)
+        if not safe:
+            return {"ok": False, "action": action, "error": reason}
+        page.goto(url, wait_until="domcontentloaded", timeout=25000)
+        return {"ok": True, "action": action, "summary": f"Opened {url}"}
+    if action_type == "fill":
+        target = str(action.get("target") or "search").lower()
+        text = str(action.get("text") or "")
+        if not text:
+            return {"ok": False, "action": action, "error": "fill action requires text"}
+        result = page.evaluate(
+            """({target, text}) => {
+                    const visible = (el) => {
+                      const rect = el.getBoundingClientRect();
+                      const style = window.getComputedStyle(el);
+                      return rect.width > 4 && rect.height > 4 && style.visibility !== 'hidden' && style.display !== 'none';
+                    };
+                    const fields = Array.from(document.querySelectorAll('input, textarea')).filter(visible);
+                    const score = (el) => {
+                      const hay = [el.placeholder, el.name, el.id, el.getAttribute('aria-label'), el.type].join(' ').toLowerCase();
+                      if (hay.includes(target)) return 4;
+                      if (hay.includes('search')) return 3;
+                      if ((el.type || '').toLowerCase() === 'search') return 2;
+                      return 1;
+                    };
+                    const el = fields.sort((a,b) => score(b) - score(a))[0];
+                    if (!el) return {ok:false, error:'no visible input field'};
+                    el.focus();
+                    el.value = text;
+                    el.dispatchEvent(new Event('input', {bubbles:true}));
+                    el.dispatchEvent(new Event('change', {bubbles:true}));
+                    return {ok:true, label: el.placeholder || el.name || el.id || el.type || 'input'};
+                }""",
+            {"target": target, "text": text},
+        )
+        if not result.get("ok"):
+            return {"ok": False, "action": action, "error": result.get("error") or "fill failed"}
+        if action.get("submit", True):
+            page.keyboard.press("Enter")
+            page.wait_for_timeout(1200)
+        return {"ok": True, "action": action, "summary": f"Typed {text} into {result.get('label')}"}
+    if action_type == "click":
+        target = str(action.get("target") or action.get("text") or "").strip()
+        if not target:
+            return {"ok": False, "action": action, "error": "click action requires target"}
+        result = page.evaluate(
+            """(target) => {
+                    const needle = String(target || '').toLowerCase();
+                    const visible = (el) => {
+                      const rect = el.getBoundingClientRect();
+                      const style = window.getComputedStyle(el);
+                      return rect.width > 4 && rect.height > 4 && style.visibility !== 'hidden' && style.display !== 'none';
+                    };
+                    const label = (el) => [el.innerText, el.textContent, el.value, el.getAttribute('aria-label'), el.getAttribute('title'), el.getAttribute('placeholder')].join(' ').replace(/\\s+/g, ' ').trim();
+                    const collectControls = () => {
+                      const roots = [document];
+                      const controls = [];
+                      for (let i = 0; i < roots.length; i += 1) {
+                        const root = roots[i];
+                        for (const el of Array.from(root.querySelectorAll('*'))) {
+                          if (el.shadowRoot) roots.push(el.shadowRoot);
+                          if (el.matches('button, a, [role="button"], input[type="button"], input[type="submit"], [aria-label]')) controls.push(el);
+                        }
+                      }
+                      return controls;
+                    };
+                    const controls = collectControls().filter(visible);
+                    const blocked = /(checkout|place order|payment|pay now|card number|password|sign in|log in|login)/i;
+                    const scored = controls.map((el) => {
+                      const text = label(el);
+                      const lower = text.toLowerCase();
+                      let score = 0;
+                      if (lower === needle) score += 8;
+                      if (lower.includes(needle)) score += 5;
+                      if (needle === 'add' && /\\badd\\b/i.test(lower)) score += 6;
+                      if (/\\badd to cart\\b/i.test(lower) && /\\badd\\b/i.test(needle)) score += 10;
+                      if (/\\badd .* to cart\\b/i.test(lower) && /\\badd\\b/i.test(needle)) score += 8;
+                      if (blocked.test(lower)) score -= 99;
+                      const rect = el.getBoundingClientRect();
+                      if (rect.y > 0 && rect.y < window.innerHeight) score += 1;
+                      if (String(el.className || '').includes('add-to-cart')) score += 5;
+                      return {el, text, score, rect};
+                    }).filter(row => row.score > 0).sort((a,b) => b.score - a.score);
+                    const row = scored[0];
+                    const el = row && row.el;
+                    if (!el) return {ok:false, error:'no visible matching control'};
+                    const rect = el.getBoundingClientRect();
+                    el.scrollIntoView({block:'center', inline:'center'});
+                    el.click();
+                    return {ok:true, label: row.text.slice(0,120), x: Math.round(rect.x), y: Math.round(rect.y), score: row.score};
+                }""",
+            target,
+        )
+        if not result.get("ok"):
+            return {"ok": False, "action": action, "error": result.get("error") or "click failed"}
+        page.wait_for_timeout(1400)
+        return {"ok": True, "action": action, "summary": f"Clicked {result.get('label') or target}", "target": result}
+    if action_type == "press":
+        key = str(action.get("key") or action.get("text") or "Enter")
+        page.keyboard.press(key)
+        page.wait_for_timeout(500)
+        return {"ok": True, "action": action, "summary": f"Pressed {key}"}
+    if action_type == "scroll":
+        direction = str(action.get("direction") or "down").lower()
+        delta = -650 if direction == "up" else 650
+        page.mouse.wheel(0, delta)
+        page.wait_for_timeout(500)
+        return {"ok": True, "action": action, "summary": f"Scrolled {direction}"}
+    if action_type == "wait":
+        page.wait_for_timeout(int(action.get("ms") or 1200))
+        return {"ok": True, "action": action, "summary": "Waited for page state"}
+    return {"ok": False, "action": action, "error": f"unsupported action type: {action_type}"}
+
+
+def _operator_brain_apply_action(action: dict, approved: bool = False) -> dict:
+    def apply(page) -> dict:
+        attempts = []
+        for attempt in range(1, 4):
+            dismissed = _operator_brain_dismiss_overlays(page)
+            result = _operator_brain_apply_action_once(page, action)
+            result["attempt"] = attempt
+            if dismissed:
+                result["dismissedOverlays"] = dismissed
+            attempts.append(result)
+            if result.get("ok"):
+                result["attempts"] = [{k: v for k, v in item.items() if k != "attempts"} for item in attempts]
+                return result
+            if str(action.get("type") or "").lower() not in {"click", "fill"}:
+                break
+            page.wait_for_timeout(700)
+        last = attempts[-1] if attempts else {"ok": False, "error": "action was not attempted"}
+        last["attempts"] = [{k: v for k, v in item.items() if k != "attempts"} for item in attempts]
+        return last
+
+    return _operator_brain_with_page(apply)
+
+
+def _operator_brain_verify_action(goal: str, action: dict, before: dict, after: dict, result: dict) -> dict:
+    action_type = str(action.get("type") or "").lower()
+    before_text = str(((before.get("dom") or {}).get("text")) or "")
+    after_text = str(((after.get("dom") or {}).get("text")) or "")
+    before_url = str(before.get("url") or "")
+    after_url = str(after.get("url") or "")
+    before_cart = ((before.get("dom") or {}).get("cart") or {})
+    after_cart = ((after.get("dom") or {}).get("cart") or {})
+    if not result.get("ok"):
+        return {"ok": False, "confidence": "high", "reason": result.get("error") or "action failed"}
+    if re.search(r"access denied|captcha|unusual traffic", after_text, re.I):
+        return {"ok": False, "confidence": "high", "reason": "page is blocked by access/captcha protection"}
+    if action_type == "open_url":
+        expected = str(action.get("url") or "")
+        ok = bool(expected and (after_url == expected or urlparse(expected).netloc in after_url or urlparse(expected).query in after_url))
+        return {"ok": ok, "confidence": "medium" if ok else "high", "reason": "target URL loaded" if ok else "target URL did not load"}
+    if action_type in {"click", "fill", "press", "scroll", "wait"}:
+        changed = before_url != after_url or before_text[:500] != after_text[:500]
+        if action.get("markTermComplete"):
+            if "securelogin" in after_url or re.search(r"\b(log in|sign up|sign in|required to continue)\b", after_text, re.I):
+                return {
+                    "ok": False,
+                    "confidence": "high",
+                    "reason": "Woolworths requires login before more cart changes can continue",
+                }
+            before_count = before_cart.get("count")
+            after_count = after_cart.get("count")
+            if isinstance(before_count, int) and isinstance(after_count, int) and after_count <= before_count:
+                return {
+                    "ok": False,
+                    "confidence": "high",
+                    "reason": f"cart count did not increase after click ({before_count} -> {after_count})",
+                }
+            return {
+                "ok": True,
+                "confidence": "high" if isinstance(after_count, int) and isinstance(before_count, int) else ("medium" if changed else "low"),
+                "reason": "cart count increased after click" if isinstance(after_count, int) and isinstance(before_count, int) else ("cart/action click completed; visual review still recommended" if changed else "click returned success but page text did not visibly change"),
+            }
+        return {"ok": True, "confidence": "medium" if changed else "low", "reason": "action returned success"}
+    if action_type in {"done", "ask_user"}:
+        return {"ok": True, "confidence": "high", "reason": "brain stopped intentionally"}
+    return {"ok": True, "confidence": "low", "reason": "unsupported action was not independently verified"}
+
+
+def _operator_brain_step(task_id: str, approved: bool = False) -> tuple[dict, int]:
+    task = _operator_browser_task_item(task_id)
+    if not task:
+        return {"ok": False, "error": "browser task not found"}, 404
+    goal = str(task.get("goal") or "")
+    _operator_update_browser_task(task_id, "running")
+    if not _operator_visible_browser_ready():
+        _operator_brain_progress(task_id, "recover", "Visible browser was not running; reopening the task URL.", "active")
+        open_payload, open_status = _operator_visible_browser_open_url(str(task.get("url") or "about:blank"), presentation=str(task.get("presentation") or "window"))
+        if open_status >= 400 or not open_payload.get("ok"):
+            _operator_brain_progress(task_id, "recover", open_payload.get("reason") or open_payload.get("error") or "Visible browser recovery failed.", "failed")
+            task = _operator_update_browser_task(task_id, "blocked_browser_recovery_failed", open_payload.get("reason") or "Visible browser recovery failed.")
+            return {"ok": False, "taskId": task_id, "stage": "recover", "result": open_payload, "task": task}, open_status if open_status >= 400 else 500
+        _operator_brain_progress(task_id, "recover", "Visible browser recovered and task URL reopened.", "done")
+    _operator_brain_progress(task_id, "observe", "Observing the visible browser.", "active")
+    observation = _operator_brain_observe(task_id)
+    if not observation.get("ok"):
+        _operator_brain_progress(task_id, "observe", observation.get("error") or "Observation failed.", "failed")
+        _operator_update_browser_task(task_id, "blocked_observe_failed", observation.get("error") or "Observation failed.")
+        return {"ok": False, "taskId": task_id, "stage": "observe", "observation": observation}, 500
+    task = _operator_browser_task_item(task_id) or task
+    _operator_brain_progress(task_id, "plan", "Asking Hermes for the next browser action.", "active")
+    plan = _operator_brain_plan_with_hermes(goal, observation, task)
+    action = plan.get("action") if isinstance(plan.get("action"), dict) else {}
+    safety = str(plan.get("safety") or "review")
+    thought = plan.get("thought") or f"Planned {action.get('type') or 'next action'}."
+    _operator_brain_progress(task_id, "thought", thought, "done", safety=safety)
+    _operator_brain_memory_append(task_id, "decisions", {
+        "ts": _now_iso(),
+        "thought": thought,
+        "safety": safety,
+        "action": action,
+        "source": str(plan.get("source") or "brain"),
+    })
+    needs_approval, reason = _operator_brain_action_needs_approval(action, safety, approved)
+    if needs_approval:
+        status = "blocked_high_risk" if reason.startswith("blocked") else "needs_approval"
+        _operator_brain_progress(task_id, "gate", reason, "blocked", safety=safety)
+        task = _operator_update_browser_task(task_id, status, reason)
+        return {"ok": False, "taskId": task_id, "stage": "approval", "reason": reason, "plan": plan, "task": task}, 202
+    _operator_brain_progress(task_id, "act", f"Running action: {action.get('type') or 'unknown'}.", "active", safety=safety)
+    result = _operator_brain_apply_action(action, approved=approved)
+    if not result.get("ok"):
+        _operator_brain_progress(task_id, "act", result.get("error") or "Action failed.", "failed")
+        _operator_brain_memory_append(task_id, "failures", {
+            "ts": _now_iso(),
+            "action": action,
+            "error": result.get("error") or "action failed",
+            "attempts": result.get("attempts") or [],
+        })
+        task = _operator_update_browser_task(task_id, "blocked_action_failed", result.get("error") or "Action failed.")
+        return {"ok": False, "taskId": task_id, "stage": "act", "plan": plan, "result": result, "task": task}, 422
+    _operator_brain_progress(task_id, "verify", "Verifying the result of the browser action.", "active")
+    after = _operator_brain_observe(task_id)
+    verification = _operator_brain_verify_action(goal, action, observation, after if after.get("ok") else {}, result)
+    if not verification.get("ok"):
+        _operator_brain_progress(task_id, "verify", verification.get("reason") or "Verification failed.", "failed")
+        _operator_brain_memory_append(task_id, "failures", {
+            "ts": _now_iso(),
+            "action": action,
+            "error": verification.get("reason") or "verification failed",
+            "result": result,
+        })
+        task = _operator_update_browser_task(task_id, "blocked_verify_failed", verification.get("reason") or "Verification failed.")
+        return {"ok": False, "taskId": task_id, "stage": "verify", "plan": plan, "result": result, "verification": verification, "observation": after, "task": task}, 422
+    if action.get("markTermComplete") and verification.get("ok"):
+        def mutate(item: dict) -> None:
+            brain = dict(item.get("brain") or {})
+            terms = list(brain.get("completedTerms") or [])
+            if action["markTermComplete"] not in terms:
+                terms.append(action["markTermComplete"])
+            selected = list(brain.get("selectedItems") or [])
+            selected.append({
+                "ts": _now_iso(),
+                "term": action["markTermComplete"],
+                "result": result.get("summary") or "cart action completed",
+                "verification": verification,
+            })
+            brain["completedTerms"] = terms
+            brain["selectedItems"] = selected[-40:]
+            item["brain"] = brain
+
+        _operator_browser_task_mutate(task_id, mutate)
+    _operator_brain_memory_append(task_id, "actions", {
+        "ts": _now_iso(),
+        "action": action,
+        "result": result.get("summary") or result,
+        "verification": verification,
+    })
+    _operator_brain_progress(task_id, "verify", verification.get("reason") or "Action verified.", "done", confidence=verification.get("confidence"))
+    task = _operator_update_browser_task(
+        task_id,
+        "needs_review" if action.get("type") in {"done", "ask_user"} else "running",
+        "Captured proof after the browser action.",
+    )
+    return {"ok": True, "taskId": task_id, "stage": "complete" if result.get("stopped") else "acted", "plan": plan, "result": result, "verification": verification, "observation": after, "task": task}, 200
+
+
+def _operator_brain_run_task(task_id: str, approved: bool = False, max_steps: int = 8) -> None:
+    for _ in range(max(1, min(max_steps, 40))):
+        payload, status = _operator_brain_step(task_id, approved=approved)
+        if status != 200:
+            return
+        stage = payload.get("stage")
+        task = payload.get("task") or {}
+        if stage == "complete" or task.get("status") in {"needs_review", "complete", "cancelled", "needs_approval", "blocked_high_risk", "blocked_action_failed", "blocked_observe_failed"}:
+            return
+        time.sleep(0.75)
+    _operator_update_browser_task(task_id, "needs_review", "Operator Brain paused after its step budget; review progress before continuing.")
+
+
+def _operator_start_browser_task_executor(task_id: str, approved: bool = False) -> bool:
+    existing = OPERATOR_BROWSER_TASK_THREADS.get(task_id)
+    if existing and existing.is_alive():
+        return False
+    thread = threading.Thread(target=_operator_brain_run_task, args=(task_id, approved), kwargs={"max_steps": 30}, daemon=True)
+    OPERATOR_BROWSER_TASK_THREADS[task_id] = thread
+    thread.start()
+    return True
+
+
+def _operator_desktop_open_url(url: str, presentation: str = "window") -> tuple[dict, int]:
+    safe, reason = _operator_desktop_url_safe(url)
+    if not safe:
+        return {"ok": False, "handled": True, "action_class": "blocked", "reason": reason, "url": url}, 400
+    visible_payload, visible_status = _operator_visible_browser_open_url(url, presentation=presentation)
+    if visible_status < 500:
+        return visible_payload, visible_status
+    firefox = shutil.which("firefox")
+    opener = firefox or shutil.which("xdg-open") or shutil.which("gio")
+    if not opener:
+        return {"ok": False, "handled": True, "action_class": "failed", "reason": "no desktop browser opener found", "url": url}, 501
+    if Path(opener).name == "firefox":
+        if presentation == "fullscreen":
+            cmd = [opener, "--kiosk", url]
+        else:
+            cmd = [opener, "--new-window", url]
+    elif Path(opener).name == "gio":
+        cmd = [opener, "open", url]
+    else:
+        cmd = [opener, url]
+    try:
+        proc = subprocess.run(
+            cmd,
+            env=_operator_desktop_env(),
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "handled": True, "action_class": "failed", "reason": "desktop browser launch timed out", "url": url, "command": " ".join(cmd)}, 408
+    stderr = (proc.stderr or "").strip()
+    stdout = (proc.stdout or "").strip()
+    ok = proc.returncode == 0
+    return {
+        "ok": ok,
+        "handled": True,
+        "action_class": "safe" if ok else "failed",
+        "action": "open-url",
+        "url": url,
+        "presentation": presentation,
+        "command": " ".join(shlex.quote(part) for part in cmd),
+        "exitCode": proc.returncode,
+        "stdout": stdout[:1000],
+        "stderr": stderr[:1000],
+        "message": (
+            f"Opened {url} in a visible Firefox task window."
+            if ok and presentation == "window"
+            else f"Opened {url} in Firefox full-screen mode."
+            if ok and presentation == "fullscreen"
+            else f"Opened {url} in a visible Firefox task window. Split-screen arrangement is queued for the next layout layer."
+            if ok and presentation == "split-requested"
+            else (stderr or stdout or "Desktop browser launch failed")
+        ),
+    }, 200 if ok else 500
+
+
+def _operator_desktop_intent_payload(content: str) -> tuple[dict, int]:
+    text = str(content or "").strip()
+    lower = text.lower()
+    looks_like_open = any(word in lower for word in ("open", "launch", "start", "go to", "navigate"))
+    looks_like_browser = any(word in lower for word in ("firefox", "browser", "web", "website", "site", "url", "http", "www.", "woolworths", "woolies", "coles", "google"))
+    looks_like_operator_task = looks_like_browser and (looks_like_open or _operator_complex_browser_task(text))
+    if not looks_like_operator_task:
+        return {"ok": True, "handled": False, "reason": "not a desktop browser intent"}, 200
+    url = _operator_url_from_text(text)
+    if not url:
+        return {"ok": False, "handled": True, "action_class": "blocked", "reason": "could not identify a site or URL to open"}, 400
+    if _operator_complex_browser_task(text):
+        presentation = _operator_desktop_presentation(text)
+        payload, status = _operator_desktop_open_url(url, presentation=presentation)
+        task, approval = _operator_create_browser_task(text, url, presentation, payload)
+        plan_text = _operator_browser_task_summary(task.get("plan") or [])
+        hermes_prompt = (
+            "Agent OS Operator created a supervised browser task. "
+            "Plan the next browser steps, but do not claim cart changes are complete. "
+            "Cart-changing click/type actions require explicit approval and checkout/payment is blocked.\n\n"
+            f"User goal: {text}\n"
+            f"URL opened: {url}\n"
+            f"Task id: {task['id']}\n"
+            f"Current plan:\n{plan_text}"
+        )
+        payload.update({
+            "ok": bool(payload.get("ok")),
+            "handled": True,
+            "action_class": "review",
+            "action": "complex-browser-task",
+            "reviewRequired": True,
+            "reason": "Created a supervised browser task and approval gate for cart-changing actions.",
+            "message": (
+                f"Opened {url} as the task starting point and created supervised browser task {task['id']}.\n\n"
+                f"Plan:\n{plan_text}\n\n"
+                "Waiting for approval before cart-changing browser actions. Checkout/payment remains blocked."
+            ),
+            "task": task,
+            "approval": approval,
+            "continueHermes": True,
+            "hermesPrompt": hermes_prompt,
+            "nextLayer": "Hermes browser-control planner with reviewed click/type/cart actions",
+        })
+        return payload, 202 if status < 500 else status
+    return _operator_desktop_open_url(url, presentation=_operator_desktop_presentation(text))
+
+
+def _operator_cmd_status(cmd: list[str], timeout: int = 3) -> dict:
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return {
+            "ok": proc.returncode == 0,
+            "exitCode": proc.returncode,
+            "stdout": (proc.stdout or "").strip()[:1200],
+            "stderr": (proc.stderr or "").strip()[:1200],
+        }
+    except Exception as exc:
+        return {"ok": False, "exitCode": None, "stdout": "", "stderr": str(exc)[:1200]}
+
+
+def _operator_port_open(host: str, port: int, timeout: float = 0.35) -> bool:
+    if not host:
+        return False
+    try:
+        with socket.create_connection((host, int(port)), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+def _operator_vnc_password_param() -> str:
+    password_file = OPERATOR_DATA_DIR / ".vnc-password"
+    try:
+        password = password_file.read_text(encoding="utf-8").strip()
+    except OSError:
+        password = ""
+    return f"&password={quote(password, safe='')}" if password else ""
+
+
+def _operator_real_desktop_bridge_pid() -> int:
+    bridge_pid_file = OPERATOR_ARTIFACT_DIR / "real-desktop" / "freerdp.pid"
+    try:
+        bridge_pid = int(bridge_pid_file.read_text(encoding="utf-8").strip())
+        os.kill(bridge_pid, 0)
+        return bridge_pid
+    except (OSError, ValueError):
+        pass
+    try:
+        proc = subprocess.run(
+            ["pgrep", "-f", rf"xfreerdp.*127[.]0[.]0[.]1:{OPERATOR_RDP_PORT}"],
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+    except Exception:
+        return 0
+    for line in (proc.stdout or "").splitlines():
+        try:
+            bridge_pid = int(line.strip())
+            os.kill(bridge_pid, 0)
+        except (OSError, ValueError):
+            continue
+        try:
+            bridge_pid_file.parent.mkdir(parents=True, exist_ok=True)
+            bridge_pid_file.write_text(f"{bridge_pid}\n", encoding="utf-8")
         except OSError:
             pass
+        return bridge_pid
+    return 0
+
+
+def _operator_observe_status_payload() -> dict:
+    tailscale_ip = OPERATOR_TAILSCALE_IP
+    tools = {
+        "novnc_proxy": shutil.which("novnc_proxy") or ("/usr/share/novnc/utils/novnc_proxy" if Path("/usr/share/novnc/utils/novnc_proxy").exists() else ""),
+        "websockify": shutil.which("websockify") or "",
+        "x11vnc": shutil.which("x11vnc") or "",
+        "wayvnc": shutil.which("wayvnc") or "",
+        "tigervncserver": shutil.which("tigervncserver") or "",
+        "grdctl": shutil.which("grdctl") or "",
+        "xfreerdp": shutil.which("xfreerdp3") or shutil.which("xfreerdp") or "",
+    }
+    session = {
+        "display": os.environ.get("DISPLAY") or "",
+        "waylandDisplay": os.environ.get("WAYLAND_DISPLAY") or "",
+        "sessionType": os.environ.get("XDG_SESSION_TYPE") or "",
+        "desktop": os.environ.get("XDG_CURRENT_DESKTOP") or "",
+    }
+    services = {}
+    vnc_display_active = _operator_port_open("127.0.0.1", OPERATOR_VNC_PORT)
+    websockify_active = _operator_port_open(tailscale_ip, OPERATOR_NOVNC_PORT)
+    bridge_pid = _operator_real_desktop_bridge_pid()
+    real_desktop_active = bool(bridge_pid)
+    blockers = []
+    if not tools["novnc_proxy"] and not tools["websockify"]:
+        blockers.append("noVNC/websockify bridge is not installed")
+    if not vnc_display_active and not tools["x11vnc"] and not tools["wayvnc"]:
+        blockers.append("no VNC server backend is installed")
+    if not vnc_display_active and session["sessionType"].lower() == "wayland" and tools["x11vnc"] and not tools["wayvnc"]:
+        blockers.append("current desktop is Wayland; x11vnc cannot observe it directly")
+    if not vnc_display_active:
+        blockers.append(f"TigerVNC virtual desktop {OPERATOR_VNC_DISPLAY} is not active")
+    if not websockify_active:
+        blockers.append(f"noVNC websockify bridge is not active on port {OPERATOR_NOVNC_PORT}")
+    url_base = (
+        f"http://{tailscale_ip}:{OPERATOR_NOVNC_PORT}/vnc.html"
+        f"?host={tailscale_ip}&port={OPERATOR_NOVNC_PORT}&path=websockify&autoconnect=true&resize=scale"
+    ) if tailscale_ip and not blockers else ""
+    password_param = _operator_vnc_password_param()
+    observe_url = f"{url_base}&view_only=true{password_param}" if url_base else ""
+    control_url = f"{url_base}&view_only=false{password_param}" if url_base else ""
+    next_actions = [
+        "Run scripts/operator_m7_start.sh if the virtual desktop or noVNC bridge is not active.",
+        "Open the observeUrl over Tailscale and enter the generated VNC password.",
+        "Keep real desktop control disabled until M8 review.",
+    ]
+    return {
+        "ok": True,
+        "stage": "M7",
+        "state": "ready" if not blockers else "blocked",
+        "live": not blockers,
+        "observeUrl": observe_url,
+        "viewUrl": observe_url,
+        "controlUrl": control_url,
+        "realDesktop": {
+            "active": real_desktop_active,
+            "bridgePid": bridge_pid if real_desktop_active else None,
+            "backend": "gnome-rdp-freerdp" if real_desktop_active else "virtual-vnc-fallback",
+            "dependencyReady": bool(tools["xfreerdp"]),
+        },
+        "tailscaleIp": tailscale_ip,
+        "tools": tools,
+        "services": services,
+        "vnc": {
+            "display": OPERATOR_VNC_DISPLAY,
+            "port": OPERATOR_VNC_PORT,
+            "active": vnc_display_active,
+        },
+        "websockify": {
+            "port": OPERATOR_NOVNC_PORT,
+            "active": websockify_active,
+        },
+        "session": session,
+        "blockers": blockers,
+        "nextActions": next_actions,
+        "notes": "Operator is view-only; Manual uses the control-enabled URL. Real desktop requires the local GNOME RDP/FreeRDP bridge.",
+    }
 
 
 def _session_summary_payload(session_id: str, index_session: dict | None = None) -> dict:
@@ -798,14 +2513,21 @@ def _operator_command_hash(command: str, root: Path) -> str:
     return hashlib.sha256(f"{root}\n{command}".encode("utf-8")).hexdigest()
 
 
-def _operator_pending_approval(project: str, command: str, reason: str, session_id: str | None = None) -> dict:
+def _operator_pending_approval(
+    project: str,
+    command: str,
+    reason: str,
+    session_id: str | None = None,
+    extra: dict | None = None,
+    ttl_seconds: int = 5 * 60,
+) -> dict:
     root = _operator_project_root(project)
     now = int(time.time())
     pending = _read_json(OPERATOR_PENDING_FILE, {"items": []})
     item = {
         "id": secrets.token_hex(8),
         "ts": _now_iso(),
-        "expiresAt": now + 5 * 60,
+        "expiresAt": now + ttl_seconds,
         "project": project,
         "working_dir": str(root) if root else "",
         "command": command,
@@ -814,10 +2536,135 @@ def _operator_pending_approval(project: str, command: str, reason: str, session_
         "status": "pending",
         "session_id": session_id,
     }
+    if extra:
+        item.update(extra)
     pending["items"] = [i for i in pending.get("items", []) if int(i.get("expiresAt") or 0) > now and i.get("status") == "pending"]
     pending["items"].append(item)
     _write_json(OPERATOR_PENDING_FILE, pending)
     return item
+
+
+def _operator_pending_items(include_all: bool = False) -> list[dict]:
+    now = int(time.time())
+    pending = _read_json(OPERATOR_PENDING_FILE, {"items": []})
+    items = list(pending.get("items") or [])
+    if include_all:
+        return items
+    return [
+        item for item in items
+        if item.get("status") == "pending" and int(item.get("expiresAt") or 0) > now
+    ]
+
+
+def _operator_update_approval(approval_id: str, action: str, approver: str = "") -> tuple[dict, int]:
+    action = str(action or "").strip().lower()
+    if action not in {"approve", "deny", "abort"}:
+        return {"ok": False, "error": "invalid approval action"}, 400
+    pending = _read_json(OPERATOR_PENDING_FILE, {"items": []})
+    items = list(pending.get("items") or [])
+    now = int(time.time())
+    for item in items:
+        if item.get("id") != approval_id:
+            continue
+        if int(item.get("expiresAt") or 0) <= now:
+            item["status"] = "expired"
+            _write_json(OPERATOR_PENDING_FILE, {"items": items})
+            return {"ok": False, "error": "approval expired", "approval": item}, 410
+        if item.get("status") != "pending":
+            return {"ok": False, "error": "approval already resolved", "approval": item}, 409
+        item["status"] = {"approve": "approved", "deny": "denied", "abort": "aborted"}[action]
+        item["resolvedAt"] = _now_iso()
+        item["approver"] = approver or "operator"
+        _write_json(OPERATOR_PENDING_FILE, {"items": items})
+        execution = "not_auto_executed"
+        task = None
+        if item.get("kind") == "browser-task":
+            task_id = str(item.get("taskId") or "")
+            if action == "approve":
+                if _operator_chrome_binary():
+                    task = _operator_update_browser_task(
+                        task_id,
+                        "approved_running",
+                        "Browser task approved. Starting Operator Brain observe-plan-act loop.",
+                    )
+                    started = _operator_start_browser_task_executor(task_id, approved=True)
+                    execution = "operator_brain_started" if started else "operator_brain_already_running"
+                else:
+                    task = _operator_update_browser_task(
+                        task_id,
+                        "blocked_missing_visible_browser",
+                        "Approval recorded, but the visible-browser executor is unavailable because Chrome/Chromium is not installed.",
+                    )
+                    execution = "blocked_missing_visible_browser"
+            elif action == "deny":
+                task = _operator_update_browser_task(task_id, "denied", "Browser task was denied by the operator.")
+                execution = "denied_not_executed"
+            elif action == "abort":
+                task = _operator_update_browser_task(task_id, "cancelled", "Browser task was aborted by the operator.")
+                execution = "aborted_not_executed"
+        return {"ok": True, "approval": item, "execution": execution, "task": task}, 200
+    return {"ok": False, "error": "approval not found"}, 404
+
+
+def _operator_status_payload() -> dict:
+    token = _operator_token_record()
+    pair = _operator_pair_record()
+    observe = _operator_observe_status_payload()
+    return {
+        "ok": True,
+        "generatedAt": _now_iso(),
+        "host": {
+            "name": os.uname().nodename if hasattr(os, "uname") else "unknown",
+            "tailscaleIp": OPERATOR_TAILSCALE_IP,
+        },
+        "auth": {
+            "tokenExpiresAt": datetime.datetime.fromtimestamp(int(token.get("expiresAt") or 0), datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+            "pairingCode": pair.get("code"),
+            "pairingExpiresAt": datetime.datetime.fromtimestamp(int(pair.get("expiresAt") or 0), datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        },
+        "network": {
+            "allowed": "localhost + 100.64.0.0/10",
+            "tailnet": [],
+        },
+        "approvals": {
+            "pending": len(_operator_pending_items()),
+        },
+        "audit": {
+            "rows": len(_read_jsonl(OPERATOR_AUDIT_FILE)),
+        },
+        "observe": {
+            "state": observe.get("state"),
+            "live": observe.get("live"),
+            "observeUrl": observe.get("observeUrl"),
+            "viewUrl": observe.get("viewUrl"),
+            "controlUrl": observe.get("controlUrl"),
+            "realDesktop": observe.get("realDesktop"),
+            "blockers": observe.get("blockers", [])[:3],
+        },
+    }
+
+
+def _operator_mobile_status_payload() -> dict:
+    observe = _operator_observe_status_payload()
+    return {
+        "ok": True,
+        "generatedAt": _now_iso(),
+        "host": {
+            "name": os.uname().nodename if hasattr(os, "uname") else "unknown",
+            "tailscaleIp": OPERATOR_TAILSCALE_IP,
+        },
+        "approvals": {"pending": len(_operator_pending_items())},
+        "audit": {"rows": len(_read_jsonl(OPERATOR_AUDIT_FILE))},
+        "observe": {
+            "state": observe.get("state") or "blocked",
+            "live": bool(observe.get("live")),
+            "observeUrl": observe.get("observeUrl") or "",
+            "viewUrl": observe.get("viewUrl") or observe.get("observeUrl") or "",
+            "controlUrl": observe.get("controlUrl") or "",
+            "realDesktop": observe.get("realDesktop") or {},
+            "blockers": observe.get("blockers") or [],
+        },
+    }
 
 
 def _operator_run_payload(project: str, command: str, session_id: str | None = None) -> tuple[dict, int]:
@@ -1680,6 +3527,8 @@ def _get_session(index: dict, session_id: str) -> dict | None:
 # all sessions whose title matches one of the channel's patterns so the
 # Agent OS view shows the same full history that Discord users see.
 _CHANNEL_SESSION_PATTERNS: dict[str, list[str]] = {
+    "1519228976344727674": [
+    ],
     "zen-chat": [
         "Zen",
         "Discord Bridge Status Confirmation",
@@ -1744,6 +3593,7 @@ def _record_hermes_session(agent_os_session: dict, hermes_session_id: str) -> No
         "lastSeen": now,
         "messageCount": (entry.get("messageCount") or 0) + 1,
     })
+    entry.pop("inferredBy", None)
     if "firstSeen" not in entry:
         entry["firstSeen"] = now
     mapping[hermes_session_id] = entry
@@ -1764,6 +3614,8 @@ def _rebuild_hermes_session_map() -> dict:
     for s in index.get("sessions", []):
         channel = s.get("channel")
         if not channel:
+            continue
+        if re.fullmatch(r"\d{10,}", str(channel)):
             continue
         patterns = _CHANNEL_SESSION_PATTERNS.get(channel, [])
         if not patterns or not HERMES_DB.exists():
@@ -1816,10 +3668,13 @@ def _channel_session_ids(channel: str) -> list[str]:
     """
     # Primary: use the explicit session mapping
     mapping = _load_hermes_session_map()
+    numeric_channel = bool(re.fullmatch(r"\d{10,}", str(channel or "")))
     mapped_ids = [
         hsid for hsid, entry in mapping.items()
-        if entry.get("channel") == channel
+        if entry.get("channel") == channel and not (numeric_channel and entry.get("inferredBy"))
     ]
+    if numeric_channel:
+        return mapped_ids
 
     # Fallback: title pattern matching for unmapped sessions
     patterns = _CHANNEL_SESSION_PATTERNS.get(channel, [])
@@ -2368,6 +4223,16 @@ class Handler(SimpleHTTPRequestHandler):
             return ""
         return auth.split(" ", 1)[1].strip()
 
+    def _operator_auth_error(self, action: str, target: str, project: str = ""):
+        remote = self.client_address[0] if self.client_address else ""
+        if not _operator_remote_allowed(remote):
+            _operator_audit(action, target, "denied", project=project or None, remote=remote, status=403, reason="non-local non-tailnet client")
+            return {"ok": False, "error": f"{target} is local-or-tailscale only"}, 403, remote
+        if not _operator_token_valid(self._operator_bearer()):
+            _operator_audit(action, target, "denied", project=project or None, remote=remote, status=401, reason="missing or invalid bearer token")
+            return {"ok": False, "error": "operator auth required"}, 401, remote
+        return None, 200, remote
+
     def _read_body(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))
         if length:
@@ -2379,6 +4244,17 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         # Static files
         if not self.path.startswith("/api/"):
+            if urlparse(self.path).path.rstrip("/") == "/m":
+                mobile = ROOT / "agent-os-mobile.html"
+                if not mobile.exists():
+                    return self._json({"error": "mobile shell not found"}, 404)
+                body = mobile.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             super().do_GET()
             return
 
@@ -2467,6 +4343,8 @@ class Handler(SimpleHTTPRequestHandler):
                 if _channel_ids:
                     _hsid = _channel_ids[0]  # primary for single-session path
                     _use_channel = True
+                elif re.fullmatch(r"\d{10,}", str(channel)):
+                    _hsid = ""
             elif not _hsid:
                 # No channel and no direct link — nothing to read
                 pass
@@ -2536,15 +4414,11 @@ class Handler(SimpleHTTPRequestHandler):
 
         # GET /api/operator/inspect?project=zen-new — M1A localhost-only read-only inspection
         if self._match("api/operator/inspect") is not None:
-            remote = self.client_address[0] if self.client_address else ""
             params = parse_qs(urlparse(self.path).query)
             project = (params.get("project") or [""])[0]
-            if not _operator_remote_allowed(remote):
-                _operator_audit("inspect", "operator/inspect", "denied", project=project, remote=remote, status=403, reason="non-local non-tailnet client")
-                return self._json({"ok": False, "error": "operator inspect is local-or-tailscale only"}, 403)
-            if not _operator_token_valid(self._operator_bearer()):
-                _operator_audit("inspect", "operator/inspect", "denied", project=project, remote=remote, status=401, reason="missing or invalid bearer token")
-                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            auth_error, auth_status, remote = self._operator_auth_error("inspect", "operator/inspect", project)
+            if auth_error:
+                return self._json(auth_error, auth_status)
             payload, status = _operator_inspect_payload(project)
             _operator_audit(
                 "inspect",
@@ -2560,13 +4434,9 @@ class Handler(SimpleHTTPRequestHandler):
 
         # GET /api/operator/screenshot — authenticated read-only screen capture
         if self._match("api/operator/screenshot") is not None:
-            remote = self.client_address[0] if self.client_address else ""
-            if not _operator_remote_allowed(remote):
-                _operator_audit("screenshot", "operator/screenshot", "denied", remote=remote, status=403, reason="non-local non-tailnet client")
-                return self._json({"ok": False, "error": "operator screenshot is local-or-tailscale only"}, 403)
-            if not _operator_token_valid(self._operator_bearer()):
-                _operator_audit("screenshot", "operator/screenshot", "denied", remote=remote, status=401, reason="missing or invalid bearer token")
-                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            auth_error, auth_status, remote = self._operator_auth_error("screenshot", "operator/screenshot")
+            if auth_error:
+                return self._json(auth_error, auth_status)
             payload, status = _operator_screenshot_payload()
             _operator_audit(
                 "screenshot",
@@ -2575,9 +4445,124 @@ class Handler(SimpleHTTPRequestHandler):
                 remote=remote,
                 status=status,
                 reason=payload.get("error"),
+                backend=payload.get("backend"),
+                path=payload.get("path"),
+                bytes=payload.get("bytes"),
+                error=payload.get("error"),
+                helperMode=payload.get("helperMode"),
+                source=payload.get("source"),
                 action_class="safe",
             )
             return self._json(payload, status)
+
+        # GET /api/operator/observe/status — authenticated M7 noVNC readiness
+        if self._match("api/operator/observe/status") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("observe", "operator/observe/status")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload = _operator_observe_status_payload()
+            _operator_audit(
+                "observe",
+                "operator/observe/status",
+                payload.get("state") or "unknown",
+                remote=remote,
+                status=200,
+                reason="; ".join(payload.get("blockers") or []) or "ready",
+                action_class="safe",
+            )
+            return self._json(payload)
+
+        # GET /api/operator/status — authenticated mobile/operator status
+        if self._match("api/operator/mobile-status") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("status", "operator/mobile-status")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload = _operator_mobile_status_payload()
+            _operator_audit("status", "operator/mobile-status", "ok", remote=remote, status=200, action_class="safe")
+            return self._json(payload)
+
+        # GET /api/operator/status — authenticated diagnostics status
+        if self._match("api/operator/status") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("status", "operator/status")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload = _operator_status_payload()
+            _operator_audit("status", "operator/status", "ok", remote=remote, status=200, action_class="safe")
+            return self._json(payload)
+
+        # GET /api/operator/browser/status — authenticated browser session state
+        if self._match("api/operator/browser/status") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("browser", "operator/browser/status")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload, status = _operator_browser_payload("status")
+            _operator_audit(
+                "browser",
+                "operator/browser/status",
+                "ok" if status < 400 else "failed",
+                remote=remote,
+                status=status,
+                reason=payload.get("error"),
+                action_class="safe",
+                url=payload.get("url"),
+            )
+            return self._json(payload, status)
+
+        # GET /api/operator/browser-tasks — authenticated supervised browser task list
+        if self._match("api/operator/browser-tasks") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("browser", "operator/browser-tasks")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            params = parse_qs(urlparse(self.path).query)
+            payload = _operator_browser_tasks_payload(include_all=(params.get("all") or [""])[0] == "1")
+            _operator_audit("browser", "operator/browser-tasks", "ok", remote=remote, status=200, action_class="safe")
+            return self._json(payload, 200)
+
+        # GET /api/operator/brain/status — authenticated visible-browser brain state
+        if self._match("api/operator/brain/status") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("brain", "operator/brain/status")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            params = parse_qs(urlparse(self.path).query)
+            task_id = (params.get("taskId") or [""])[0]
+            payload = {
+                "ok": True,
+                "visibleBrowser": {
+                    "ready": _operator_visible_browser_ready(),
+                    "debugPort": 9222,
+                    "version": _operator_brain_cdp_json("/json/version") or {},
+                    "chrome": _operator_chrome_binary(),
+                    "display": OPERATOR_VNC_DISPLAY,
+                    "visionModel": OPERATOR_VISION_MODEL,
+                },
+                "activeTasks": [
+                    tid for tid, thread in OPERATOR_BROWSER_TASK_THREADS.items()
+                    if thread.is_alive()
+                ],
+                "task": _operator_browser_task_item(task_id) if task_id else None,
+            }
+            _operator_audit("brain", "operator/brain/status", "ok", remote=remote, status=200, action_class="safe", taskId=task_id or None)
+            return self._json(payload, 200)
+
+        # GET /api/operator/approvals — authenticated pending approval queue
+        if self._match("api/operator/approvals") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("approvals", "operator/approvals")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload = {"ok": True, "items": _operator_pending_items(include_all=True)}
+            _operator_audit("approvals", "operator/approvals", "ok", remote=remote, status=200, action_class="safe")
+            return self._json(payload)
+
+        # GET /api/operator/audit — authenticated proof/audit rows
+        if self._match("api/operator/audit") is not None:
+            auth_error, auth_status, remote = self._operator_auth_error("audit", "operator/audit")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            params = parse_qs(urlparse(self.path).query)
+            session_id = (params.get("sessionId") or [""])[0]
+            payload = {"ok": True, **_operator_proof_payload(session_id)}
+            _operator_audit("audit", "operator/audit", "ok", remote=remote, status=200, action_class="safe", session_id=session_id or None)
+            return self._json(payload)
 
         # GET /api/review/diff?sessionId=zen-os&raw=1 — read-only worktree review
         if self._match("api/review/diff") is not None:
@@ -2649,19 +4634,57 @@ class Handler(SimpleHTTPRequestHandler):
 
         index = _load_index()
 
+        # POST /api/operator/pair — one-time local/Tailscale phone pairing
+        if self._match("api/operator/pair") is not None:
+            body = self._read_body()
+            code = str(body.get("code") or "").strip()
+            remote = self.client_address[0] if self.client_address else ""
+            if not _operator_remote_allowed(remote):
+                payload, status = {"ok": False, "error": "operator pairing is local/Tailscale only"}, 403
+            else:
+                payload, status = _operator_pair_payload(code)
+            _operator_audit(
+                "pair",
+                "operator/pair",
+                "ok" if status < 300 else "denied",
+                remote=remote,
+                status=status,
+                reason=payload.get("error"),
+                action_class="safe",
+            )
+            return self._json(payload, status)
+
+        # POST /api/operator/approval — resolve pending approval state only
+        if self._match("api/operator/approval") is not None:
+            body = self._read_body()
+            approval_id = str(body.get("id") or "").strip()
+            action = str(body.get("action") or "").strip().lower()
+            approver = str(body.get("approver") or "").strip() or "operator"
+            auth_error, auth_status, remote = self._operator_auth_error("approval", "operator/approval")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload, status = _operator_update_approval(approval_id, action, approver)
+            _operator_audit(
+                "approval",
+                "operator/approval",
+                "ok" if status < 300 else "denied",
+                remote=remote,
+                status=status,
+                reason=payload.get("error") or action,
+                action_class="review",
+                approver=approver,
+            )
+            return self._json(payload, status)
+
         # POST /api/operator/run — M2 classified command runner
         if self._match("api/operator/run") is not None:
-            remote = self.client_address[0] if self.client_address else ""
             body = self._read_body()
             project = str(body.get("project") or "zen-new").strip()
             command = str(body.get("command") or "").strip()
             session_id = body.get("session_id") or body.get("sessionId")
-            if not _operator_remote_allowed(remote):
-                _operator_audit("run", "operator/run", "denied", project=project, remote=remote, status=403, reason="non-local non-tailnet client")
-                return self._json({"ok": False, "error": "operator run is local-or-tailscale only"}, 403)
-            if not _operator_token_valid(self._operator_bearer()):
-                _operator_audit("run", "operator/run", "denied", project=project, remote=remote, status=401, reason="missing or invalid bearer token")
-                return self._json({"ok": False, "error": "operator auth required"}, 401)
+            auth_error, auth_status, remote = self._operator_auth_error("run", "operator/run", project)
+            if auth_error:
+                return self._json(auth_error, auth_status)
             payload, status = _operator_run_payload(project, command, session_id=session_id)
             _operator_audit(
                 "run",
@@ -2675,6 +4698,138 @@ class Handler(SimpleHTTPRequestHandler):
                 session_id=session_id,
             )
             return self._json(payload, status)
+
+        # POST /api/operator/desktop-intent — natural desktop/browser action bridge
+        if self._match("api/operator/desktop-intent") is not None:
+            body = self._read_body()
+            content = str(body.get("content") or body.get("command") or "").strip()
+            session_id = body.get("session_id") or body.get("sessionId")
+            auth_error, auth_status, remote = self._operator_auth_error("desktop", "operator/desktop-intent")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload, status = _operator_desktop_intent_payload(content)
+            if payload.get("handled"):
+                audit_result = "ok" if status < 300 and payload.get("ok") else "failed"
+                if payload.get("action_class") == "review" and status == 202:
+                    audit_result = "pending"
+                _operator_audit(
+                    "desktop",
+                    "operator/desktop/open-url" if payload.get("action") == "open-url" else "operator/desktop-intent",
+                    audit_result,
+                    remote=remote,
+                    status=status,
+                    reason=payload.get("reason") or payload.get("message"),
+                    action_class=payload.get("action_class") or "safe",
+                    url=payload.get("url"),
+                    command=payload.get("command"),
+                    exitCode=payload.get("exitCode"),
+                    presentation=payload.get("presentation"),
+                    taskId=(payload.get("task") or {}).get("id"),
+                    kind="browser-task" if payload.get("task") else None,
+                    session_id=session_id,
+                )
+            return self._json(payload, status)
+
+        # POST /api/operator/browser/:action — M6 browser observation/review layer
+        m = self._match("api/operator/browser/:action")
+        if m:
+            action = str(m["action"] or "").strip().lower()
+            body = self._read_body()
+            auth_error, auth_status, remote = self._operator_auth_error("browser", f"operator/browser/{action}")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload, status = _operator_browser_payload(action, body)
+            target = f"operator/browser/{action}"
+            _operator_audit(
+                "screenshot" if action == "screenshot" else "browser",
+                target,
+                "ok" if status < 300 else ("review" if status == 202 else "failed"),
+                remote=remote,
+                status=status,
+                reason=payload.get("reason") or payload.get("error"),
+                action_class=payload.get("action_class") or ("safe" if action in {"open", "screenshot", "close", "status"} else "review"),
+                path=payload.get("path"),
+                bytes=payload.get("bytes"),
+                error=payload.get("error"),
+                url=payload.get("url"),
+                title=payload.get("title"),
+                mime=payload.get("mime"),
+            )
+            return self._json(payload, status)
+
+        # POST /api/operator/brain/observe — capture visible-browser state for a task
+        if self._match("api/operator/brain/observe") is not None:
+            body = self._read_body()
+            task_id = str(body.get("taskId") or body.get("task_id") or "").strip()
+            auth_error, auth_status, remote = self._operator_auth_error("brain", "operator/brain/observe")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload = _operator_brain_observe(task_id)
+            status = 200 if payload.get("ok") else 500
+            _operator_audit(
+                "brain",
+                "operator/brain/observe",
+                "ok" if payload.get("ok") else "failed",
+                remote=remote,
+                status=status,
+                action_class="safe",
+                taskId=task_id or None,
+                path=(payload.get("screenshot") or {}).get("path"),
+                url=payload.get("url"),
+                title=payload.get("title"),
+                reason=payload.get("error"),
+            )
+            return self._json(payload, status)
+
+        # POST /api/operator/brain/step — one observe-plan-act cycle
+        if self._match("api/operator/brain/step") is not None:
+            body = self._read_body()
+            task_id = str(body.get("taskId") or body.get("task_id") or "").strip()
+            approved = bool(body.get("approved"))
+            auth_error, auth_status, remote = self._operator_auth_error("brain", "operator/brain/step")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            payload, status = _operator_brain_step(task_id, approved=approved)
+            _operator_audit(
+                "brain",
+                "operator/brain/step",
+                "ok" if status < 300 else ("review" if status == 202 else "failed"),
+                remote=remote,
+                status=status,
+                action_class="review" if approved else "safe",
+                taskId=task_id,
+                reason=payload.get("reason") or payload.get("error"),
+            )
+            return self._json(payload, status)
+
+        # POST /api/operator/brain/start — background brain loop for an approved task
+        if self._match("api/operator/brain/start") is not None:
+            body = self._read_body()
+            task_id = str(body.get("taskId") or body.get("task_id") or "").strip()
+            approved = bool(body.get("approved"))
+            auth_error, auth_status, remote = self._operator_auth_error("brain", "operator/brain/start")
+            if auth_error:
+                return self._json(auth_error, auth_status)
+            task = _operator_browser_task_item(task_id)
+            if not task:
+                return self._json({"ok": False, "error": "browser task not found"}, 404)
+            started = _operator_start_browser_task_executor(task_id, approved=approved)
+            task = _operator_update_browser_task(
+                task_id,
+                "running",
+                "Operator Brain background loop started." if started else "Operator Brain is already running.",
+            )
+            payload = {"ok": True, "started": started, "task": task}
+            _operator_audit(
+                "brain",
+                "operator/brain/start",
+                "ok",
+                remote=remote,
+                status=200,
+                action_class="review" if approved else "safe",
+                taskId=task_id,
+            )
+            return self._json(payload, 200)
 
         # POST /api/sessions/:id/review-decision — record gate decisions only
         m = self._match("api/sessions/:id/review-decision")
@@ -3070,6 +5225,9 @@ def main():
     # Seed sessions on first run
     idx = _load_index()
     print(f"Agent OS server starting on {args.host}:{args.port}")
+    pair = _operator_pair_record()
+    pair_exp = datetime.datetime.fromtimestamp(int(pair.get("expiresAt") or 0), datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    print(f"Operator pairing code: {pair.get('code')} (expires {pair_exp})")
     print(f"Sessions: {len(idx['sessions'])}")
     for s in idx["sessions"]:
         hsid = s.get("hermesSessionId") or "—"

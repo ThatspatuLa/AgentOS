@@ -33,7 +33,7 @@
       "projectId": "zen",
       "parentSessionId": null,
       "hermesSessionId": "20260607_193056_683caea5",
-      "channel": "zen-chat",
+      "channel": "1519228976344727674",
       "color": "#6366f1",
       "summary": "Project Zen — intelligence engine, monitoring, monetization",
       "decisions": [
@@ -52,11 +52,11 @@
         "Files touched: task-link-ok"
       ],
       "taskId": "task-zen-memory-world",
-      "messageCount": 120,
+      "messageCount": 123,
       "repo": "/home/spatula/Projects/ZenNew",
       "branchPrefix": "session/zen/",
       "createdAt": "2026-06-16T05:02:21.313039Z",
-      "lastActive": "2026-06-17T07:26:33.900101Z"
+      "lastActive": "2026-06-27T17:15:20.000222Z"
     },
     {
       "id": "kiyosaki",
@@ -100,11 +100,11 @@
       "nextSafeGate": "M1 — project scoping",
       "recentActivity": [],
       "taskId": "task-minato-income-5k",
-      "messageCount": 10,
+      "messageCount": 15,
       "repo": "/home/spatula/Projects/ZenNew",
       "branchPrefix": "session/minato/",
       "createdAt": "2026-06-16T05:02:21.313043Z",
-      "lastActive": "2026-06-22T11:34:23.189878Z"
+      "lastActive": "2026-06-25T15:26:44.614519Z"
     },
     {
       "id": "rin",
@@ -179,5 +179,5 @@
       "lastActive": "2026-06-16T05:02:21.313047Z"
     }
   ],
-  "updatedAt": "2026-06-22T11:34:23.190381Z"
+  "updatedAt": "2026-06-27T17:15:20.000238Z"
 }

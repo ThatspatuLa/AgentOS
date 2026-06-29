@@ -1,0 +1,14 @@
+[Unit]
+Description=Zen Agent OS Discord operator bridge
+After=network-online.target agent-os.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/spatula/Projects/ZenNew
+ExecStart=/home/spatula/Projects/ZenNew/scripts/operator_bot_start.sh
+Restart=always
+RestartSec=5
+TimeoutStartSec=30
+
+[Install]
+WantedBy=default.target

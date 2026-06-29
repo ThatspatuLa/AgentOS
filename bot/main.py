@@ -29,6 +29,7 @@ OPERATOR_TOKEN_FILE = Path(os.getenv("OPERATOR_TOKEN_FILE", "/home/spatula/Proje
 
 # Channel → Session Mapping
 CHANNEL_SESSION_MAP = {
+    1519228976344727674: "zen",
     1513076747430793289: "zen",
     1516644810834841672: "zen-os",
     1500437316379086880: "kiyosaki",
@@ -135,13 +136,22 @@ def read_operator_token() -> str:
 
 def fetch_operator_inspect(project: str) -> tuple[int, dict]:
     """Call the read-only operator inspect endpoint with the bearer token."""
+    return operator_request("GET", f"/api/operator/inspect?project={urllib.parse.quote(project)}")
+
+
+def operator_request(method: str, path: str, payload: dict | None = None) -> tuple[int, dict]:
+    """Call an authenticated operator endpoint and return status + JSON payload."""
     token = read_operator_token()
     if not token:
         return 0, {"ok": False, "error": "operator token missing"}
-    url = f"{OPERATOR_API_URL}/api/operator/inspect?project={urllib.parse.quote(project)}"
-    request = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    body = None
+    headers = {"Authorization": f"Bearer {token}"}
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    request = urllib.request.Request(OPERATOR_API_URL + path, data=body, headers=headers, method=method.upper())
     try:
-        with urllib.request.urlopen(request, timeout=8) as response:
+        with urllib.request.urlopen(request, timeout=20) as response:
             body = response.read().decode("utf-8")
             return response.status, json.loads(body)
     except urllib.error.HTTPError as exc:
@@ -153,6 +163,154 @@ def fetch_operator_inspect(project: str) -> tuple[int, dict]:
         return exc.code, payload
     except Exception as exc:
         return 0, {"ok": False, "error": str(exc)}
+
+
+def build_operator_status_embed(status_code: int, payload: dict) -> discord.Embed:
+    ok = bool(payload.get("ok"))
+    embed = discord.Embed(
+        title="🛰️ Operator Status",
+        color=0x22c55e if ok else 0xef4444,
+        timestamp=datetime.utcnow(),
+    )
+    if not ok:
+        embed.description = f"Status `{status_code or 'n/a'}`: {payload.get('error', 'unknown error')}"
+        return embed
+    host = payload.get("host", {})
+    approvals = payload.get("approvals", {})
+    audit = payload.get("audit", {})
+    embed.add_field(name="Host", value=f"`{host.get('name', 'unknown')}`\n`{host.get('tailscaleIp', 'no tailscale ip')}`", inline=True)
+    embed.add_field(name="Approvals", value=f"Pending: `{approvals.get('pending', 0)}`", inline=True)
+    embed.add_field(name="Audit", value=f"Rows: `{audit.get('rows', 0)}`", inline=True)
+    embed.add_field(name="Network", value=payload.get("network", {}).get("allowed", "local-or-tailscale"), inline=False)
+    observe = payload.get("observe") or {}
+    if observe:
+        observe_text = observe.get("observeUrl") or "\n".join(observe.get("blockers") or ["not ready"])
+        embed.add_field(name="M7 Observation", value=str(observe_text)[:1024], inline=False)
+    return embed
+
+
+def build_operator_run_embed(project: str, command: str, status_code: int, payload: dict) -> discord.Embed:
+    action_class = payload.get("action_class") or "unknown"
+    color = {"safe": 0x22c55e, "review": 0xf59e0b, "blocked": 0xef4444}.get(action_class, 0x64748b)
+    embed = discord.Embed(title=f"💻 Operator Run — {action_class.upper()}", color=color, timestamp=datetime.utcnow())
+    embed.add_field(name="Project", value=f"`{project}`", inline=True)
+    embed.add_field(name="Status", value=f"`{status_code or 'n/a'}`", inline=True)
+    embed.add_field(name="Command", value=f"```text\n{command[:950]}\n```", inline=False)
+    if payload.get("reason"):
+        embed.add_field(name="Reason", value=str(payload.get("reason"))[:1024], inline=False)
+    if action_class == "safe":
+        stdout = payload.get("stdout") or ""
+        stderr = payload.get("stderr") or ""
+        embed.add_field(name="Exit", value=f"`{payload.get('exitCode')}`", inline=True)
+        embed.add_field(name="Stdout", value=f"```text\n{stdout[:950] or '(empty)'}\n```", inline=False)
+        if stderr:
+            embed.add_field(name="Stderr", value=f"```text\n{stderr[:950]}\n```", inline=False)
+    approval = payload.get("approval") or {}
+    if approval:
+        embed.add_field(name="Approval ID", value=f"`{approval.get('id')}`", inline=False)
+        embed.add_field(name="Expires", value=f"`{approval.get('expiresAt')}`", inline=True)
+    if payload.get("error"):
+        embed.add_field(name="Error", value=str(payload.get("error"))[:1024], inline=False)
+    return embed
+
+
+def build_operator_approvals_embed(status_code: int, payload: dict) -> discord.Embed:
+    embed = discord.Embed(title="📋 Operator Approvals", color=0x7dd3fc, timestamp=datetime.utcnow())
+    if not payload.get("ok"):
+        embed.description = f"Status `{status_code or 'n/a'}`: {payload.get('error', 'unknown error')}"
+        return embed
+    items = payload.get("items") or []
+    if not items:
+        embed.description = "No pending approvals."
+        return embed
+    for item in items[:8]:
+        embed.add_field(
+            name=f"{item.get('status', 'pending')} · {item.get('id')}",
+            value=f"`{item.get('project')}`\n```text\n{str(item.get('command') or '')[:220]}\n```",
+            inline=False,
+        )
+    return embed
+
+
+def build_operator_observe_embed(status_code: int, payload: dict) -> discord.Embed:
+    ok = bool(payload.get("ok"))
+    ready = payload.get("state") == "ready"
+    embed = discord.Embed(
+        title="🖥️ Operator Observe — M7",
+        color=0x22c55e if ok and ready else 0xf59e0b,
+        timestamp=datetime.utcnow(),
+    )
+    if not ok:
+        embed.description = f"Status `{status_code or 'n/a'}`: {payload.get('error', 'unknown error')}"
+        return embed
+    embed.add_field(name="State", value=f"`{payload.get('state', 'unknown')}`", inline=True)
+    embed.add_field(name="Live", value=f"`{bool(payload.get('live'))}`", inline=True)
+    if payload.get("observeUrl"):
+        embed.add_field(name="Observation URL", value=payload.get("observeUrl"), inline=False)
+    blockers = payload.get("blockers") or []
+    if blockers:
+        embed.add_field(name="Blockers", value="\n".join(f"• {item}" for item in blockers[:6]), inline=False)
+    tools = payload.get("tools") or {}
+    tool_lines = [f"{name}: {'yes' if path else 'no'}" for name, path in tools.items()]
+    embed.add_field(name="Tools", value="```text\n" + "\n".join(tool_lines)[:900] + "\n```", inline=False)
+    next_actions = payload.get("nextActions") or []
+    if next_actions:
+        embed.add_field(name="Next", value="\n".join(f"• {item}" for item in next_actions[:3]), inline=False)
+    return embed
+
+
+def build_operator_browser_embed(action: str, status_code: int, payload: dict) -> discord.Embed:
+    ok = bool(payload.get("ok"))
+    action_class = payload.get("action_class") or ("safe" if ok else "failed")
+    color = {"safe": 0x22c55e, "review": 0xf59e0b, "blocked": 0xef4444, "failed": 0xef4444}.get(action_class, 0x64748b)
+    embed = discord.Embed(
+        title=f"🌐 Operator Browser — {action}",
+        color=color,
+        timestamp=datetime.utcnow(),
+    )
+    embed.add_field(name="Status", value=f"`{status_code or 'n/a'}`", inline=True)
+    embed.add_field(name="Class", value=f"`{action_class}`", inline=True)
+    if payload.get("url"):
+        embed.add_field(name="URL", value=str(payload.get("url"))[:1024], inline=False)
+    if payload.get("title"):
+        embed.add_field(name="Title", value=str(payload.get("title"))[:1024], inline=False)
+    if payload.get("reason"):
+        embed.add_field(name="Reason", value=str(payload.get("reason"))[:1024], inline=False)
+    if payload.get("detail"):
+        embed.add_field(name="Detail", value=f"`{payload.get('detail')}`", inline=False)
+    if payload.get("error"):
+        embed.add_field(name="Error", value=str(payload.get("error"))[:1024], inline=False)
+    if payload.get("path"):
+        embed.add_field(name="Artifact", value=f"`{payload.get('path')}`", inline=False)
+    return embed
+
+
+class OperatorApprovalView(discord.ui.View):
+    def __init__(self, approval_id: str):
+        super().__init__(timeout=300)
+        self.approval_id = approval_id
+
+    async def _decide(self, interaction: discord.Interaction, action: str):
+        if ALLOWED_USER_ID and interaction.user.id != ALLOWED_USER_ID:
+            await interaction.response.send_message("Not authorized.", ephemeral=True)
+            return
+        status_code, payload = await asyncio.to_thread(
+            operator_request,
+            "POST",
+            "/api/operator/approval",
+            {"id": self.approval_id, "action": action, "approver": str(interaction.user)},
+        )
+        ok = payload.get("ok")
+        text = f"{'Accepted' if ok else 'Failed'} `{action}` for `{self.approval_id}` · status `{status_code}`"
+        await interaction.response.send_message(text, ephemeral=True)
+
+    @discord.ui.button(label="Approve", style=discord.ButtonStyle.success)
+    async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._decide(interaction, "approve")
+
+    @discord.ui.button(label="Deny", style=discord.ButtonStyle.danger)
+    async def deny_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._decide(interaction, "deny")
 
 
 def build_operator_inspect_embed(project: str, status_code: int, payload: dict) -> discord.Embed:
@@ -242,12 +400,35 @@ async def on_message(message: discord.Message):
     session = get_session(message.channel.id)
 
     async with message.channel.typing():
+        hermes_message = message.content
+        status_code, operator_payload = await asyncio.to_thread(
+            operator_request,
+            "POST",
+            "/api/operator/desktop-intent",
+            {"content": message.content, "session_id": session},
+        )
+        if operator_payload.get("handled"):
+            operator_text = (
+                operator_payload.get("message")
+                or operator_payload.get("reason")
+                or operator_payload.get("error")
+                or f"Operator handled request with status {status_code}."
+            )
+            if len(operator_text) <= 1900:
+                await message.reply(operator_text)
+            else:
+                await message.reply(operator_text[:1900])
+            if not operator_payload.get("continueHermes"):
+                await bot.process_commands(message)
+                return
+            hermes_message = operator_payload.get("hermesPrompt") or message.content
+
         # Queue the message for Hermes
         queue_file = queue_message_for_hermes(
             channel_id=message.channel.id,
             channel_name=message.channel.name,
             user=str(message.author),
-            message=message.content,
+            message=hermes_message,
         )
 
         # Wait for Hermes to respond (poll queue)
@@ -281,7 +462,7 @@ async def ping(ctx):
     await ctx.reply(f"🏓 Pong! Session: **{session}** | Channel: **{ctx.channel.name}**")
 
 
-@bot.command(name="status")
+@bot.hybrid_command(name="status", description="Show Zen bridge and operator status.")
 async def status(ctx):
     session = get_session(ctx.channel.id)
     instruction_file = get_instruction_file(session)
@@ -292,6 +473,12 @@ async def status(ctx):
     embed.add_field(name="Session", value=session, inline=True)
     embed.add_field(name="Instructions", value=instruction_file, inline=False)
     embed.add_field(name="Queue", value=str(QUEUE_DIR), inline=False)
+    status_code, operator = await asyncio.to_thread(operator_request, "GET", "/api/operator/status")
+    if operator.get("ok"):
+        host = operator.get("host", {})
+        embed.add_field(name="Operator", value=f"`{host.get('tailscaleIp', 'no tailscale ip')}` · pending `{operator.get('approvals', {}).get('pending', 0)}`", inline=False)
+    else:
+        embed.add_field(name="Operator", value=f"Unavailable: `{operator.get('error', status_code)}`", inline=False)
     await ctx.reply(embed=embed)
 
 
@@ -317,6 +504,175 @@ async def inspect(ctx, project: str = "zen-new"):
         status_code, payload = await asyncio.to_thread(fetch_operator_inspect, project)
     embed = build_operator_inspect_embed(project, status_code, payload)
     await ctx.reply(embed=embed)
+
+
+@bot.hybrid_command(name="run", description="Run or queue an operator command through SAFE/REVIEW/BLOCKED policy.")
+async def run(ctx, project: str = "zen-new", *, command: str = "pwd"):
+    if ALLOWED_USER_ID and ctx.author.id != ALLOWED_USER_ID:
+        await ctx.reply("Not authorized.")
+        return
+    async with ctx.typing():
+        status_code, payload = await asyncio.to_thread(
+            operator_request,
+            "POST",
+            "/api/operator/run",
+            {"project": project.strip().lower(), "command": command, "session_id": get_session(ctx.channel.id)},
+        )
+    embed = build_operator_run_embed(project, command, status_code, payload)
+    approval_id = (payload.get("approval") or {}).get("id")
+    await ctx.reply(embed=embed, view=OperatorApprovalView(approval_id) if approval_id else None)
+
+
+@bot.hybrid_command(name="services", description="Show operator service/status summary.")
+async def services(ctx):
+    status_code, payload = await asyncio.to_thread(operator_request, "GET", "/api/operator/status")
+    await ctx.reply(embed=build_operator_status_embed(status_code, payload))
+
+
+@bot.hybrid_command(name="observe", description="Show M7 noVNC observation URL or readiness blockers.")
+async def observe(ctx):
+    if ALLOWED_USER_ID and ctx.author.id != ALLOWED_USER_ID:
+        await ctx.reply("Not authorized.")
+        return
+    status_code, payload = await asyncio.to_thread(operator_request, "GET", "/api/operator/observe/status")
+    await ctx.reply(embed=build_operator_observe_embed(status_code, payload))
+
+
+@bot.hybrid_command(name="screenshot", description="Capture current desktop screenshot when available.")
+async def screenshot(ctx):
+    if ALLOWED_USER_ID and ctx.author.id != ALLOWED_USER_ID:
+        await ctx.reply("Not authorized.")
+        return
+    async with ctx.typing():
+        status_code, payload = await asyncio.to_thread(operator_request, "GET", "/api/operator/screenshot")
+    if payload.get("ok") and payload.get("dataUrl"):
+        import base64
+        from io import BytesIO
+        raw = payload["dataUrl"].split(",", 1)[1]
+        file = discord.File(BytesIO(base64.b64decode(raw)), filename="operator-screenshot.png")
+        embed = discord.Embed(title="📸 Operator Screenshot", color=0x22c55e, timestamp=datetime.utcnow())
+        embed.add_field(name="Bytes", value=f"`{payload.get('bytes')}`", inline=True)
+        await ctx.reply(embed=embed, file=file)
+        return
+    embed = discord.Embed(title="📸 Operator Screenshot", color=0xef4444, timestamp=datetime.utcnow())
+    embed.description = f"Status `{status_code or 'n/a'}`: {payload.get('error') or 'screenshot unavailable'}"
+    if payload.get("backend"):
+        embed.add_field(name="Backend", value=f"`{payload.get('backend')}`", inline=True)
+    if payload.get("helperMode") or payload.get("source"):
+        embed.add_field(name="Helper", value=f"`{payload.get('helperMode') or payload.get('source')}`", inline=True)
+    if payload.get("reason"):
+        embed.add_field(name="Reason", value=str(payload.get("reason"))[:900], inline=False)
+    attempts = payload.get("attempts") or []
+    if attempts:
+        lines = []
+        for attempt in attempts[-5:]:
+            lines.append(f"`{attempt.get('backend', 'unknown')}` — {attempt.get('status', 'n/a')}")
+        embed.add_field(name="Attempts", value="\n".join(lines), inline=False)
+    await ctx.reply(embed=embed)
+
+
+@bot.hybrid_command(name="browser", description="M6 operator browser: open/status/screenshot/close; click/type require review.")
+async def browser(ctx, action_or_url: str = "status", *, value: str = ""):
+    if ALLOWED_USER_ID and ctx.author.id != ALLOWED_USER_ID:
+        await ctx.reply("Not authorized.")
+        return
+    raw = (action_or_url or "status").strip()
+    action = raw.lower()
+    body: dict = {}
+    method = "POST"
+    path = "/api/operator/browser/status"
+
+    if action in {"status", "state"}:
+        method = "GET"
+        path = "/api/operator/browser/status"
+        action = "status"
+    elif action in {"open", "go", "navigate"}:
+        target = value.strip()
+        if not target:
+            await ctx.reply("Usage: `!browser open https://example.com`")
+            return
+        path = "/api/operator/browser/open"
+        body = {"url": target}
+        action = "open"
+    elif action in {"screenshot", "shot", "capture"}:
+        path = "/api/operator/browser/screenshot"
+        action = "screenshot"
+    elif action in {"close", "stop"}:
+        path = "/api/operator/browser/close"
+        action = "close"
+    elif action in {"click", "type"}:
+        path = f"/api/operator/browser/{action}"
+        body = {"selector": value.strip()} if action == "click" else {"text": value.strip()}
+    else:
+        path = "/api/operator/browser/open"
+        body = {"url": raw if not value.strip() else f"{raw} {value.strip()}"}
+        action = "open"
+
+    async with ctx.typing():
+        status_code, payload = await asyncio.to_thread(operator_request, method, path, body if method == "POST" else None)
+
+    embed = build_operator_browser_embed(action, status_code, payload)
+    if action == "screenshot" and payload.get("ok") and payload.get("dataUrl"):
+        import base64
+        from io import BytesIO
+        raw_image = payload["dataUrl"].split(",", 1)[1]
+        file = discord.File(BytesIO(base64.b64decode(raw_image)), filename="operator-browser.png")
+        await ctx.reply(embed=embed, file=file)
+        return
+    await ctx.reply(embed=embed)
+
+
+@bot.hybrid_command(name="tail", description="Safely tail a project-local log file.")
+async def tail(ctx, project: str = "zen-new", path: str = "data/operator/audit.jsonl", lines: int = 40):
+    lines = max(1, min(int(lines or 40), 120))
+    command = f"tail -n {lines} {path}"
+    async with ctx.typing():
+        status_code, payload = await asyncio.to_thread(
+            operator_request,
+            "POST",
+            "/api/operator/run",
+            {"project": project.strip().lower(), "command": command, "session_id": get_session(ctx.channel.id)},
+        )
+    await ctx.reply(embed=build_operator_run_embed(project, command, status_code, payload))
+
+
+@bot.hybrid_command(name="approve", description="Approve a pending operator review request without auto-executing it.")
+async def approve(ctx, approval_id: str):
+    status_code, payload = await asyncio.to_thread(
+        operator_request,
+        "POST",
+        "/api/operator/approval",
+        {"id": approval_id, "action": "approve", "approver": str(ctx.author)},
+    )
+    await ctx.reply(f"Approve `{approval_id}` → `{status_code}` · `{payload.get('error') or payload.get('execution') or 'ok'}`")
+
+
+@bot.hybrid_command(name="deny", description="Deny a pending operator review request.")
+async def deny(ctx, approval_id: str):
+    status_code, payload = await asyncio.to_thread(
+        operator_request,
+        "POST",
+        "/api/operator/approval",
+        {"id": approval_id, "action": "deny", "approver": str(ctx.author)},
+    )
+    await ctx.reply(f"Deny `{approval_id}` → `{status_code}` · `{payload.get('error') or 'ok'}`")
+
+
+@bot.hybrid_command(name="abort", description="Abort a pending operator review request.")
+async def abort(ctx, approval_id: str):
+    status_code, payload = await asyncio.to_thread(
+        operator_request,
+        "POST",
+        "/api/operator/approval",
+        {"id": approval_id, "action": "abort", "approver": str(ctx.author)},
+    )
+    await ctx.reply(f"Abort `{approval_id}` → `{status_code}` · `{payload.get('error') or 'ok'}`")
+
+
+@bot.hybrid_command(name="approvals", description="List operator approvals.")
+async def approvals(ctx):
+    status_code, payload = await asyncio.to_thread(operator_request, "GET", "/api/operator/approvals")
+    await ctx.reply(embed=build_operator_approvals_embed(status_code, payload))
 
 
 @bot.command(name="llm")

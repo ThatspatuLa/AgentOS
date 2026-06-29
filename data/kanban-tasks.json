@@ -545,11 +545,11 @@
         "All in information-gathering mode - no live sends"
       ],
       "activity": [
-        "Completed: Six — that message looks like a stray/au",
         "Completed: Six — confirmed: that's a test, not a re",
         "Files touched: final_status.json",
         "Files touched: final_status.json",
-        "Completed: ┊ 💻 preparing terminal…, Six — that last block is a real cron mes"
+        "Completed: ┊ 💻 preparing terminal…, Six — that last block is a real cron mes",
+        "Failed: [Hermes timeout — no response in 5 minutes]"
       ]
     },
     {
@@ -2040,6 +2040,28 @@
           ]
         },
         {
+          "title": "M3A: Desktop Capture Helper",
+          "status": "wip",
+          "description": "Build a small user-session screenshot helper/service for Agent OS. It captures optional screenshot artifacts for Review/Proof, Discord /screenshot, and operator evidence without blocking command transcript, file log, git diff, validation result, or approval history when screenshots are unavailable.",
+          "nextAction": "1. Do not just wrap gnome-screenshot.\n2. Run capture from the real desktop/user session where display/session env is available.\n3. Try multiple backends where available: GNOME Shell DBus screenshot, xdg-desktop-portal screenshot if usable, grim for Wayland/wlroots, scrot/maim/xwd/import for X11, later noVNC capture after M7.\n4. Store artifacts under data/operator/artifacts/screenshots.\n5. Return structured result: ok, backend, path, error, reason.\n6. If screenshot is unavailable, Review/Proof shows screenshot unavailable and continues.\n7. Wire helper output to Review/Proof and Discord /screenshot.",
+          "evidence": [
+            "Normal terminal gnome-screenshot -f /tmp/agent-os-normal-terminal.png failed: fell back to X11, could not capture any window, hung until interrupted, and produced no file",
+            "/api/operator/screenshot failed cleanly with ok=false and timeout",
+            "Host capture method is unreliable; this is not only an Agent OS server-context issue"
+          ],
+          "validation": [
+            "Screenshot helper reports which backend was attempted",
+            "Successful capture writes a PNG artifact",
+            "Failed capture returns clean JSON and no hang",
+            "Review/Proof works with and without screenshot artifacts",
+            "Discord /screenshot handles unavailable capture cleanly"
+          ],
+          "risk": "Medium",
+          "activity": [
+            "M3A added after terminal and Agent OS screenshot proof failures"
+          ]
+        },
+        {
           "title": "M4: Discord command interface — operator UI",
           "status": "backlog",
           "description": "Full Discord operator UI with commands, status streaming, screenshots, and approvals.",
@@ -2083,44 +2105,63 @@
         },
         {
           "title": "M6: Browser/Playwright control",
-          "status": "backlog",
-          "description": "Generalize existing Playwright (from google_maps_au.py) into a general browser control tool.",
-          "nextAction": "1. Refactor Playwright out of google_maps_au.py into intelligence_engine/operator/browser.py.\n2. Add /api/operator/browser/* endpoints: open, click, type, screenshot, close, navigate.\n3. Classification: navigate = safe, click/type = review, file upload = blocked.\n4. Wire Discord commands: !browser <url>, !browser click <selector>, !browser type <text>, !browser screenshot.\n5. Screenshot attached to every browser action.\n6. Browser session tracked in audit.jsonl.",
+          "status": "validate",
+          "description": "Generalized Playwright into a review-safe browser observation layer. Navigation/status/screenshot/close are wired; click/type return review-required until live control is deliberately enabled later.",
+          "nextAction": "Frontend review: confirm the Operator browser proof/audit flow is acceptable. Optional next pass: add richer mobile browser controls and before/after screenshots for reviewed actions. Keep live click/type execution disabled until a later control milestone.",
           "evidence": [
             "intelligence_engine/operator/browser.py",
             "agent_os_server.py",
+            "bot/main.py Discord !browser command",
+            "/api/operator/browser/status",
+            "/api/operator/browser/open",
+            "/api/operator/browser/screenshot",
+            "/api/operator/browser/close",
             "data/operator/audit.jsonl"
           ],
           "validation": [
-            "Browser session controllable from Discord",
-            "Every click/type sends screenshot back to Discord",
-            "File upload is blocked",
-            "Browser actions appear in Review/Proof View"
+            "Python compile passed for agent_os_server.py and intelligence_engine/operator/browser.py",
+            "Browser open returned ok=true for Agent OS",
+            "Browser screenshot wrote PNG artifact under data/operator/artifacts/browser",
+            "Click endpoint returned HTTP 202 review-required instead of executing live control",
+            "Browser screenshot appears in operator proof/audit screenshots"
           ],
           "risk": "Medium",
           "activity": [
-            "Task created 2026-06-21"
+            "Task created 2026-06-21",
+            "M6 browser operator implemented with system Chrome fallback",
+            "Threading issue fixed by making browser open/screenshot stateless per request",
+            "Validated browser screenshot artifact and proof/audit inclusion on 2026-06-23"
           ]
         },
         {
           "title": "M7: noVNC live observation",
-          "status": "backlog",
-          "description": "Replace placeholder screen panel in Operator View with real live noVNC over Tailscale. This unblocks M5A's placeholder → real screen swap.",
-          "nextAction": "1. Install tigervnc-standalone-server + novnc on desktop.\n2. Configure VNC: display :1, password-protected, 1920x1080, 30fps.\n3. noVNC serves on localhost:6080, exposed via Tailscale.\n4. Add /observe Discord command that returns Tailscale URL.\n5. Two-layer auth: Tailscale ACL + noVNC password.\n6. Auto-disconnect after 30 min idle.\n7. Mobile test: open URL in iOS Safari full-screen, verify <100ms input latency.",
+          "status": "validate",
+          "description": "Replace placeholder screen panel in Operator View with live noVNC over Tailscale. M7 is now observation-only using a TigerVNC virtual desktop bridged through websockify/noVNC. It is not the real GNOME Wayland desktop and desktop control remains disabled.",
+          "nextAction": "Frontend review: open the Observation URL from iOS Safari over Tailscale and confirm the virtual desktop renders acceptably. Keep control disabled until M8 review.",
           "evidence": [
-            "vnc-server.service (systemd)",
-            "novnc.service (systemd)",
-            "Tailscale ACL"
+            "scripts/operator_m7_setup.sh",
+            "scripts/operator_m7_start.sh",
+            "TigerVNC virtual desktop :2 on 127.0.0.1:5902",
+            "websockify/noVNC on 100.101.170.83:6080",
+            "/api/operator/observe/status",
+            "Discord /observe",
+            "agent-os-mobile Manual/Observation tab",
+            "x11vnc test: Wayland detected; x11vnc exited"
           ],
           "validation": [
-            "Phone sees desktop in real time at 30fps",
-            "Input latency <100ms on same Tailscale network",
-            "Auto-disconnect after 30 min idle",
-            "VNC password cannot be brute-forced (rate limit)"
+            "/api/operator/observe/status returned ok=true, state=ready, live=true",
+            "noVNC vnc.html returned HTTP 200",
+            "Observe URL available at http://100.101.170.83:6080/vnc.html?host=100.101.170.83&port=6080&autoconnect=true&resize=remote",
+            "TigerVNC virtual desktop listens on 127.0.0.1:5902",
+            "Readiness endpoint reports blockers cleanly when live observation is unavailable"
           ],
           "risk": "Medium",
           "activity": [
-            "Task created 2026-06-21"
+            "Task created 2026-06-21",
+            "M7 readiness endpoint, mobile observe panel, and Discord /observe added",
+            "Blocked: real GNOME Wayland desktop cannot be observed directly with x11vnc",
+            "User installed noVNC/websockify/TigerVNC dependencies",
+            "M7 virtual desktop observation validated over Tailscale on 2026-06-23"
           ]
         },
         {

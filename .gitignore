@@ -7,7 +7,15 @@ data/sessions/*/messages.jsonl
 data/sessions/*/events.jsonl
 data/sessions/index.json
 data/operator/.token
+data/operator/.pairing-code
+data/operator/.totp-secret
+data/operator/authenticator-setup.png
+data/operator/authenticator-setup.uri
+data/operator/.vnc-passwd
+data/operator/.vnc-password
+data/operator/.rdp-credentials
 data/operator/pending-approvals.json
+data/operator/artifacts/
 
 # Intelligence engine runtime artefacts — outputs, never source.
 products/

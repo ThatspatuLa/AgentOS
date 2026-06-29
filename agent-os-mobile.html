@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Zen Operator</title>
+  <link rel="stylesheet" href="/agent-os-mobile.css">
+</head>
+<body>
+  <main class="mobile-shell">
+    <header class="mobile-topbar">
+      <div>
+        <span class="eyebrow">Agent OS</span>
+        <h1>Remote Operator</h1>
+      </div>
+      <button class="icon-btn" id="refresh-btn" title="Refresh">↻</button>
+    </header>
+
+    <section class="operator-state-strip" aria-label="Operator state">
+      <span id="state-network">Tailscale pending</span>
+      <span id="state-helper">Capture helper pending</span>
+      <span id="state-proof">Proof idle</span>
+    </section>
+
+    <section class="auth-card" id="auth-card">
+      <div>
+        <span class="eyebrow">Secure Pairing</span>
+        <h2>Pair this phone</h2>
+        <p>Enter the six-digit Google Authenticator code. The server backup code still works if needed.</p>
+      </div>
+      <div class="pair-row">
+        <input id="pair-code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000">
+        <button id="pair-btn">Pair</button>
+      </div>
+      <p class="pair-status" id="pair-status" role="status" aria-live="polite"></p>
+      <details class="manual-token">
+        <summary>Advanced manual token</summary>
+        <input id="token-input" type="password" autocomplete="off" placeholder="op...">
+        <button id="save-token-btn">Save token</button>
+      </details>
+    </section>
+
+    <nav class="mobile-tabs" aria-label="Operator views">
+      <button class="active" data-view="operator">Operator</button>
+      <button data-view="manual">Manual</button>
+      <button data-view="proof">Proof</button>
+    </nav>
+
+    <section class="view active" id="view-operator">
+      <section class="operator-screen-panel">
+        <div class="desktop-toolbar">
+          <div>
+            <span class="eyebrow">Real Desktop</span>
+            <strong id="host-label">Waiting for operator</strong>
+          </div>
+          <div class="desktop-toolbar-actions">
+            <span id="status-screen">Offline</span>
+            <button class="icon-btn" id="screen-refresh-btn" title="Reconnect">↻</button>
+          </div>
+        </div>
+        <div class="desktop-viewport">
+          <iframe class="desktop-frame" id="operator-frame" title="Real desktop observation" allow="fullscreen"></iframe>
+          <div class="desktop-empty" id="operator-screen-empty">
+            <strong>Real desktop waiting</strong>
+            <p id="network-label">Pair this phone to connect Agent OS.</p>
+          </div>
+        </div>
+        <div class="status-row operator-status-row">
+          <span id="status-auth">Auth unknown</span>
+          <span id="status-pending">0 pending</span>
+          <span id="status-audit">0 audit rows</span>
+        </div>
+        <div class="operator-task-strip" id="operator-task-strip">
+          <div class="empty">No active browser task.</div>
+        </div>
+      </section>
+
+      <section class="chat-panel">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">Zen Chat</span>
+            <h2>Hermes operator</h2>
+          </div>
+          <span class="channel-badge">Discord · 1519228976344727674</span>
+        </div>
+        <div class="zen-chat-thread" id="zen-chat-thread">
+          <div class="empty">Pair this phone to load the Zen conversation.</div>
+        </div>
+        <div class="zen-live-progress" id="zen-live-progress" hidden></div>
+        <div class="zen-chat-compose">
+          <input id="zen-chat-input" type="text" autocomplete="off" placeholder="Message Zen through Hermes">
+          <button id="zen-chat-send">Send</button>
+        </div>
+        <details class="operator-tools">
+          <summary>Operator tools</summary>
+          <div class="quick-grid">
+            <button data-command="pwd">pwd</button>
+            <button data-command="git status --short">git status</button>
+            <button data-command="tail -n 30 data/operator/audit.jsonl">audit tail</button>
+          </div>
+          <div class="run-row">
+            <select id="project-select">
+              <option value="zen-new">zen-new</option>
+              <option value="zen">zen</option>
+              <option value="kiyosaki">kiyosaki</option>
+            </select>
+            <input id="command-input" type="text" placeholder="SAFE command">
+            <button id="run-btn">Run</button>
+          </div>
+          <button id="inspect-btn">Inspect project</button>
+          <div class="mobile-log" id="operator-log"></div>
+        </details>
+      </section>
+    </section>
+
+    <section class="view" id="view-manual">
+      <section class="manual-stage">
+        <div class="manual-toolbar">
+          <div>
+            <span class="eyebrow">Manual Control</span>
+            <strong id="observe-title">Real desktop waiting</strong>
+          </div>
+          <span id="observe-state">Offline</span>
+          <button class="icon-btn" id="observe-refresh-btn" title="Reconnect">↻</button>
+          <button id="observe-open-btn" disabled>Full screen</button>
+        </div>
+        <div class="manual-viewport">
+          <iframe class="desktop-frame" id="manual-frame" title="Real desktop manual control" allow="fullscreen"></iframe>
+          <div class="desktop-empty" id="manual-screen-empty">
+            <strong>Manual control unavailable</strong>
+            <p id="observe-detail">Connect the real desktop bridge to use touch and keyboard control.</p>
+          </div>
+        </div>
+        <p class="observe-url" id="observe-url" hidden>No desktop URL yet.</p>
+      </section>
+    </section>
+
+    <section class="view" id="view-proof">
+      <section class="proof-panel">
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">Review / Proof</span>
+            <h2>Operator trail</h2>
+          </div>
+          <button id="proof-refresh-btn">Refresh</button>
+        </div>
+        <div class="proof-summary" id="proof-summary">
+          <span><b>0</b> commands</span>
+          <span><b>0</b> tasks</span>
+          <span><b>0</b> files</span>
+          <span><b>0</b> approvals</span>
+        </div>
+        <div class="browser-task-list" id="browser-task-list"></div>
+        <div class="approval-list" id="approval-list"></div>
+        <div class="proof-grid">
+          <article>
+            <h3>Command transcript</h3>
+            <div id="proof-commands"></div>
+          </article>
+          <article>
+            <h3>File access</h3>
+            <div id="proof-files"></div>
+          </article>
+          <article>
+            <h3>Network calls</h3>
+            <div id="proof-network"></div>
+          </article>
+          <article>
+            <h3>Screenshots</h3>
+            <div id="proof-screens"></div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      token: localStorage.getItem('zenOperatorToken') || '',
+      project: 'zen-new',
+      lastProof: null,
+      observe: null,
+      activeView: 'operator',
+      zenMessages: [],
+      chatBusy: false,
+      activeBrainTasks: 0
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const log = (title, detail, tone = '') => {
+      const row = document.createElement('div');
+      row.className = 'log-row ' + tone;
+      row.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail || '')}</p>`;
+      $('operator-log').prepend(row);
+    };
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function setPairStatus(message = '', tone = '') {
+      const node = $('pair-status');
+      node.textContent = message;
+      node.className = `pair-status ${tone}`.trim();
+    }
+
+    async function api(path, options = {}) {
+      const headers = {'Content-Type': 'application/json'};
+      if (state.token) headers.Authorization = `Bearer ${state.token}`;
+      const resp = await fetch(path, {...options, headers});
+      const data = await resp.json().catch(() => ({ok:false, error:'Invalid JSON response'}));
+      return {status: resp.status, data};
+    }
+
+    function setAuthUi() {
+      $('auth-card').style.display = state.token ? 'none' : 'grid';
+      $('status-auth').textContent = state.token ? 'Paired' : 'Pairing needed';
+      $('state-network').textContent = state.token ? 'Paired over Tailscale' : 'Pairing needed';
+    }
+
+    function clearAuth(reason = 'Pairing expired') {
+      state.token = '';
+      localStorage.removeItem('zenOperatorToken');
+      setAuthUi();
+      setScreenStatus('Offline');
+      $('network-label').textContent = reason;
+      renderDesktopFrames(null);
+      log('Pairing reset', reason, 'warn');
+    }
+
+    function setScreenStatus(text, tone = '') {
+      const node = $('status-screen');
+      node.textContent = text;
+      node.className = tone;
+      $('state-helper').textContent = text;
+      $('state-helper').className = tone;
+    }
+
+    async function pairPhone() {
+      const code = $('pair-code-input').value.replace(/\D/g, '').slice(0, 6);
+      if (code.length !== 6) {
+        setPairStatus('Enter the current six-digit authenticator code.', 'warn');
+        log('Pairing code needed', 'Enter the six-digit Google Authenticator code.', 'warn');
+        return;
+      }
+      const pairBtn = $('pair-btn');
+      pairBtn.disabled = true;
+      pairBtn.textContent = 'Pairing...';
+      setPairStatus('Checking authenticator code...', '');
+      try {
+        const {status, data} = await api('/api/operator/pair', {
+          method: 'POST',
+          body: JSON.stringify({code})
+        });
+        if (!data.ok || !data.token) {
+          const message = data.error || `HTTP ${status}`;
+          setPairStatus(`Pairing failed: ${message}`, 'bad');
+          log('Pairing failed', message, 'bad');
+          return;
+        }
+        state.token = data.token;
+        localStorage.setItem('zenOperatorToken', state.token);
+        $('pair-code-input').value = '';
+        setAuthUi();
+        setPairStatus(`Phone paired${data.method ? ` with ${data.method}` : ''}. Loading operator...`, 'good');
+        log('Phone paired', 'Remote Operator is connected to this Agent OS session.', 'good');
+        await refreshStatus();
+        await refreshZenChat();
+        await refreshProof();
+      } catch (error) {
+        const message = error?.message || 'Could not reach Agent OS server.';
+        setPairStatus(`Pairing failed: ${message}`, 'bad');
+        log('Pairing failed', message, 'bad');
+      } finally {
+        pairBtn.disabled = false;
+        pairBtn.textContent = 'Pair';
+      }
+    }
+
+    async function refreshStatus() {
+      setAuthUi();
+      if (!state.token) return;
+      const {status, data} = await api('/api/operator/mobile-status');
+      if (!data.ok) {
+        if (status === 401) clearAuth('Pairing expired or invalid. Pair this phone again.');
+        log('Status failed', `${status}: ${data.error || 'unknown'}`, 'bad');
+        return;
+      }
+      $('host-label').textContent = data.host?.name || 'Operator host';
+      $('network-label').textContent = data.host?.tailscaleIp ? `Tailscale ${data.host.tailscaleIp}` : data.network?.allowed || 'Local/Tailscale only';
+      $('status-pending').textContent = `${data.approvals?.pending || 0} pending`;
+      $('status-audit').textContent = `${data.audit?.rows || 0} audit rows`;
+      if (data.observe) renderObserveStatus(data.observe);
+    }
+
+    function renderObserveStatus(data) {
+      state.observe = data || null;
+      const ready = data?.state === 'ready' && Boolean(data?.viewUrl || data?.observeUrl);
+      const realDesktop = Boolean(data?.realDesktop?.active);
+      const stateText = realDesktop ? 'Real desktop live' : ready ? 'Virtual fallback' : 'Offline';
+      $('observe-state').textContent = stateText;
+      $('observe-state').className = ready ? 'good' : 'bad';
+      $('observe-title').textContent = realDesktop ? 'Real desktop control' : ready ? 'Virtual desktop fallback' : 'Manual control unavailable';
+      const blockers = data?.blockers || [];
+      $('observe-detail').textContent = realDesktop
+        ? 'Touch, click, and keyboard input are enabled in this Manual view.'
+        : ready
+          ? 'The transport is online, but the real GNOME desktop bridge is not active yet.'
+        : (blockers[0] || 'noVNC observation is not configured yet.');
+      const hasUrl = Boolean(data?.controlUrl || data?.observeUrl);
+      $('observe-open-btn').disabled = !hasUrl;
+      $('observe-url').textContent = hasUrl ? (data.controlUrl || data.observeUrl) : 'No desktop URL yet.';
+      setScreenStatus(realDesktop ? 'Live desktop' : ready ? 'Fallback online' : 'Offline', ready ? 'good' : 'bad');
+      $('network-label').textContent = realDesktop
+        ? 'Connected to the current GNOME desktop.'
+        : ready
+          ? 'Transport ready; real desktop bridge still required.'
+          : (blockers[0] || 'Desktop transport unavailable.');
+      renderDesktopFrames(data);
+    }
+
+    function setDesktopFrame(frameId, emptyId, url) {
+      const frame = $(frameId);
+      const empty = $(emptyId);
+      if (!url) {
+        frame.removeAttribute('src');
+        frame.classList.remove('active');
+        empty.hidden = false;
+        return;
+      }
+      if (frame.getAttribute('src') !== url) frame.setAttribute('src', url);
+      frame.classList.add('active');
+      empty.hidden = true;
+    }
+
+    function renderDesktopFrames(data = state.observe) {
+      const viewUrl = data?.viewUrl || data?.observeUrl || '';
+      const controlUrl = data?.controlUrl || data?.observeUrl || '';
+      setDesktopFrame('operator-frame', 'operator-screen-empty', state.activeView === 'operator' ? viewUrl : '');
+      setDesktopFrame('manual-frame', 'manual-screen-empty', state.activeView === 'manual' ? controlUrl : '');
+    }
+
+    async function refreshObserveStatus() {
+      setAuthUi();
+      if (!state.token) return;
+      const {status, data} = await api('/api/operator/observe/status');
+      if (status === 401) {
+        clearAuth('Pairing expired or invalid. Pair this phone again.');
+        return;
+      }
+      if (!data.ok) {
+        $('observe-title').textContent = 'M7 observation unavailable';
+        $('observe-detail').textContent = data.error || 'Could not check observation readiness.';
+        $('observe-state').textContent = 'Observation unavailable';
+        $('observe-state').className = 'bad';
+        return;
+      }
+      renderObserveStatus(data);
+    }
+
+    function renderZenChat(messages) {
+      state.zenMessages = Array.isArray(messages) ? messages : [];
+      const rows = state.zenMessages.filter(item => item?.content).slice(-40);
+      const thread = $('zen-chat-thread');
+      if (!rows.length) {
+        thread.innerHTML = '<div class="empty">No Zen messages yet.</div>';
+        return;
+      }
+      thread.innerHTML = rows.map(item => `
+        <article class="zen-message ${item.role === 'user' ? 'user' : 'assistant'}">
+          <span>${item.role === 'user' ? 'You' : 'Zen'}</span>
+          <p>${escapeHtml(item.content)}</p>
+        </article>
+      `).join('');
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    async function refreshZenChat() {
+      if (!state.token) return;
+      const {status, data} = await api('/api/sessions/zen/messages?all=1');
+      if (status === 401) {
+        clearAuth('Pairing expired or invalid. Pair this phone again.');
+        return;
+      }
+      renderZenChat(data.messages || []);
+    }
+
+    async function sendZenMessage() {
+      const input = $('zen-chat-input');
+      const content = input.value.trim();
+      if (!content || state.chatBusy) return;
+      state.chatBusy = true;
+      input.value = '';
+      $('zen-chat-send').disabled = true;
+      renderZenChat([...state.zenMessages, {role: 'user', content}]);
+      const progress = $('zen-live-progress');
+      progress.hidden = false;
+      progress.textContent = 'Zen is receiving the request...';
+      try {
+        progress.textContent = 'Checking Operator action...';
+        const operatorIntent = await api('/api/operator/desktop-intent', {
+          method: 'POST',
+          body: JSON.stringify({content, session_id: 'mobile-operator'})
+        });
+        if (operatorIntent.status === 401) {
+          clearAuth('Pairing expired or invalid. Pair this phone again.');
+          return;
+        }
+        let hermesContent = content;
+        if (operatorIntent.data?.handled) {
+          const isReview = operatorIntent.data.action_class === 'review';
+          const message = operatorIntent.data.ok || isReview
+            ? (operatorIntent.data.message || `Opened ${operatorIntent.data.url} on the real desktop.`)
+            : (`Operator action failed: ${operatorIntent.data.reason || operatorIntent.data.error || operatorIntent.data.message || `HTTP ${operatorIntent.status}`}`);
+          progress.textContent = message;
+          renderZenChat([...state.zenMessages, {role: 'assistant', content: message}]);
+          await refreshStatus();
+          await refreshProof();
+          await refreshObserveStatus();
+          if (!operatorIntent.data.continueHermes) return;
+          hermesContent = operatorIntent.data.hermesPrompt || content;
+          progress.textContent = 'Asking Hermes to plan the supervised browser steps...';
+        }
+        progress.textContent = 'Forwarding to Hermes...';
+        const resp = await fetch('/api/sessions/zen/messages/stream', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', Authorization: `Bearer ${state.token}`},
+          body: JSON.stringify({role: 'user', content: hermesContent})
+        });
+        if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        while (true) {
+          const {value, done} = await reader.read();
+          buffer += decoder.decode(value || new Uint8Array(), {stream: !done});
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            const event = JSON.parse(line);
+            if (event.event === 'progress' && event.line) progress.textContent = event.line;
+            if (event.event === 'complete') {
+              progress.textContent = 'Zen completed the request.';
+              if (event.assistant?.content) {
+                renderZenChat([...state.zenMessages, event.assistant]);
+              }
+            }
+            if (event.event === 'failed') throw new Error(event.error || 'Zen request failed');
+          }
+          if (done) break;
+        }
+        await refreshZenChat();
+      } catch (error) {
+        progress.textContent = `Zen chat failed: ${error.message}`;
+      } finally {
+        state.chatBusy = false;
+        $('zen-chat-send').disabled = false;
+      }
+    }
+
+    async function runCommand(command) {
+      const project = $('project-select').value;
+      const {status, data} = await api('/api/operator/run', {
+        method: 'POST',
+        body: JSON.stringify({project, command, session_id: 'mobile-operator'})
+      });
+      const tone = data.action_class === 'blocked' ? 'bad' : data.action_class === 'review' ? 'warn' : data.ok ? 'good' : 'bad';
+      const detail = data.stdout || data.reason || data.error || `HTTP ${status}`;
+      log(`${data.action_class || 'run'} · ${command}`, detail, tone);
+      await refreshProof();
+      await refreshStatus();
+    }
+
+    async function inspectProject() {
+      const project = $('project-select').value;
+      const {status, data} = await api(`/api/operator/inspect?project=${encodeURIComponent(project)}`);
+      log(`inspect · ${project}`, data.ok ? `${data.tree?.entries?.length || 0} entries · ${data.git?.statusShort || 'clean'}` : `${status}: ${data.error}`, data.ok ? 'good' : 'bad');
+      await refreshProof();
+      await refreshStatus();
+    }
+
+    function renderRows(node, rows, empty) {
+      if (!rows || !rows.length) {
+        node.innerHTML = `<div class="empty">${escapeHtml(empty)}</div>`;
+        return;
+      }
+      node.innerHTML = rows.slice(-8).reverse().map(row => `
+        <div class="proof-row">
+          <strong>${escapeHtml(row.action_type || row.target || 'operator')}</strong>
+          <p>${escapeHtml(row.command || row.error || row.reason || row.project || row.remote || row.backend || 'recorded')}</p>
+          <span>${escapeHtml(row.status || row.result || '')}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderProofSummary(data, approvals, browserTasks = []) {
+      const commands = data.commandTranscript || [];
+      const files = data.fileAccess || [];
+      const screens = data.screenshots || [];
+      const pending = (approvals || []).filter(item => item.status === 'pending');
+      $('proof-summary').innerHTML = `
+        <span><b>${commands.length}</b> commands</span>
+        <span><b>${browserTasks.length}</b> tasks</span>
+        <span><b>${files.length}</b> files</span>
+        <span><b>${pending.length}</b> approvals</span>
+      `;
+      $('state-proof').textContent = `${commands.length + files.length + screens.length + browserTasks.length} proof rows`;
+    }
+
+    function mergeProofData(sessionData, allData) {
+      const session = sessionData?.ok ? sessionData : {};
+      const all = allData?.ok ? allData : {};
+      const merged = {...all, ...session};
+      ['operatorLogs', 'commandTranscript', 'fileAccess', 'networkCalls', 'screenshots'].forEach(key => {
+        const sessionRows = Array.isArray(session[key]) ? session[key] : [];
+        const allRows = Array.isArray(all[key]) ? all[key] : [];
+        merged[key] = sessionRows.length ? sessionRows : allRows;
+      });
+      merged.ok = Boolean(sessionData?.ok || allData?.ok);
+      return merged;
+    }
+
+    async function refreshProof() {
+      if (!state.token) return;
+      const proof = await api('/api/operator/audit?sessionId=mobile-operator');
+      const allProof = await api('/api/operator/audit');
+      const approvals = await api('/api/operator/approvals');
+      const browserTasks = await api('/api/operator/browser-tasks');
+      if (proof.status === 401 || allProof.status === 401 || approvals.status === 401 || browserTasks.status === 401) {
+        clearAuth('Pairing expired or invalid. Pair this phone again.');
+        return;
+      }
+      const data = mergeProofData(proof.data, allProof.data);
+      state.lastProof = data;
+      renderBrowserTasks(browserTasks.data?.items || []);
+      renderRows($('proof-commands'), data.commandTranscript, 'No command rows yet.');
+      renderRows($('proof-files'), data.fileAccess, 'No file access yet.');
+      renderRows($('proof-network'), data.networkCalls, 'No network calls yet.');
+      renderRows($('proof-screens'), data.screenshots, 'No screenshots yet.');
+      const approvalItems = approvals.data?.items || [];
+      renderApprovals(approvalItems);
+      renderProofSummary(data, approvalItems, browserTasks.data?.items || []);
+    }
+
+    function renderBrowserTasks(items) {
+      const active = (items || []).filter(item => item && item.status !== 'complete' && item.status !== 'cancelled');
+      state.activeBrainTasks = active.filter(item => ['running', 'approved_running', 'needs_approval'].includes(String(item.status || ''))).length;
+      renderOperatorTaskStrip(active);
+      if (!active.length) {
+        $('browser-task-list').innerHTML = '<div class="empty">No active browser tasks.</div>';
+        return;
+      }
+      $('browser-task-list').innerHTML = active.slice(-4).reverse().map(task => {
+        const steps = (task.plan || []).map((step, index) => `
+          <li>
+            <span>${index + 1}</span>
+            <strong>${escapeHtml(step.title || 'Step')}</strong>
+            <em>${escapeHtml(String(step.status || 'planned').replaceAll('_', ' '))}</em>
+          </li>
+        `).join('');
+        const brain = renderBrainState(task);
+        const activity = renderTaskActivity(task);
+        const evidence = renderTaskEvidence(task);
+        return `
+          <article class="browser-task-card">
+            <div>
+              <span class="eyebrow">Browser Task · ${escapeHtml(task.status || 'active')}</span>
+              <h3>${escapeHtml(task.goal || task.url || 'Browser task')}</h3>
+              <p>${escapeHtml(task.url || '')}</p>
+            </div>
+            <ol>${steps}</ol>
+            ${brain}
+            ${activity}
+            ${evidence}
+            <div class="brain-actions">
+              <button data-brain-start="${escapeHtml(task.id)}">Start brain</button>
+              <button data-brain-step="${escapeHtml(task.id)}">Run one step</button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderBrainState(task) {
+      const brain = task.brain || {};
+      const current = brain.currentAction || {};
+      const done = brain.completedTerms || [];
+      const selected = brain.selectedItems || [];
+      const visual = brain.lastObservation?.visual || '';
+      const progress = (brain.progress || []).slice(-4).reverse();
+      return `
+        <section class="brain-state">
+          <div class="brain-current">
+            <span>${escapeHtml(current.stage || 'brain')}</span>
+            <strong>${escapeHtml(current.summary || 'Waiting for the next observe-plan-act cycle.')}</strong>
+          </div>
+          ${visual ? `<p class="brain-visual">${escapeHtml(visual)}</p>` : ''}
+          ${done.length || selected.length ? `
+            <div class="brain-memory">
+              ${done.length ? `<span>${escapeHtml(done.length)} completed</span>` : ''}
+              ${selected.slice(-3).map(item => `<span>${escapeHtml(item.term || item.result || 'item')}</span>`).join('')}
+            </div>
+          ` : ''}
+          ${progress.length ? `
+            <div class="brain-progress">
+              ${progress.map(row => `<span class="${escapeHtml(row.state || '')}">${escapeHtml(row.stage || 'step')}</span>`).join('')}
+            </div>
+          ` : ''}
+        </section>
+      `;
+    }
+
+    function renderTaskActivity(task) {
+      const rows = (task.activity || []).slice(-5).reverse();
+      if (!rows.length) return '<div class="brain-stream empty-inline">No brain activity yet.</div>';
+      return `
+        <div class="brain-stream">
+          ${rows.map(row => `
+            <div>
+              <span>${escapeHtml(row.type || 'brain')}</span>
+              <p>${escapeHtml(row.summary || '')}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderTaskEvidence(task) {
+      const rows = (task.evidence || []).filter(row => row.type === 'brain-screenshot').slice(-2).reverse();
+      if (!rows.length) return '';
+      return `
+        <div class="brain-evidence">
+          ${rows.map(row => `
+            <a href="${escapeHtml(row.path || '#')}" target="_blank" rel="noopener">${escapeHtml(row.title || row.url || 'proof screenshot')}</a>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderOperatorTaskStrip(items) {
+      const node = $('operator-task-strip');
+      const task = (items || []).slice(-1)[0];
+      if (!task) {
+        node.innerHTML = '<div class="empty">No active browser task.</div>';
+        return;
+      }
+      const steps = (task.plan || []).map((step, index) => `
+        <li class="${escapeHtml(String(step.status || 'planned').replaceAll('_', '-'))}">
+          <span>${index + 1}</span>
+          <strong>${escapeHtml(step.title || 'Step')}</strong>
+          <em>${escapeHtml(String(step.status || 'planned').replaceAll('_', ' '))}</em>
+        </li>
+      `).join('');
+      node.innerHTML = `
+        <article class="operator-task-card">
+          <div class="operator-task-head">
+            <div>
+              <span class="eyebrow">Active Browser Task</span>
+              <h3>${escapeHtml(task.goal || task.url || 'Browser task')}</h3>
+            </div>
+            <strong>${escapeHtml(String(task.status || 'active').replaceAll('_', ' '))}</strong>
+          </div>
+          <ol>${steps}</ol>
+          ${renderBrainState(task)}
+          ${renderTaskActivity(task)}
+        </article>
+      `;
+    }
+
+    function renderApprovals(items) {
+      const pending = items.filter(item => item.status === 'pending');
+      if (!pending.length) {
+        $('approval-list').innerHTML = '<div class="empty">No pending approvals.</div>';
+        return;
+      }
+      $('approval-list').innerHTML = pending.map(item => `
+        <div class="approval-card">
+          <div>
+            <strong>${escapeHtml(item.project)} · ${escapeHtml(item.kind === 'browser-task' ? 'browser task' : item.id)}</strong>
+            <p>${escapeHtml(item.reason || item.command)}</p>
+          </div>
+          <button data-approval="${escapeHtml(item.id)}" data-action="approve">${item.kind === 'browser-task' ? 'Approve gate' : 'Approve'}</button>
+          <button data-approval="${escapeHtml(item.id)}" data-action="deny">Deny</button>
+        </div>
+      `).join('');
+    }
+
+    async function decideApproval(id, action) {
+      const {status, data} = await api('/api/operator/approval', {
+        method: 'POST',
+        body: JSON.stringify({id, action, approver: 'mobile'})
+      });
+      log(`${action} · ${id}`, data.error || data.execution || `HTTP ${status}`, data.ok ? 'good' : 'bad');
+      await refreshProof();
+      await refreshStatus();
+    }
+
+    async function startBrainTask(taskId, approved = true) {
+      const {status, data} = await api('/api/operator/brain/start', {
+        method: 'POST',
+        body: JSON.stringify({taskId, approved})
+      });
+      log(`brain start · ${taskId}`, data.error || (data.started ? 'Operator Brain started.' : 'Operator Brain already running.') || `HTTP ${status}`, data.ok ? 'good' : 'bad');
+      await refreshProof();
+      await refreshStatus();
+    }
+
+    async function stepBrainTask(taskId, approved = true) {
+      const {status, data} = await api('/api/operator/brain/step', {
+        method: 'POST',
+        body: JSON.stringify({taskId, approved})
+      });
+      const plan = data.plan || {};
+      log(`brain step · ${taskId}`, data.error || data.reason || plan.thought || data.stage || `HTTP ${status}`, data.ok ? 'good' : (status === 202 ? 'warn' : 'bad'));
+      await refreshProof();
+      await refreshStatus();
+    }
+
+    document.querySelectorAll('.mobile-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mobile-tabs button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        btn.classList.add('active');
+        $(`view-${btn.dataset.view}`).classList.add('active');
+        state.activeView = btn.dataset.view;
+        renderDesktopFrames();
+        if (btn.dataset.view === 'proof') refreshProof();
+        if (btn.dataset.view === 'manual') refreshObserveStatus();
+        if (btn.dataset.view === 'operator') refreshZenChat();
+      });
+    });
+    $('pair-btn').addEventListener('click', pairPhone);
+    $('pair-code-input').addEventListener('input', () => {
+      $('pair-code-input').value = $('pair-code-input').value.replace(/\D/g, '').slice(0, 6);
+    });
+    $('pair-code-input').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') pairPhone();
+    });
+    $('save-token-btn').addEventListener('click', () => {
+      state.token = $('token-input').value.trim();
+      localStorage.setItem('zenOperatorToken', state.token);
+      setAuthUi();
+      refreshStatus();
+      refreshProof();
+      refreshZenChat();
+    });
+    $('refresh-btn').addEventListener('click', () => { refreshStatus(); refreshProof(); refreshZenChat(); });
+    $('screen-refresh-btn').addEventListener('click', refreshObserveStatus);
+    $('proof-refresh-btn').addEventListener('click', refreshProof);
+    $('observe-refresh-btn').addEventListener('click', refreshObserveStatus);
+    $('observe-open-btn').addEventListener('click', () => {
+      const url = state.observe?.controlUrl || state.observe?.observeUrl;
+      if (url) window.open(url, '_blank', 'noopener');
+    });
+    $('zen-chat-send').addEventListener('click', sendZenMessage);
+    $('zen-chat-input').addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) sendZenMessage();
+    });
+    $('inspect-btn').addEventListener('click', inspectProject);
+    $('run-btn').addEventListener('click', () => runCommand($('command-input').value.trim() || 'pwd'));
+    document.querySelectorAll('[data-command]').forEach(btn => btn.addEventListener('click', () => runCommand(btn.dataset.command)));
+    $('approval-list').addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-approval]');
+      if (btn) decideApproval(btn.dataset.approval, btn.dataset.action);
+    });
+    $('browser-task-list').addEventListener('click', (event) => {
+      const start = event.target.closest('[data-brain-start]');
+      if (start) startBrainTask(start.dataset.brainStart, true);
+      const step = event.target.closest('[data-brain-step]');
+      if (step) stepBrainTask(step.dataset.brainStep, true);
+    });
+
+    setAuthUi();
+    refreshStatus();
+    refreshProof();
+    refreshZenChat();
+    setInterval(refreshStatus, 30000);
+    setInterval(() => {
+      if (state.activeBrainTasks > 0 || state.activeView === 'operator') refreshProof();
+    }, 5000);
+  </script>
+</body>
+</html>

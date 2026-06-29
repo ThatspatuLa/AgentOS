@@ -1,0 +1,14 @@
+[Unit]
+Description=Zen Agent OS local operator server
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/spatula/Projects/ZenNew
+ExecStart=/home/spatula/Projects/ZenNew/scripts/operator_server_start.sh
+Restart=always
+RestartSec=3
+TimeoutStartSec=30
+
+[Install]
+WantedBy=default.target
