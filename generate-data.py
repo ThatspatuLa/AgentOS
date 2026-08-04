@@ -22,7 +22,6 @@ PROJECT_ROOT = Path("/home/spatula/Projects/ZenNew")
 
 # OpenRouter pricing (per 1M tokens) — update as needed
 PRICING = {
-    "openrouter/owl-alpha": {"in": 0.0, "out": 0.0},
     "minimax-m3:cloud": {"in": 0.279, "out": 1.15},
     "qwen3-coder:30b": {"in": 0.08, "out": 0.28},
     "nemotron-3:ultra:cloud": {"in": 0.15, "out": 0.15},
@@ -335,7 +334,7 @@ def generate_token_history(token_data, sandbox_prompts):
         
         # Categorize models
         local_models = ['qwen2.5-coder:14b', 'qwen3-coder:30b', 'gpt-oss:20b', 'nemotron-3-ultra:local']
-        regular_cloud = ['openrouter/owl-alpha', 'openai-codex', 'claude-opus-4.8', 'o3', 'o4-mini', 'gpt-5', 'gpt-5.5']
+        regular_cloud = ['openai-codex', 'claude-opus-4.8', 'o3', 'o4-mini', 'gpt-5', 'gpt-5.5']
         free_tier = ['minimax-m3:cloud', 'nemotron-3-ultra:cloud', 'kimi-k2.6:cloud', 'deepseek-coder-v2:16b']
         
         total_in = sum(d['in'] for d in per_model.values())
@@ -374,7 +373,7 @@ def generate_routing_data(sandbox_prompts, token_data):
     
     # Categorize models
     local_models = ['qwen2.5-coder:14b', 'qwen3-coder:30b', 'gpt-oss:20b', 'nemotron-3-ultra:local']
-    regular_cloud = ['openrouter/owl-alpha', 'openai-codex', 'claude-opus-4.8', 'o3', 'o4-mini', 'gpt-5', 'gpt-5.5']
+    regular_cloud = ['openai-codex', 'claude-opus-4.8', 'o3', 'o4-mini', 'gpt-5', 'gpt-5.5']
     free_tier = ['minimax-m3:cloud', 'nemotron-3-ultra:cloud', 'kimi-k2.6:cloud', 'deepseek-coder-v2:16b']
     
     # Count calls by category
@@ -480,10 +479,6 @@ def generate_dashboard_data():
             "refresh_cycle": "5h",
             "next_observed_refresh": "12:11",
             "weekly_reset_observed": "2026-06-11"
-        },
-        "owl_alpha": {
-            "reset_basis": "current UTC day / midnight UTC",
-            "local_reset_time": "10:00 AEST"
         },
         "tracking_rule": "Record exhaustion points to estimate usable capacity."
     }

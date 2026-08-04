@@ -13,7 +13,6 @@ USAGE_FILE = Path.home() / ".hermes" / "sandbox" / "token-usage.json"
 
 # Model pricing (per 1M tokens)
 PRICING = {
-    "openrouter/owl-alpha": {"in": 0.0, "out": 0.0},  # Free tier
     "openai-codex": {"in": 0.0, "out": 0.0},  # OAuth, no per-token cost
     "ollama/qwen3-coder:30b": {"in": 0.0, "out": 0.0},  # Local, free
     "ollama/nemotron-3-ultra:cloud": {"in": 0.0, "out": 0.0},

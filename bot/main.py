@@ -6,8 +6,10 @@ Webhook-based: messages are queued for Hermes to pick up.
 """
 
 import os
+import sys
 import json
 import asyncio
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -37,6 +39,7 @@ CHANNEL_SESSION_MAP = {
     1500437397916356608: "rin",
     1500437438680793209: "toji",
     1500437483429564476: "kazuki",
+    1523539567792099339: "nami",
 }
 
 # Session → Instruction File
@@ -45,27 +48,24 @@ SESSION_INSTRUCTIONS = {
     "zen-os": "Zen OS Instructions.md",
     "kiyosaki": "Kiyosaki Instructions.md",
     "minato": "Minato Instructions.md",
+    "nami": "Nami Instructions.md",
     "rin": "Rin Instructions.md",
     "toji": "Toji Instructions.md",
     "kazuki": "Kazuki Instructions.md",
 }
 
 # Message queue directory
-QUEUE_DIR = Path("/tmp/zennew_queue")
-QUEUE_DIR.mkdir(exist_ok=True)
+QUEUE_DIR = Path(os.environ.get("ZENNEW_QUEUE_DIR", str(Path(tempfile.gettempdir()) / "zennew_queue")))
+QUEUE_DIR.mkdir(exist_ok=True, parents=True)
 
 # Friendly Discord shortcuts for Hermes gateway model switching.
 # These are session-scoped by default; they do not rewrite global config.yaml.
 LLM_SWITCH_COMMANDS = {
-    "owl": "/model openrouter/owl-alpha --provider openrouter",
-    "owl-alpha": "/model openrouter/owl-alpha --provider openrouter",
-    "owla": "/model openrouter/owl-alpha --provider openrouter",
     "codex": "/model gpt-5.5 --provider openai-codex",
     "gpt-5.5": "/model gpt-5.5 --provider openai-codex",
 }
 
 LLM_DISPLAY = {
-    "owl": "Owl Alpha via OpenRouter (`openrouter/owl-alpha`)",
     "codex": "Codex (`gpt-5.5` via `openai-codex`)",
 }
 
@@ -122,6 +122,84 @@ async def check_hermes_response(queue_file: str) -> str | None:
         Path(queue_file).unlink(missing_ok=True)
         return data.get("response", "No response content.")
     return None
+
+
+# Path to the new project-bridges. We import them lazily inside the
+# responder so the bot can still start without them (e.g. in a
+# deployment where chatgpt_client isn't deployed yet).
+PROJECT_BRIDGES_DIR = Path(__file__).resolve().parent.parent / "bridges"
+PROJECTS_DIR = Path(__file__).resolve().parent.parent / "projects" / "_lib"
+
+
+def produce_response(queue_file: str) -> bool:
+    """Produce a response for the queued message.
+
+    Synchronous producer: reads the queue file, looks up the
+    session's philosophy from Obsidian (currently via the
+    chatgpt_client skeleton), and writes the .response.json so
+    the bot loop can post it back.
+
+    Returns True if a response file was written, False otherwise.
+    """
+    qpath = Path(queue_file)
+    if not qpath.exists():
+        return False
+    try:
+        payload = json.loads(qpath.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+
+    session = payload.get("session") or "zen"
+    message = payload.get("message") or ""
+
+    # Append the user's message to that project's memory.
+    # memory_bus now dual-writes to both data/sessions/<project>/memory.md
+    # AND ~/Obsidian/ZenVault/00_System/Project Memories/<Project> Memory.md
+    # (effective 2026-08-04). Test traffic (PONG/PING/...) is silently
+    # filtered to keep memory.md useful. Returns a dict of which targets
+    # succeeded; we just log the outcome and move on.
+    try:
+        sys.path.insert(0, str(PROJECTS_DIR))
+        import memory_bus  # type: ignore
+        result = memory_bus.append_memory_note(
+            session,
+            f"Discord user `{payload.get('user', 'unknown')}` said:\n"
+            f"> {message[:400]}",
+        )
+        if isinstance(result, dict):
+            if result.get("filtered"):
+                print(f"[zen-bridge] memory_append filtered test noise for {session}",
+                      flush=True)
+            elif not (result.get("data") and result.get("obsidian")):
+                print(f"[zen-bridge] memory_append partial: {result}", flush=True)
+    except Exception as exc:
+        print(f"[zen-bridge] memory_append warning: {exc}", flush=True)
+
+    # Compose the reply via the chatgpt_client skeleton.
+    try:
+        sys.path.insert(0, str(PROJECT_BRIDGES_DIR))
+        import chatgpt_client  # type: ignore
+        reply = chatgpt_client.answer_with_project_persona(
+            message, session, channel_id=payload.get("channel_id"))
+    except Exception as exc:
+        print(f"[zen-bridge] chatgpt_client err: {exc}", flush=True)
+        reply = f"Hermes call failed — {exc}"
+
+    response_file = qpath.with_suffix(".response.json")
+    try:
+        response_file.write_text(
+            json.dumps({
+                "queue_id": qpath.stem,
+                "session": session,
+                "response": reply,
+                "produced_at": datetime.utcnow().isoformat(),
+                "producer": "zen-bridge-skeleton@v0.1",
+            }, indent=2),
+            encoding="utf-8",
+        )
+        return True
+    except OSError:
+        return False
 
 
 def read_operator_token() -> str:
@@ -431,6 +509,14 @@ async def on_message(message: discord.Message):
             message=hermes_message,
         )
 
+        # Produce a response file (skeleton — uses chatgpt_client stub).
+        # This runs synchronously in the bot process. If we later move
+        # to a separate worker, swap produce_response() for a queue.post().
+        try:
+            produce_response(queue_file)
+        except Exception as exc:
+            print(f"[zen-bridge] produce_response warn: {exc}", flush=True)
+
         # Wait for Hermes to respond (poll queue)
         response = None
         for _ in range(60):  # Wait up to 60 seconds
@@ -680,7 +766,6 @@ async def llm(ctx, choice: str = "help"):
     """Switch the active Hermes model for this Discord session.
 
     Usage:
-      !llm owl      -> openrouter/owl-alpha via OpenRouter
       !llm codex    -> gpt-5.5 via OpenAI Codex
       !llm current  -> ask Hermes to show the current model picker/status
       !llm help     -> show options
@@ -689,7 +774,6 @@ async def llm(ctx, choice: str = "help"):
 
     if normalized in {"help", "?", "list", "options"}:
         embed = discord.Embed(title="🧠 LLM Switcher", color=0x7c3aed)
-        embed.add_field(name="Owl Alpha", value="`!llm owl`", inline=True)
         embed.add_field(name="Codex", value="`!llm codex`", inline=True)
         embed.add_field(name="Current / picker", value="`!llm current`", inline=True)
         embed.add_field(
@@ -705,12 +789,12 @@ async def llm(ctx, choice: str = "help"):
         label = "current model / picker"
     else:
         hermes_command = LLM_SWITCH_COMMANDS.get(normalized)
-        label = LLM_DISPLAY.get("owl" if normalized.startswith("owl") else normalized, normalized)
+        label = LLM_DISPLAY.get(normalized, normalized)
 
     if not hermes_command:
         await ctx.reply(
             f"Unknown LLM choice: `{choice}`\n"
-            "Use `!llm owl`, `!llm codex`, or `!llm current`."
+            "Use `!llm codex` or `!llm current`."
         )
         return
 

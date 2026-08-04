@@ -5,6 +5,7 @@ __pycache__/
 bot/__pycache__/
 data/sessions/*/messages.jsonl
 data/sessions/*/events.jsonl
+data/sessions/*/memory.md
 data/sessions/index.json
 data/operator/.token
 data/operator/.pairing-code
@@ -21,3 +22,10 @@ data/operator/artifacts/
 products/
 tmp/*.log
 intelligence_engine/collectors/debug_*.py
+
+# MT5 setup installers / runtime detritus (large binaries, not source).
+.venv/
+mt5setup.exe
+webview2.exe
+wget-log
+AGENTS.md

@@ -1,5 +1,5 @@
 {
-  "version": 64,
+  "version": 66,
   "tasks": [
     {
       "id": "task-zen-agent-os-kanban",
@@ -2215,8 +2215,91 @@
         "10 milestones defined with boundaries, validation, and risks",
         "Task added to Zen backlog"
       ]
+    },
+    {
+      "id": "task-benchmark-kilo-vs-direct",
+      "title": "Benchmark: Hermes+MiniMax vs Hermes+Kilo+MiniMax",
+      "project": "zen",
+      "sessionId": null,
+      "status": "wip",
+      "priority": "High",
+      "risk": "Medium",
+      "created": "2026-06-29",
+      "lastActive": "Now",
+      "archived": false,
+      "why": "Compare Lane A (Hermes + MiniMax M3 direct) vs Lane B (Hermes + Kilo Code + MiniMax M3) on identical coding tasks to decide whether Kilo Code is worth integrating as a permanent coding worker. Cost-effectiveness is the primary criterion.",
+      "nextAction": "On-demand via /bench slash commands in Discord. /bench next auto-picks next pending (task, lane) with lane alternation. /bench A or /bench B run all 10 tasks for that lane. /bench status shows progress. /bench report generates final REPORT.md. Cron-based version was retired — user wants on-demand control.",
+      "notes": "Sandbox: /home/spatula/Projects/benchmark-sandbox/Frozen SHA: 52b3cf96e9c3a1b4cb1bb1d3b0f2c9fe0588c29b (runner hardcodes this). 10 task cards in scripts/task_cards.py. 6 weighted scoring categories in scripts/scoring.py (coding 40%, reasoning 20%, process 15%, memory 10%, quality 10%, cost/speed/reliability 5%). Pass gates: avg total >=3.75, coding >=4, memory >=3.5, no security/destructive/unrelated-damage flags. Accept Kilo only if: +15% weighted, +20% coding, no process regression. Dispatcher: scripts/bench.py.",
+      "subtasks": [
+        {
+          "title": "M1: Sandbox repo + task cards + runner + scoring",
+          "status": "done",
+          "description": "Build the benchmark harness. Sandbox repo with backend + frontend + tests + docs + memory. 10 task cards with constraints and success criteria. Runner that resets to frozen SHA, makes worktree, runs lane, captures diff/tests/duration. Scoring harness with 6 categories, pass gates, ACCEPT/REJECT/RETEST engine.",
+          "evidence": [
+            "/home/spatula/Projects/benchmark-sandbox/"
+          ],
+          "validation": [
+            "Sandbox has 14 files committed at frozen SHA 52b3cf9",
+            "10 task cards load and parse",
+            "Scoring helper detected all 4 destructive patterns, all 4 security patterns, unrelated damage detection works",
+            "ACCEPT/REJECT/RETEST all verified with synthetic data"
+          ],
+          "risk": "Low",
+          "activity": [
+            "2026-06-29: Sandbox built, harness validated"
+          ]
+        },
+        {
+          "title": "M2: Run all 20 lane-task combinations",
+          "status": "wip",
+          "description": "Autonomous cron runs 10 tasks × 2 lanes (20 runs). Each run is reset, worktree-isolated, capped at 15 min. Cron writes one JSON per run to results/. Cron runs every 2h, capped at 2h per tick, so this completes across multiple ticks.",
+          "evidence": [
+            "/home/spatula/Projects/benchmark-sandbox/results/"
+          ],
+          "validation": [
+            "20 result JSONs exist (10 tasks × 2 lanes)",
+            "Each run has start_commit, end_commit, files_changed, tests_run/passed/failed, weighted_total, scores, pass_gates",
+            "No run hits the 15-min cap without recording a timeout",
+            "No run touches files outside backend/, frontend/, docs/, memory/, scripts/"
+          ],
+          "risk": "Medium",
+          "activity": [
+            "2026-06-29: Cron started"
+          ]
+        },
+        {
+          "title": "M3: Final report + ACCEPT/REJECT/RETEST decision",
+          "status": "backlog",
+          "description": "After all 20 runs, write results/REPORT.md with per-task averages, per-category averages, pass-gate breakdown, safety violations, and the recommendation. Append summary to this kanban task.",
+          "evidence": [
+            "/home/spatula/Projects/benchmark-sandbox/results/REPORT.md"
+          ],
+          "validation": [
+            "REPORT.md contains ACCEPT/REJECT/RETEST line with reasoning",
+            "Decision is one of: accept Kilo (integrate), reject Kilo (keep direct), retest (more data needed)"
+          ],
+          "risk": "Low",
+          "activity": []
+        }
+      ],
+      "evidence": [
+        "/home/spatula/Projects/benchmark-sandbox/ (sandbox repo)",
+        "/home/spatula/Projects/benchmark-sandbox/scripts/run_benchmark.py",
+        "/home/spatula/Projects/benchmark-sandbox/scripts/scoring.py",
+        "/home/spatula/Projects/benchmark-sandbox/scripts/task_cards.py",
+        "Cron job: benchmark-kilo-vs-direct"
+      ],
+      "validation": [
+        "Sandbox built and frozen",
+        "Runner + scoring validated end-to-end",
+        "Cron runs every 2h, completes 20 runs autonomously",
+        "Final report posted with ACCEPT/REJECT/RETEST"
+      ],
+      "activity": [
+        "2026-06-29: Task created, sandbox built, harness validated"
+      ]
     }
   ],
   "writable": true,
-  "lastUpdated": "2026-06-21"
+  "lastUpdated": "2026-06-29"
 }

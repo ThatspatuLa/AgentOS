@@ -744,10 +744,10 @@ def extract_system_facts(state: dict) -> tuple[list, list]:
         rule_id = "rule-local-vs-cloud"
         n = base_node("routing_rule", rule_id, "Local vs Cloud Routing",
             risk="medium", active=True, confidence=0.95,
-            summary="Routes planning/review to cloud (Owl Alpha + Codex); execution to local (Aider + Ollama gpt-oss:20b)",
+            summary="Routes planning/review to cloud (MiniMax-M3 + Codex); execution to local (Aider + Ollama gpt-oss:20b)",
             source_path=str(ZEN_MEMORY))
         n["data"] = {
-            "cloud_models": ["openrouter/owl-alpha", "openai-codex"],
+            "cloud_models": ["minimax-m3:cloud", "openai-codex"],
             "local_models": ["ollama/gpt-oss:20b"],
             "boundary_description": "Local never touches cloud keys. Cloud never processes raw file generation.",
             "decision_logic": "Cloud for planning/research/review; Local for file edits/artifact creation",
@@ -845,7 +845,7 @@ def extract_token_activity(state: dict) -> tuple[list, list]:
             model_usage = {}
             for line in lines:
                 if "agent.conversation_loop" in line:
-                    for model_name in ["owl-alpha", "codex", "gpt-oss", "minimax", "nemotron"]:
+                    for model_name in ["codex", "gpt-oss", "minimax", "nemotron"]:
                         if model_name in line.lower():
                             model_usage[model_name] = model_usage.get(model_name, 0) + 1
 

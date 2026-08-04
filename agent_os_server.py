@@ -64,7 +64,7 @@ import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 from urllib import error as urllib_error
 from urllib import request as urllib_request
 from urllib.parse import parse_qs, quote, urlparse
@@ -474,6 +474,269 @@ def _read_session_events(session_id: str) -> list[dict]:
     """Read all events from a session's events.jsonl file."""
     event_path = SESSIONS_DIR / session_id / "events.jsonl"
     return _read_jsonl(event_path)
+
+
+# ---------------------------------------------------------------------------
+# Zen Overlay chat helpers (POST /api/zen/chat, GET /api/zen/history/:project)
+# ---------------------------------------------------------------------------
+
+# Mirror of bot/main.py:CHANNEL_SESSION_MAP + SESSION_INSTRUCTIONS, kept
+# server-side so the overlay can route without needing the bot running.
+# Channel IDs match Zen Discord server.
+ZEN_PROJECTS = {
+    "zen":      {"label": "Zen",      "channel_id": "1513076747430793289", "channel_name": "zen-chat",     "instruction_file": "Zen Instructions.md"},
+    "zen-os":   {"label": "Zen OS",   "channel_id": "1516644810834841672", "channel_name": "zen-os",       "instruction_file": "Zen OS Instructions.md"},
+    "kiyosaki": {"label": "Kiyosaki", "channel_id": "1500437316379086880", "channel_name": "kiyosaki-chat", "instruction_file": "Kiyosaki Instructions.md"},
+    "minato":   {"label": "Minato",   "channel_id": "1500437358934233219", "channel_name": "minato-chat",   "instruction_file": "Minato Instructions.md"},
+    "nami":     {"label": "Nami",     "channel_id": "1523539567792099339", "channel_name": "nami-chat",     "instruction_file": "Nami Instructions.md"},
+    "rin":      {"label": "Rin",      "channel_id": "1500437397916356608", "channel_name": "rin-chat",      "instruction_file": "Rin Instructions.md"},
+    "toji":     {"label": "Toji",     "channel_id": "1500437438680793209", "channel_name": "toji-chat",     "instruction_file": "Toji Instructions.md"},
+    "kazuki":   {"label": "Kazuki",   "channel_id": "1500437483429564476", "channel_name": "kazuki-chat",   "instruction_file": "Kazuki Instructions.md"},
+}
+
+
+def _zen_load_philosophy(project: str) -> str:
+    """Load the project's instruction/philosophy file from Obsidian."""
+    meta = ZEN_PROJECTS.get(project)
+    if not meta:
+        return ""
+    instr_name = meta["instruction_file"]
+    vault = Path.home() / "Obsidian" / "ZenVault"
+    # Try the explicit name first, fall back to Zen Instructions.md for
+    # project ids that don't have a dedicated file (e.g. zen-os).
+    candidates = [
+        vault / "00_System" / "Project Instructions" / instr_name,
+        vault / "00_System" / "Project Instructions" / "Zen Instructions.md",
+    ]
+    for path in candidates:
+        try:
+            if path.exists():
+                return path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+    return ""
+
+
+def _zen_load_memory(project: str, last_chars: int = 1500) -> str:
+    """Return the trailing slice of the project's memory.md."""
+    mem_path = SESSIONS_DIR / project / "memory.md"
+    try:
+        if mem_path.exists():
+            text = mem_path.read_text(encoding="utf-8")
+            return text[-last_chars:] if len(text) > last_chars else text
+    except OSError:
+        pass
+    return ""
+
+
+def _zen_append_memory(project: str, note: str) -> bool:
+    """Append a timestamped note to the project's memory.md. Best-effort."""
+    if not project or project not in ZEN_PROJECTS:
+        return False
+    mem_path = SESSIONS_DIR / project / "memory.md"
+    try:
+        mem_path.parent.mkdir(parents=True, exist_ok=True)
+        ts = _now_iso()
+        with open(mem_path, "a", encoding="utf-8") as f:
+            f.write(f"\n\n## {ts} — overlay\n\n{note.strip()}\n")
+        return True
+    except OSError:
+        return False
+
+
+def _zen_history_messages(project: str, limit: int = 10) -> list[dict]:
+    """Read last `limit` messages from data/sessions/<project>/messages.jsonl."""
+    msg_path = SESSIONS_DIR / project / "messages.jsonl"
+    out: list[dict] = []
+    try:
+        if msg_path.exists():
+            with open(msg_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            for line in lines[-limit:]:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    out.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+    except OSError:
+        pass
+    return out
+
+
+def _zen_post_discord_message(channel_id: str, content: str, *,
+                                username: str = "Zen Overlay") -> tuple[bool, str]:
+    """Post a message to a Discord channel via REST using DISCORD_TOKEN.
+
+    Reads DISCORD_TOKEN from ZenNew/.env if not already in os.environ.
+    Returns (ok, error_message).
+    """
+    import urllib.request
+    token = os.environ.get("DISCORD_TOKEN")
+    if not token:
+        env_path = ROOT / ".env"
+        try:
+            if env_path.exists():
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("DISCORD_TOKEN="):
+                        token = line.split("=", 1)[1].strip()
+                        break
+        except OSError:
+            pass
+    if not token:
+        return False, "DISCORD_TOKEN not configured"
+
+    url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
+    payload = json.dumps({
+        "content": content[:2000],
+        "username": username,
+        # No avatar_url — keep bot's default avatar to avoid impersonation.
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        url, data=payload, method="POST",
+        headers={
+            "Authorization": f"Bot {token}",
+            "Content-Type": "application/json",
+            "User-Agent": "ZenOverlay (agent-os-server, v0.1)",
+        },
+    )
+    try:
+        with urllib_request.urlopen(req, timeout=10) as resp:
+            if 200 <= resp.status < 300:
+                return True, ""
+            return False, f"HTTP {resp.status}"
+    except urllib_error.HTTPError as e:
+        return False, f"HTTP {e.code}: {e.reason}"
+    except Exception as e:
+        return False, str(e)
+
+
+def _zen_dispatch(project: str, prompt: str, philosophy: str, memory: str) -> dict:
+    """Hybrid dispatch: bot-first, server-fallback.
+
+    Per the user's architecture spec (Discord IS the LLM frontend):
+      1. Mirror prompt to memory so context persists.
+      2. Post the prompt to Discord as a Zen Overlay message so the
+         conversation appears in the user's actual Discord channel.
+      3. Call chatgpt_client directly for a real MiniMax-M3 reply
+         (full reply text).
+      4. Call chatgpt_client again with a "summarise" prompt to get
+         a 1-2 sentence gist for the overlay.
+      5. Post the full reply to Discord as a follow-up message.
+      6. Return summary + reply to the overlay.
+
+    Two LLM calls is intentional — the overlay needs short, scannable
+    text, while Discord gets the full answer. Hermes is fast enough
+    (~3-10s per call) that the cost is fine.
+    """
+    meta = ZEN_PROJECTS.get(project)
+    if not meta:
+        return {"ok": False, "error": "unknown project"}
+
+    channel_id = meta["channel_id"]
+    channel_name = meta["channel_name"]
+
+    # 1. Mirror to memory.
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "projects" / "_lib"))
+        import memory_bus  # type: ignore
+        memory_bus.append_memory_note(
+            project,
+            f"Overlay user said:\n> {prompt[:400]}",
+        )
+    except Exception as e:
+        print(f"[zen-dispatch] memory_append warning: {e}", file=sys.stderr)
+
+    # 2. Post the user's prompt to Discord.
+    prompt_ok, prompt_err = _zen_post_discord_message(
+        channel_id,
+        f"[OVERLAY] {prompt}",
+        username="Zen Overlay",
+    )
+
+    # 3. Server-side LLM call for full reply.
+    server_reply = ""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent / "bridges"))
+        import chatgpt_client  # type: ignore
+        server_reply = chatgpt_client.answer_with_project_persona(
+            prompt, project, channel_id=int(channel_id),
+        )
+    except Exception as e:
+        print(f"[zen-dispatch] chatgpt_client err: {e}", file=sys.stderr)
+
+    # 4. Truncate reply for the overlay (1-2 sentences).
+    # We tried using a 2nd LLM call for true LLM summarization, but
+    # the extra Hermes call (3-30s) caused flakiness and the truncation
+    # fallback was almost always used anyway. Simple truncation at
+    # sentence boundaries is faster, deterministic, and good enough
+    # for a quick-scannable overlay panel.
+    summary = _zen_summarise_reply(server_reply) if server_reply else ""
+
+    # 5. Post the full reply to Discord.
+    server_reply_ok, server_reply_err = (False, "no reply")
+    if server_reply:
+        server_reply_ok, server_reply_err = _zen_post_discord_message(
+            channel_id,
+            server_reply,
+            username=f"Zen Overlay ({project})",
+        )
+
+    return {
+        "ok": True,
+        "session": project,
+        "channel": channel_name,
+        "queued": True,
+        "discord_delivered": prompt_ok,
+        "discord_error": prompt_err or None,
+        "server_reply": server_reply,
+        "summary": summary,
+        "server_reply_delivered": server_reply_ok,
+        "server_reply_error": server_reply_err or None,
+        "memory_appended": True,
+        "context_chars": {
+            "philosophy": len(philosophy),
+            "memory": len(memory),
+        },
+    }
+
+
+def _zen_summarise_reply(text: str, max_chars: int = 220) -> str:
+    """Return a SHORT summary of a reply for the overlay panel.
+
+    Goal: 1-2 sentences that capture the gist. The full reply is
+    available via /api/zen/history/<project> — the overlay is for
+    quick scanning, not full reading.
+    """
+    if not text:
+        return ""
+    text = text.strip()
+    if len(text) <= max_chars:
+        return text
+
+    # Take the first 1-2 sentences that fit within max_chars
+    sentences: list[str] = []
+    rest = text
+    while rest and sum(len(s) + 2 for s in sentences) < max_chars:
+        # Find next sentence boundary
+        candidates = [
+            rest.find(". "), rest.find("! "), rest.find("? "),
+            rest.find(".\n"), rest.find("!\n"), rest.find("?\n"),
+        ]
+        candidates = [c for c in candidates if c >= 0]
+        if not candidates:
+            sentences.append(rest)
+            break
+        end = min(candidates) + 1  # include the period
+        sentences.append(rest[:end].strip())
+        rest = rest[end:].lstrip()
+
+    out = " ".join(sentences).strip()
+    if len(out) > max_chars:
+        out = out[:max_chars - 4].rstrip() + " […]"
+    return out
 
 
 def _b64url(data: bytes) -> str:
@@ -4592,6 +4855,29 @@ class Handler(SimpleHTTPRequestHandler):
             mw = _read_json(mw_path, {"nodes": [], "edges": []})
             return self._json(mw)
 
+        # GET /api/zen/history/:project — last N messages for an overlay project
+        m = self._match("api/zen/history/:project")
+        if m:
+            project = m["project"]
+            if project not in ZEN_PROJECTS:
+                return self._json({
+                    "error": "unknown project",
+                    "project": project,
+                    "valid": sorted(ZEN_PROJECTS.keys()),
+                }, 404)
+            limit_raw = parse_qs(urlparse(self.path).query).get("limit", ["10"])
+            try:
+                limit = max(1, min(50, int(limit_raw[0])))
+            except (ValueError, IndexError):
+                limit = 10
+            messages = _zen_history_messages(project, limit=limit)
+            return self._json({
+                "project": project,
+                "channel": ZEN_PROJECTS[project]["channel_name"],
+                "messages": messages,
+                "count": len(messages),
+            })
+
         self._json({"error": "not found"}, 404)
 
     # -- PUT -------------------------------------------------------------
@@ -5017,6 +5303,49 @@ class Handler(SimpleHTTPRequestHandler):
                 "assistant": assistant_record,
                 "progress": (assistant_record or {}).get("progress", []),
             })
+
+        # POST /api/zen/chat — Zen Overlay v2 entry point.
+        # Compose philosophy + memory context, call (stub) LLM, append to
+        # memory. Real LLM call lives in bridges/chatgpt_client.py — until
+        # that's wired, _zen_stub_response echoes the prompt with the
+        # injected-context size so the overlay can verify end-to-end.
+        if self._match("api/zen/chat") is not None:
+            body = self._read_body()
+            project = str(body.get("target") or body.get("project") or "").strip()
+            prompt = str(body.get("prompt") or body.get("message") or "").strip()
+            if not project:
+                return self._json({
+                    "error": "missing target (project id)",
+                    "valid": sorted(ZEN_PROJECTS.keys()),
+                }, 400)
+            if project not in ZEN_PROJECTS:
+                return self._json({
+                    "error": "unknown project",
+                    "project": project,
+                    "valid": sorted(ZEN_PROJECTS.keys()),
+                }, 404)
+            if not prompt:
+                return self._json({"error": "missing prompt"}, 400)
+
+            philosophy = _zen_load_philosophy(project)
+            memory = _zen_load_memory(project)
+            result = _zen_dispatch(project, prompt, philosophy, memory)
+
+            # Append to messages.jsonl so /api/zen/history can show it.
+            try:
+                msg_path = SESSIONS_DIR / project / "messages.jsonl"
+                msg_path.parent.mkdir(parents=True, exist_ok=True)
+                _append_jsonl(msg_path, {
+                    "role": "user",
+                    "content": prompt,
+                    "ts": _now_iso(),
+                    "source": "overlay",
+                })
+            except OSError:
+                pass
+
+            status = 200 if result.get("ok") else 500
+            return self._json(result, status)
 
         self._json({"error": "not found"}, 404)
 
