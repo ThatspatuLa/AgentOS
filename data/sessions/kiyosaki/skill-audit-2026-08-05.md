@@ -172,8 +172,8 @@ How often each is actually invoked in a kiyosaki session:
 | third-party-research-venv | 0.05× per quarter | Venv setup |
 | shell-batch-runner-pattern | 1× per Stage 2b | Every MT5 batch |
 | memory-sync | 1× per session | After every durable change |
-| check-no-owl-alpha | 0 | Not kiyosaki-related |
-| kiyosaki-stage2b-windows-migration-state | 0 | Stale |
+| check-no-owl-alpha | 0 | **DISCARDED 2026-08-05** ✅ |
+| kiyosaki-stage2b-windows-migration-state | 0 | **DISCARDED 2026-08-05** ✅ (also pre-emptively gone) |
 
 ---
 
@@ -181,8 +181,30 @@ How often each is actually invoked in a kiyosaki session:
 
 1. **Get your approval on the 4 high-impact compressions** (clusters B, D, E) — these move a lot of content.
 2. **Merge strategy-repainting-audit into trading-fitness-function-design** — small, clean, implements your Tier-3 bar-close-first directive.
-3. **Discard the 2 dead skills** — trivial, no risk.
+3. **Discard the 2 dead skills** — trivial, no risk. ✅ **DONE 2026-08-05** (both skills removed)
 4. **Tighten subpool-stage-pipeline** — add current-sub-pools table.
 5. Re-verify total payload (target: ~220 KB).
 
-Want me to proceed with any/all of these? I'd start with the merge (item 2) and the discards (item 3) since they're no-risk, then do the compressions one at a time so you can review the diffs.
+---
+
+## 7. STATUS AS OF 2026-08-05 (after cleanup)
+
+| Action | Status |
+|---|---|
+| Owl-alpha cleanup (8 ZenNew files, 25 live refs → 0 live) | ✅ DONE |
+| `check-no-owl-alpha` skill discarded | ✅ DONE |
+| `kiyosaki-stage2b-windows-migration-state` skill discarded | ✅ DONE |
+| 8 `.pre-owl-alpha-cleanup.*` backups removed | ✅ DONE (auto-cleaned) |
+| 17 active kiyosaki skills remain (~382 KB) | Awaiting compressions |
+| 4 compressions + 1 merge + 1 tighten (5 changes) | PENDING user approval |
+
+**Next steps** (when ready to restart):
+- Merge `strategy-repainting-audit` into `trading-fitness-function-design` (implements Tier-3 bar-close-first invariant)
+- Compress `kiyosaki-swarm-mining` (74 → 24 KB) — move templates to `references/`
+- Compress `kiyosaki-confidence-engine-phase25-v2-freqtrade-port` (70 → 20 KB) — same
+- Compress `freqtrade-5-phase-hyperopt-pipeline` (55 → 15 KB) — gotchas → `references/gotchas.md`
+- Merge `skill-decision-framework` → `installed-skill-curation` (subset; saves ~16 KB)
+- Tighten `subpool-stage-pipeline` — add current-sub-pools table
+
+**Target after all work**: ~220 KB (-44%), 16 skills (vs 19 start).
+
