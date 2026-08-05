@@ -18,7 +18,7 @@ Total payload: **395 KB across 19 SKILL.md files** (the 5 kiyosaki+swarm+confide
 | 3 | kiyosaki-confidence-engine-phase25-v2-freqtrade-port | kiyosaki | 70 KB | 25/07 | YES (target port) | **KEEP** |
 | 4 | kiyosaki-stage2d | kiyosaki | 34 KB | 25/07 | YES (Stage 2d) | **KEEP** |
 | 5 | kiyosaki-swarm-mining | kiyosaki | 74 KB | 25/07 | YES (orchestrator) | **KEEP** |
-| 6 | kiyosaki-stage2b-windows-migration-state | kiyosaki | 7 KB | 24/07 | YES (state ref) | **DISCARD** — 7-day stale, current state captured in `AGENTS.md` |
+| 6 | kiyosaki-stage2b-windows-migration-state | kiyosaki | 7 KB | 24/07 | YES (state ref) | **DISCARDED 2026-08-05** ✅ — 12-day stale, state in `AGENTS.md` |
 | 7 | mt5-stage1-best-params-extraction | mt5 | 9 KB | 28/07 | YES (fresh) | **KEEP** |
 | 8 | mt5-ea-backtest-deployment | mt5 | 14 KB | 27/07 | YES (headless test) | **KEEP** |
 | 9 | trading-fitness-function-design | scoring | 13 KB | 30/07 | YES (just edited) | **KEEP** |
@@ -30,7 +30,7 @@ Total payload: **395 KB across 19 SKILL.md files** (the 5 kiyosaki+swarm+confide
 | 15 | skill-decision-framework | meta | 16 KB | 24/07 | YES (decision policy) | **KEEP** |
 | 16 | third-party-research-venv | infra | 4 KB | 24/07 | YES (venv setup) | **KEEP** |
 | 17 | shell-batch-runner-pattern | infra | 15 KB | 24/07 | YES (batches) | **KEEP** |
-| 18 | check-no-owl-alpha | meta | 6 KB | 25/07 | n/a (Zen/Nami) | **DISCARD** — not kiyosaki-related |
+| 18 | check-no-owl-alpha | meta | 6 KB | 25/07 | n/a (Zen/Nami) | **DISCARDED 2026-08-05** ✅ — not kiyosaki-related |
 | 19 | memory-sync | infra | 9 KB | 25/07 | YES (state sync) | **KEEP** |
 
 ---
