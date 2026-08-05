@@ -29,6 +29,7 @@ Serves static files and adds:
   POST     /api/operator/approval         -> local/Tailscale approval state update
   GET      /api/memory                    -> Hermes MEMORY.md + USER.md
   GET      /api/memory-world              -> data/memory-world.json
+  GET      /api/opencode-stats            -> daily OpenCode usage + cost (cron_output/opencode_costs.jsonl)
   GET      /api/health                    -> live Hermes + git status
 
 Data layout:
@@ -4854,6 +4855,33 @@ class Handler(SimpleHTTPRequestHandler):
             mw_path = ROOT / "data" / "memory-world.json"
             mw = _read_json(mw_path, {"nodes": [], "edges": []})
             return self._json(mw)
+
+        # GET /api/opencode-stats — daily OpenCode usage + cost (read cron output)
+        if self._match("api/opencode-stats") is not None:
+            # Resolve log path from HERMES_HOME env var (matches the cron script's
+            # default) rather than HERMES_DB.parent which points at ~/.hermes/.
+            hermes_home = Path(os.environ.get("HERMES_HOME",
+                                  str(Path.home() / "AppData" / "Local" / "hermes")))
+            log_path = hermes_home / "cron_output" / "opencode_costs.jsonl"
+            records = []
+            if log_path.exists():
+                # Use the existing _read_jsonl helper to tolerate blank lines and bad JSON.
+                records = _read_jsonl(log_path)[-30:]
+            total_cost = sum(r.get("cost_usd", 0) for r in records)
+            total_sessions = sum(r.get("sessions", 0) for r in records)
+            total_messages = sum(r.get("messages", 0) for r in records)
+            return self._json({
+                "ok": True,
+                "records": records,
+                "summary": {
+                    "days_logged": len(records),
+                    "total_cost_usd": round(total_cost, 4),
+                    "total_sessions": total_sessions,
+                    "total_messages": total_messages,
+                    "avg_cost_per_day_usd": round(total_cost / max(len(records), 1), 4),
+                    "log_path": str(log_path),
+                },
+            })
 
         # GET /api/zen/history/:project — last N messages for an overlay project
         m = self._match("api/zen/history/:project")

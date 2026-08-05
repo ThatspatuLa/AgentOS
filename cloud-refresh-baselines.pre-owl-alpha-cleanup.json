@@ -1,0 +1,32 @@
+{
+  "updated_at": "2026-06-09",
+  "timezone": {
+    "local": "AEST",
+    "offset": "+10:00",
+    "note": "Midnight UTC maps to 10:00 AEST while local timezone remains +10."
+  },
+  "models": {
+    "codex": {
+      "refresh_cycle": "5h",
+      "next_observed_refresh": "12:11",
+      "weekly_reset_observed": "2026-06-11",
+      "source": "user_observed_in_codex_prompt_context",
+      "confidence": "observed_by_user",
+      "tracking_note": "Use as the current baseline for 5-hour and weekly Codex capacity windows."
+    },
+    "owl-alpha_openrouter_free": {
+      "refresh_basis": "current UTC day / midnight UTC",
+      "local_reset_time_aest": "10:00",
+      "free_limits": {
+        "requests_per_minute": 20,
+        "daily_requests_if_credits_lt_10": 50,
+        "daily_requests_if_credits_gte_10": 1000
+      },
+      "source": "OpenRouter docs: API Rate Limits and FAQ",
+      "confidence": "confirmed_for_openrouter_free_request_day; owl_alpha_exact_usable_capacity_still_requires_exhaustion_baselines",
+      "tracking_note": "Treat 10:00 AEST as the expected reset time, then measure real Owl Alpha usable capacity by recording exhaustion-to-exhaustion baselines."
+    }
+  },
+  "tracking_rule": "Use exhaustion baselines: record when a cloud model runs out, then compare with the next exhaustion point after reset to estimate usable capacity.",
+  "sb_policy_link": "During run SB, do not spend Owl Alpha/Codex except explicit expiry/capacity checkpoints. Run cloud review only after the local batch completion gate."
+}

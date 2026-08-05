@@ -336,6 +336,30 @@
           </table>
         </div>
       </section>
+
+      <section class="dashboard-card dashboard-opencode">
+        <header class="dashboard-card-header">
+          <h3 class="dashboard-card-title">OpenCode Usage</h3>
+          <span class="dashboard-card-subtitle" id="opencode-subtitle">Loading...</span>
+        </header>
+        <div class="dashboard-card-body" id="opencode-body">
+          <div class="opencode-summary" id="opencode-summary">
+            <div class="opencode-stat">
+              <div class="opencode-stat-label">Total Cost (30d)</div>
+              <div class="opencode-stat-value" id="opencode-cost">/usr/bin/bash.00</div>
+            </div>
+            <div class="opencode-stat">
+              <div class="opencode-stat-label">Sessions</div>
+              <div class="opencode-stat-value" id="opencode-sessions">0</div>
+            </div>
+            <div class="opencode-stat">
+              <div class="opencode-stat-label">Avg / Day</div>
+              <div class="opencode-stat-value" id="opencode-avg">/usr/bin/bash.00</div>
+            </div>
+          </div>
+          <div id="opencode-recent" class="opencode-recent"></div>
+        </div>
+      </section>
     </div>
   </section>
 
@@ -1349,8 +1373,39 @@ async function refreshData() {
 }
 
 // ── Render All ──
+async function renderOpencodeStats() {
+  try {
+    const resp = await fetch('/api/opencode-stats?t=' + Date.now());
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const summary = data.summary || {};
+    const records = data.records || [];
+    document.getElementById('opencode-cost').textContent = '$' + (summary.total_cost_usd || 0).toFixed(4);
+    document.getElementById('opencode-sessions').textContent = summary.total_sessions || 0;
+    document.getElementById('opencode-avg').textContent = '$' + (summary.avg_cost_per_day_usd || 0).toFixed(4);
+    document.getElementById('opencode-subtitle').textContent = summary.days_logged ? `${summary.days_logged}d logged` : 'No data yet';
+    const recent = document.getElementById('opencode-recent');
+    if (records.length === 0) {
+      recent.innerHTML = '<div class="opencode-empty">No OpenCode sessions yet — cron runs daily at 23:00.</div>';
+    } else {
+      const rows = records.slice(-5).reverse().map(r => `
+        <div class="opencode-row">
+          <span class="opencode-row-date">${(r.timestamp || '').slice(0,10)}</span>
+          <span class="opencode-row-sessions">${r.sessions || 0} sess</span>
+          <span class="opencode-row-msgs">${r.messages || 0} msg</span>
+          <span class="opencode-row-cost">$${(r.cost_usd || 0).toFixed(4)}</span>
+        </div>`).join('');
+      recent.innerHTML = `<div class="opencode-recent-list">${rows}</div>`;
+    }
+  } catch(e) {
+    document.getElementById('opencode-subtitle').textContent = 'Stats unavailable';
+    console.warn('renderOpencodeStats failed:', e);
+  }
+}
+
 function renderAll() {
   try { renderAgents(); } catch(e) { console.warn('renderAgents failed:', e); }
+  try { renderOpencodeStats(); } catch(e) { console.warn('renderOpencodeStats failed:', e); }
   try { renderStats(); } catch(e) { console.warn('renderStats failed:', e); }
   try { renderActivity('all'); } catch(e) { console.warn('renderActivity failed:', e); }
   try { renderProjectTable(); } catch(e) { console.warn('renderProjectTable failed:', e); }

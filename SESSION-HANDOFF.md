@@ -28,7 +28,7 @@
 - Both browser-verified
 
 ### Model Check Behavior
-- Config default = openrouter/owl-alpha
+- Config default = openai-codex (owl-alpha retired 2026-08-05)
 - When Six asks "what model?", always run live check (grep models.yaml), never answer from memory
 
 ## Key Files Modified This Session

@@ -17,3 +17,14 @@
 {"role": "user", "content": "✅ Family-exclusion fix shipped (commit 18e027e). Retirement replacement MUST be a different family now. Cron safeguard hardened (3312a09, ca457ba). 654/654 tests pass. Cycle spawned with new logic.", "ts": "2026-06-24T17:31:23.253163Z", "source": "agent-os"}
 {"role": "assistant", "content": "[Hermes timeout — no response in 5 minutes]", "ts": "2026-06-24T17:36:23.265511Z", "source": "hermes-error"}
 {"role": "assistant", "content": "🧬 Minato Cycle Expanded: gen budget 200→500, bias pool 24→32. Cycle 20260625_145403 resumed from gen 105 with new config. Bug fix included (cycle_id resume sync). Commit 004690e (local, awaiting push approval).", "ts": "2026-06-25T15:26:44.614519Z", "source": "agent-os"}
+{"role": "user", "content": "minato test", "ts": "2026-08-03T00:56:13.367558Z", "source": "overlay"}
+{"role": "assistant", "content": "Minato here. DCA evolution pipeline.\n\n(Stub reply — bridge not yet wired.)\n\n> minato test", "ts": "2026-08-03T00:56:13.370552Z", "source": "overlay-dispatch", "discord_delivered": true}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T01:44:00.479166Z", "source": "overlay"}
+{"role": "user", "content": "overlay reply test minato - one sentence", "ts": "2026-08-03T01:44:49.831594Z", "source": "overlay"}
+{"role": "user", "content": "overlay reply test - one sentence about minato role", "ts": "2026-08-03T01:47:31.126248Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T01:57:14.472459Z", "source": "overlay"}
+{"role": "user", "content": "hello minato", "ts": "2026-08-03T02:29:14.542339Z", "source": "overlay"}
+{"role": "user", "content": "hi", "ts": "2026-08-03T02:29:18.605316Z", "source": "overlay"}
+{"role": "user", "content": "test", "ts": "2026-08-03T03:11:14.634004Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T05:18:41.634587Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T05:19:39.220888Z", "source": "overlay"}

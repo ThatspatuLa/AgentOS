@@ -122,16 +122,17 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Consolidate Tier-2 to Tier-1")
     ap.add_argument("--project", help="only run for this project")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--all", action="store_true", help="consolidate all")
+    ap.add_argument("--all", action="store_true", default=True,
+                    help="consolidate all projects (default when no --project given)")
     args = ap.parse_args()
 
-    if not args.project and not args.all:
-        print("Use --project <name> or --all", file=sys.stderr)
-        return 1
-
-    targets = (
-        [args.project] if args.project else memory_bus.KNOWN_PROJECTS
-    )
+    if args.project:
+        targets = [args.project]
+    else:
+        # --all is default; covers every project
+        targets = (
+            [args.project] if args.project else memory_bus.KNOWN_PROJECTS
+        )
     promoted = 0
     duplicates = 0
     skipped = 0

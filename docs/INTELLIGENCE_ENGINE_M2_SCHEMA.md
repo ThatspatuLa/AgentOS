@@ -443,7 +443,7 @@ CREATE TABLE reports (
     
     -- Generation
     generated_by       VARCHAR(50) NOT NULL,               -- 'intelligence_engine', 'llm_pipeline', 'manual'
-    generation_model   VARCHAR(100),                       -- 'gpt-oss:20b', 'owl-alpha'
+    generation_model   VARCHAR(100),                       -- 'gpt-oss:20b', 'codex' (owl-alpha retired 2026-08-05)
     generation_prompt_hash VARCHAR(64),                   -- for reproducibility
     generation_time_ms INT,
     

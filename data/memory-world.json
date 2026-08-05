@@ -4,10 +4,10 @@
   "exporter_version": "1.0.0",
   "exporter_git_sha": "03f9a3115489",
   "stats": {
-    "total_nodes": 26,
-    "total_edges": 40,
+    "total_nodes": 25,
+    "total_edges": 39,
     "node_types": {
-      "model_cloud": 4,
+      "model_cloud": 3,
       "model_local": 1,
       "zen_core": 1,
       "agent": 5,
@@ -39,7 +39,7 @@
       "invokes": 1
     },
     "clusters": {
-      "models": 5,
+      "models": 4,
       "zen_core": 1,
       "agents": 5,
       "rules": 1,
@@ -48,8 +48,8 @@
       "projects": 7
     },
     "layers": {
-      "2": 23,
       "0": 1,
+      "2": 22,
       "3": 2
     },
     "avg_confidence": 0.9,
@@ -58,8 +58,8 @@
     "validation_errors": 0,
     "extractor_stats": {
       "models_from_config": {
-        "nodes": 4,
-        "edges": 2
+        "nodes": 3,
+        "edges": 1
       },
       "agent_roster": {
         "nodes": 6,
@@ -169,49 +169,6 @@
         "full_name": "neuphonic/neutts-air-q4-gguf",
         "provider": "neuphonic",
         "endpoint": "api.neuphonic.com",
-        "cost_per_million_in": 0.0,
-        "cost_per_million_out": 0.0,
-        "context_limit": 128000,
-        "is_default": false,
-        "is_free_tier": false,
-        "calls_24h": 0,
-        "tokens_24h": 0,
-        "cache_hit_rate": 0.0
-      },
-      "visual": {
-        "sigil": "☁️",
-        "color_override": "#bc8cff",
-        "size_modifier": 1.0,
-        "glow": false,
-        "pulse": "none"
-      }
-    },
-    {
-      "id": "model-openrouter-owl-alpha",
-      "type": "model_cloud",
-      "label": "owl-alpha",
-      "cluster": "models",
-      "layer": 2,
-      "active": false,
-      "risk": "none",
-      "confidence": 0.9,
-      "evidence": [
-        {
-          "source": "/home/spatula/.hermes/config.yaml",
-          "type": "file",
-          "excerpt": "model: openrouter/owl-alpha",
-          "timestamp": "2026-06-11T18:16:48"
-        }
-      ],
-      "summary": "Configured cloud model: openrouter/owl-alpha",
-      "source_path": "/home/spatula/.hermes/config.yaml",
-      "created_at": "2026-06-11T18:16:48",
-      "updated_at": "2026-06-11T18:16:48",
-      "expires_at": null,
-      "data": {
-        "full_name": "openrouter/owl-alpha",
-        "provider": "openrouter",
-        "endpoint": "api.openrouter.com",
         "cost_per_million_in": 0.0,
         "cost_per_million_out": 0.0,
         "context_limit": 128000,
@@ -523,14 +480,13 @@
           "timestamp": "2026-06-11T18:16:48"
         }
       ],
-      "summary": "Routes planning/review to cloud (Owl Alpha + Codex); execution to local (Aider + Ollama gpt-oss:20b)",
+      "summary": "Routes planning/review to cloud (Codex); execution to local (Aider + Ollama gpt-oss:20b)",
       "source_path": "/home/spatula/Obsidian/ZenVault/00_System/Project Memories/Zen Memory.md",
       "created_at": "2026-06-11T18:16:48",
       "updated_at": "2026-06-11T18:16:48",
       "expires_at": null,
       "data": {
         "cloud_models": [
-          "openrouter/owl-alpha",
           "openai-codex"
         ],
         "local_models": [
@@ -1114,25 +1070,6 @@
       "id": "model-neuphonic-neutts-air-q4-gguf-available_to-model-default-cloud",
       "type": "available_to",
       "source": "model-neuphonic-neutts-air-q4-gguf",
-      "target": "model-default-cloud",
-      "label": "configured",
-      "confidence": 0.9,
-      "evidence": [],
-      "created_at": "2026-06-11T18:16:48",
-      "updated_at": "2026-06-11T18:16:48",
-      "data": {},
-      "visual": {
-        "style": "dotted",
-        "color_override": "#8b9bb3",
-        "width_modifier": 1.0,
-        "animated": false,
-        "arrowhead": "standard"
-      }
-    },
-    {
-      "id": "model-openrouter-owl-alpha-available_to-model-default-cloud",
-      "type": "available_to",
-      "source": "model-openrouter-owl-alpha",
       "target": "model-default-cloud",
       "label": "configured",
       "confidence": 0.9,

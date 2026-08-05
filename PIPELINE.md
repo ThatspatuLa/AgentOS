@@ -1,3 +1,4 @@
+<!-- owl-alpha: RETIRED 2026-08-05 -- no longer in use. References below updated to document migration. -->
 # Multi-LLM Pipeline — Configuration Summary
 
 ## Architecture
@@ -5,17 +6,17 @@
 ```
 User sends message to Zen
          ↓
-    Zen (Owl Alpha)
+    Zen (Codex cloud)
     Decides: Thinking task or Doing task?
          ↓                ↓
    CLOUD PATH         LOCAL PATH
-   Owl Alpha/Codex    Aider + Ollama gpt-oss:20b
+   Codex    Aider + Ollama gpt-oss:20b
    Research, discuss,  File mutations, artifact creation
    review, plan        HTML, CSS, JS, Python, configs, markdown
          ↓                ↓
    Direct output    Aider executes locally
                      ↓
-                 Cloud Review (Owl Alpha)
+                 Cloud Review (Codex)
                      ↓
                  Pass? → Done
                  Fail? → Tweak → Aider re-runs (max 3)
@@ -26,12 +27,12 @@ User sends message to Zen
 - Local worker (Aider/Ollama) NEVER touches cloud API keys
 - Cloud models NEVER process raw file generation prompts
 - Ollama runs at `http://127.0.0.1:11434` only
-- Cloud models run through OpenRouter (Owl Alpha) or Codex
+- Cloud models run through Codex (openrouter/owl-alpha retired 2026-08-05)
 
 ## Model Priority
 
-1. **Owl Alpha** — primary cloud for thinking/research/review
-2. **Codex** — fallback when Owl Alpha hits limits
+1. **Codex** — primary cloud for thinking/research/review (owl-alpha retired 2026-08-05)
+2. _(owl-alpha was previously the primary; retired 2026-08-05)_
 3. **gpt-oss:20b (Ollama)** — all file mutations (default, tested best June 2026)
 
 ## Local Worker — Tested June 2026
@@ -52,7 +53,7 @@ User sends message to Zen
 
 User can override automatic routing:
 - "use local" / "use Aider" → force local
-- "use cloud" / "use Owl" / "use Codex" → force cloud
+- "use cloud" / "use Codex" → force cloud
 
 ## File Locations
 
@@ -68,13 +69,13 @@ User can override automatic routing:
 
 1. **Zen Plans** — analyze task, write Aider prompt
 2. **Aider Executes** — local file mutations (10 min timeout)
-3. **Cloud Review** — Owl Alpha reviews output vs spec
+3. **Cloud Review** — Codex reviews output vs spec
 4. **Auto-Tweak** — up to 3 fix iterations
 5. **Promote** — production-ready
 
 ## Cloud Token Savings
 
-Before: Every task used Owl Alpha/Codex (including file generation)
+Before: Every task used Codex (including file generation)
 After: Only thinking/review uses cloud; file generation is free (local)
 
 Estimated savings: 60-80% reduction in cloud token usage.

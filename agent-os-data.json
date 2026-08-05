@@ -16,12 +16,6 @@
     "total_out": 1025500,
     "total_calls": 2536,
     "per_model": {
-      "openrouter/owl-alpha": {
-        "in": 70461876,
-        "out": 121322,
-        "calls": 539,
-        "cost": 0.0
-      },
       "gpt-5.5": {
         "in": 18313244,
         "out": 84707,
@@ -487,7 +481,7 @@
       },
       {
         "id": "SB-20260609-010",
-        "summary": "Specify Owl Alpha/Codex exhaustion baseline tracker",
+        "summary": "Specify Owl Alpha/Codex exhaustion baseline tracker (owl-alpha retired 2026-08-05)",
         "project": "Zen",
         "quality": "high",
         "review_status": "accepted",
@@ -806,7 +800,7 @@
     {
       "time": "2026-06-08",
       "type": "First sandbox run",
-      "details": "SB-001 (TDEE calculator) \u2014 quality: high, artifact verified, accepted"
+      "details": "SB-001 (TDEE calculator) — quality: high, artifact verified, accepted"
     },
     {
       "time": "2026-06-08",
@@ -831,12 +825,12 @@
     {
       "time": "2026-06-08",
       "type": "Review tool created",
-      "details": "SB Review Flashcard.md \u2014 interactive DataviewJS flashcard"
+      "details": "SB Review Flashcard.md — interactive DataviewJS flashcard"
     },
     {
       "time": "2026-06-08",
       "type": "Review session",
-      "details": "SB-025 accepted \u2192 promoted. SB-042, SB-059, SB-097, SB-099 rejected."
+      "details": "SB-025 accepted → promoted. SB-042, SB-059, SB-097, SB-099 rejected."
     },
     {
       "time": "2026-06-08",
@@ -846,7 +840,7 @@
     {
       "time": "2026-06-08",
       "type": "Detail file audit",
-      "details": "26 prompts missing detail files \u2014 all written."
+      "details": "26 prompts missing detail files — all written."
     },
     {
       "time": "2026-06-08",
@@ -1034,10 +1028,6 @@
       "next_observed_refresh": "12:11",
       "weekly_reset_observed": "2026-06-11"
     },
-    "owl_alpha": {
-      "reset_basis": "current UTC day / midnight UTC",
-      "local_reset_time": "10:00 AEST"
-    },
     "tracking_rule": "Record exhaustion points to estimate usable capacity."
   },
   "health": {
@@ -1070,9 +1060,7 @@
         "924095"
       ]
     },
-    "active_models": [
-      "openrouter/owl-alpha"
-    ],
+    "active_models": [],
     "zen_bot": {
       "connected": false,
       "last_activity": "unknown"

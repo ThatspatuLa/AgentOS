@@ -1,0 +1,51 @@
+{"role": "user", "content": "how are you?", "ts": "2026-08-03T00:48:00.385090Z", "source": "overlay"}
+{"role": "assistant", "content": "[Zen] (stub) — received: 'how are you?'\n\ncontext injected: 13884 chars of philosophy, 0 chars of memory. Wire bridges/chatgpt_client.py for real replies.", "ts": "2026-08-03T00:48:00.385090Z", "source": "overlay-stub"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T00:50:55.696146Z", "source": "overlay"}
+{"role": "assistant", "content": "[Zen] (stub) — received: 'testing'\n\ncontext injected: 13884 chars of philosophy, 63 chars of memory. Wire bridges/chatgpt_client.py for real replies.", "ts": "2026-08-03T00:50:55.697142Z", "source": "overlay-stub"}
+{"role": "user", "content": "zen test", "ts": "2026-08-03T00:56:13.905166Z", "source": "overlay"}
+{"role": "assistant", "content": "Zen here. Coordinator and governance.\n\n(Stub reply — bridge not yet wired.)\n\n> zen test", "ts": "2026-08-03T00:56:13.908163Z", "source": "overlay-dispatch", "discord_delivered": true}
+{"role": "user", "content": "testing", "ts": "2026-08-03T00:58:33.800818Z", "source": "overlay"}
+{"role": "assistant", "content": "Zen here. Coordinator and governance.\n\n(Stub reply — bridge not yet wired.)\n\n> testing", "ts": "2026-08-03T00:58:33.800818Z", "source": "overlay-dispatch", "discord_delivered": true}
+{"role": "user", "content": "testing", "ts": "2026-08-03T01:00:37.806195Z", "source": "overlay"}
+{"role": "assistant", "content": "Zen here. Coordinator and governance.\n\n(Stub reply — bridge not yet wired.)\n\n> testing", "ts": "2026-08-03T01:00:37.807200Z", "source": "overlay-dispatch", "discord_delivered": true}
+{"role": "user", "content": "final test - should appear in #zen-chat from Zen Overlay username", "ts": "2026-08-03T01:07:28.091756Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T01:08:54.622472Z", "source": "overlay"}
+{"role": "user", "content": "bot round-trip test", "ts": "2026-08-03T01:16:01.074289Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T01:40:28.508569Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T01:41:12.445992Z", "source": "overlay"}
+{"role": "user", "content": "overlay reply test zen - one sentence", "ts": "2026-08-03T01:44:29.282944Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T01:49:56.789197Z", "source": "overlay"}
+{"role": "user", "content": "explain zen role in one sentence", "ts": "2026-08-03T01:59:48.931426Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T02:02:23.198373Z", "source": "overlay"}
+{"role": "user", "content": "explain zen role in detail", "ts": "2026-08-03T02:07:31.980141Z", "source": "overlay"}
+{"role": "user", "content": "explain zen role in one sentence", "ts": "2026-08-03T02:07:55.628341Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T02:10:06.580246Z", "source": "overlay"}
+{"role": "user", "content": "what are we working on?", "ts": "2026-08-03T02:27:37.510492Z", "source": "overlay"}
+{"role": "user", "content": "ping", "ts": "2026-08-03T02:33:34.999007Z", "source": "overlay"}
+{"role": "user", "content": "test probe", "ts": "2026-08-03T02:52:52.156629Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T02:55:33.018882Z", "source": "overlay"}
+{"role": "user", "content": "what are we currently working on", "ts": "2026-08-03T03:12:17.070937Z", "source": "overlay"}
+{"role": "user", "content": "[OVERLAY] verify tag", "ts": "2026-08-03T03:18:07.345818Z", "source": "overlay"}
+{"role": "user", "content": "[OVERLAY] verify tag", "ts": "2026-08-03T03:19:13.094686Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T03:22:53.258792Z", "source": "overlay"}
+{"role": "user", "content": "testing", "ts": "2026-08-03T05:14:31.890293Z", "source": "overlay"}
+{"role": "user", "content": "say hi in one sentence", "ts": "2026-08-03T05:16:27.515953Z", "source": "overlay"}
+{"role": "user", "content": "testing\\", "ts": "2026-08-03T05:18:04.242494Z", "source": "overlay"}
+{"role": "user", "content": "PONG test - reply with just PONG", "ts": "2026-08-03T08:41:07.847431Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just the word PONG and nothing else.", "ts": "2026-08-03T08:41:39.196559Z", "source": "overlay"}
+{"role": "user", "content": "PONG", "ts": "2026-08-03T08:43:07.589614Z", "source": "overlay"}
+{"role": "user", "content": "Reply with word ZEN", "ts": "2026-08-03T08:43:37.084817Z", "source": "overlay"}
+{"role": "user", "content": "Reply with word CACHE", "ts": "2026-08-03T08:43:50.854168Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-03T08:54:37.741889Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just ZEN", "ts": "2026-08-03T08:54:52.403922Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-03T08:58:10.274322Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-03T08:59:20.747166Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-04T03:51:07.243402Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-04T03:53:28.924916Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just ZEN", "ts": "2026-08-04T03:53:38.551441Z", "source": "overlay"}
+{"role": "user", "content": "Memory hygiene test: please acknowledge this real message in one short sentence.", "ts": "2026-08-04T04:04:50.826942Z", "source": "overlay"}
+{"role": "user", "content": "Quick ack please, this is round 2 of memory hygiene testing", "ts": "2026-08-04T04:05:18.894236Z", "source": "overlay"}
+{"role": "user", "content": "Reply with just PONG", "ts": "2026-08-04T04:06:27.303581Z", "source": "overlay"}
+{"role": "user", "content": "Round 3 of memory hygiene: please confirm in one short sentence that dual-write to Obsidian is working", "ts": "2026-08-04T04:07:04.870295Z", "source": "overlay"}
+{"role": "user", "content": "What is the current state of the Zen memory architecture?", "ts": "2026-08-04T04:37:26.884135Z", "source": "overlay"}
+{"role": "user", "content": "What is the current state of the Zen memory architecture?", "ts": "2026-08-04T04:40:59.272460Z", "source": "overlay"}

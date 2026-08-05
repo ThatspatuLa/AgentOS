@@ -43,7 +43,7 @@
 
 | Type | Label | Description | Cluster | Layer |
 |------|-------|-------------|---------|-------|
-| `model_cloud` | Cloud Model | Owl Alpha, Codex, Minimax, Nemotron, etc. | `models` | 2 |
+| `model_cloud` | Cloud Model | Codex, Minimax, Nemotron, etc. (owl-alpha retired 2026-08-05) | `models` | 2 |
 | `model_local` | Local Model | gpt-oss:20b via Ollama | `models` | 2 |
 | `model_fallback` | Fallback Model | Configured but not primary | `models` | 3 |
 

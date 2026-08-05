@@ -1,0 +1,16 @@
+{
+  "id": "nami",
+  "label": "Nami",
+  "type": "main",
+  "projectId": "nami",
+  "taskId": null,
+  "summary": "",
+  "decisions": [],
+  "blockers": [],
+  "filesTouched": [],
+  "validationProof": [],
+  "nextSafeGate": "",
+  "messageCount": 0,
+  "createdAt": "2026-08-01T00:00:00.000000Z",
+  "lastActive": "2026-08-01T00:00:00.000000Z"
+}
