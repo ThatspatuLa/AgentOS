@@ -44,7 +44,7 @@
     "engine/lib/mention_identity.py": "8dc470553357b1f78865e42832c293d322375f47e1fc904b9437dd368b7193ce",
     "engine/lib/mention_store.py": "38ec0814a1bc85d9733e2f7b6b53a787e14e9a98482ef2a1d6db256bf1c51ada",
     "engine/lib/model_usage.py": "c6649a3f1d18883df21441cbf1fa32df7aedf66b90b1a2b8d9efd099be2cb56b",
-    "engine/lib/nami_io.py": "f91b9087c58ce771627302b4ebc5d65e479efce0fd7366246066345eea677097",
+    "engine/lib/nami_io.py": "a9d1cfbd4187dddcc2ae0093352fbfa91822d23eede3677c01748cd63de5218b",
     "engine/lib/notifier.py": "80fee3b2942c91d99b187f923a8b2866f3a5bdf7e64fb9e1ced07c8e54ec8788",
     "engine/lib/numeric_signals.py": "9b7eba9790ce0fc28bfcee9cc6abe7e7a703bd0fbc6878973d39f90b28e7fe8b",
     "engine/lib/operational_coordinator.py": "71ad3ebab717b635809ebc555534b1c63da28b612d3196f24603a7108d85f84e",
@@ -96,7 +96,7 @@
     "engine/lib/survival_tier.py": "5b0238a89857db9e229cef28ad8413a6cf5168a4c69dcccf5c2e6be36fb94761",
     "engine/lib/third_party_eval.py": "b5761caabe78d6006f68e2bed0336d4f059a9e6a6aaec0b994e907a52c0e9e66",
     "engine/lib/wallet_pnl.py": "4cd0be8db68426ba82817837d2d280dc452d24d25d19efb95bacdd8b0d214309",
-    "engine/lib/work_store.py": "f8a2b347f71fb38de31ee6f2d564a079cf6539a4f7d0b419891b487f1008ac34",
+    "engine/lib/work_store.py": "e0f075a05f01802c2397b2973dd6d143a259f3e259bd94f0ec0022ae1fcca03e",
     "engine/lib/worker_runtime.py": "e3254d52c9f3ac8e1e028fb0f3c38b5ec786029f9c232e50c547365ce15588ee",
     "engine/nami_engine.py": "6386917a1e1088a4fffccc15dbc4310a610963d75549ad37fc9a2640d5d5b3b1",
     "scripts/_register_nami_crons.py": "0f903540bbce543357687822d406833cf2bb7b505741ab15c0f3392e835e61ac",
@@ -158,7 +158,7 @@
     "tests/clearance_fixtures.py": "eb12aeaa27255bc7ef5e7b98be116fca5b4674ddc9373fedebd3bae01a3ab9dd",
     "tests/fixtures/meta_decision_benchmark_v1.json": "548f1af9a03d615ee850d5d627f680360568ddee5349979ae2b39ecec579a4dc",
     "tests/fixtures/meta_decision_benchmark_v2.json": "7bce450c3fd05f16db2a73445e98ba7f70b5e1fa3fa1bfe02d4fd1514b0982ca",
-    "tests/test_archive_backup_retention.py": "7ff7ad4cc6755a67ea197e6a3d74e405469b071ebeb324e2dcc57bc8cb23e3e9",
+    "tests/test_archive_backup_retention.py": "cb992bf8f3c0e89963a9dd3140c9ab96d92d742c82becba39750d4b7e88c9edf",
     "tests/test_arxiv_news_feed.py": "fe2e042d97d63ca370a36926f93499868419028a577b6da6e9d9ac8650993846",
     "tests/test_automatic_source_clearance.py": "40a021ee43d48422da104654c159308e2ce82b7f84c32b31fb923dc7d83e784c",
     "tests/test_backtest_contracts.py": "171f00fc4653d741306f79603eaec397f9512145479595f9d0e906acb25d0640",
@@ -250,6 +250,7 @@
     "tests/test_subscription_evidence.py": "d42e59ff90b78dfa41a225d1530111415f283e97f4fbbeca91efd45386706261",
     "tests/test_subscription_quota.py": "d848ae6de23b12fd65921a23afb402a73a566d6d983476002e3839600054205a",
     "tests/test_watchdog_scope.py": "ea338e54975a89638f6739d2d37c9eb14d80d8dc6e0876305f03f69fdd774fc0",
+    "tests/test_work_store_exact_root_lease.py": "e1e34fc59211f1c166c0680f7f69abc26779824646648cc147822316817af643",
     "tests/test_workflow_retention_propagation.py": "510b1e766cacec4da50149166be6134ccd1c25624a5ab9420ab4358b6af27ee8",
     "docs/binance_vision_offline_adapter.md": "80dba17cbac26a934518eb7dd69369df198c6c596b03397618d6ba42be5a145d",
     "docs/evidence/binance-vision-terms-review-20261016.md": "d4ff42f71cb93345e9adbf7f6da9c8ef5acf7c11293aa4dc3db4bbe9972ffc88",
@@ -258,7 +259,7 @@
     "docs/evidence/p3m-retention-schema-inventory-fix-20261017.md": "1c0746e4a187cd911896fcf82547a780268ddd5ae2920e19d7a9d85ae564ee08",
     "docs/evidence/p3m-retention-task5-20261017.md": "235a4714031c7e93f5b6041b116946d6d3a2eb83ba941627da3b2aa3b342cc6d",
     "docs/evidence/source-route-policy-triage-20261016.md": "b4efdb1d54d1b2fd6c5c4748c1a22f73919c08dfc585f0b24d018b0b61e98fad",
-    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "1f15ae3c07eaf8685efb9c9ba70c863b12e05cef3b502cecb44319c33b5182e5",
+    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "3438bdba79a660afe50f1da65b7bded920abf219915b3492baa8e4cc4c4f4cf2",
     "docs/evidence/unlimited-subscription-admission.md": "782a0d6560b7ae4cb1cfee36dff03b5fa39a4ae59ecb5f500b7a05beb51e887a",
     "docs/kraken-autonomous-research.md": "ef4eacec2e46dd543cbccfce09e410c9851a66b00b6e4a7b0005c2091283ec60",
     "docs/kraken-ohlc-replay.md": "94b1e967e17d57f059b79d6802c94bd3ff7380daafa77cc5cf645de8f12b0d72",
@@ -267,5 +268,5 @@
     "docs/source-clearance.md": "3f3532075ba9214a8d9f196ea6f9db8b3effd994b96435f31316a3de434dcf9b",
     "SOURCE_AUTONOMY_CANDIDATE.md": "f25cbb702c89105de57fc3843649b79a824ccec8508ef97f97e9e5c0a36b26b5"
   },
-  "sha256": "1cf41fe270f0144636e74fbb54d41a38e4046e3536042494f93b41a68ddbb769"
+  "sha256": "ae9d17124a3bad573262ec1112f83123e6a5c677f5baddf8fac36f0bd5a70b18"
 }
