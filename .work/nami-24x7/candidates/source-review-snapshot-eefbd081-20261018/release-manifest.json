@@ -42,7 +42,7 @@
     "engine/lib/loop_state.py": "82ca8b52b8ee0c64dbe3ce40d23ae4bcc4cbc8d7c93c6aa4e2bf9e8380660874",
     "engine/lib/market_data.py": "bada6e97555590106bd913fb3f4b450f5f0100cb1ed62b74cb797525f0d3037f",
     "engine/lib/mention_identity.py": "8dc470553357b1f78865e42832c293d322375f47e1fc904b9437dd368b7193ce",
-    "engine/lib/mention_store.py": "38ec0814a1bc85d9733e2f7b6b53a787e14e9a98482ef2a1d6db256bf1c51ada",
+    "engine/lib/mention_store.py": "6fd7dd1131e7aebcee2276cb64077958c45cbbd4e607106694119309a6b1cefa",
     "engine/lib/model_usage.py": "c6649a3f1d18883df21441cbf1fa32df7aedf66b90b1a2b8d9efd099be2cb56b",
     "engine/lib/nami_io.py": "a9d1cfbd4187dddcc2ae0093352fbfa91822d23eede3677c01748cd63de5218b",
     "engine/lib/notifier.py": "80fee3b2942c91d99b187f923a8b2866f3a5bdf7e64fb9e1ced07c8e54ec8788",
@@ -202,6 +202,7 @@
     "tests/test_loop_state_safety.py": "4ec46f909bad09a4cae27b3bba824582892b6520afcedc3aaf2df80aaa3f7b17",
     "tests/test_maintenance_retention.py": "e7f2096010038e4feedd7c15802373bdc89dd2b877e364e44bff48fc77fda0b6",
     "tests/test_manifold_watch_contract.py": "681c2dda4c93ab7ceb90ef041985a616f381857eaabd4fd13736668793a08002",
+    "tests/test_mention_store_exact_root_lease.py": "bd5281db9a65dc322d7a8d6fdbcab977ff1ce021f9aebea3cf6ee9a1d3ca579f",
     "tests/test_meta_decision_benchmark.py": "4d74eb8b43a36dbe7a025b1ac81512e27b12d717c1b4eda49530c5f0ee715ef6",
     "tests/test_model_controls.py": "d90cbe5b40c8b2307f4fc4ac01f843f4871b3b5052872a296aa3a29b112cc2ce",
     "tests/test_model_identity.py": "12324ef21b17d7f3cab16766fb95f55e0f8f548867e5763e6122c6e10e051b57",
@@ -259,7 +260,7 @@
     "docs/evidence/p3m-retention-schema-inventory-fix-20261017.md": "1c0746e4a187cd911896fcf82547a780268ddd5ae2920e19d7a9d85ae564ee08",
     "docs/evidence/p3m-retention-task5-20261017.md": "235a4714031c7e93f5b6041b116946d6d3a2eb83ba941627da3b2aa3b342cc6d",
     "docs/evidence/source-route-policy-triage-20261016.md": "b4efdb1d54d1b2fd6c5c4748c1a22f73919c08dfc585f0b24d018b0b61e98fad",
-    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "3438bdba79a660afe50f1da65b7bded920abf219915b3492baa8e4cc4c4f4cf2",
+    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "b65df26f9c7226d858445e8f56e47eb80c370e55f0bdb08a527b68222b80421a",
     "docs/evidence/unlimited-subscription-admission.md": "782a0d6560b7ae4cb1cfee36dff03b5fa39a4ae59ecb5f500b7a05beb51e887a",
     "docs/kraken-autonomous-research.md": "ef4eacec2e46dd543cbccfce09e410c9851a66b00b6e4a7b0005c2091283ec60",
     "docs/kraken-ohlc-replay.md": "94b1e967e17d57f059b79d6802c94bd3ff7380daafa77cc5cf645de8f12b0d72",
@@ -268,5 +269,5 @@
     "docs/source-clearance.md": "3f3532075ba9214a8d9f196ea6f9db8b3effd994b96435f31316a3de434dcf9b",
     "SOURCE_AUTONOMY_CANDIDATE.md": "f25cbb702c89105de57fc3843649b79a824ccec8508ef97f97e9e5c0a36b26b5"
   },
-  "sha256": "ae9d17124a3bad573262ec1112f83123e6a5c677f5baddf8fac36f0bd5a70b18"
+  "sha256": "47402df116124822967183f660407962642bbfbbc9cc20ba762c39bf259f3113"
 }

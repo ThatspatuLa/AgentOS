@@ -21,7 +21,7 @@ The Federal Reserve route is included only as route context: the registered adap
 | Store family | Candidate writer and retained copies | Existing retention capability | Remaining hold |
 |---|---|---|---|
 | JSON/JSONL | `nami_io` append/write helpers; `dataset_store.persist_raw_response`; legacy mention/stage writers; qualification/report writers | Generic inventory plus a hash-guarded, single-file JSON/JSONL purge primitive | No global duplicate/copy writer map; no all-root transaction; operational logs/reports can contain content and have heterogeneous schemas |
-| Workflow SQLite | `WorkStore`, `MentionStore`, dispatcher/model-usage stores; maintenance purge adapter | `WorkStore._db()` now holds an exact-root lease across schema setup and every connection, including WAL sidecar writes; explicit schema inventory and per-database rewrite/receipt paths exist for supported schemas | `MentionStore` and other SQLite writers do not yet share the lease; SQLite rows, WAL/SHM/journal sidecars and related JSONL/cursor transitions are not globally atomic; unsupported writers/schemas hold |
+| Workflow SQLite | `WorkStore`, `MentionStore`, dispatcher/model-usage stores; maintenance purge adapter | `WorkStore._db()` and `MentionStore.connect()` now hold an exact-root lease across schema setup and every connection, including WAL sidecar writes; explicit schema inventory and per-database rewrite/receipt paths exist for supported schemas | Dispatcher/model-usage and other SQLite writers do not yet share the lease; SQLite rows, WAL/SHM/journal sidecars and related JSONL/cursor transitions are not globally atomic; unsupported writers/schemas hold |
 | Raw responses | `dataset_store.persist_raw_response`; `scripts.nami_data_capture.capture_response` writes separate public capture envelopes | Lease-bound raw-response inventory and assessment paths exist for the dataset raw directory | Response-envelope writer lacks persisted clearance/descendant proof; no authorized global duplicate and descendant purge commit |
 | Raw generations | `RawGenerationStore.append` and intake/cursor writers | Hash-chained generation/catalog assessment and staged rewrite primitives exist | Catalog, event-index, cursor, intake receipts, and descendants lack one committed purge transition and global recovery |
 | Frozen datasets | `dataset_store.persist_frozen_events`; manifests and evaluation descendants | Dataset raw/frozen records can be recognized and retention lineage inventoried | Descendant and duplicate-reference rewrite is incomplete; manifests, rows and raw parents cannot be committed as one recoverable unit |
@@ -29,7 +29,7 @@ The Federal Reserve route is included only as route context: the registered adap
 
 ## Lease and transaction findings
 
-- Raw response, dataset, and `WorkStore` writers use `.nami-raw-dataset-write-gate.lock`; `RawDatasetStoreLease` and `WorkStore._db()` are Windows-only and check exact-root identity. The gate covers only call sites routed through these adapters. `MentionStore`, raw generations, archive/backups, logs/reports, and model-output writers remain outside it.
+- Raw response, dataset, `WorkStore`, and `MentionStore` writers use `.nami-raw-dataset-write-gate.lock`; `RawDatasetStoreLease`, `WorkStore._db()`, and `MentionStore.connect()` are Windows-only and check exact-root identity. The gate covers only call sites routed through these adapters. Other SQLite writers, raw generations, archive/backups, logs/reports, and model-output writers remain outside it.
 - Cross-process testing exposed that `file_lock_on_secure_root()` inspected the gate byte before taking its Windows byte lock. A waiting process could fail with `PermissionError`; it now acquires the lock before inspecting or initializing the one-byte gate. This ordering is covered by the WorkStore cross-process claim test.
 - Archive rewrite and workflow purge adapters still accept caller-supplied lease seams; the archive rewrite path has not yet been hardened to require the concrete authenticated lease type.
 - `global_retention_transaction` writes a create-only **held** plan, journal, and receipt under a caller-supplied lease-like object. It performs no payload mutation and explicitly cannot recover partial control writes. A method named `assert_bound_root` alone is not proof of exclusive quiescence.
@@ -72,6 +72,8 @@ Current hashes for the workflow-lease slice (2026-10-18):
 | `engine/lib/work_store.py` | `e0f075a05f01802c2397b2973dd6d143a259f3e259bd94f0ec0022ae1fcca03e` |
 | `engine/lib/nami_io.py` | `a9d1cfbd4187dddcc2ae0093352fbfa91822d23eede3677c01748cd63de5218b` |
 | `tests/test_work_store_exact_root_lease.py` | `e1e34fc59211f1c166c0680f7f69abc26779824646648cc147822316817af643` |
+| `engine/lib/mention_store.py` | `6fd7dd1131e7aebcee2276cb64077958c45cbbd4e607106694119309a6b1cefa` |
+| `tests/test_mention_store_exact_root_lease.py` | `bd5281db9a65dc322d7a8d6fdbcab977ff1ce021f9aebea3cf6ee9a1d3ca579f` |
 
 ## Bounded implementation completed after this audit
 
@@ -81,12 +83,14 @@ This lease fences only cooperating writers routed through this seam. It is Windo
 
 ## Next bounded adapter: workflow SQLite
 
-`WorkStore._db()` now enters `ExactRootQuiescenceLease(self.path.parent)`, verifies the exact database parent and rejects linked database leaves before connecting. Constructor/schema writes and normal reads/writes use this same context; `_transaction()` delegates once to `_db()`, and the audited call sites do not nest `_db()` on an open connection. No lease reentrancy redesign was needed. The adapter requires the database parent directory to exist before construction; failure to establish the lease aborts the operation. `MentionStore.connect()` remains a separate unleased writer even when pointed at the same database, so this is only a partial fence.
+`WorkStore._db()` and `MentionStore.connect()` enter `ExactRootQuiescenceLease(self.path.parent)`, verify the exact database parent, and reject linked database leaves before connecting. Constructor/schema writes and normal reads/writes use these contexts; `_transaction()` delegates once to `_db()`. The audited MentionStore `commit_stage` call passes its active connection into `WorkStore.enqueue_hypotheses`, so no nested acquisition occurs. No lease reentrancy redesign was needed. These adapters require the database parent directory to exist before construction; failure to establish the lease aborts the operation.
 
 The focused tests cover missing lease failure, wrong-root rejection, same-root concurrent writer serialization, and the existing cross-process single-claim case. Scoped verification passed: 33 tests and 21 subtests across `test_work_store_exact_root_lease.py`, `test_durable_pipeline.py::DurablePipelineTests::test_cross_process_claim_has_one_owner`, and `test_retention_workflow_store.py`. The earlier all-suite attempt also selected two recovery tests from the adjacent `p3m-retention-transaction-20261017` candidate; their missing-claim failures are not treated as evidence for this candidate slice.
+
+MentionStore-specific synthetic missing-lease, wrong-root, and concurrent-writer tests were added. The combined MentionStore regression command passed 70 tests and 21 subtests: `tests/test_mention_store_exact_root_lease.py`, `tests/test_generation_lineage.py`, `tests/test_durable_pipeline.py`, `tests/test_work_store_exact_root_lease.py`, and `tests/test_retention_workflow_store.py`.
 
 This does not qualify workflow retention or the global controller. A held lease file is operational control state, and root inventory may still classify it as unsupported evidence until explicitly registered. Automatic source clearance remains held.
 
 ## Remaining implementation boundary
 
-The current gate excludes `MentionStore`, raw generations, archives/backups, logs/reports, and model-output writers. Before any purge work, the controller needs complete writer/root coverage, a release-bound registry, safe treatment of the gate control artifact, and recoverable global receipt/recovery plus independent post-inventory. `verify_retention_control()` remains false; no purge path or clearance activation was added.
+The current gate excludes dispatcher/model-usage SQLite writers, raw generations, archives/backups, logs/reports, and model-output writers. Before any purge work, the controller needs complete writer/root coverage, a release-bound registry, safe treatment of the gate control artifact, and recoverable global receipt/recovery plus independent post-inventory. `verify_retention_control()` remains false; no purge path or clearance activation was added.
