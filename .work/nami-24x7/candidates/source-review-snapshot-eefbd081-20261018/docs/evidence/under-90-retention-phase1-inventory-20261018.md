@@ -14,6 +14,8 @@ The candidate has six named store families and multiple partial readers, receipt
 
 The registry is path configuration, not proof that every writer uses those roots or participates in one lease. Additional mutable operational outputs include model usage/workflow databases, documentation evidence, source clearance evidence, model dispatch receipts, worker failures, stage progress, dataset sidecars, raw-generation catalogs/indexes/checkpoints, retention staging, maintenance receipts, and compressed archives/SQLite backups. These are inside known trees in the usual layout, but the current inventory schema does not classify every such format. Unknown content-bearing formats remain held. The candidate resolver also accepts environment path overrides; this pass did not prove they match an installed release or an active runtime.
 
+The Federal Reserve route is included only as route context: the registered adapter path is the public monetary-policy RSS feed `www.federalreserve.gov/feeds/press_monetary.xml`, and its pinned documentation references are the feeds index and disclaimer. Any older P3M source clearance for this route is not evidence of deletion within 89 days and cannot satisfy the newly authorized retention condition.
+
 ## Store and writer coverage
 
 | Store family | Candidate writer and retained copies | Existing retention capability | Remaining hold |

@@ -258,7 +258,7 @@
     "docs/evidence/p3m-retention-schema-inventory-fix-20261017.md": "1c0746e4a187cd911896fcf82547a780268ddd5ae2920e19d7a9d85ae564ee08",
     "docs/evidence/p3m-retention-task5-20261017.md": "235a4714031c7e93f5b6041b116946d6d3a2eb83ba941627da3b2aa3b342cc6d",
     "docs/evidence/source-route-policy-triage-20261016.md": "b4efdb1d54d1b2fd6c5c4748c1a22f73919c08dfc585f0b24d018b0b61e98fad",
-    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "0bea91a4897e10532b4f911d372ad5608ba702dd477c4b9ad9a3e01988fb8ab5",
+    "docs/evidence/under-90-retention-phase1-inventory-20261018.md": "1f15ae3c07eaf8685efb9c9ba70c863b12e05cef3b502cecb44319c33b5182e5",
     "docs/evidence/unlimited-subscription-admission.md": "782a0d6560b7ae4cb1cfee36dff03b5fa39a4ae59ecb5f500b7a05beb51e887a",
     "docs/kraken-autonomous-research.md": "ef4eacec2e46dd543cbccfce09e410c9851a66b00b6e4a7b0005c2091283ec60",
     "docs/kraken-ohlc-replay.md": "94b1e967e17d57f059b79d6802c94bd3ff7380daafa77cc5cf645de8f12b0d72",
@@ -267,5 +267,5 @@
     "docs/source-clearance.md": "3f3532075ba9214a8d9f196ea6f9db8b3effd994b96435f31316a3de434dcf9b",
     "SOURCE_AUTONOMY_CANDIDATE.md": "f25cbb702c89105de57fc3843649b79a824ccec8508ef97f97e9e5c0a36b26b5"
   },
-  "sha256": "e3b39442559e30540ac1a250362637ac95bdce7f6e28cf91ea2811152a1fddcd"
+  "sha256": "1cf41fe270f0144636e74fbb54d41a38e4046e3536042494f93b41a68ddbb769"
 }
