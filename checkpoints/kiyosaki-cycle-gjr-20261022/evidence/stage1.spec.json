@@ -1,0 +1,1534 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 1,
+  "decision": "approved_for_stage2",
+  "research_mode": "queue_only_no_web",
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "primitive": "GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "market": "EightCap ETHUSD",
+  "symbol": "ETHUSD",
+  "timeframes": [
+    "M5",
+    "M15",
+    "H1"
+  ],
+  "test_plan": {
+    "market": "EightCap ETHUSD",
+    "symbol": "ETHUSD",
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1"
+    ],
+    "from_date": "2025.01.10",
+    "to_date": "2026.01.10",
+    "closed_bar_only": true,
+    "scope": "Stage 1 source-derived revalidation; Stage 2 remains held."
+  },
+  "strategy": {
+    "edge": "Vol Regime",
+    "selection_reason": "Selected over excluded static realized-volatility, range, ACF-clustering, and Markov-switching candidates because the captured MDPI cryptocurrency study explicitly evaluates GJR-GARCH volatility modeling, while the official arch documentation provides the asymmetric negative-shock recursion. The OHLC-only regime mapping, entries, exits, and execution layer are deterministic project-derived and not attributed to source performance.",
+    "entry_logic": [
+      "At each newly closed bar, compute r_t=ln(C_t/C_{t-1}) and update the deterministic GJR recursion from prior closed-bar state.",
+      "Classify volatility regime from sigma_t / EMA(sigma_t): GREED when ratio >= InpVolRegimeThreshold and r_t>0; FEAR when ratio >= threshold and r_t<0; NEUTRAL when ratio<threshold and abs(r_t) <= InpNeutralReturnBand; EXTREME_FEAR when ratio >= InpExtremeVolThreshold and r_t<0.",
+      "Enter long on closed-bar positive return with regime-specific multiplier mapping when no position exists; enter short on closed-bar negative return under the corresponding regime."
+    ],
+    "exit_logic": [
+      "Attach ATR-based stop and take-profit at entry using the active regime SL/TP multipliers.",
+      "Exit on opposite closed-bar signal or stop/take-profit; one position per symbol."
+    ],
+    "filters": [
+      "Closed-bar-only OHLC validity and finite-price checks.",
+      "Warmup requires max(InpGJROrder, InpGJRLookback, InpATRPeriod)+1 bars.",
+      "Regime states are mutually exclusive by priority EXTREME_FEAR > GREED/FEAR > NEUTRAL."
+    ],
+    "parameters": [
+      "InpGJRLookback = 256",
+      "InpGJRAlpha = 0.12",
+      "InpGJRGamma = 0.08",
+      "InpGJRBeta = 0.82",
+      "InpVolRegimeThreshold = 1.35",
+      "InpExtremeVolThreshold = 2.25",
+      "InpNeutralReturnBand = 0.0015",
+      "InpATRPeriod = 21",
+      "InpStopATRMult = 2.2",
+      "InpTakeProfitATRMult = 3.4",
+      "InpMagicNumber = 26091042",
+      "InpRegime_Greed_Lot_Mult = 1.0",
+      "InpRegime_Greed_SL_Mult = 1.0",
+      "InpRegime_Greed_TP_Mult = 1.0",
+      "InpRegime_Neutral_Lot_Mult = 1.0",
+      "InpRegime_Neutral_SL_Mult = 1.0",
+      "InpRegime_Neutral_TP_Mult = 1.0",
+      "InpRegime_Fear_Lot_Mult = 1.0",
+      "InpRegime_Fear_SL_Mult = 1.0",
+      "InpRegime_Fear_TP_Mult = 1.0",
+      "InpRegime_ExtFear_Lot_Mult = 1.0",
+      "InpRegime_ExtFear_SL_Mult = 1.0",
+      "InpRegime_ExtFear_TP_Mult = 1.0",
+      "InpFromDate = \"2025.01.10\"",
+      "InpToDate = \"2026.01.10\""
+    ],
+    "parameter_design": [
+      {
+        "name": "InpGJRLookback",
+        "domain": {
+          "default": 256,
+          "start": 64,
+          "step": 64,
+          "stop": 1024,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpGJRAlpha",
+        "domain": {
+          "default": 0.12,
+          "start": 0.01,
+          "step": 0.05,
+          "stop": 0.96,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpGJRGamma",
+        "domain": {
+          "default": 0.08,
+          "start": -0.8,
+          "step": 0.1,
+          "stop": 0.8,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpGJRBeta",
+        "domain": {
+          "default": 0.82,
+          "start": 0.05,
+          "step": 0.05,
+          "stop": 0.95,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpVolRegimeThreshold",
+        "domain": {
+          "default": 1.35,
+          "start": 0.5,
+          "step": 0.125,
+          "stop": 3.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpExtremeVolThreshold",
+        "domain": {
+          "default": 2.25,
+          "start": 1.25,
+          "step": 0.125,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpNeutralReturnBand",
+        "domain": {
+          "default": 0.0015,
+          "start": 0.0,
+          "step": 0.00025,
+          "stop": 0.01,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpATRPeriod",
+        "domain": {
+          "default": 21,
+          "start": 5,
+          "step": 4,
+          "stop": 101,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpStopATRMult",
+        "domain": {
+          "default": 2.2,
+          "start": 0.5,
+          "step": 0.125,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpTakeProfitATRMult",
+        "domain": {
+          "default": 3.4,
+          "start": 0.75,
+          "step": 0.125,
+          "stop": 7.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpMagicNumber",
+        "domain": {
+          "default": 26091042,
+          "start": 26091042,
+          "step": 26091042,
+          "stop": 26091042,
+          "optimize": "N"
+        }
+      },
+      {
+        "name": "InpRegime_Greed_Lot_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Greed_SL_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Greed_TP_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Neutral_Lot_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Neutral_SL_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Neutral_TP_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Fear_Lot_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Fear_SL_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_Fear_TP_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_ExtFear_Lot_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_ExtFear_SL_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      },
+      {
+        "name": "InpRegime_ExtFear_TP_Mult",
+        "domain": {
+          "default": 1.0,
+          "start": 0.0,
+          "step": 0.25,
+          "stop": 5.0,
+          "optimize": "Y"
+        }
+      }
+    ],
+    "execution_contract": {
+      "schema_version": 1,
+      "series": [
+        {
+          "id": "log_return",
+          "equation": "r_t=ln(C_t/C_{t-1})",
+          "origin": "project_design",
+          "bar_shift": 1
+        },
+        {
+          "id": "gjr_log_variance",
+          "equation": "sigma2_t=omega+alpha*epsilon_(t-1)^2+gamma*epsilon_(t-1)^2*I[epsilon_(t-1)<0]+beta*sigma2_(t-1); sigma_t=sqrt(max(sigma2_t,1e-12))",
+          "origin": "documented_methodology",
+          "source_ref": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+          "bar_shift": 1
+        },
+        {
+          "id": "true_range_atr",
+          "equation": "TR_t=max(H_t-L_t,abs(H_t-C_{t-1}),abs(L_t-C_{t-1})); ATR_t=EMA(TR_t,InpATRPeriod)",
+          "origin": "project_design",
+          "bar_shift": 1
+        }
+      ],
+      "warmup": {
+        "required_bars": "max(InpGJRLookback,InpATRPeriod)+2",
+        "initialization": "Initialize sigma2 from the first lookback return variance, set g=ln(max(sigma2,1e-12)), and skip signals until warmup is complete."
+      },
+      "closed_bar_policy": {
+        "signal_shift": 1,
+        "allow_forming_bar": false,
+        "description": "Only completed OHLC bars are read and evaluated once per new bar."
+      },
+      "equations": [
+        "The official arch documentation gives the GJR-GARCH variance recursion with an indicator for negative shocks: sigma^2_t = omega + alpha epsilon^2_(t-1) + gamma epsilon^2_(t-1) I[epsilon_(t-1)<0] + beta sigma^2_(t-1); this supports the implementation form.",
+        "r_t=ln(C_t/C_(t-1)); epsilon_t=r_t-mu with project-derived mu=0.",
+        "vol_ratio=sigma_t/EMA(sigma_t,InpGJRLookback); classify mutually exclusive regimes by priority."
+      ],
+      "regimes": {
+        "classification": "priority EXTREME_FEAR, then GREED or FEAR by return sign, else NEUTRAL; vol_ratio=sigma/EMA(sigma,InpGJRLookback).",
+        "overlap_policy": "mutually_exclusive",
+        "multipliers": [
+          {
+            "regime": "GREED",
+            "lot_input": "InpRegime_Greed_Lot_Mult",
+            "sl_input": "InpRegime_Greed_SL_Mult",
+            "tp_input": "InpRegime_Greed_TP_Mult"
+          },
+          {
+            "regime": "NEUTRAL",
+            "lot_input": "InpRegime_Neutral_Lot_Mult",
+            "sl_input": "InpRegime_Neutral_SL_Mult",
+            "tp_input": "InpRegime_Neutral_TP_Mult"
+          },
+          {
+            "regime": "FEAR",
+            "lot_input": "InpRegime_Fear_Lot_Mult",
+            "sl_input": "InpRegime_Fear_SL_Mult",
+            "tp_input": "InpRegime_Fear_TP_Mult"
+          },
+          {
+            "regime": "EXTREME_FEAR",
+            "lot_input": "InpRegime_ExtFear_Lot_Mult",
+            "sl_input": "InpRegime_ExtFear_SL_Mult",
+            "tp_input": "InpRegime_ExtFear_TP_Mult"
+          }
+        ]
+      },
+      "signals": {
+        "long": "r_t>0 and no open position after regime classification",
+        "short": "r_t<0 and no open position after regime classification",
+        "conflict_policy": "If both signals are unavailable or data is invalid, skip the trade."
+      },
+      "exits": {
+        "stop_loss": "Entry price plus/minus ATR_t*InpStopATRMult*active regime SL multiplier.",
+        "take_profit": "Entry price plus/minus ATR_t*InpTakeProfitATRMult*active regime TP multiplier.",
+        "time_stop": "No time stop; exits are only stop, target, or opposite closed-bar signal."
+      },
+      "execution": {
+        "margin_check": "Require sufficient free margin before order.",
+        "volume_normalization": "Normalize calculated volume to broker min, max, and step.",
+        "minimum_take_profit": "Reject orders whose target violates broker minimum distance.",
+        "invalid_data": "skip_trade"
+      },
+      "input_bindings": {
+        "InpGJRLookback": [
+          "execution",
+          "exits",
+          "gjr_log_variance",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpGJRAlpha": [
+          "execution",
+          "exits",
+          "gjr_log_variance",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpGJRGamma": [
+          "execution",
+          "exits",
+          "gjr_log_variance",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpGJRBeta": [
+          "execution",
+          "exits",
+          "gjr_log_variance",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpVolRegimeThreshold": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpExtremeVolThreshold": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpNeutralReturnBand": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpATRPeriod": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpStopATRMult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpTakeProfitATRMult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Greed_Lot_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Greed_SL_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Greed_TP_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Neutral_Lot_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Neutral_SL_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Neutral_TP_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Fear_Lot_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Fear_SL_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_Fear_TP_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_ExtFear_Lot_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_ExtFear_SL_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpRegime_ExtFear_TP_Mult": [
+          "execution",
+          "exits",
+          "regimes",
+          "signals",
+          "true_range_atr",
+          "warmup"
+        ],
+        "InpFromDate": [
+          "tester_config"
+        ],
+        "InpToDate": [
+          "tester_config"
+        ]
+      }
+    },
+    "parameters_normalized_from_source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5"
+  },
+  "tester_config": {
+    "schema_version": 1,
+    "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+    "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "symbol": "ETHUSD",
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1"
+    ],
+    "from_date": "2025.01.10",
+    "to_date": "2026.01.10",
+    "inputs": {
+      "InpGJRLookback": {
+        "type": "int",
+        "default": 256,
+        "start": 64,
+        "step": 64,
+        "stop": 1024,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpGJRAlpha": {
+        "type": "double",
+        "default": 0.12,
+        "start": 0.01,
+        "step": 0.05,
+        "stop": 0.96,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpGJRGamma": {
+        "type": "double",
+        "default": 0.08,
+        "start": -0.8,
+        "step": 0.1,
+        "stop": 0.8,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpGJRBeta": {
+        "type": "double",
+        "default": 0.82,
+        "start": 0.05,
+        "step": 0.05,
+        "stop": 0.95,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpVolRegimeThreshold": {
+        "type": "double",
+        "default": 1.35,
+        "start": 0.5,
+        "step": 0.125,
+        "stop": 3.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpExtremeVolThreshold": {
+        "type": "double",
+        "default": 2.25,
+        "start": 1.25,
+        "step": 0.125,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpNeutralReturnBand": {
+        "type": "double",
+        "default": 0.0015,
+        "start": 0.0,
+        "step": 0.00025,
+        "stop": 0.01,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpATRPeriod": {
+        "type": "int",
+        "default": 21,
+        "start": 5,
+        "step": 4,
+        "stop": 101,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpStopATRMult": {
+        "type": "double",
+        "default": 2.2,
+        "start": 0.5,
+        "step": 0.125,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpTakeProfitATRMult": {
+        "type": "double",
+        "default": 3.4,
+        "start": 0.75,
+        "step": 0.125,
+        "stop": 7.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpMagicNumber": {
+        "type": "int",
+        "default": 26091042,
+        "start": 26091042,
+        "step": 26091042,
+        "stop": 26091042,
+        "optimize": "N"
+      },
+      "InpRegime_Greed_Lot_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Greed_SL_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Greed_TP_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Neutral_Lot_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Neutral_SL_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Neutral_TP_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Fear_Lot_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Fear_SL_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_Fear_TP_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_ExtFear_Lot_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_ExtFear_SL_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpRegime_ExtFear_TP_Mult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0.0,
+        "step": 0.25,
+        "stop": 5.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "authenticated_parent_stage1_domain",
+          "basis": "Preserved unchanged from the hash-bound authenticated Stage 1 parent; no backtest-derived ranking or reliability update."
+        }
+      },
+      "InpMinatoTestStart": {
+        "type": "datetime",
+        "default": 1736467200,
+        "start": 1736467200,
+        "step": 0,
+        "stop": 1736467200,
+        "optimize": "N"
+      },
+      "InpMinatoTestEnd": {
+        "type": "datetime",
+        "default": 1768003200,
+        "start": 1768003200,
+        "step": 0,
+        "stop": 1768003200,
+        "optimize": "N"
+      },
+      "InpMinatoExpectedScoreVersion": {
+        "type": "string",
+        "default": "MINATO_BASE_SCORE_V2.0",
+        "start": "MINATO_BASE_SCORE_V2.0",
+        "step": "MINATO_BASE_SCORE_V2.0",
+        "stop": "MINATO_BASE_SCORE_V2.0",
+        "optimize": "N"
+      },
+      "InpFromDate": {
+        "type": "string",
+        "default": "2025.01.10",
+        "start": "2025.01.10",
+        "step": 0,
+        "stop": "2025.01.10",
+        "optimize": "N",
+        "domain_provenance": {
+          "method": "source_default",
+          "basis": "fixed at the exact source default"
+        }
+      },
+      "InpToDate": {
+        "type": "string",
+        "default": "2026.01.10",
+        "start": "2026.01.10",
+        "step": 0,
+        "stop": "2026.01.10",
+        "optimize": "N",
+        "domain_provenance": {
+          "method": "source_default",
+          "basis": "fixed at the exact source default"
+        }
+      }
+    },
+    "input_constraints": [
+      {
+        "id": "gjr_alpha_nonnegative",
+        "coefficients": {
+          "InpGJRAlpha": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "gjr_beta_nonnegative",
+        "coefficients": {
+          "InpGJRBeta": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "extreme_above_normal",
+        "coefficients": {
+          "InpExtremeVolThreshold": 1,
+          "InpVolRegimeThreshold": -1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "greed_sl_nonnegative",
+        "coefficients": {
+          "InpRegime_Greed_SL_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "greed_tp_nonnegative",
+        "coefficients": {
+          "InpRegime_Greed_TP_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "neutral_sl_nonnegative",
+        "coefficients": {
+          "InpRegime_Neutral_SL_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "neutral_tp_nonnegative",
+        "coefficients": {
+          "InpRegime_Neutral_TP_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "fear_sl_nonnegative",
+        "coefficients": {
+          "InpRegime_Fear_SL_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "fear_tp_nonnegative",
+        "coefficients": {
+          "InpRegime_Fear_TP_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "extfear_sl_nonnegative",
+        "coefficients": {
+          "InpRegime_ExtFear_SL_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      },
+      {
+        "id": "extfear_tp_nonnegative",
+        "coefficients": {
+          "InpRegime_ExtFear_TP_Mult": 1
+        },
+        "operator": ">=",
+        "limit": 0
+      }
+    ]
+  },
+  "source_provenance": {
+    "url": "https://www.mdpi.com/1911-8074/14/9/421",
+    "main_source": {
+      "platform": "MDPI",
+      "publisher": "Journal of Risk and Financial Management",
+      "url": "https://www.mdpi.com/1911-8074/14/9/421",
+      "role": "Documents GJR-GARCH volatility modeling applied to multiple cryptocurrencies.",
+      "evidence_type": "research article"
+    },
+    "secondary_source": {
+      "platform": "arch documentation",
+      "publisher": "Kevin Sheppard / arch project",
+      "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+      "role": "Documents the implementable asymmetric GJR-GARCH variance recursion.",
+      "evidence_type": "official technical documentation"
+    },
+    "secondary_sources": [],
+    "sources": [
+      {
+        "url": "https://www.mdpi.com/1911-8074/14/9/421",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_1.pdf",
+        "retrieved_utc": "2026-10-19T05:02:00Z",
+        "content_sha256": "B6C699B95D85627F08AB811C700937473990BA23A149FBA55DB4419C5153B758",
+        "evidence_excerpt": "The study explicitly implements GJR-GARCH for volatility estimation of ten cryptocurrencies and compares it with GARCH-based approaches; this supports the asymmetric conditional-volatility mechanism and crypto relevance, not downstream EA performance.",
+        "capture_type": "reused byte-for-byte from authenticated same-source Stage 1 parent"
+      },
+      {
+        "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_2.html",
+        "retrieved_utc": "2026-10-19T05:02:00Z",
+        "content_sha256": "DB9EF7E554E6DD494632043CCD1E5D79BA592B9AFF4C5D9E5BC7A377D01BB281",
+        "evidence_excerpt": "The official arch documentation gives the GJR-GARCH variance recursion with an indicator for negative shocks: sigma^2_t = omega + alpha epsilon^2_(t-1) + gamma epsilon^2_(t-1) I[epsilon_(t-1)<0] + beta sigma^2_(t-1); this supports the implementation form.",
+        "capture_type": "reused byte-for-byte from authenticated same-source Stage 1 parent"
+      }
+    ]
+  },
+  "source_verification": {
+    "status": "live_verified",
+    "verified_utc": "2026-10-21T21:36:25.125203+00:00",
+    "sources": [
+      {
+        "url": "https://www.mdpi.com/1911-8074/14/9/421",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_1.pdf",
+        "retrieved_utc": "2026-10-19T05:02:00Z",
+        "content_sha256": "B6C699B95D85627F08AB811C700937473990BA23A149FBA55DB4419C5153B758",
+        "evidence_excerpt": "The study explicitly implements GJR-GARCH for volatility estimation of ten cryptocurrencies and compares it with GARCH-based approaches; this supports the asymmetric conditional-volatility mechanism and crypto relevance, not downstream EA performance.",
+        "capture_type": "reused byte-for-byte from authenticated same-source Stage 1 parent"
+      },
+      {
+        "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_2.html",
+        "retrieved_utc": "2026-10-19T05:02:00Z",
+        "content_sha256": "DB9EF7E554E6DD494632043CCD1E5D79BA592B9AFF4C5D9E5BC7A377D01BB281",
+        "evidence_excerpt": "The official arch documentation gives the GJR-GARCH variance recursion with an indicator for negative shocks: sigma^2_t = omega + alpha epsilon^2_(t-1) + gamma epsilon^2_(t-1) I[epsilon_(t-1)<0] + beta sigma^2_(t-1); this supports the implementation form.",
+        "capture_type": "reused byte-for-byte from authenticated same-source Stage 1 parent"
+      }
+    ]
+  },
+  "source_paths": [
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_1.pdf",
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_2.html"
+  ],
+  "source_evidence": [
+    {
+      "url": "https://www.mdpi.com/1911-8074/14/9/421",
+      "publisher": null,
+      "retrieved_utc": "2026-10-19T05:02:00Z",
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_1.pdf",
+      "sha256": "B6C699B95D85627F08AB811C700937473990BA23A149FBA55DB4419C5153B758",
+      "role": "Documents GJR-GARCH volatility modeling applied to multiple cryptocurrencies.",
+      "limitations": "Source-backed: cryptocurrency GJR-GARCH application and asymmetric variance recursion. Project-derived: closed-bar OHLC inputs, initialization, regime thresholds, four mutually exclusive regimes, ATR execution, and parameter domains. No performance outcome is attributed to either source."
+    },
+    {
+      "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+      "publisher": null,
+      "retrieved_utc": "2026-10-19T05:02:00Z",
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\legacy_source_2.html",
+      "sha256": "DB9EF7E554E6DD494632043CCD1E5D79BA592B9AFF4C5D9E5BC7A377D01BB281",
+      "role": "Documents the implementable asymmetric GJR-GARCH variance recursion.",
+      "limitations": "Source-backed: cryptocurrency GJR-GARCH application and asymmetric variance recursion. Project-derived: closed-bar OHLC inputs, initialization, regime thresholds, four mutually exclusive regimes, ATR execution, and parameter domains. No performance outcome is attributed to either source."
+    }
+  ],
+  "strategy_fingerprint": "closed-bar GJR-GARCH asymmetric conditional-volatility recursion with normalized volatility regimes and ATR execution layer",
+  "reproducible": true,
+  "completeness": {
+    "complete": true,
+    "boundary": "Source-backed: cryptocurrency GJR-GARCH application and asymmetric variance recursion. Project-derived: closed-bar OHLC inputs, initialization, regime thresholds, four mutually exclusive regimes, ATR execution, and parameter domains. No performance outcome is attributed to either source."
+  },
+  "risks": [
+    "GJR parameter stability is sensitive to window length and volatility persistence.",
+    "The directional/ATR trading layer is project-derived and has no source performance claim.",
+    "Regime thresholds can drift across crypto market conditions; Stage 3/forward validation is required."
+  ],
+  "selection_reason": "Selected over excluded static realized-volatility, range, ACF-clustering, and Markov-switching candidates because the captured MDPI cryptocurrency study explicitly evaluates GJR-GARCH volatility modeling, while the official arch documentation provides the asymmetric negative-shock recursion. The OHLC-only regime mapping, entries, exits, and execution layer are deterministic project-derived and not attributed to source performance.",
+  "input_resolution": {
+    "schema_version": 1,
+    "contract_sha256": "9806EC2C2C309563C0124046DA8DFEB376755368F5DD384D5F48CC7FA0A55E04",
+    "sources": {
+      "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF"
+    },
+    "changes": [
+      {
+        "input": "InpMinatoTestStart",
+        "field": "default",
+        "before": "2025.01.10",
+        "after": 1736467200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestStart",
+        "field": "start",
+        "before": "2025.01.10",
+        "after": 1736467200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestStart",
+        "field": "stop",
+        "before": "2025.01.10",
+        "after": 1736467200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestEnd",
+        "field": "default",
+        "before": "2026.01.10",
+        "after": 1768003200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestEnd",
+        "field": "start",
+        "before": "2026.01.10",
+        "after": 1768003200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestEnd",
+        "field": "stop",
+        "before": "2026.01.10",
+        "after": 1768003200,
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoExpectedScoreVersion",
+        "field": "step",
+        "before": 0,
+        "after": "MINATO_BASE_SCORE_V2.0",
+        "reason": "approved_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestStart",
+        "field": "tester_config.inputs",
+        "before": null,
+        "after": {
+          "type": "datetime",
+          "default": 1736467200,
+          "start": 1736467200,
+          "step": 0,
+          "stop": 1736467200,
+          "optimize": "N"
+        },
+        "reason": "required_runtime_binding"
+      },
+      {
+        "input": "InpMinatoTestEnd",
+        "field": "tester_config.inputs",
+        "before": null,
+        "after": {
+          "type": "datetime",
+          "default": 1768003200,
+          "start": 1768003200,
+          "step": 0,
+          "stop": 1768003200,
+          "optimize": "N"
+        },
+        "reason": "required_runtime_binding"
+      },
+      {
+        "input": "InpMinatoExpectedScoreVersion",
+        "field": "tester_config.inputs",
+        "before": null,
+        "after": {
+          "type": "string",
+          "default": "MINATO_BASE_SCORE_V2.0",
+          "start": "MINATO_BASE_SCORE_V2.0",
+          "step": "MINATO_BASE_SCORE_V2.0",
+          "stop": "MINATO_BASE_SCORE_V2.0",
+          "optimize": "N"
+        },
+        "reason": "required_runtime_binding"
+      }
+    ],
+    "inputs": {
+      "InpMinatoTestStart": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "datetime",
+        "source_default": 1736035200,
+        "source_default_literal": "D'2025.01.05 00:00'",
+        "runtime_default": 1736467200,
+        "runtime_binding_applied": true,
+        "serialization": {
+          "default": "1736467200",
+          "start": "1736467200",
+          "step": "0",
+          "stop": "1736467200"
+        }
+      },
+      "InpMinatoTestEnd": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "datetime",
+        "source_default": 1767571200,
+        "source_default_literal": "D'2026.01.05 00:00'",
+        "runtime_default": 1768003200,
+        "runtime_binding_applied": true,
+        "serialization": {
+          "default": "1768003200",
+          "start": "1768003200",
+          "step": "0",
+          "stop": "1768003200"
+        }
+      },
+      "InpMinatoExpectedScoreVersion": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "string",
+        "source_default": "MINATO_BASE_SCORE_V2.0",
+        "source_default_literal": "\"MINATO_BASE_SCORE_V2.0\"",
+        "runtime_default": "MINATO_BASE_SCORE_V2.0",
+        "runtime_binding_applied": true,
+        "serialization": {
+          "default": "MINATO_BASE_SCORE_V2.0",
+          "start": "MINATO_BASE_SCORE_V2.0",
+          "step": "MINATO_BASE_SCORE_V2.0",
+          "stop": "MINATO_BASE_SCORE_V2.0"
+        }
+      }
+    },
+    "unresolved_inputs": [
+      "InpATRPeriod",
+      "InpExtremeVolThreshold",
+      "InpGJRAlpha",
+      "InpGJRBeta",
+      "InpGJRGamma",
+      "InpGJRLookback",
+      "InpMagicNumber",
+      "InpNeutralReturnBand",
+      "InpRegime_ExtFear_Lot_Mult",
+      "InpRegime_ExtFear_SL_Mult",
+      "InpRegime_ExtFear_TP_Mult",
+      "InpRegime_Fear_Lot_Mult",
+      "InpRegime_Fear_SL_Mult",
+      "InpRegime_Fear_TP_Mult",
+      "InpRegime_Greed_Lot_Mult",
+      "InpRegime_Greed_SL_Mult",
+      "InpRegime_Greed_TP_Mult",
+      "InpRegime_Neutral_Lot_Mult",
+      "InpRegime_Neutral_SL_Mult",
+      "InpRegime_Neutral_TP_Mult",
+      "InpStopATRMult",
+      "InpTakeProfitATRMult",
+      "InpVolRegimeThreshold"
+    ],
+    "added_inputs": [
+      "InpMinatoTestStart",
+      "InpMinatoTestEnd",
+      "InpMinatoExpectedScoreVersion"
+    ],
+    "shared_inputs": {
+      "InpMinatoTestStart": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "datetime",
+        "source_default_literal": "D'2025.01.05 00:00'",
+        "optimizable": true,
+        "supported": true,
+        "source_default": 1736035200
+      },
+      "InpMinatoTestEnd": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "datetime",
+        "source_default_literal": "D'2026.01.05 00:00'",
+        "optimizable": true,
+        "supported": true,
+        "source_default": 1767571200
+      },
+      "InpMinatoExpectedScoreVersion": {
+        "owner": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+        "mql_type": "string",
+        "source_default_literal": "\"MINATO_BASE_SCORE_V2.0\"",
+        "optimizable": true,
+        "supported": true,
+        "source_default": "MINATO_BASE_SCORE_V2.0"
+      }
+    }
+  },
+  "stage1_tracking": {
+    "schema_version": 1,
+    "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+    "candidate_selection": {
+      "reason": "Selected over excluded static realized-volatility, range, ACF-clustering, and Markov-switching candidates because the captured MDPI cryptocurrency study explicitly evaluates GJR-GARCH volatility modeling, while the official arch documentation provides the asymmetric negative-shock recursion. The OHLC-only regime mapping, entries, exits, and execution layer are deterministic project-derived and not attributed to source performance.",
+      "status": "recorded"
+    },
+    "sources": {
+      "primary": {
+        "platform": "MDPI",
+        "source_name": "Journal of Risk and Financial Management",
+        "url": "https://www.mdpi.com/1911-8074/14/9/421",
+        "supports": "Documents GJR-GARCH volatility modeling applied to multiple cryptocurrencies."
+      },
+      "secondary": {
+        "platform": "arch documentation",
+        "source_name": "Kevin Sheppard / arch project",
+        "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+        "supports": "Documents the implementable asymmetric GJR-GARCH variance recursion."
+      },
+      "strategy_posted_date": null,
+      "strategy_posted_date_status": "not_reported"
+    },
+    "outcome_consistency": {
+      "scores": [
+        "stage3.minato_base_score",
+        "stage4_5.minato_base_score",
+        "stage5.minato_base_score"
+      ],
+      "comparison": "compare each stage score with the preceding stage; report increased, held, decreased, or unavailable",
+      "failure_reason_and_trade_count": "retain both beside each stage score and timeframe"
+    },
+    "stage_outcomes": {
+      "stage3": {
+        "artifact": "decisions/{cycle_id}.stage3.decision.json",
+        "minato_base_score": "timeframes[highest_cf_tf].cf",
+        "timeframe": "highest_cf_tf",
+        "failure_reason": "reason",
+        "trade_count": "timeframes[highest_cf_tf].trades"
+      },
+      "stage4_5": {
+        "artifact": "decisions/{cycle_id}.stage45.run*.decision.json",
+        "minato_base_score": "retained_best_minato_score",
+        "timeframe": "selected_tf",
+        "failure_reason": "reason",
+        "trade_count": "max_trades (maximum observed in that run)"
+      },
+      "stage5": {
+        "artifact": "stage5_v2/{cycle_id}.stage5.result.json",
+        "minato_base_score": "forward_result.metrics.forward_cf",
+        "timeframe": "forward_result.timeframe",
+        "failure_reason": "forward_result.verdict and forward_result.gates",
+        "trade_count": "forward_result.metrics.forward_trades"
+      }
+    }
+  },
+  "candidate_ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "edge": "Vol Regime",
+  "from_date": "2025.01.10",
+  "to_date": "2026.01.10",
+  "created_utc": "2026-10-21T21:36:25.124202+00:00",
+  "stage2_requirements": {
+    "build_and_compile": true,
+    "verify_canonical_minato_formula_parity": true,
+    "verify_closed_bar_only": true,
+    "verify_no_external_data": true,
+    "minato_formula_version": "MINATO_BASE_SCORE_V2.0"
+  },
+  "duplicate_check": {
+    "decision": "same_existing_ea_revalidation",
+    "exact_duplicate": false,
+    "rename_only": false,
+    "parameter_only_variant": false,
+    "evidence": [
+      "The candidate retains the exact EA and primitive identity from its authenticated Stage 1 parent.",
+      "The source hash is unchanged; this re-entry creates no second EA identity.",
+      "The canonical duplicate assessment found no authenticated Stage 5-complete duplicate to discard."
+    ]
+  },
+  "primitive_selection": {
+    "mode": "selected",
+    "edge": "Vol Regime",
+    "reason": "Fresh bounded auto-evolve pick after live queue exhaustion. GJR-GARCH is distinct from excluded static realized-volatility, range, ACF-clustering, and Markov-switching candidates; the MDPI crypto study documents GJR-GARCH use for cryptocurrencies and arch documentation supplies the implementation recursion.",
+    "source_rotation_cursor": 55,
+    "excluded": [
+      "AdaptiveEntropyCompression_RegimeGate_v1",
+      "AdaptiveRealizedVolatility_RegimeGate_v1",
+      "BipowerVariation_JumpDetect_LeeMykland",
+      "CARR_RangeVolatility_RegimeGate_v1",
+      "CUSUM_RangeExpansion_RegimeGate_v1",
+      "DCC_GARCH_AdaptiveCorrelation_VolRegime_v1",
+      "DCC_GARCH_ETH_BTC_VolRegime",
+      "DCC_GARCH_Multivariate_Correlation_Regime",
+      "EWMA_RealizedVolatility_RegimeGate",
+      "EntropyRate_Volatility_RegimeGate_v1",
+      "ExtremeValue_PeakOverThreshold_VolRegimeGate_v1",
+      "GarmanKlass_OHLC_VolRegimeGate_v1",
+      "HomogeneousOHLC_EfficiencyVolatility_RegimeGate_v1",
+      "HurstExponent_RegimeGate_v1",
+      "InformationDrivenTripleBarrier_VolRegimeGate_v1",
+      "InformationDrivenTripleBarrier_VolatilityGate_v2",
+      "KMeans_RealizedVolatility_RegimeGate_v1",
+      "KeltnerChannelWidth_RegimeGate_v1",
+      "LogRangeVolatility_QuantileRegimeGate_v1",
+      "MarkovSwitching_GARCH_CryptoVolRegimeGate_v1",
+      "MedianAbsoluteDeviation_ReturnVolatility_RegimeGate_v1",
+      "MultiScaleReturnVolatility_RegimeGate_v1",
+      "ParkinsonRangePercentile_RegimeGate_v1",
+      "PermutationEntropy_RegimeGate_v1",
+      "ProbabilisticVolatilityQuantile_RegimeGate_v1",
+      "RangeCompression_Duration_RegimeGate_v1",
+      "RangeVolatility_Quantile_RegimeGate_v1",
+      "RealizedPowerVariation_Quarticity_RegimeGate_v1",
+      "RealizedSemivarianceAsymmetry_RegimeGate_v1",
+      "RealizedVolatility_Ensemble_RegimeGate_v1",
+      "RealizedVolatility_GARCH_RegimeGate",
+      "RealizedVolatility_Quantile_RegimeGate_v1",
+      "RegimeSwitching_OU_RealizedVolatility_Gate_v1",
+      "RobustClippedVolatility_RegimeGate_v1",
+      "RogersSatchell_AsymmetricVolatility_RegimeGate",
+      "VolatilityClustering_ACF2_RegimeGate_v1",
+      "VolatilityClustering_ACFDecay_RegimeGate_v1",
+      "YangZhang_OHLC_Volatility_RegimeGate_v1"
+    ],
+    "avoid_exact_primitive_reuse": true,
+    "excluded_candidate_eas": [
+      "B1_1_DCC_GARCH_Multivariate_Correlation_Regime_v1",
+      "B1_1_EWMA_RealizedVolatility_RegimeGate_v1",
+      "B1_1_ExtremeValue_PeakOverThreshold_VolRegimeGate_v1",
+      "B1_1_HomogeneousOHLC_EfficiencyVolatility_RegimeGate_v1",
+      "B1_1_HurstExponent_RegimeGate_v1",
+      "B1_1_InformationDrivenTripleBarrier_VolRegimeGate_v1",
+      "B1_1_InformationDrivenTripleBarrier_VolatilityGate_v2",
+      "B1_1_KMeans_RealizedVolatility_RegimeGate_v1",
+      "B1_1_KeltnerChannelWidth_RegimeGate_v1",
+      "B1_1_MarkovSwitching_GARCH_CryptoVolRegimeGate_v1",
+      "B1_1_MedianAbsoluteDeviation_ReturnVolatility_RegimeGate_v1",
+      "B1_1_MultiScaleReturnVolatility_RegimeGate_v1",
+      "B1_1_ProbabilisticVolatilityQuantile_RegimeGate_v1",
+      "B1_1_RealizedPowerVariation_Quarticity_RegimeGate_v1",
+      "B1_1_RealizedSemivarianceAsymmetry_RegimeGate_v1",
+      "B1_1_RegimeSwitching_OU_RealizedVolatility_Gate_v1",
+      "B1_1_RobustClippedVolatility_RegimeGate_v1",
+      "B1_1_RogersSatchell_AsymmetricVolatility_RegimeGate_v1",
+      "B1_1_VolatilityClustering_ACF2_RegimeGate_v1",
+      "B1_1_VolatilityClustering_ACFDecay_RegimeGate_v1",
+      "B1_1_YangZhang_OHLC_Volatility_RegimeGate_v1"
+    ],
+    "avoid_exact_candidate_reuse": true,
+    "primitive": "GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "candidate_ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "mechanism": "GJR-GARCH asymmetric conditional-volatility regime gate on closed-bar log returns",
+    "evidence_urls": [
+      "https://www.mdpi.com/1911-8074/14/9/421",
+      "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html"
+    ]
+  },
+  "selected_primitive_provenance": {
+    "primitive": "GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "edge": "Vol Regime",
+    "mechanism": "GJR-GARCH asymmetric conditional-volatility regime gate on closed-bar log returns",
+    "whale_driven": "Y",
+    "tf_sweet": "M15",
+    "source": "https://www.mdpi.com/1911-8074/14/9/421",
+    "secondary_sources": [
+      "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html"
+    ]
+  },
+  "source_binding": {
+    "candidate_source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+    "candidate_source_sha256": "7257A8E19A388D9B33948A490EC90DED30842576E8CF43A6E1B21112492A4A9A",
+    "cycle_id": "kcos-20261021T213538Z-research-new"
+  },
+  "recovery_scope": {
+    "scope": "revalidation",
+    "item_id": "legacy-reentry-B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1-7257A8E19A38",
+    "source_cycle_id": "kcos-20261019T045858Z-research-new",
+    "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "primitive": "GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "source_spec_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261019T045858Z-research-new.stage1.spec.json",
+    "source_spec_sha256": "05A6E4C4300F3A901FDD2315B2A96A525665D9EE82D6FE098A648A9F6FF5E804",
+    "source_stage1_event_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261019T045858Z-research-new.stage1.complete.json",
+    "source_stage1_event_sha256": "65CB8DA3D07249D6A9171F05BAE4994275EE5C05FC1884AA271D8C8441B5489F",
+    "candidate_source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+    "candidate_source_sha256": "7257A8E19A388D9B33948A490EC90DED30842576E8CF43A6E1B21112492A4A9A",
+    "preflight_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T213518.937935Z.json",
+    "preflight_sha256": "3C2F1B6615C3B01F265A63B3B97105E4273D9EDC47E7D625443741779336CCD5"
+  },
+  "source_ranking": [
+    {
+      "rank": 1,
+      "url": "https://www.mdpi.com/1911-8074/14/9/421",
+      "authority": "Journal of Risk and Financial Management",
+      "directness": "Documents GJR-GARCH volatility modeling applied to multiple cryptocurrencies.",
+      "support": "The study explicitly implements GJR-GARCH for volatility estimation of ten cryptocurrencies and compares it with GARCH-based approaches; this supports the asymmetric conditional-volatility mechanism and crypto relevance, not downstream EA performance.",
+      "limit": "Source-backed: cryptocurrency GJR-GARCH application and asymmetric variance recursion. Project-derived: closed-bar OHLC inputs, initialization, regime thresholds, four mutually exclusive regimes, ATR execution, and parameter domains. No performance outcome is attributed to either source.",
+      "ranking_basis": "Preserved authenticated Stage 1 primary/secondary ordering; authority and directness descriptions remain bound to parent evidence."
+    },
+    {
+      "rank": 2,
+      "url": "https://arch.readthedocs.io/en/latest/univariate/univariate_volatility_modeling.html",
+      "authority": "Kevin Sheppard / arch project",
+      "directness": "Documents the implementable asymmetric GJR-GARCH variance recursion.",
+      "support": "The official arch documentation gives the GJR-GARCH variance recursion with an indicator for negative shocks: sigma^2_t = omega + alpha epsilon^2_(t-1) + gamma epsilon^2_(t-1) I[epsilon_(t-1)<0] + beta sigma^2_(t-1); this supports the implementation form.",
+      "limit": "Source-backed: cryptocurrency GJR-GARCH application and asymmetric variance recursion. Project-derived: closed-bar OHLC inputs, initialization, regime thresholds, four mutually exclusive regimes, ATR execution, and parameter domains. No performance outcome is attributed to either source.",
+      "ranking_basis": "Preserved authenticated Stage 1 primary/secondary ordering; authority and directness descriptions remain bound to parent evidence."
+    }
+  ],
+  "catalog_reconciliation": {
+    "path": "state/strategy_catalog_v2.json",
+    "catalog_sha256": "AC1C82663ED989581EF9C120771C0F65C3C029E519848800785862ECE2857F36",
+    "coverage": "complete",
+    "unresolved": 0,
+    "conclusion": "This is an exact-source, exact-EA identity revalidation tied to its authenticated Stage 1 parent. The canonical legacy duplicate assessment found no authenticated Stage 5-complete exact duplicate requiring discard."
+  },
+  "evidence_capture": {
+    "candidate_source_sha256": "7257A8E19A388D9B33948A490EC90DED30842576E8CF43A6E1B21112492A4A9A",
+    "admission_preflight": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T213518.937935Z.json",
+      "sha256": "3C2F1B6615C3B01F265A63B3B97105E4273D9EDC47E7D625443741779336CCD5",
+      "result": "READY"
+    },
+    "current_per_run_preflight": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T213615.673213Z.json",
+      "sha256": "A42C5DE9D7D30BF19B578E68B222A8D963A051CE2F9074FE69DF67B964172B2B",
+      "audit_id": "20261021T213615.673213Z",
+      "result": "READY"
+    },
+    "research_manifest": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T213538Z-research-new\\capture_manifest.json",
+      "sha256": "F50C0440BE106CD829F58FFF9B0C10728AACEC8E17ADC26B42EA41693719135D"
+    }
+  },
+  "source_reliability_policy": "provenance_only_no_reliability_updates"
+}

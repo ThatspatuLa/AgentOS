@@ -1,0 +1,28 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 3,
+  "decision": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.decision.json",
+  "decision_sha256": "7EB37D14517686D8E3ECFB8639D6A275DD7D6A0B1A1C586BA226572619DA8AE3",
+  "checks": {
+    "identity": true,
+    "approved_dates": true,
+    "approved_gates_only": true,
+    "final_verdict": true,
+    "m5_then_m15": true,
+    "artifacts_current": true,
+    "gates_recomputed": true,
+    "metrics_recomputed": true,
+    "selection_valid": true,
+    "h1_rule": true,
+    "compute_limit_valid": true,
+    "stage1_lineage": true,
+    "stage2_lineage": true
+  },
+  "passed": true,
+  "stage1_spec": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage1.spec.json",
+  "stage1_spec_sha256": "64282EE2202440B65092B826FF85B3ED126CE3985DE0F80CF87D3272F14FFC4E",
+  "stage2_event": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage2.complete.json",
+  "stage2_event_sha256": "757EAA1394332B714CC6F309FAA15FEDC3C42BF676458E36BBE8320514276D96",
+  "verified_utc": "2026-10-22T17:25:46Z"
+}

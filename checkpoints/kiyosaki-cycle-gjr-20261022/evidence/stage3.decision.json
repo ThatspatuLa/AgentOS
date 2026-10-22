@@ -1,0 +1,128 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 3,
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "verdict": "READY_FOR_STAGE4",
+  "next_timeframe": null,
+  "reason": "H1 has the highest qualifying Minato base score",
+  "selected_tf": "H1",
+  "from_date": "2025.01.10",
+  "to_date": "2026.01.10",
+  "gates": {
+    "profit_min_exclusive": 0.0,
+    "cf_min": 15.0,
+    "tpm_min": 35.0,
+    "drawdown_max": 35.0,
+    "min_margin_level": 120.0
+  },
+  "timeframes": {
+    "M5": {
+      "pass": 0,
+      "profit": -8429.810000000003,
+      "raw_cf": 0.0,
+      "trades": 16206,
+      "drawdown_percent": 84.31126146931153,
+      "sharpe": -5.0,
+      "profit_factor": 0.39804313193149754,
+      "margin_level": 399.08409930980343,
+      "cf": 0.0,
+      "margin_gate_passed": true,
+      "tpm": 1351.39725,
+      "test_months": 11.992032690609664,
+      "row_count": 8549,
+      "max_trades": 56636,
+      "zero_trades": false,
+      "checks": {
+        "profit_positive": false,
+        "cf_at_least_15": false,
+        "tpm_at_least_35": true,
+        "drawdown_at_most_35": false,
+        "margin_level_at_least_120": true
+      },
+      "passed": false
+    },
+    "M15": {
+      "pass": 13188,
+      "profit": 406.2100000000003,
+      "raw_cf": 5.008035439053898,
+      "trades": 1289,
+      "drawdown_percent": 3.6793697495331084,
+      "sharpe": 3.449111908601102,
+      "profit_factor": 1.4229019395542037,
+      "margin_level": 596.9978217079685,
+      "cf": 5.008035439053898,
+      "margin_gate_passed": true,
+      "tpm": 107.48803253424657,
+      "test_months": 11.992032690609664,
+      "row_count": 13563,
+      "max_trades": 20191,
+      "zero_trades": false,
+      "checks": {
+        "profit_positive": true,
+        "cf_at_least_15": false,
+        "tpm_at_least_35": true,
+        "drawdown_at_most_35": true,
+        "margin_level_at_least_120": true
+      },
+      "passed": false
+    },
+    "H1": {
+      "pass": 12949,
+      "profit": 2472.4599999999996,
+      "raw_cf": 25.28557103354726,
+      "trades": 746,
+      "drawdown_percent": 6.43768048605836,
+      "sharpe": 5.455448967291207,
+      "profit_factor": 1.5178403873864845,
+      "margin_level": 454.14792333596637,
+      "cf": 25.28557103354726,
+      "margin_gate_passed": true,
+      "tpm": 62.20796917808219,
+      "test_months": 11.992032690609664,
+      "row_count": 13288,
+      "max_trades": 5316,
+      "zero_trades": false,
+      "checks": {
+        "profit_positive": true,
+        "cf_at_least_15": true,
+        "tpm_at_least_35": true,
+        "drawdown_at_most_35": true,
+        "margin_level_at_least_120": true
+      },
+      "passed": true
+    }
+  },
+  "artifacts": {
+    "M5": {
+      "parse_evidence": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M5.parse.json",
+      "parse_evidence_sha256": "D2299B14637CF1F0165C6D0AD011C8BC554185F8A03BC76B30F626ADB82A0FC7",
+      "csv": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M5.csv",
+      "csv_sha256": "4250C1B122687B507FBEF9B872DAD581AB3676CBCBDBCA99FD682F951652153D",
+      "opt": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M5.opt",
+      "opt_sha256": "3CEBA04E95E93825F66206418252223286FAA49BA1D9923A74C45086976A4E66"
+    },
+    "M15": {
+      "parse_evidence": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.parse.json",
+      "parse_evidence_sha256": "075A879CBDB8B3AA4823B2412BD80449E2B48A09C0D0FA951929B54C24A332A1",
+      "csv": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.csv",
+      "csv_sha256": "C74FBD50234B0FE697100F2E6CCB043981F6AE6983B67E09ED65191482B0556B",
+      "opt": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.opt",
+      "opt_sha256": "C139E4F62543E6EB4DE2151771F791C7FB808D49B0A53DF79A45792BCB492C9B"
+    },
+    "H1": {
+      "parse_evidence": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.H1.parse.json",
+      "parse_evidence_sha256": "238AB40B6331314263C30148DAB8EAD4E1D955371BC43990FE0B8143D0BB804E",
+      "csv": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.H1.csv",
+      "csv_sha256": "62EEA02C3318E6F319CF43BAB9FA917E187222465708812BA3B89E45B990D435",
+      "opt": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.H1.opt",
+      "opt_sha256": "BB05D52F1116EFBB89CA55153F486B00FCBCE7E5893CD0354B372398C00E6BDA"
+    }
+  },
+  "compute_skips": {},
+  "repair_trigger": null,
+  "highest_cf_tf": "H1",
+  "highest_tpm_tf": "M5",
+  "closest_to_pass_tf": "H1",
+  "decided_utc": "2026-10-22T17:25:45Z"
+}

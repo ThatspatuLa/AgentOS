@@ -1,0 +1,505 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 3,
+  "timeframe": "M15",
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "from_date": "2025.01.10",
+  "to_date": "2026.01.10",
+  "source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+  "source_sha256": "52EB0C47B7B2421B3ACC7E60CC5443FEED78A81882A85A56AAEBA5473ED7FA84",
+  "stage1_spec": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage1.spec.json",
+  "stage1_spec_sha256": "64282EE2202440B65092B826FF85B3ED126CE3985DE0F80CF87D3272F14FFC4E",
+  "source_input_domains": {
+    "InpGJRLookback": {
+      "min": 64.0,
+      "max": 1024.0,
+      "step": 64.0,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpGJRAlpha": {
+      "min": 0.01,
+      "max": 0.96,
+      "step": 0.05,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpGJRGamma": {
+      "min": -0.8,
+      "max": 0.8,
+      "step": 0.1,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpGJRBeta": {
+      "min": 0.05,
+      "max": 0.95,
+      "step": 0.05,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpVolRegimeThreshold": {
+      "min": 0.5,
+      "max": 3.0,
+      "step": 0.125,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpExtremeVolThreshold": {
+      "min": 1.25,
+      "max": 5.0,
+      "step": 0.125,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpNeutralReturnBand": {
+      "min": 0.0,
+      "max": 0.01,
+      "step": 0.00025,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpATRPeriod": {
+      "min": 5.0,
+      "max": 101.0,
+      "step": 4.0,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpStopATRMult": {
+      "min": 0.5,
+      "max": 5.0,
+      "step": 0.125,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpTakeProfitATRMult": {
+      "min": 0.75,
+      "max": 7.0,
+      "step": 0.125,
+      "provenance": "authenticated_parent_stage1_domain",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Greed_Lot_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Greed_SL_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Greed_TP_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Neutral_Lot_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Neutral_SL_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Neutral_TP_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Fear_Lot_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Fear_SL_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_Fear_TP_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_ExtFear_Lot_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_ExtFear_SL_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpRegime_ExtFear_TP_Mult": {
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.25,
+      "provenance": "stage2_regime_grid_policy",
+      "basis": "stage1_search_estimate",
+      "hard_domain": false
+    },
+    "InpBaseLot": {
+      "min": 0.01,
+      "max": 0.2,
+      "step": 0.01,
+      "provenance": "kcos_stage2_gjr_base_lot",
+      "basis": "stage2_derived_policy",
+      "hard_domain": true
+    }
+  },
+  "opt": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.opt",
+  "opt_sha256": "C139E4F62543E6EB4DE2151771F791C7FB808D49B0A53DF79A45792BCB492C9B",
+  "csv": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.csv",
+  "csv_sha256": "C74FBD50234B0FE697100F2E6CCB043981F6AE6983B67E09ED65191482B0556B",
+  "header_size": 7126,
+  "record_size": 480,
+  "timeframe_event": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.complete.json",
+  "timeframe_event_sha256": "DF2264DE01732E40BC8F6E83D7CDD6B1CEBAC1D2E974B6825B63F8369240BD3C",
+  "tester_log": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\Tester\\logs\\20261023.log",
+  "tester_log_start_offset": 214800,
+  "tester_log_end_offset": 253140,
+  "tester_log_sha256": "6FCD2236F508DAED20C99166FD78059179913DD7E2F9C0F5EB9DF147F1C083C4",
+  "minato_diagnostics": {
+    "schema_version": 1,
+    "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+    "stage": 3,
+    "timeframe": "M15",
+    "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+    "symbol": "ETHUSD",
+    "from_date": "2025.01.10",
+    "to_date": "2026.01.10",
+    "status": "INCONCLUSIVE",
+    "reason": "Minato diagnostic capture rejected: ValueError: Minato diagnostic prefix changed after Stage 3 launch"
+  },
+  "records": 13563,
+  "duplicates_dropped": 0,
+  "declared_parameters": [
+    "InpATRPeriod",
+    "InpBaseLot",
+    "InpExtremeVolThreshold",
+    "InpGJRAlpha",
+    "InpGJRBeta",
+    "InpGJRGamma",
+    "InpGJRLookback",
+    "InpMagicNumber",
+    "InpNeutralReturnBand",
+    "InpRegime_ExtFear_Lot_Mult",
+    "InpRegime_ExtFear_SL_Mult",
+    "InpRegime_ExtFear_TP_Mult",
+    "InpRegime_Fear_Lot_Mult",
+    "InpRegime_Fear_SL_Mult",
+    "InpRegime_Fear_TP_Mult",
+    "InpRegime_Greed_Lot_Mult",
+    "InpRegime_Greed_SL_Mult",
+    "InpRegime_Greed_TP_Mult",
+    "InpRegime_Neutral_Lot_Mult",
+    "InpRegime_Neutral_SL_Mult",
+    "InpRegime_Neutral_TP_Mult",
+    "InpStopATRMult",
+    "InpTakeProfitATRMult",
+    "InpVolRegimeThreshold"
+  ],
+  "stage1_parameters": [
+    "InpATRPeriod",
+    "InpExtremeVolThreshold",
+    "InpFromDate",
+    "InpGJRAlpha",
+    "InpGJRBeta",
+    "InpGJRGamma",
+    "InpGJRLookback",
+    "InpMagicNumber",
+    "InpMinatoExpectedScoreVersion",
+    "InpMinatoTestEnd",
+    "InpMinatoTestStart",
+    "InpNeutralReturnBand",
+    "InpRegime_ExtFear_Lot_Mult",
+    "InpRegime_ExtFear_SL_Mult",
+    "InpRegime_ExtFear_TP_Mult",
+    "InpRegime_Fear_Lot_Mult",
+    "InpRegime_Fear_SL_Mult",
+    "InpRegime_Fear_TP_Mult",
+    "InpRegime_Greed_Lot_Mult",
+    "InpRegime_Greed_SL_Mult",
+    "InpRegime_Greed_TP_Mult",
+    "InpRegime_Neutral_Lot_Mult",
+    "InpRegime_Neutral_SL_Mult",
+    "InpRegime_Neutral_TP_Mult",
+    "InpStopATRMult",
+    "InpTakeProfitATRMult",
+    "InpToDate",
+    "InpVolRegimeThreshold"
+  ],
+  "stage2_derived_parameters": [
+    "InpBaseLot"
+  ],
+  "optimization_contract_parameters": [
+    "InpATRPeriod",
+    "InpBaseLot",
+    "InpExtremeVolThreshold",
+    "InpFromDate",
+    "InpGJRAlpha",
+    "InpGJRBeta",
+    "InpGJRGamma",
+    "InpGJRLookback",
+    "InpMagicNumber",
+    "InpMinatoExpectedScoreVersion",
+    "InpMinatoTestEnd",
+    "InpMinatoTestStart",
+    "InpNeutralReturnBand",
+    "InpRegime_ExtFear_Lot_Mult",
+    "InpRegime_ExtFear_SL_Mult",
+    "InpRegime_ExtFear_TP_Mult",
+    "InpRegime_Fear_Lot_Mult",
+    "InpRegime_Fear_SL_Mult",
+    "InpRegime_Fear_TP_Mult",
+    "InpRegime_Greed_Lot_Mult",
+    "InpRegime_Greed_SL_Mult",
+    "InpRegime_Greed_TP_Mult",
+    "InpRegime_Neutral_Lot_Mult",
+    "InpRegime_Neutral_SL_Mult",
+    "InpRegime_Neutral_TP_Mult",
+    "InpStopATRMult",
+    "InpTakeProfitATRMult",
+    "InpToDate",
+    "InpVolRegimeThreshold"
+  ],
+  "optimized_input_ranges": {
+    "InpGJRLookback": {
+      "start": 64.0,
+      "step": 64.0,
+      "stop": 1024.0
+    },
+    "InpGJRAlpha": {
+      "start": 0.02,
+      "step": 0.05,
+      "stop": 0.92
+    },
+    "InpGJRGamma": {
+      "start": -0.8,
+      "step": 0.08,
+      "stop": 0.8
+    },
+    "InpGJRBeta": {
+      "start": 0.07,
+      "step": 0.05,
+      "stop": 0.92
+    },
+    "InpBaseLot": {
+      "start": 0.01,
+      "step": 0.01,
+      "stop": 0.2
+    },
+    "InpVolRegimeThreshold": {
+      "start": 0.525,
+      "step": 0.075,
+      "stop": 1.8
+    },
+    "InpExtremeVolThreshold": {
+      "start": 2.1,
+      "step": 0.15,
+      "stop": 4.95
+    },
+    "InpNeutralReturnBand": {
+      "start": 0.0,
+      "step": 0.0005,
+      "stop": 0.01
+    },
+    "InpATRPeriod": {
+      "start": 6.0,
+      "step": 5.0,
+      "stop": 101.0
+    },
+    "InpStopATRMult": {
+      "start": 0.7,
+      "step": 0.25,
+      "stop": 4.95
+    },
+    "InpTakeProfitATRMult": {
+      "start": 1.0,
+      "step": 0.3,
+      "stop": 7.0
+    },
+    "InpRegime_Greed_Lot_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Greed_SL_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Greed_TP_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Neutral_Lot_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Neutral_SL_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Neutral_TP_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Fear_Lot_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Fear_SL_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_Fear_TP_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_ExtFear_Lot_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_ExtFear_SL_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    },
+    "InpRegime_ExtFear_TP_Mult": {
+      "start": 0.0,
+      "step": 0.25,
+      "stop": 5.0
+    }
+  },
+  "ini": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.ETHUSD.M15.20250110_20260110.wide.ini",
+  "ini_sha256": "4769FFEA733CBE871E46B85DAC7BD6C9B4EC2828F776EAD786D9C03BA8C0502F",
+  "ini_optimized_parameters": [
+    "InpATRPeriod",
+    "InpBaseLot",
+    "InpExtremeVolThreshold",
+    "InpGJRAlpha",
+    "InpGJRBeta",
+    "InpGJRGamma",
+    "InpGJRLookback",
+    "InpNeutralReturnBand",
+    "InpRegime_ExtFear_Lot_Mult",
+    "InpRegime_ExtFear_SL_Mult",
+    "InpRegime_ExtFear_TP_Mult",
+    "InpRegime_Fear_Lot_Mult",
+    "InpRegime_Fear_SL_Mult",
+    "InpRegime_Fear_TP_Mult",
+    "InpRegime_Greed_Lot_Mult",
+    "InpRegime_Greed_SL_Mult",
+    "InpRegime_Greed_TP_Mult",
+    "InpRegime_Neutral_Lot_Mult",
+    "InpRegime_Neutral_SL_Mult",
+    "InpRegime_Neutral_TP_Mult",
+    "InpStopATRMult",
+    "InpTakeProfitATRMult",
+    "InpVolRegimeThreshold"
+  ],
+  "ini_fixed_parameters": [
+    "InpFromDate",
+    "InpMagicNumber",
+    "InpMinatoExpectedScoreVersion",
+    "InpMinatoTestEnd",
+    "InpMinatoTestStart",
+    "InpToDate"
+  ],
+  "authenticated_fixed_source_parameters": [],
+  "optimized_parameters": [
+    "InpATRPeriod",
+    "InpBaseLot",
+    "InpExtremeVolThreshold",
+    "InpGJRAlpha",
+    "InpGJRBeta",
+    "InpGJRGamma",
+    "InpGJRLookback",
+    "InpNeutralReturnBand",
+    "InpRegime_ExtFear_Lot_Mult",
+    "InpRegime_ExtFear_SL_Mult",
+    "InpRegime_ExtFear_TP_Mult",
+    "InpRegime_Fear_Lot_Mult",
+    "InpRegime_Fear_SL_Mult",
+    "InpRegime_Fear_TP_Mult",
+    "InpRegime_Greed_Lot_Mult",
+    "InpRegime_Greed_SL_Mult",
+    "InpRegime_Greed_TP_Mult",
+    "InpRegime_Neutral_Lot_Mult",
+    "InpRegime_Neutral_SL_Mult",
+    "InpRegime_Neutral_TP_Mult",
+    "InpStopATRMult",
+    "InpTakeProfitATRMult",
+    "InpVolRegimeThreshold"
+  ],
+  "mt5_grid_endpoint_adjustments": {},
+  "fixed_parameters_omitted_from_opt_header": [
+    "InpFromDate",
+    "InpMinatoExpectedScoreVersion",
+    "InpMinatoTestEnd",
+    "InpMinatoTestStart",
+    "InpToDate"
+  ],
+  "nonoptimized_opt_header_extras": [],
+  "post_stage2_infrastructure_parameters": [],
+  "parsed_utc": "2026-10-22T17:22:30Z",
+  "passed": true
+}

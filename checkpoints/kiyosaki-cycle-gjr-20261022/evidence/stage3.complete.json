@@ -1,0 +1,27 @@
+{
+  "schema_version": 2,
+  "event_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation:stage3:complete",
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 3,
+  "status": "complete",
+  "verdict": "READY_FOR_STAGE4",
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "next_stage": "stage4_pending",
+  "decision": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.decision.json",
+  "decision_sha256": "7EB37D14517686D8E3ECFB8639D6A275DD7D6A0B1A1C586BA226572619DA8AE3",
+  "verification": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.verification.json",
+  "verification_sha256": "D10D9451FC15C09B613C1B927EB988A1F32AA79BCFA34CCA5E413CE5FA0079CE",
+  "stage1_spec": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage1.spec.json",
+  "stage1_spec_sha256": "64282EE2202440B65092B826FF85B3ED126CE3985DE0F80CF87D3272F14FFC4E",
+  "stage2_event": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage2.complete.json",
+  "stage2_event_sha256": "757EAA1394332B714CC6F309FAA15FEDC3C42BF676458E36BBE8320514276D96",
+  "note_hashes": {
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\obsidian_fragments\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.passing.md": "707BEE85255E0A85ACCF2FD74C74069854A440578CA0277A9B086887B6AD48DF"
+  },
+  "completed_utc": "2026-10-22T17:25:46Z",
+  "consumed": true,
+  "stage4_queue": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage4_pending_queue_v2.json",
+  "stage4_queue_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation:B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "consumed_utc": "2026-10-22T17:25:58Z",
+  "consumed_action": "dispatch_stage4"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 2,
+  "status": "complete",
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "score_version": "MINATO_BASE_SCORE_V2.0",
+  "next_stage": 3,
+  "verification": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage2.verification.json",
+  "verification_sha256": "4D23D58A0CE8CD54FDC4ADD1A9DB1D20279EE19F3D2F7AD0867DEC007ABEC5D5",
+  "mq5_sha256": "52EB0C47B7B2421B3ACC7E60CC5443FEED78A81882A85A56AAEBA5473ED7FA84",
+  "ex5_sha256": "61C6C5B053884AD8DD40C9958E249B6F1F2EA72B829E5A758505F0D1BB67FF7D",
+  "canonical_minato_sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF",
+  "stage1_spec": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage1.spec.json",
+  "stage1_spec_sha256": "64282EE2202440B65092B826FF85B3ED126CE3985DE0F80CF87D3272F14FFC4E",
+  "approved_tester_config_sha256": "3D5954EFB98CC263A235CE8B63AD0579F01DBEFB3553028938338D74A005FFF4",
+  "configuration_authority": "stage1_spec.tester_config_plus_stage2_derived_policy",
+  "compile_attempts": 1,
+  "completed_utc": "2026-10-22T17:07:31Z"
+}

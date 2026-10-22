@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "captured_local": "2026-10-23",
+  "artifacts": [
+    {
+      "checkpoint_path": "source/state/kcos_tester_config_v2.py",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_tester_config_v2.py",
+      "bytes": 46846,
+      "sha256": "181C5BF653186F77C7E524F04EF3160B66292FB41D159C44DC57AB994582AB6B"
+    },
+    {
+      "checkpoint_path": "source/state/kcos_stage3_prepare_v2.py",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage3_prepare_v2.py",
+      "bytes": 134685,
+      "sha256": "A3402452F055B7088FEFCB4870457980BE6042E321439E46263F826C7E985F0A"
+    },
+    {
+      "checkpoint_path": "source/state/kcos_stage4_runner_v2.py",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage4_runner_v2.py",
+      "bytes": 46256,
+      "sha256": "DE36166E23EA3325044E694C5A9229162A857B24CBB062F1012F09D44D1134A1"
+    },
+    {
+      "checkpoint_path": "source/state/kcos_stage45_launcher.py",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage45_launcher.py",
+      "bytes": 118381,
+      "sha256": "AF7CE805D882FA3DA1D277284ACF11E82230524A7FDD703AB32911AC48EE2417"
+    },
+    {
+      "checkpoint_path": "source/MQL5/Experts/Kiyosaki/B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1.mq5",
+      "bytes": 13466,
+      "sha256": "52EB0C47B7B2421B3ACC7E60CC5443FEED78A81882A85A56AAEBA5473ED7FA84"
+    },
+    {
+      "checkpoint_path": "evidence/stage1.spec.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage1.spec.json",
+      "bytes": 58695,
+      "sha256": "64282EE2202440B65092B826FF85B3ED126CE3985DE0F80CF87D3272F14FFC4E"
+    },
+    {
+      "checkpoint_path": "evidence/stage2.complete.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage2.complete.json",
+      "bytes": 1385,
+      "sha256": "757EAA1394332B714CC6F309FAA15FEDC3C42BF676458E36BBE8320514276D96"
+    },
+    {
+      "checkpoint_path": "evidence/stage2.verification.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage2.verification.json",
+      "bytes": 4280,
+      "sha256": "4D23D58A0CE8CD54FDC4ADD1A9DB1D20279EE19F3D2F7AD0867DEC007ABEC5D5"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.complete.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.complete.json",
+      "bytes": 2203,
+      "sha256": "736D4CDC47FAF03E9B7B107E5CF2D25BD793940E1BD4E51728FFC15C0BEC6FF5"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.verification.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.verification.json",
+      "bytes": 1402,
+      "sha256": "D10D9451FC15C09B613C1B927EB988A1F32AA79BCFA34CCA5E413CE5FA0079CE"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.decision.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.decision.json",
+      "bytes": 5453,
+      "sha256": "7EB37D14517686D8E3ECFB8639D6A275DD7D6A0B1A1C586BA226572619DA8AE3"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.M5.parse.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M5.parse.json",
+      "bytes": 14282,
+      "sha256": "D2299B14637CF1F0165C6D0AD011C8BC554185F8A03BC76B30F626ADB82A0FC7"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.M15.parse.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.M15.parse.json",
+      "bytes": 14289,
+      "sha256": "075A879CBDB8B3AA4823B2412BD80449E2B48A09C0D0FA951929B54C24A332A1"
+    },
+    {
+      "checkpoint_path": "evidence/stage3.H1.parse.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\stage3_v2\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage3.H1.parse.json",
+      "bytes": 14283,
+      "sha256": "238AB40B6331314263C30148DAB8EAD4E1D955371BC43990FE0B8143D0BB804E"
+    },
+    {
+      "checkpoint_path": "evidence/stage4.complete.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage4.complete.json",
+      "bytes": 997,
+      "sha256": "C6EA0CAB67B4927888DF4B1BB4B56C2A06C841BA24A5ED47B39E673AB654E006"
+    },
+    {
+      "checkpoint_path": "evidence/stage4.verification.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage4.verification.json",
+      "bytes": 745,
+      "sha256": "F1533A40F6508C28788D15B365C43141D391FC33CDD694ACFA54A5696343C781"
+    },
+    {
+      "checkpoint_path": "evidence/stage4.decision.json",
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.decision.json",
+      "bytes": 41121,
+      "sha256": "311035F0316C3D12996CEC391DF9C39B1B754760C554CE4C2B66463B826ED3A2"
+    }
+  ]
+}

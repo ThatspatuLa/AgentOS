@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "event_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation:stage4:complete",
+  "cycle_id": "kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation",
+  "stage": 4,
+  "status": "complete",
+  "verdict": "STAGE4_PLANNED",
+  "ea": "B1_1_GJR_GARCH_AsymmetricVolatility_RegimeGate_v1",
+  "next_stage": "stage4.5_pending",
+  "decision": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.decision.json",
+  "decision_sha256": "311035F0316C3D12996CEC391DF9C39B1B754760C554CE4C2B66463B826ED3A2",
+  "verification": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\verification\\kcos-20261022T163414Z-b1-1-gjr-garch-asymmetricvolatility-regimegate-v1-rotation.stage4.verification.json",
+  "verification_sha256": "F1533A40F6508C28788D15B365C43141D391FC33CDD694ACFA54A5696343C781",
+  "emitted_utc": "2026-10-22T17:25:58Z"
+}
