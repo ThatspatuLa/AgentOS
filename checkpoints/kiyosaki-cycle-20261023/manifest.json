@@ -1,0 +1,38 @@
+{
+  "not_atomic": true,
+  "notes": [
+    "Curated snapshot of the four source files changed for this Kiyosaki cycle.",
+    "The external Kiyosaki project has no Git repository; live runtime state, logs, binaries and tester outputs are excluded.",
+    "Stage 5 was still RUNNING at capture; this snapshot does not claim Stage 5 completion.",
+    "Two snapshot copies have trailing blank lines trimmed for a clean repository diff; source_sha256 records the exact live source hash."
+  ],
+  "captured_utc": "20261022T201139Z",
+  "cycle_id": "kcos-20261022T175758Z-b1-1-maxentropymarkovswitchinggarch-eth-volregime-v1-20260929t114206z-research-n-rotation",
+  "snapshot_only": true,
+  "files": [
+    {
+      "source_sha256": "16a487a771da0072ffe1d5524e680800df5e8489f0110a7b3f1975ee33de79f4",
+      "bytes": 206884,
+      "path": "kiyosaki_stage2b/state/kcos_stage3_launch_v2.py",
+      "sha256": "16a487a771da0072ffe1d5524e680800df5e8489f0110a7b3f1975ee33de79f4"
+    },
+    {
+      "source_sha256": "319709e7862f1c6954181e1159c99a0efb99a01108f16bbb8f9c1810f0d6255c",
+      "bytes": 121505,
+      "path": "kiyosaki_stage2b/state/kcos_stage45_launcher.py",
+      "sha256": "96432cb92636ebe1db4dede1d205242fab613537144faf3ebb5070206d5886c9"
+    },
+    {
+      "source_sha256": "e4067969117a3c0b0e5bab6d3b35514191b79ad948706a9b4b85ec1fa206fdf9",
+      "bytes": 62634,
+      "path": "kiyosaki_stage2b/state/kcos_stage45_workflow_v2.py",
+      "sha256": "46d44a24086e42262bc51541cb2cba7d32f805f7a75badb877d38160d302e844"
+    },
+    {
+      "source_sha256": "948e0a67ab670e5bfbac1de171797f3b7071a4f8421f206787811ca347aedc2e",
+      "bytes": 54138,
+      "path": "kiyosaki_stage2b/state/kcos_stage4_runner_v2.py",
+      "sha256": "948e0a67ab670e5bfbac1de171797f3b7071a4f8421f206787811ca347aedc2e"
+    }
+  ]
+}
