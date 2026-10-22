@@ -1,0 +1,93 @@
+{
+  "captured_local": "2026-10-23T08:48:38+11:00",
+  "project": "kiyosaki_stage2b",
+  "snapshot_only": true,
+  "cycle_id": "kcos-20261022T203116Z-b1-1-mtftrend-rotation",
+  "status": "in_progress_or_held",
+  "notes": [
+    "Curated source snapshot of the active Kiyosaki cron changes and sizing policy.",
+    "External runtime is not a Git repository; runtime databases, logs, binaries, and tester output are excluded.",
+    "Stage 3 optimization grid remains 0.01 through 0.20 in 0.01 steps. Stage 4.5 may expand GJR base lot above 0.20 only with observed minimum margin at or above 120%.",
+    "Snapshot does not claim cycle completion or a successful Stage 2 repair.",
+    "Snapshot copies remove excess blank lines at EOF where present; source_sha256 and bytes retain the exact live-source evidence, while snapshot_sha256 and snapshot_bytes record normalized copies.",
+    "Includes Stage 3 preparation and tester configuration sources that define the persistent 0.01 to 0.20 by 0.01 optimization grid."
+  ],
+  "files": [
+    {
+      "path": "source/state/kcos_stage2_autonomous_executor.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage2_autonomous_executor.py",
+      "source_sha256": "4C731BF38FE20AC1357490E6C3AFDE107629B9FBF42752589AECBD80AC245525",
+      "sha256": "A6D7CC97D49912EC3A3FFEDF15972014F8CD90968E2C86A52237D950BF355BD5",
+      "bytes": 119424,
+      "snapshot_sha256": "A6D7CC97D49912EC3A3FFEDF15972014F8CD90968E2C86A52237D950BF355BD5",
+      "snapshot_bytes": 119423
+    },
+    {
+      "path": "source/state/kcos_stage2_repair_loop_v1.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage2_repair_loop_v1.py",
+      "source_sha256": "439A60F15331AFFC33960ABC7216CAF6DD40F4628938D6E773DC14D4BDB8005B",
+      "sha256": "439A60F15331AFFC33960ABC7216CAF6DD40F4628938D6E773DC14D4BDB8005B",
+      "bytes": 312721,
+      "snapshot_bytes": 312721
+    },
+    {
+      "path": "source/state/kcos_stage2_verify_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage2_verify_v2.py",
+      "source_sha256": "8D914EA18E99BA653C5A151BDA6CB7F794906DB91DA7AB5B9C953F7576F2CD6E",
+      "sha256": "4DD472AA78BF7BB3E3D75245E262C761320486C75A0A20307A9783492B5AE8B8",
+      "bytes": 117979,
+      "snapshot_sha256": "4DD472AA78BF7BB3E3D75245E262C761320486C75A0A20307A9783492B5AE8B8",
+      "snapshot_bytes": 117977
+    },
+    {
+      "path": "source/state/kcos_stage3_launch_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage3_launch_v2.py",
+      "source_sha256": "16A487A771DA0072FFE1D5524E680800DF5E8489F0110A7B3F1975EE33DE79F4",
+      "sha256": "16A487A771DA0072FFE1D5524E680800DF5E8489F0110A7B3F1975EE33DE79F4",
+      "bytes": 206884,
+      "snapshot_bytes": 206884
+    },
+    {
+      "path": "source/state/kcos_stage4_runner_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage4_runner_v2.py",
+      "source_sha256": "948E0A67AB670E5BFBAC1DE171797F3B7071A4F8421F206787811CA347AEDC2E",
+      "sha256": "948E0A67AB670E5BFBAC1DE171797F3B7071A4F8421F206787811CA347AEDC2E",
+      "bytes": 54138,
+      "snapshot_bytes": 54138
+    },
+    {
+      "path": "source/state/kcos_stage45_launcher.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage45_launcher.py",
+      "source_sha256": "319709E7862F1C6954181E1159C99A0EFB99A01108F16BBB8F9C1810F0D6255C",
+      "sha256": "6C0CDC8AC1B15B21658FCD2EC20991133ADBF42347AF7BC2787F689CAC318690",
+      "bytes": 121510,
+      "snapshot_sha256": "6C0CDC8AC1B15B21658FCD2EC20991133ADBF42347AF7BC2787F689CAC318690",
+      "snapshot_bytes": 121506
+    },
+    {
+      "path": "source/state/kcos_stage45_workflow_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage45_workflow_v2.py",
+      "source_sha256": "E4067969117A3C0B0E5BAB6D3B35514191B79AD948706A9B4B85EC1FA206FDF9",
+      "sha256": "46D44A24086E42262BC51541CB2CBA7D32F805F7A75BADB877D38160D302E844",
+      "bytes": 62635,
+      "snapshot_sha256": "46D44A24086E42262BC51541CB2CBA7D32F805F7A75BADB877D38160D302E844",
+      "snapshot_bytes": 62634
+    },
+    {
+      "path": "source/state/kcos_stage3_prepare_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_stage3_prepare_v2.py",
+      "source_sha256": "A3402452F055B7088FEFCB4870457980BE6042E321439E46263F826C7E985F0A",
+      "bytes": 134685,
+      "sha256": "A3402452F055B7088FEFCB4870457980BE6042E321439E46263F826C7E985F0A",
+      "snapshot_bytes": 134685
+    },
+    {
+      "path": "source/state/kcos_tester_config_v2.py",
+      "source_path": "kiyosaki_stage2b/state/kcos_tester_config_v2.py",
+      "source_sha256": "181C5BF653186F77C7E524F04EF3160B66292FB41D159C44DC57AB994582AB6B",
+      "bytes": 46846,
+      "sha256": "181C5BF653186F77C7E524F04EF3160B66292FB41D159C44DC57AB994582AB6B",
+      "snapshot_bytes": 46846
+    }
+  ]
+}
