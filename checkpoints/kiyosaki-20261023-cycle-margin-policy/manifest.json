@@ -1,0 +1,65 @@
+{
+  "checkpoint": "kiyosaki-20261023-cycle-margin-policy",
+  "captured_at_local": "2026-10-23T10:10:09+11:00",
+  "source_runtime": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b",
+  "cycle_id": "kcos-20261022T215430Z-b1-1-mtftrend-v4-elder-rotation",
+  "candidate": "B1_1_MTFTrend_v4_Elder",
+  "stage2_status": "paused_after_repair_rejected",
+  "claim": "configuration snapshot only; no stage completion claimed",
+  "stage3_base_lot_grid": {
+    "start": 0.01,
+    "step": 0.01,
+    "stop": 0.2
+  },
+  "stage45_upward_expansion": {
+    "requires_at_least_two_selected_rows_with_min_margin_pct_at_least": 120.0,
+    "otherwise": "keep current upper edge"
+  },
+  "files": [
+    {
+      "path": "state/kcos_stage2_repair_loop_v1.py",
+      "bytes": 323927,
+      "sha256": "d43a99ef27fde8b2c638f0910695f7cfc619bb70fa32a81e1f889ef17ab0fcb8"
+    },
+    {
+      "path": "state/kcos_stage2_adapters_v1.py",
+      "bytes": 2588,
+      "sha256": "c5dc0a3bb14e4e7466857d4d469500a72f31fc6673ef5224783f552fcf901672"
+    },
+    {
+      "path": "state/kcos_supervisor_v2.py",
+      "bytes": 577305,
+      "sha256": "ead6b179b7468f772f97fdf56e0410e2df17d34dabc98b1c2cecb21ad1e25bae"
+    },
+    {
+      "path": "state/kcos_stage3_prepare_v2.py",
+      "bytes": 136153,
+      "sha256": "22b2689a5d28cc28eb64ae0db657b2c31fd2fb668ae852351e313f058ccff289"
+    },
+    {
+      "path": "state/kcos_stage3_launch_v2.py",
+      "bytes": 206884,
+      "sha256": "16a487a771da0072ffe1d5524e680800df5e8489f0110a7b3f1975ee33de79f4"
+    },
+    {
+      "path": "state/kcos_stage3_driver_v2.py",
+      "bytes": 301419,
+      "sha256": "85dddb53a7e58049736b6bb38cefc384f57ce1e27d94a2013a2e3fc6c616178c"
+    },
+    {
+      "path": "state/kcos_tester_config_v2.py",
+      "bytes": 46846,
+      "sha256": "181c5bf653186f77c7e524f04ef3160b66292fb41d159c44dc57ab994582ab6b"
+    },
+    {
+      "path": "state/kcos_stage45_launcher.py",
+      "bytes": 121510,
+      "sha256": "319709e7862f1c6954181e1159c99a0efb99a01108f16bbb8f9c1810f0d6255c"
+    },
+    {
+      "path": "state/kcos_stage45_workflow_v2.py",
+      "bytes": 62635,
+      "sha256": "e4067969117a3c0b0e5bab6d3b35514191b79ad948706a9b4b85ec1fa206fdf9"
+    }
+  ]
+}
