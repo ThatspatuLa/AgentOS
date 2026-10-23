@@ -1,0 +1,466 @@
+{
+  "schema_version": 1,
+  "captured_utc": "2026-10-23T15:00:38.628617+00:00",
+  "source_project": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b",
+  "snapshot_type": "read_only_archival_stage2_stage3",
+  "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+  "file_count": 76,
+  "files": [
+    {
+      "snapshot_path": "source/state/kcos_input_contract_v2.py",
+      "source_path": "state/kcos_input_contract_v2.py",
+      "size_bytes": 20233,
+      "sha256": "ED28353665D0DC6E62C0C5EA562930A8944D71AC10BE06824974A789B9A6B896"
+    },
+    {
+      "snapshot_path": "source/state/kcos_optimization_contract_v2.py",
+      "source_path": "state/kcos_optimization_contract_v2.py",
+      "size_bytes": 2818,
+      "sha256": "23CF7FFB6D2F5D1D6402263DC8C6780F5F6B3E53555355EE04EC2FEF66158ED7"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_adapters_v1.py",
+      "source_path": "state/kcos_stage2_adapters_v1.py",
+      "size_bytes": 3595,
+      "sha256": "6BE04E9207C4FAB898D39B2210E99FA6A75C1986D90A2F0DEF666A2E65C8CB41"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_autonomous_executor.py",
+      "source_path": "state/kcos_stage2_autonomous_executor.py",
+      "size_bytes": 123994,
+      "sha256": "560AD52E3B0B202C58BBCF38E11199D3FCD9B78DF7B8F34D290A9A65BC216853"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_build_ea_v1.py",
+      "source_path": "state/kcos_stage2_build_ea_v1.py",
+      "size_bytes": 41020,
+      "sha256": "3BF0A19A38B2F12791AB9B1A5776CA207058D0FB6C0E4F568B89F263D35A78D1"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_compile_v2.py",
+      "source_path": "state/kcos_stage2_compile_v2.py",
+      "size_bytes": 10351,
+      "sha256": "EE067405F382C1B7BBD2F82EA7FA4B1332C90540609EA0F6DEFADA71C3545393"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_failure_v2.py",
+      "source_path": "state/kcos_stage2_failure_v2.py",
+      "size_bytes": 2663,
+      "sha256": "17E3AC2EBC3DCC8DD6AD7F5E661C9DF58DF7351D0CCA653C0852B495D6A71C7D"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_generate_source_v2.py",
+      "source_path": "state/kcos_stage2_generate_source_v2.py",
+      "size_bytes": 125409,
+      "sha256": "49069A7B95B34901F56CC475A67C3E66537A7181E7ED58008542AAE82713A261"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_implementation_brief_v1.py",
+      "source_path": "state/kcos_stage2_implementation_brief_v1.py",
+      "size_bytes": 8936,
+      "sha256": "806C2170656B5A1AEF137DC7AD7FB814DD90D8F18C76E36E6A9DBC8862F9F408"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_learning_v1.py",
+      "source_path": "state/kcos_stage2_learning_v1.py",
+      "size_bytes": 45117,
+      "sha256": "984E3B01ED1A5C374BCA856FD10FB468473E97EAA30A2563FC72F13653734649"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_obv_reconcile_v1.py",
+      "source_path": "state/kcos_stage2_obv_reconcile_v1.py",
+      "size_bytes": 11897,
+      "sha256": "FCF452B8C801EA0D1180A41A4CA68CC3D9BE1E3AD9E45F050BB9F2A01997A082"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_prepare_v2.py",
+      "source_path": "state/kcos_stage2_prepare_v2.py",
+      "size_bytes": 28569,
+      "sha256": "89B73F43A7DD1845A9C116DCF2D330F1087088EA408A2DB4D59870D0487AC942"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_promote_runtime_lesson_v1.py",
+      "source_path": "state/kcos_stage2_promote_runtime_lesson_v1.py",
+      "size_bytes": 1013,
+      "sha256": "EB771462A73042A448EFE348AA7F7BA2C7BA71BE06833674730EC3A5A1B380BF"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_protected_contract_v1.py",
+      "source_path": "state/kcos_stage2_protected_contract_v1.py",
+      "size_bytes": 2980,
+      "sha256": "007C4980160EC01827F389A85827741BBA37246E7E50C980D00CAED0E7C9C680"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_publish_v2.py",
+      "source_path": "state/kcos_stage2_publish_v2.py",
+      "size_bytes": 14153,
+      "sha256": "57FDC15140BC1451A741DC1615883259429BA7C4018557976EF1EEF01B97F2A5"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_reconcile_v1.py",
+      "source_path": "state/kcos_stage2_reconcile_v1.py",
+      "size_bytes": 21933,
+      "sha256": "17F37F24B0D7E766F4E0BDFFDEB311F20A33DA8BD0A6532D66040F8C08C29A6A"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_reconcile_v2.py",
+      "source_path": "state/kcos_stage2_reconcile_v2.py",
+      "size_bytes": 5108,
+      "sha256": "31506EC6D2E99E1BA341F037A8B76A1BE03C2B28E19702AD0B1A9B02C233626D"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_repair_loop_v1.py",
+      "source_path": "state/kcos_stage2_repair_loop_v1.py",
+      "size_bytes": 369436,
+      "sha256": "6D664BEB1B438B0F71BD8AFA2271B90651BCD025C608C5635D4D5DE22B3A240A"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_repair_registry_v1.py",
+      "source_path": "state/kcos_stage2_repair_registry_v1.py",
+      "size_bytes": 6442,
+      "sha256": "7E8CE3E98B9FC17F1BBB781CEA40B1451E6CF088AF478348D5CA887E33C52772"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_repair_v2.py",
+      "source_path": "state/kcos_stage2_repair_v2.py",
+      "size_bytes": 46321,
+      "sha256": "34C70CEFF6E804F271E3A0562C7FE09EE6E0DB46B3C63E436FE30C326277C3EC"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_source_defect_recovery_v1.py",
+      "source_path": "state/kcos_stage2_source_defect_recovery_v1.py",
+      "size_bytes": 50014,
+      "sha256": "2C253B78013F52109547A5D44979E427BD9C0754A628A8771142F768FB483EA8"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_tester_diagnostic_v1.py",
+      "source_path": "state/kcos_stage2_tester_diagnostic_v1.py",
+      "size_bytes": 33679,
+      "sha256": "015A11B2A9ADFAA0D67D49C55BCE2273178840D3B47AFE7749BB8B3CEF26291C"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage2_verify_v2.py",
+      "source_path": "state/kcos_stage2_verify_v2.py",
+      "size_bytes": 128977,
+      "sha256": "85A3A0EA5B61A75463BD81CF66D93A30E864B5E6E0EF5CF9779CB4889A4CA68F"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_common_v2.py",
+      "source_path": "state/kcos_stage3_common_v2.py",
+      "size_bytes": 1924,
+      "sha256": "5FE7BE9004B340D64C6A20C134FB001BF935AF6C9C8D083940B6C584572C5AF3"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_context_v2.py",
+      "source_path": "state/kcos_stage3_context_v2.py",
+      "size_bytes": 3118,
+      "sha256": "9CEA7C3FE9824C4F68F3BC3124368079C896EE4FA3C929C9EAE2FB96B421F3AA"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_cron_v2.py",
+      "source_path": "state/kcos_stage3_cron_v2.py",
+      "size_bytes": 30319,
+      "sha256": "3F79AA37A282994CB74822A597F94E5F924DF359BF5C13FE30D755C708E6E376"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_driver_v2.py",
+      "source_path": "state/kcos_stage3_driver_v2.py",
+      "size_bytes": 306683,
+      "sha256": "31B4A5C3ED2826F1DC2F2C550CE8D4A9445F198475E7D039C0F258864839B15A"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_duration_policy_v2.py",
+      "source_path": "state/kcos_stage3_duration_policy_v2.py",
+      "size_bytes": 7284,
+      "sha256": "8EF484637451E9D0C1ADFE8EC43C83558EFC469FD4A7893370BDD90513606A01"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_evaluate_v2.py",
+      "source_path": "state/kcos_stage3_evaluate_v2.py",
+      "size_bytes": 13507,
+      "sha256": "394D67DFBC072281B5C59FC3DF937BF4A5AC5EA9EFF35D848889719D63AF1BE8"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_launch_v2.py",
+      "source_path": "state/kcos_stage3_launch_v2.py",
+      "size_bytes": 213205,
+      "sha256": "24C374D31B6AC6FC990171A13D5054795DB4EDFCA0BC79C0B42DC6D83853E3C9"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_parse_v2.py",
+      "source_path": "state/kcos_stage3_parse_v2.py",
+      "size_bytes": 41445,
+      "sha256": "6CB8C5F3A6670FDDF1403A165C56AAE7E9ED9FDAD5B876FB21930B9DAF31653F"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_prepare_v2.py",
+      "source_path": "state/kcos_stage3_prepare_v2.py",
+      "size_bytes": 140859,
+      "sha256": "A862BDA03FFDFAF03CCB9816EFDE49D8A28C74AE354F17EECD40DF1E151F45A7"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_publish_v2.py",
+      "source_path": "state/kcos_stage3_publish_v2.py",
+      "size_bytes": 13350,
+      "sha256": "EE562FFFEB71B8A574F9C75F99E5A663BAF313EB01E5CECF4F7804C258DF1521"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_recover.py",
+      "source_path": "state/kcos_stage3_recover.py",
+      "size_bytes": 3230,
+      "sha256": "2D9B443D38B5C9D4762571E37CB0B2905AAD188318EF1CF10A28C8BC62ECE9D9"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_stop_v2.py",
+      "source_path": "state/kcos_stage3_stop_v2.py",
+      "size_bytes": 7207,
+      "sha256": "A0D12D147E14BF7401DB01E8A9B58326BCDE52065770832295F85EDDC26D9823"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_ui_pass_watch_v2.py",
+      "source_path": "state/kcos_stage3_ui_pass_watch_v2.py",
+      "size_bytes": 10407,
+      "sha256": "EA0738FD6EC91F0D7E21B71C86F5A3D0AD1F85A6E0D8696EDD275B1BFBACAC14"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_verify_v2.py",
+      "source_path": "state/kcos_stage3_verify_v2.py",
+      "size_bytes": 10037,
+      "sha256": "B4156C4EB16C8ADBDF5AB6D7C3347E45CED6456DA7F0505EFB7AF125011E47C4"
+    },
+    {
+      "snapshot_path": "source/state/kcos_stage3_watch_v2.py",
+      "source_path": "state/kcos_stage3_watch_v2.py",
+      "size_bytes": 55396,
+      "sha256": "30821ED57791F754C9914099EC0BCD25C4EB7D64323EFCE1BFCD64EA95851F41"
+    },
+    {
+      "snapshot_path": "source/state/kcos_supervisor_v2.py",
+      "source_path": "state/kcos_supervisor_v2.py",
+      "size_bytes": 619923,
+      "sha256": "52660B20717012044A5C655B13F03635922A024EA52D41B340E7B6459A3E2D15"
+    },
+    {
+      "snapshot_path": "source/state/kcos_tester_config_v2.py",
+      "source_path": "state/kcos_tester_config_v2.py",
+      "size_bytes": 59382,
+      "sha256": "7A37C2D86CBA32DBE19B6A7DC0688867DEF7F2F4E43F988F9CFC78F5E518ED03"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_compile_history_v2.py",
+      "source_path": "state/test_kcos_stage2_compile_history_v2.py",
+      "size_bytes": 2829,
+      "sha256": "B14C6C0BB0E8ACD6FFA0245C90A455911A93A0DC95D663F9F46FB4AD4B7F647C"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_creation_prompt.py",
+      "source_path": "state/test_kcos_stage2_creation_prompt.py",
+      "size_bytes": 4737,
+      "sha256": "EC9FA34B9153228B0F79F9031E751330AF5D8F7E9A5AC609B0E6D2A9F4161CF5"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_dcc_admission_route_v1.py",
+      "source_path": "state/test_kcos_stage2_dcc_admission_route_v1.py",
+      "size_bytes": 14624,
+      "sha256": "0E4399DC16E9677AB7231004D1871DBBABE6D3496CCD04EF3A35BFE6DA697E7C"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_dcc_builder_v1.py",
+      "source_path": "state/test_kcos_stage2_dcc_builder_v1.py",
+      "size_bytes": 3019,
+      "sha256": "29AD2368E734410DD75AFBB4173FABCB482241080864CE29BD45B96236C36CDD"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_executor_reconciliation_v1.py",
+      "source_path": "state/test_kcos_stage2_executor_reconciliation_v1.py",
+      "size_bytes": 2424,
+      "sha256": "15F0BACF9FFED472C214F778B7641970BDAB521377EAB1310FA15417EE0183C8"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_executor_safety.py",
+      "source_path": "state/test_kcos_stage2_executor_safety.py",
+      "size_bytes": 25688,
+      "sha256": "817F82905C514AB19A5D4D6F948630C14984FD930DDDC97CD4EBF4F4D0023576"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_implementation_brief_v1.py",
+      "source_path": "state/test_kcos_stage2_implementation_brief_v1.py",
+      "size_bytes": 10748,
+      "sha256": "AC1ED68FC4808EE064D38AB3E98E5B4A1AA549B1E0C53321DCFF481FB86BE6DD"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_learning_v1.py",
+      "source_path": "state/test_kcos_stage2_learning_v1.py",
+      "size_bytes": 20889,
+      "sha256": "AE279B8DFD810C8537CE8E36A4B6D92C9F9BA372FC41D7CAAB9D9179B18B6FFD"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_obv_reconcile_v1.py",
+      "source_path": "state/test_kcos_stage2_obv_reconcile_v1.py",
+      "size_bytes": 10683,
+      "sha256": "370DB5A1FC9BD9AA289D16CE8E7803101C26643A2E23B4E364F1701B5E0B9280"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_protected_contract_v1.py",
+      "source_path": "state/test_kcos_stage2_protected_contract_v1.py",
+      "size_bytes": 2863,
+      "sha256": "780BA05304FBE4DFBD90C9545856A37408BC34154C0348EF680CD3A56DE395F2"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_reconcile_v1.py",
+      "source_path": "state/test_kcos_stage2_reconcile_v1.py",
+      "size_bytes": 12623,
+      "sha256": "778344540B2A331BE1B938AC32A8C03AB5DA29579518E073FBCD8753B98A54C6"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_repair_loop_v1.py",
+      "source_path": "state/test_kcos_stage2_repair_loop_v1.py",
+      "size_bytes": 108637,
+      "sha256": "850A11A68C72A94AB808F28310974F2945F42BBC739227BC4F1748FF2FCBF8B9"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_repair_registry_v1.py",
+      "source_path": "state/test_kcos_stage2_repair_registry_v1.py",
+      "size_bytes": 969,
+      "sha256": "C3FE16158884085B6B23F1C9CAAC4003C0BCC22B2F98B72C4012D381C6A59791"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_repair_v2.py",
+      "source_path": "state/test_kcos_stage2_repair_v2.py",
+      "size_bytes": 6958,
+      "sha256": "6777B3E4CABED82B96E58F1BDB07D924995453DCFDADE65622DDC15101FB1903"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage2_v2.py",
+      "source_path": "state/test_kcos_stage2_v2.py",
+      "size_bytes": 98701,
+      "sha256": "26B4C897CD66C97682E873EEBE598D4AC49A1F65216CF8A78E4FD8FA49BBC4DD"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_compute_budget_v2.py",
+      "source_path": "state/test_kcos_stage3_compute_budget_v2.py",
+      "size_bytes": 19279,
+      "sha256": "D1D38D9AF74E61C7D6E8EF243AB5C83547D8E238B968C422E4CD0BED2D958AE1"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_cron_v2.py",
+      "source_path": "state/test_kcos_stage3_cron_v2.py",
+      "size_bytes": 10681,
+      "sha256": "B8BB41EB47BCD39DF4674E6D390C05F72DC074BCA2311D5B771BEA297E6C8661"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_dead_runtime_recovery_v1.py",
+      "source_path": "state/test_kcos_stage3_dead_runtime_recovery_v1.py",
+      "size_bytes": 33864,
+      "sha256": "8FA11CF073CDFCC4DF4EB757C58A4F66A99B479AC00214E30DE5A1F236E20574"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_hold_gate_v2.py",
+      "source_path": "state/test_kcos_stage3_hold_gate_v2.py",
+      "size_bytes": 16541,
+      "sha256": "F4706A1B92D7D8F54D4C3EE933E79F79CF13664BB2F1F03371DA0A7DE01F2C53"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_launch_ownership_v2.py",
+      "source_path": "state/test_kcos_stage3_launch_ownership_v2.py",
+      "size_bytes": 58730,
+      "sha256": "FD865C7EEC7C7253E910CAE307F79B7BDC973BA95EBA8C5CF669D375A353B63C"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_publish_v2.py",
+      "source_path": "state/test_kcos_stage3_publish_v2.py",
+      "size_bytes": 3979,
+      "sha256": "21E0514874859AB01333F3AED6D2829F4427221960B8AF02E4D99D3BC791A75E"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_secret_redaction_v1.py",
+      "source_path": "state/test_kcos_stage3_secret_redaction_v1.py",
+      "size_bytes": 998,
+      "sha256": "9257D8838D2538D9F9CB43D0DA879F3CD1E11DB87FC7F42D30346A24514AD34A"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_ui_pass_watch_v2.py",
+      "source_path": "state/test_kcos_stage3_ui_pass_watch_v2.py",
+      "size_bytes": 1107,
+      "sha256": "4136C97DF118EE8F75E7CF99E8449759A27DFAA5658FF754507E3E863BEA323D"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_stage3_v2.py",
+      "source_path": "state/test_kcos_stage3_v2.py",
+      "size_bytes": 158654,
+      "sha256": "766284FD09F45A3C2BA1E93DCF673AAF601FC350650345AF96C218F020C2A17A"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_supervisor_v2.py",
+      "source_path": "state/test_kcos_supervisor_v2.py",
+      "size_bytes": 178176,
+      "sha256": "44F6D76541F0CDF240CBF94F24F7C94F98A93A0655BB01DD4677E993F160CD72"
+    },
+    {
+      "snapshot_path": "source/tests/test_kcos_tester_config_v2.py",
+      "source_path": "state/test_kcos_tester_config_v2.py",
+      "size_bytes": 20100,
+      "sha256": "E9849EF9220D5489466BCFA921546D6B5E311BC39BC406936A94D660027FE3EF"
+    },
+    {
+      "snapshot_path": "cycle/B1_1_OBV_Divergence_v1.mq5",
+      "source_path": "state/mt5_stage45_portable/MQL5/Experts/Kiyosaki/B1_1_OBV_Divergence_v1.mq5",
+      "size_bytes": 24624,
+      "sha256": "755043356D24FFA51B1DF4F8BD2E4B5103A95A0F4C95E01510C803DD3B806C52"
+    },
+    {
+      "snapshot_path": "cycle/includes/minato_base_score_v2.mqh",
+      "source_path": "C:\\Users\\Tyson\\AppData\\Roaming\\MetaQuotes\\Terminal\\608AB61EFF9C7B3585EC08B8CF6800E3\\MQL5\\Include\\minato_base_score_v2.mqh",
+      "size_bytes": 18440,
+      "sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF"
+    },
+    {
+      "snapshot_path": "cycle/includes/kiyosaki_regime.mqh",
+      "source_path": "state/mt5_stage45_portable/MQL5/Include/kiyosaki_regime.mqh",
+      "size_bytes": 9911,
+      "sha256": "82B01A4E1742BFA00320317BFFC49EE3BE69309B73CB308AC6F9E5D96200072E"
+    },
+    {
+      "snapshot_path": "cycle/kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation.stage1.spec.json",
+      "source_path": "state/specs/kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation.stage1.spec.json",
+      "size_bytes": 42937,
+      "sha256": "A4FE8B8F63D1794818AF4FEAD8DCC8DCF748EC9C83F2DB971E2316E0BA170E5C"
+    },
+    {
+      "snapshot_path": "cycle/tester_inis/M5.ini",
+      "source_path": "state/stage3_v2/kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation.B1_1_OBV_Divergence_v1.ETHUSD.M5.20250110_20260110.wide.ini",
+      "size_bytes": 1544,
+      "sha256": "EDC27A4FCE5338B6E7C06FD48A870B888E09F2FBEE49152D1AA1C9695FDEFDE6"
+    },
+    {
+      "snapshot_path": "cycle/tester_inis/M15.ini",
+      "source_path": "state/stage3_v2/kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation.B1_1_OBV_Divergence_v1.ETHUSD.M15.20250110_20260110.wide.ini",
+      "size_bytes": 1545,
+      "sha256": "37C50FB5F5EA3CA4D8A46723E5D671CEC2741606702028068477DB53749411DC"
+    },
+    {
+      "snapshot_path": "cycle/tester_inis/H1.ini",
+      "source_path": "state/stage3_v2/kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation.B1_1_OBV_Divergence_v1.ETHUSD.H1.20250110_20260110.wide.ini",
+      "size_bytes": 1544,
+      "sha256": "B8EE4D92233316239DD19D6DA3E24A3F442CB54E66438C9C6E40F98F0D131060"
+    },
+    {
+      "snapshot_path": "cycle/cycle_receipt.json",
+      "source_path": "derived from hash-bound Stage 2/3 evidence",
+      "size_bytes": 2973,
+      "sha256": "9820A60720E5BA0215E782EA1555E3C9BB3D0E217ADA6BBF67ED483710ABA1E6"
+    },
+    {
+      "snapshot_path": "README.md",
+      "source_path": "generated checkpoint description",
+      "size_bytes": 796,
+      "sha256": "9CB331A0777A41A621D1CF6C1EF34EE01F568CA466AD33829341B405E31AB329"
+    },
+    {
+      "snapshot_path": ".gitattributes",
+      "source_path": "checkpoint-specific line-ending preservation",
+      "size_bytes": 8,
+      "sha256": "705FD4D6451A31D36B3DF7DE96F83F30AC976C9B4A6D1E51671D8E2F33E2D0DA"
+    }
+  ]
+}

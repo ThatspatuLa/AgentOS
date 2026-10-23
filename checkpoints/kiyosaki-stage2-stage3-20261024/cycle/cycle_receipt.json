@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "snapshot_type": "read_only_archival_stage2_stage3",
+  "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+  "ea": "B1_1_OBV_Divergence_v1",
+  "market": "EightCap ETHUSD",
+  "symbol": "ETHUSD",
+  "date_range": {
+    "from": "2025.01.10",
+    "to": "2026.01.10"
+  },
+  "source_sha256": "755043356D24FFA51B1DF4F8BD2E4B5103A95A0F4C95E01510C803DD3B806C52",
+  "ex5_sha256": "9013E2C1FAC797278A21AF123EA33582B412E9C83A9BFF01607BCCDF117AD3C1",
+  "stage1_spec_sha256": "A4FE8B8F63D1794818AF4FEAD8DCC8DCF748EC9C83F2DB971E2316E0BA170E5C",
+  "approved_tester_config_sha256": "B5AFB94CE4BDFCF26BDE8DF3AF1FC323CB3BE14F3DDD4E8B26FDC3123429583B",
+  "stage2_event_sha256": "C0B0BD12709BD1EE7AB90AD32DE29AB935A01F2CD89F889D9595BDEC06423C03",
+  "stage2_verification_sha256": "95C7802BE1D39ED3B43BCD52FD2DC19C636318681854299F0FC4D8968B9DBBD9",
+  "stage2_passed": true,
+  "verification_policy_sha256": "677D1E653C948AEE3B86D1DA4472A3023A041D5DCD0C81FC7FDDBE381ECF28B3",
+  "verifier_code_sha256": "85A3A0EA5B61A75463BD81CF66D93A30E864B5E6E0EF5CF9779CB4889A4CA68F",
+  "canonical_minato_sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF",
+  "timeframe_order": [
+    "M5",
+    "M15",
+    "H1"
+  ],
+  "tester_inis": {
+    "M5": {
+      "snapshot_path": "cycle/tester_inis/M5.ini",
+      "sha256": "EDC27A4FCE5338B6E7C06FD48A870B888E09F2FBEE49152D1AA1C9695FDEFDE6"
+    },
+    "M15": {
+      "snapshot_path": "cycle/tester_inis/M15.ini",
+      "sha256": "37C50FB5F5EA3CA4D8A46723E5D671CEC2741606702028068477DB53749411DC"
+    },
+    "H1": {
+      "snapshot_path": "cycle/tester_inis/H1.ini",
+      "sha256": "B8EE4D92233316239DD19D6DA3E24A3F442CB54E66438C9C6E40F98F0D131060"
+    }
+  },
+  "stage3_timeframes": {
+    "M5": {
+      "status": "TIMEFRAME_COMPLETE",
+      "completion_mode": "full",
+      "completion_basis": "tester_pass_counter",
+      "completed_utc": "2026-10-23T14:46:40Z",
+      "event_sha256": "F21E205BF9A8717646941B27D9ED136E18CEE0B2702E1D35B3F921EA2D2EE18D"
+    },
+    "M15": {
+      "status": "TIMEFRAME_COMPLETE",
+      "completion_mode": "full",
+      "completion_basis": "tester_pass_counter",
+      "completed_utc": "2026-10-23T14:52:03Z",
+      "event_sha256": "DB0A89A5B0E7D4DA07C86536680CC0301AF43D3DD0B6E665BAF1A160E160C888"
+    },
+    "H1": {
+      "status": "TIMEFRAME_COMPLETE",
+      "completion_mode": "full",
+      "completion_basis": "fresh_genetic_journal",
+      "completed_utc": "2026-10-23T14:54:59Z",
+      "event_sha256": "5152D50A45D5C33CA25222137738F15F5030BBCC1DF6FE9728ED7589626C7A84"
+    }
+  },
+  "cycle_state_at_capture": {
+    "current_stage": "stage4_pending",
+    "stage_status": "stage3_complete_held",
+    "next_action": "inspect_stage3_before_stage4"
+  },
+  "exclusions": [
+    "runtime databases",
+    "tester caches",
+    "logs",
+    "compiled binaries",
+    "credentials",
+    "market data"
+  ]
+}

@@ -1,0 +1,899 @@
+{
+  "schema_version": 2,
+  "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+  "stage": 1,
+  "ea": "B1_1_OBV_Divergence_v1",
+  "decision": "approved_for_stage2",
+  "market": "EightCap ETHUSD",
+  "timeframes": [
+    "M5",
+    "M15",
+    "H1"
+  ],
+  "research_mode": "queue_only_no_web",
+  "duplicate_check": {
+    "decision": "same_existing_ea_revalidation",
+    "exact_duplicate": false,
+    "rename_only": false,
+    "parameter_only_variant": false,
+    "evidence": [
+      "Current .mq5 and historical Stage 1 identity are hash-bound.",
+      "The bound admission classifies this candidate eligible_unresolved with no authenticated Stage 5 completion or Stage 3/4.5 guard rejection.",
+      "Catalog distinction is the candidate's confirmed-pivot price divergence against its candle-body-signed cumulative tick-volume series; compare directly with ADLine and other volume-divergence families before downstream promotion."
+    ]
+  },
+  "strategy": {
+    "edge": "Reversal",
+    "family": "PivotPrice_SignedTickVolume_Divergence",
+    "mechanism": "Long/short price-pivot divergence against a cumulative tick-volume series whose increments are signed by candle body direction, filtered by EMA trend and managed with ATR/regime-scaled stops and targets.",
+    "selection_reason": "The candidate remains eligible_unresolved in its bound Stage 1 admission evidence. Source ranking prioritizes the independent conventional OBV definition, then official platform API references that support implementation comparison and identify buffer-ordering questions; none is performance evidence.",
+    "entry_logic": [
+      "On each new chart bar, use the current source's custom cumulative series: add tick volume when close>open, subtract it when close<open, and leave it unchanged on a doji. This is candle-body-signed tick volume, not conventional close-to-prior-close OBV.",
+      "Confirm fractal pivots using InpPivotStrength bars on both sides. For bearish divergence, the most recent confirmed pivot high must exceed the prior pivot high by more than _Point while the custom-series value at that pivot is lower by more than _Point. Bullish divergence reverses both comparisons at pivot lows. Each older pivot is searched backward within InpObvDivLookback.",
+      "Require close[1]>EMA(InpEmaTrendPeriod)[1] for a long and close[1]<EMA[1] for a short. Enter only when no owned symbol/magic position exists and the cooldown has elapsed.",
+      "Size with InpLots and the active H1 CKiyosakiRegime lot multiplier; calculate ATR(InpAtrPeriod)-scaled stop/target distances with active regime factors, normalize volume, and require projected-margin approval."
+    ],
+    "exit_logic": [
+      "Attach a stop at ATR[1]*InpAtrSlMult*active regime SL multiplier and target at ATR[1]*InpAtrTpMult*active regime TP multiplier through MinatoTakeProfit.",
+      "There is no source-defined opposite-signal, EMA, or time exit. The margin-kill path closes positions matching both the configured magic number and symbol when positive account margin level falls below InpMarginKillLevel."
+    ],
+    "filters": [
+      "The source's OBV-like input is signed by open-to-close candle body, whereas conventional OBV signs volume by close-to-previous-close. Preserve this distinction when rebuilding.",
+      "Pivots require right-side confirmation and are delayed by InpPivotStrength bars; verify pivot/OBV alignment and the in-place reversal plus ArraySetAsSeries indexing in Stage 2.",
+      "Verify EMA and ATR CopyBuffer physical/logical indexing; the current source reads index 1 after different copy start positions.",
+      "Require sufficient bars and finite valid OHLC, indicator, volume, ATR, lot, and margin data; skip entry when required data are unavailable.",
+      "Cooldown is measured from last successful trade time using InpMinBarsBetweenTrades*PeriodSeconds(PERIOD_CURRENT); only one owned position is permitted."
+    ],
+    "parameters": [
+      "InpObvDivLookback=25",
+      "InpPivotStrength=2",
+      "InpEmaTrendPeriod=50",
+      "InpAtrPeriod=14",
+      "InpAtrSlMult=2.0",
+      "InpAtrTpMult=3.0",
+      "InpMinBarsBetweenTrades=20",
+      "InpLots=0.5",
+      "InpMarginKillLevel=120.0",
+      "InpMagicNumber=260814014",
+      "InpRegime_GreedLot=1.0",
+      "InpRegime_GreedSLMult=1.0",
+      "InpRegime_GreedTPMult=1.0",
+      "InpRegime_NeutralLot=0.5",
+      "InpRegime_NeutralSLMult=1.0",
+      "InpRegime_NeutralTPMult=1.0",
+      "InpRegime_FearLot=0.25",
+      "InpRegime_FearSLMult=1.0",
+      "InpRegime_FearTPMult=1.0",
+      "InpRegime_ExtFearLot=0.25",
+      "InpRegime_ExtFearSLMult=1.0",
+      "InpRegime_ExtFearTPMult=1.0"
+    ],
+    "execution_contract": {
+      "schema_version": 1,
+      "warmup": {
+        "required_bars": "At least max(100, 2*InpPivotStrength+InpObvDivLookback+5, InpEmaTrendPeriod+3, InpAtrPeriod+3) chart bars, plus 60 H1 bars for regime classification.",
+        "initialization": "Require successful OHLC/tick-volume history build, confirmed pivot range, valid closed-bar EMA/ATR, and H1 regime data; skip signals on any missing or invalid input."
+      },
+      "series": [
+        {
+          "id": "custom_signed_tick_volume",
+          "equation": "Cumulative sum: +tick_volume[i] if close[i]>open[i], -tick_volume[i] if close[i]<open[i], unchanged if equal; source physically reverses the array and then sets series indexing.",
+          "origin": "project_design",
+          "bar_shift": 1
+        },
+        {
+          "id": "price_pivots",
+          "equation": "A high/low pivot at shift s is confirmed when no strictly higher high/lower low occurs within InpPivotStrength bars on either side; eligible pivot shifts begin at InpPivotStrength+1.",
+          "origin": "project_design",
+          "bar_shift": 1
+        },
+        {
+          "id": "ema_trend",
+          "equation": "EMA(close,InpEmaTrendPeriod) on PERIOD_CURRENT; source copies from start position 1 for three values and reads array index 1.",
+          "origin": "documented_methodology",
+          "source_ref": "https://www.mql5.com/en/docs/indicators/iobv",
+          "bar_shift": 1
+        },
+        {
+          "id": "atr",
+          "equation": "ATR(InpAtrPeriod) on PERIOD_CURRENT; source copies from start position 0 for three values and reads array index 1.",
+          "origin": "documented_methodology",
+          "source_ref": "https://www.mql5.com/en/docs/indicators/iobv",
+          "bar_shift": 1
+        },
+        {
+          "id": "h1_regime",
+          "equation": "CKiyosakiRegime classification from up to 60 completed H1 highs, lows, and closes; the legacy source currently requests shift 0, which Stage 2 must change to closed data.",
+          "origin": "project_design",
+          "bar_shift": 1
+        }
+      ],
+      "regimes": {
+        "classification": "Source CKiyosakiRegime on H1 OHLC maps to GREED, NEUTRAL, FEAR, or EXTREME_FEAR; selected regime triplet scales lot, stop, and target.",
+        "overlap_policy": "mutually_exclusive",
+        "multipliers": [
+          {
+            "regime": "GREED",
+            "lot_input": "InpRegime_GreedLot",
+            "sl_input": "InpRegime_GreedSLMult",
+            "tp_input": "InpRegime_GreedTPMult"
+          },
+          {
+            "regime": "NEUTRAL",
+            "lot_input": "InpRegime_NeutralLot",
+            "sl_input": "InpRegime_NeutralSLMult",
+            "tp_input": "InpRegime_NeutralTPMult"
+          },
+          {
+            "regime": "FEAR",
+            "lot_input": "InpRegime_FearLot",
+            "sl_input": "InpRegime_FearSLMult",
+            "tp_input": "InpRegime_FearTPMult"
+          },
+          {
+            "regime": "EXTREME_FEAR",
+            "lot_input": "InpRegime_ExtFearLot",
+            "sl_input": "InpRegime_ExtFearSLMult",
+            "tp_input": "InpRegime_ExtFearTPMult"
+          }
+        ]
+      },
+      "signals": {
+        "long": "Find most recent confirmed pivot low and preceding older confirmed pivot low within InpObvDivLookback; newer low < older low-_Point and custom_signed_tick_volume[newer] > custom_signed_tick_volume[older]+_Point; require close[1]>EMA[1].",
+        "short": "Find most recent confirmed pivot high and preceding older confirmed pivot high within InpObvDivLookback; newer high > older high+_Point and custom_signed_tick_volume[newer] < custom_signed_tick_volume[older]-_Point; require close[1]<EMA[1].",
+        "conflict_policy": "Do not enter if both directions qualify, any required data are invalid, an owned position is open, cooldown has not elapsed, volume is invalid, or projected-margin approval fails."
+      },
+      "exits": {
+        "stop_loss": "ATR[1]*InpAtrSlMult*selected regime SL multiplier.",
+        "take_profit": "ATR[1]*InpAtrTpMult*selected regime TP multiplier through MinatoTakeProfit.",
+        "time_stop": "No source-defined time or signal exit; attached stop/target and magic+symbol-filtered margin-kill are the available exits."
+      },
+      "execution": {
+        "margin_check": "Require MinatoAllowsProjectedMargin before entry; when positive account margin level is below InpMarginKillLevel, close only positions matching the configured magic number and _Symbol.",
+        "volume_normalization": "MinatoRegimeQuantity(InpLots, selected regime lot factor), clamped to broker min/max and floored to volume step.",
+        "minimum_take_profit": "Use MinatoTakeProfit for broker stop-distance compliance.",
+        "invalid_data": "skip_trade",
+        "cooldown": "Require InpMinBarsBetweenTrades*PeriodSeconds(PERIOD_CURRENT) since last successful trade."
+      },
+      "closed_bar_policy": {
+        "signal_shift": 1,
+        "allow_forming_bar": false,
+        "rule": "Signals are evaluated after NewBarClosed and intend closed-bar price, pivots, EMA, ATR, and custom-volume values; Stage 2 must reconcile the source's array orientation and CopyBuffer shifts before relying on alignment."
+      },
+      "source_limit": "The sources establish conventional OBV and MQL5 APIs, not the custom candle-body signed tick-volume rule, specific pivot thresholds, performance, or profitability.",
+      "input_bindings": {
+        "InpPivotStrength": [
+          "price_pivots",
+          "warmup"
+        ],
+        "InpEmaTrendPeriod": [
+          "ema_trend",
+          "warmup"
+        ],
+        "InpAtrPeriod": [
+          "atr",
+          "warmup"
+        ],
+        "InpObvDivLookback": [
+          "warmup",
+          "signals"
+        ],
+        "InpRegime_GreedSLMult": [
+          "regimes"
+        ],
+        "InpRegime_NeutralLot": [
+          "regimes"
+        ],
+        "InpRegime_NeutralSLMult": [
+          "regimes"
+        ],
+        "InpRegime_GreedTPMult": [
+          "regimes"
+        ],
+        "InpRegime_ExtFearLot": [
+          "regimes"
+        ],
+        "InpRegime_FearSLMult": [
+          "regimes"
+        ],
+        "InpRegime_FearTPMult": [
+          "regimes"
+        ],
+        "InpRegime_ExtFearTPMult": [
+          "regimes"
+        ],
+        "InpRegime_GreedLot": [
+          "regimes"
+        ],
+        "InpRegime_FearLot": [
+          "regimes"
+        ],
+        "InpRegime_NeutralTPMult": [
+          "regimes"
+        ],
+        "InpRegime_ExtFearSLMult": [
+          "regimes"
+        ],
+        "InpAtrTpMult": [
+          "exits"
+        ],
+        "InpAtrSlMult": [
+          "exits"
+        ],
+        "InpMinBarsBetweenTrades": [
+          "execution"
+        ],
+        "InpLots": [
+          "execution"
+        ],
+        "InpMarginKillLevel": [
+          "execution"
+        ]
+      }
+    }
+  },
+  "stage2_requirements": {
+    "build_and_compile": true,
+    "verify_canonical_minato_formula_parity": true,
+    "note": "Verify custom OBV array reversal/series indexing, CopyBuffer bar alignment, pivot confirmation and OBV-to-pivot alignment, and whether to retain candle-body-signed tick volume or replace it with conventional close-to-prior-close OBV. Preserve the disclosed long/short divergence and EMA filter, derive exact warmup, verify H1 regime closed-bar handling, and retain magic-filtered margin closes. Stages 2+ remain held."
+  },
+  "source_paths": [
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_OBV_Divergence_v1.mq5",
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\stockcharts-obv.html",
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-iobv-reference.html",
+    "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-copybuffer-reference.html"
+  ],
+  "risks": [
+    "The file labels its series OBV, but the current implementation signs tick volume by close versus open rather than close versus previous close.",
+    "The custom series is reversed in place and then marked as series; its pivot index alignment needs runtime/source verification.",
+    "CopyBuffer values are physically ordered oldest-first; verify the source's EMA/ATR array index choices.",
+    "ATR, regime data, and pivots include code paths that may read shift 0; Stage 2 should ensure closed-bar reproducibility.",
+    "Current source has no opposite-signal or time-based exit; positions rely on stop, target, or margin kill."
+  ],
+  "candidate_ea": "B1_1_OBV_Divergence_v1",
+  "edge": "Reversal",
+  "primitive": "B1_1_OBV_Divergence_v1",
+  "symbol": "ETHUSD",
+  "from_date": "2025.01.10",
+  "to_date": "2026.01.10",
+  "created_utc": "2026-10-21T23:09:44.528661+00:00",
+  "updated_utc": "2026-10-21T23:09:44.528661+00:00",
+  "mechanism": "Long/short price-pivot divergence against a cumulative tick-volume series whose increments are signed by candle body direction, filtered by EMA trend and managed with ATR/regime-scaled stops and targets.",
+  "strategy_fingerprint": "Confirmed price swing pivots diverging from candle-body signed cumulative tick volume, EMA trend filter, H1 regime-scaled ATR exits.",
+  "tester_config": {
+    "schema_version": 1,
+    "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+    "ea": "B1_1_OBV_Divergence_v1",
+    "symbol": "ETHUSD",
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1"
+    ],
+    "from_date": "2025.01.10",
+    "to_date": "2026.01.10",
+    "inputs": {
+      "InpObvDivLookback": {
+        "type": "int",
+        "default": 25,
+        "start": 19,
+        "step": 2,
+        "stop": 31,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=19, hi=31, step=2."
+        }
+      },
+      "InpPivotStrength": {
+        "type": "int",
+        "default": 2,
+        "start": 1,
+        "step": 1,
+        "stop": 3,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=1, hi=3, step=1."
+        }
+      },
+      "InpEmaTrendPeriod": {
+        "type": "int",
+        "default": 50,
+        "start": 38,
+        "step": 4,
+        "stop": 62,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=38, hi=62, step=4."
+        }
+      },
+      "InpAtrPeriod": {
+        "type": "int",
+        "default": 14,
+        "start": 11,
+        "step": 1,
+        "stop": 17,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=11, hi=17, step=1."
+        }
+      },
+      "InpAtrSlMult": {
+        "type": "double",
+        "default": 2.0,
+        "start": 1.2,
+        "step": 0.36,
+        "stop": 3.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=1.2, hi=3.0, step=0.36."
+        }
+      },
+      "InpAtrTpMult": {
+        "type": "double",
+        "default": 3.0,
+        "start": 1.8,
+        "step": 0.54,
+        "stop": 4.5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=1.8, hi=4.5, step=0.54."
+        }
+      },
+      "InpMinBarsBetweenTrades": {
+        "type": "int",
+        "default": 20,
+        "start": 20,
+        "step": 0,
+        "stop": 20,
+        "optimize": "N",
+        "domain_provenance": {
+          "method": "source_fixed_default",
+          "basis": "Cooldown is held at the exact source default by Stage 1 policy."
+        },
+        "value": 20
+      },
+      "InpLots": {
+        "type": "double",
+        "default": 0.5,
+        "start": 0.25,
+        "step": 0.15,
+        "stop": 1.0,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "source_comment_domain",
+          "basis": "Copied from the current hash-bound .mq5 input comment: lo=0.25, hi=1.0, step=0.15."
+        }
+      },
+      "InpMarginKillLevel": {
+        "type": "double",
+        "default": 120.0,
+        "start": 120.0,
+        "step": 0,
+        "stop": 120.0,
+        "optimize": "N",
+        "domain_provenance": {
+          "method": "source_fixed_default",
+          "basis": "No optimizable source domain is declared; preserve the exact source default."
+        }
+      },
+      "InpMagicNumber": {
+        "type": "ulong",
+        "default": 260814014,
+        "start": 260814014,
+        "step": 0,
+        "stop": 260814014,
+        "optimize": "N",
+        "domain_provenance": {
+          "method": "source_fixed_default",
+          "basis": "No optimizable source domain is declared; preserve the exact source default."
+        }
+      },
+      "InpRegime_GreedLot": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_GreedSLMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_GreedTPMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_NeutralLot": {
+        "type": "double",
+        "default": 0.5,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_NeutralSLMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_NeutralTPMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_FearLot": {
+        "type": "double",
+        "default": 0.25,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_FearSLMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_FearTPMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_ExtFearLot": {
+        "type": "double",
+        "default": 0.25,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_ExtFearSLMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpRegime_ExtFearTPMult": {
+        "type": "double",
+        "default": 1.0,
+        "start": 0,
+        "step": 0.25,
+        "stop": 5,
+        "optimize": "Y",
+        "domain_provenance": {
+          "method": "stage2_regime_grid_policy",
+          "basis": "Canonical Stage 1 four-regime search surface: 0.0 through 5.0 in 0.25 steps."
+        }
+      },
+      "InpMinatoTestStart": {
+        "type": "datetime",
+        "default": 1736467200,
+        "start": 1736467200,
+        "step": 0,
+        "stop": 1736467200,
+        "optimize": "N"
+      },
+      "InpMinatoTestEnd": {
+        "type": "datetime",
+        "default": 1768003200,
+        "start": 1768003200,
+        "step": 0,
+        "stop": 1768003200,
+        "optimize": "N"
+      },
+      "InpMinatoExpectedScoreVersion": {
+        "type": "string",
+        "default": "MINATO_BASE_SCORE_V2.0",
+        "start": "MINATO_BASE_SCORE_V2.0",
+        "step": "MINATO_BASE_SCORE_V2.0",
+        "stop": "MINATO_BASE_SCORE_V2.0",
+        "optimize": "N"
+      }
+    },
+    "input_constraints": []
+  },
+  "primitive_selection": {
+    "mode": "research_new",
+    "edge": "Reversion \u2014 OBV divergence against EMA(50) trend filter with ATR-scaled SL/TP and regime-weighted lot/SL/TP",
+    "primitive": {
+      "name": "B1_1_OBV_Divergence_v1",
+      "mechanism": "B1_1_OBV_Divergence_v1",
+      "status": "legacy_reentry"
+    },
+    "rework_item_id": "legacy-reentry-B1_1_OBV_Divergence_v1-C3B8DEB706E9",
+    "rework_source_cycle_id": "kcos-20260918T110815Z-b1-1-obv-divergence-v1-rotation",
+    "rework_reason": "Hash-bound legacy EA re-entry through canonical Stage 1 research and publication.",
+    "legacy_ea_reentry": true
+  },
+  "selected_primitive_provenance": {
+    "primitive": "B1_1_OBV_Divergence_v1",
+    "edge": "Reversal",
+    "mechanism": "Long/short price-pivot divergence against a cumulative tick-volume series whose increments are signed by candle body direction, filtered by EMA trend and managed with ATR/regime-scaled stops and targets.",
+    "sources": [
+      {
+        "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+        "publisher": "StockCharts ChartSchool",
+        "title": "On Balance Volume (OBV)",
+        "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+        "trust_level": "HIGH",
+        "evidence_type": "technical indicator reference"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/indicators/iobv",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "iOBV \u2014 On Balance Volume",
+        "role": "official API reference for the platform's iOBV handle and volume-applied input",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/series/copybuffer",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "CopyBuffer \u2014 Timeseries and Indicators Access",
+        "role": "official API reference for physical copy order and indexing of indicator values",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation"
+      }
+    ]
+  },
+  "source_provenance": {
+    "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+    "publisher": "StockCharts ChartSchool",
+    "title": "On Balance Volume (OBV)",
+    "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+    "trust_level": "HIGH",
+    "main_source": {
+      "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+      "publisher": "StockCharts ChartSchool",
+      "title": "On Balance Volume (OBV)",
+      "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+      "trust_level": "HIGH",
+      "evidence_type": "technical indicator reference"
+    },
+    "secondary_source": {
+      "url": "https://www.mql5.com/en/docs/indicators/iobv",
+      "publisher": "MetaQuotes MQL5 Reference",
+      "title": "iOBV \u2014 On Balance Volume",
+      "role": "official API reference for the platform's iOBV handle and volume-applied input",
+      "trust_level": "HIGH",
+      "evidence_type": "official MQL5 API documentation"
+    },
+    "sources": [
+      {
+        "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+        "publisher": "StockCharts ChartSchool",
+        "title": "On Balance Volume (OBV)",
+        "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+        "trust_level": "HIGH",
+        "evidence_type": "technical indicator reference"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/indicators/iobv",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "iOBV \u2014 On Balance Volume",
+        "role": "official API reference for the platform's iOBV handle and volume-applied input",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/series/copybuffer",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "CopyBuffer \u2014 Timeseries and Indicators Access",
+        "role": "official API reference for physical copy order and indexing of indicator values",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation"
+      }
+    ],
+    "selection_note": "StockCharts ranks first as a direct independent conventional-method reference; MetaQuotes references follow as official platform API evidence. The source's custom volume rule is described from the hash-bound EA itself."
+  },
+  "source_evidence": [
+    {
+      "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+      "publisher": "StockCharts ChartSchool",
+      "retrieved_utc": "2026-10-21T23:06:26Z",
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\stockcharts-obv.html",
+      "sha256": "E06D8D2292C881A0094943DCA610D72AFD3AF9809864BD2279EC405495A2ABD1",
+      "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+      "evidence_excerpt": "Conventional OBV adds volume when the close is above the prior close and subtracts it when the close is below the prior close.",
+      "limitations": "Does not validate this EA's pivot pairing, filters, execution or profitability."
+    },
+    {
+      "url": "https://www.mql5.com/en/docs/indicators/iobv",
+      "publisher": "MetaQuotes MQL5 Reference",
+      "retrieved_utc": "2026-10-21T23:06:27Z",
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-iobv-reference.html",
+      "sha256": "07EA5C3082AB448C60204471E1917B5BF7A4B5DE7603177EF2D86520281CE875",
+      "role": "official API reference for the platform's iOBV handle and volume-applied input",
+      "evidence_excerpt": "The iOBV function creates an On Balance Volume indicator handle with a selected applied volume type.",
+      "limitations": "Does not establish that the EA calls iOBV; its current source computes a custom series instead."
+    },
+    {
+      "url": "https://www.mql5.com/en/docs/series/copybuffer",
+      "publisher": "MetaQuotes MQL5 Reference",
+      "retrieved_utc": "2026-10-21T23:06:27Z",
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-copybuffer-reference.html",
+      "sha256": "15B1E432D36E6BE008B02E69E27BC4C9CFE73AEA1EF6914BD72CD09978A851CF",
+      "role": "official API reference for physical copy order and indexing of indicator values",
+      "evidence_excerpt": "CopyBuffer places the oldest copied element at the start of physical memory regardless of the target array's series flag.",
+      "limitations": "Documents copy ordering, not this EA's effective logical bar alignment."
+    }
+  ],
+  "verified_sources": [
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+    "https://www.mql5.com/en/docs/indicators/iobv",
+    "https://www.mql5.com/en/docs/series/copybuffer"
+  ],
+  "reproducible": true,
+  "source_verification": {
+    "status": "live_verified",
+    "verified_utc": "2026-10-21T23:09:44.528661+00:00",
+    "sources": [
+      {
+        "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+        "publisher": "StockCharts ChartSchool",
+        "title": "On Balance Volume (OBV)",
+        "role": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+        "trust_level": "HIGH",
+        "evidence_type": "technical indicator reference",
+        "retrieved_utc": "2026-10-21T23:06:26Z",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\stockcharts-obv.html",
+        "content_sha256": "E06D8D2292C881A0094943DCA610D72AFD3AF9809864BD2279EC405495A2ABD1",
+        "evidence_excerpt": "Conventional OBV adds volume when the close is above the prior close and subtracts it when the close is below the prior close.",
+        "capture_type": "live_http_response_body"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/indicators/iobv",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "iOBV \u2014 On Balance Volume",
+        "role": "official API reference for the platform's iOBV handle and volume-applied input",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation",
+        "retrieved_utc": "2026-10-21T23:06:27Z",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-iobv-reference.html",
+        "content_sha256": "07EA5C3082AB448C60204471E1917B5BF7A4B5DE7603177EF2D86520281CE875",
+        "evidence_excerpt": "The iOBV function creates an On Balance Volume indicator handle with a selected applied volume type.",
+        "capture_type": "live_http_response_body"
+      },
+      {
+        "url": "https://www.mql5.com/en/docs/series/copybuffer",
+        "publisher": "MetaQuotes MQL5 Reference",
+        "title": "CopyBuffer \u2014 Timeseries and Indicators Access",
+        "role": "official API reference for physical copy order and indexing of indicator values",
+        "trust_level": "HIGH",
+        "evidence_type": "official MQL5 API documentation",
+        "retrieved_utc": "2026-10-21T23:06:27Z",
+        "content_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\mql5-copybuffer-reference.html",
+        "content_sha256": "15B1E432D36E6BE008B02E69E27BC4C9CFE73AEA1EF6914BD72CD09978A851CF",
+        "evidence_excerpt": "CopyBuffer places the oldest copied element at the start of physical memory regardless of the target array's series flag.",
+        "capture_type": "live_http_response_body"
+      }
+    ]
+  },
+  "source_ranking": [
+    {
+      "rank": 1,
+      "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+      "authority": "StockCharts ChartSchool",
+      "directness": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence",
+      "support": "The conventional OBV baseline and the distinction between standard close-to-close OBV and this EA's candle-body-signed tick-volume series.",
+      "limit": "Does not validate this EA's pivot pairing, filters, execution or profitability.",
+      "ranking_basis": "Existing Stage 1 source ranking: publisher authority and directness to method or implementation; no performance-based scoring."
+    },
+    {
+      "rank": 2,
+      "url": "https://www.mql5.com/en/docs/indicators/iobv",
+      "authority": "MetaQuotes MQL5 Reference",
+      "directness": "official API reference for the platform's iOBV handle and volume-applied input",
+      "support": "The platform-level OBV API available for comparison with the EA's manually precomputed series.",
+      "limit": "Does not establish that the EA calls iOBV; its current source computes a custom series instead.",
+      "ranking_basis": "Existing Stage 1 source ranking: publisher authority and directness to method or implementation; no performance-based scoring."
+    },
+    {
+      "rank": 3,
+      "url": "https://www.mql5.com/en/docs/series/copybuffer",
+      "authority": "MetaQuotes MQL5 Reference",
+      "directness": "official API reference for physical copy order and indexing of indicator values",
+      "support": "A Stage 2 verification requirement for the source's copied EMA/ATR buffers and series indexing.",
+      "limit": "Documents copy ordering, not this EA's effective logical bar alignment.",
+      "ranking_basis": "Existing Stage 1 source ranking: publisher authority and directness to method or implementation; no performance-based scoring."
+    }
+  ],
+  "source_binding": {
+    "candidate_source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_OBV_Divergence_v1.mq5",
+    "candidate_source_sha256": "C3B8DEB706E956808CB16A34CD837DC45E00F5B6C7F6FE2AED0332F961032766",
+    "cycle_id": "kcos-20261021T230420Z-research-new"
+  },
+  "recovery_scope": {
+    "scope": "revalidation",
+    "item_id": "legacy-reentry-B1_1_OBV_Divergence_v1-C3B8DEB706E9",
+    "source_cycle_id": "kcos-20260918T110815Z-b1-1-obv-divergence-v1-rotation",
+    "ea": "B1_1_OBV_Divergence_v1",
+    "primitive": "B1_1_OBV_Divergence_v1",
+    "source_spec_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20260918T110815Z-b1-1-obv-divergence-v1-rotation.stage1.spec.json",
+    "source_spec_sha256": "26A7B7F3DC9A570E28BF9C6526B2F4FF7254C3436F18F532F5A890FD5837CD21",
+    "source_stage1_event_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\events\\kcos-20260918T110815Z-b1-1-obv-divergence-v1-rotation.stage1.complete.json",
+    "source_stage1_event_sha256": "8265F42493F6667B2EDFB7DC5052C3511760B9731B80E9A14B88AD0D942C81C8",
+    "candidate_source": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_OBV_Divergence_v1.mq5",
+    "candidate_source_sha256": "C3B8DEB706E956808CB16A34CD837DC45E00F5B6C7F6FE2AED0332F961032766",
+    "preflight_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T230349.626244Z.json",
+    "preflight_sha256": "F29964B9B5AB6EB0B15D91AC61F6E5A1673149FCFB2813F7899BE4478F946FA6"
+  },
+  "source_reliability_policy": "provenance_only_no_reliability_updates",
+  "test_plan": {
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1"
+    ],
+    "from_date": "2025.01.10",
+    "to_date": "2026.01.10",
+    "scope": "Source-backed Stage 1 re-entry; later stages remain held."
+  },
+  "completeness": {
+    "complete": true,
+    "boundary": "Current source behavior, source ranking, complete inputs, parent contradictions, and Stage 2 verification items are recorded without performance claims."
+  },
+  "catalog_reconciliation": {
+    "path": "state/strategy_catalog_v2.json",
+    "catalog_sha256": "0F5CAEEDAEADDE97A95247CD19290E4A03A211AA819E2B788E7F15523453AC07",
+    "coverage": "complete",
+    "unresolved": 0,
+    "conclusion": "Classify as pivot-based divergence against a candle-body signed cumulative tick-volume series; it is related to volume divergence families but distinct from ADLine divergence because its source uses a custom signed-volume accumulator and confirmed price pivots."
+  },
+  "stage1_tracking": {
+    "schema_version": 1,
+    "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+    "candidate_selection": {
+      "reason": "The candidate remains eligible_unresolved in its bound Stage 1 admission evidence. Source ranking prioritizes the independent conventional OBV definition, then official platform API references that support implementation comparison and identify buffer-ordering questions; none is performance evidence.",
+      "status": "recorded"
+    },
+    "sources": {
+      "primary": {
+        "platform": null,
+        "source_name": "StockCharts ChartSchool",
+        "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/on-balance-volume-obv",
+        "supports": "independent indicator-method reference defining conventional OBV direction and price/OBV divergence"
+      },
+      "secondary": {
+        "platform": null,
+        "source_name": "MetaQuotes MQL5 Reference",
+        "url": "https://www.mql5.com/en/docs/indicators/iobv",
+        "supports": "official API reference for the platform's iOBV handle and volume-applied input"
+      },
+      "strategy_posted_date": null,
+      "strategy_posted_date_status": "not_reported"
+    },
+    "outcome_consistency": {
+      "scores": [
+        "stage3.minato_base_score",
+        "stage4_5.minato_base_score",
+        "stage5.minato_base_score"
+      ],
+      "comparison": "compare each stage score with the preceding stage; report increased, held, decreased, or unavailable",
+      "failure_reason_and_trade_count": "retain both beside each stage score and timeframe"
+    },
+    "stage_outcomes": {
+      "stage3": {
+        "artifact": "decisions/{cycle_id}.stage3.decision.json",
+        "minato_base_score": "timeframes[highest_cf_tf].cf",
+        "timeframe": "highest_cf_tf",
+        "failure_reason": "reason",
+        "trade_count": "timeframes[highest_cf_tf].trades"
+      },
+      "stage4_5": {
+        "artifact": "decisions/{cycle_id}.stage45.run*.decision.json",
+        "minato_base_score": "retained_best_minato_score",
+        "timeframe": "selected_tf",
+        "failure_reason": "reason",
+        "trade_count": "max_trades (maximum observed in that run)"
+      },
+      "stage5": {
+        "artifact": "stage5_v2/{cycle_id}.stage5.result.json",
+        "minato_base_score": "forward_result.metrics.forward_cf",
+        "timeframe": "forward_result.timeframe",
+        "failure_reason": "forward_result.verdict and forward_result.gates",
+        "trade_count": "forward_result.metrics.forward_trades"
+      }
+    }
+  },
+  "evidence_capture": {
+    "candidate_source_sha256": "C3B8DEB706E956808CB16A34CD837DC45E00F5B6C7F6FE2AED0332F961032766",
+    "admission_preflight": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T230349.626244Z.json",
+      "sha256": "F29964B9B5AB6EB0B15D91AC61F6E5A1673149FCFB2813F7899BE4478F946FA6",
+      "result": "READY"
+    },
+    "current_per_run_preflight": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\temporary_reentry_audit_v1\\legacy-reentry-preflight-20261021T230934.845719Z.json",
+      "sha256": "31F5240DE6DC8C309E56D79E77F8B58955330305BF5C38052C5DDC3044D20DF3",
+      "audit_id": "20261021T230934.845719Z",
+      "result": "READY"
+    },
+    "research_manifest": {
+      "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\research\\kcos-20261021T230420Z-research-new\\capture_manifest.json",
+      "sha256": "07BF8E7491E57F4FFC1BCF131D307097244BD68189132EC9C1FA560497BFF153"
+    }
+  },
+  "policy_normalizations": [
+    {
+      "policy": "source_cooldown_fixed_unoptimized",
+      "inputs": [
+        "InpMinBarsBetweenTrades"
+      ],
+      "reason": "preserve source behavior at its declared default while excluding cooldown optimization"
+    }
+  ]
+}
