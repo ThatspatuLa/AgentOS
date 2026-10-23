@@ -447,14 +447,14 @@
     {
       "snapshot_path": "cycle/cycle_receipt.json",
       "source_path": "derived from hash-bound Stage 2/3 evidence",
-      "size_bytes": 2973,
-      "sha256": "9820A60720E5BA0215E782EA1555E3C9BB3D0E217ADA6BBF67ED483710ABA1E6"
+      "size_bytes": 3384,
+      "sha256": "A2CD6B51DAD26923AB80CF4C0B82C7BC5B0549C9A801BB205185E4D4E598F5F3"
     },
     {
       "snapshot_path": "README.md",
       "source_path": "generated checkpoint description",
-      "size_bytes": 796,
-      "sha256": "9CB331A0777A41A621D1CF6C1EF34EE01F568CA466AD33829341B405E31AB329"
+      "size_bytes": 938,
+      "sha256": "D6EB0255188339709B12913A4A6D684019DC769624ED78A1F69D292ACAFA2FFA"
     },
     {
       "snapshot_path": ".gitattributes",

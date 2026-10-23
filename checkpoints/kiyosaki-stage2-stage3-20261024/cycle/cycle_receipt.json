@@ -63,8 +63,10 @@
   },
   "cycle_state_at_capture": {
     "current_stage": "stage4_pending",
-    "stage_status": "stage3_complete_held",
-    "next_action": "inspect_stage3_before_stage4"
+    "stage_status": "stage4_pending",
+    "next_action": "run_stage4",
+    "hold_after_stage": null,
+    "updated_utc": "2026-10-23T14:56:09Z"
   },
   "exclusions": [
     "runtime databases",
@@ -73,5 +75,13 @@
     "compiled binaries",
     "credentials",
     "market data"
-  ]
+  ],
+  "stage4_observation_at_capture": {
+    "hermes_job_id": "6d5583eadf91",
+    "execution_id": "5a61c4191f9b47b9a9dff899b576da75",
+    "attempt_local": "2026-10-24T01:56:09+11:00",
+    "status": "failed",
+    "primary_diagnostic": "timing control InpMinBarsBetweenTrades must be a scalar zero and excluded from optimization",
+    "secondary_diagnostic": "UnboundLocalError while reporting failure because csv_path was not initialized"
+  }
 }
