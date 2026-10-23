@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "release_id": "kcos-stage2-obv-20261023",
+  "source_project": "KCOS operational project external to this repository; local filesystem path omitted",
+  "cycle_id": "kcos-20261023T030304Z-b1-1-obv-divergence-v1-rotation",
+  "ea": "B1_1_OBV_Divergence_v1",
+  "transaction_id": "d7e127eabc1e49be925f969182d98389",
+  "transaction_status": "committed",
+  "implementation_method": "body_signed_volume_bounded_rolling_v1",
+  "source_before_sha256": "1079879F6D9EE22643DD8168EC706BC268473DA49E00A554057B48FC5DA00EB7",
+  "source_after_sha256": "755043356D24FFA51B1DF4F8BD2E4B5103A95A0F4C95E01510C803DD3B806C52",
+  "published_stage2_receipt_sha256": "8A51B64B1037E76C1A1271E9A0307834A3C4BD1850E95F9424608688B3D2092B",
+  "published_verification_sha256": "642642E0676A36A7A4F3906658DA7BD0054A415359206CA5D2060A857E2B3007",
+  "published_ex5_sha256": "9013E2C1FAC797278A21AF123EA33582B412E9C83A9BFF01607BCCDF117AD3C1",
+  "stage1_spec_sha256": "A4FE8B8F63D1794818AF4FEAD8DCC8DCF748EC9C83F2DB971E2316E0BA170E5C",
+  "tester_config_sha256": "05C9954D578862A7747D876BA282D7F3CCA7C9FF8DD8D4C7A51411A4FA13F50A",
+  "protected_regime_include_sha256": "82B01A4E1742BFA00320317BFFC49EE3BE69309B73CB308AC6F9E5D96200072E",
+  "protected_minato_include_sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF",
+  "verification": "34 existing predicates passed; Stage 2 focused regression suite recorded 238 passed and 18 subtests before the live rerun",
+  "files": [
+    {
+      "path": "state/kcos_input_contract_v2.py",
+      "sha256": "ED28353665D0DC6E62C0C5EA562930A8944D71AC10BE06824974A789B9A6B896",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_optimization_contract_v2.py",
+      "sha256": "23CF7FFB6D2F5D1D6402263DC8C6780F5F6B3E53555355EE04EC2FEF66158ED7",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_adapters_v1.py",
+      "sha256": "6BE04E9207C4FAB898D39B2210E99FA6A75C1986D90A2F0DEF666A2E65C8CB41",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_autonomous_executor.py",
+      "sha256": "560AD52E3B0B202C58BBCF38E11199D3FCD9B78DF7B8F34D290A9A65BC216853",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_build_ea_v1.py",
+      "sha256": "3BF0A19A38B2F12791AB9B1A5776CA207058D0FB6C0E4F568B89F263D35A78D1",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_compile_v2.py",
+      "sha256": "EE067405F382C1B7BBD2F82EA7FA4B1332C90540609EA0F6DEFADA71C3545393",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_generate_source_v2.py",
+      "sha256": "49069A7B95B34901F56CC475A67C3E66537A7181E7ED58008542AAE82713A261",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_implementation_brief_v1.py",
+      "sha256": "806C2170656B5A1AEF137DC7AD7FB814DD90D8F18C76E36E6A9DBC8862F9F408",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_learning_v1.py",
+      "sha256": "984E3B01ED1A5C374BCA856FD10FB468473E97EAA30A2563FC72F13653734649",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_obv_reconcile_v1.py",
+      "sha256": "FCF452B8C801EA0D1180A41A4CA68CC3D9BE1E3AD9E45F050BB9F2A01997A082",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_prepare_v2.py",
+      "sha256": "6C1CA7320A533AB3AA80FD2E185E10025595CF8C214FCA3018A678FE03AD00F8",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_promote_runtime_lesson_v1.py",
+      "sha256": "EB771462A73042A448EFE348AA7F7BA2C7BA71BE06833674730EC3A5A1B380BF",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_protected_contract_v1.py",
+      "sha256": "007C4980160EC01827F389A85827741BBA37246E7E50C980D00CAED0E7C9C680",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_publish_v2.py",
+      "sha256": "EAF8D6C4965C831B0AF20077568890C98FB920885F5CB4850A4967FB6392355A",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_reconcile_v1.py",
+      "sha256": "17F37F24B0D7E766F4E0BDFFDEB311F20A33DA8BD0A6532D66040F8C08C29A6A",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_repair_loop_v1.py",
+      "sha256": "6D664BEB1B438B0F71BD8AFA2271B90651BCD025C608C5635D4D5DE22B3A240A",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_repair_registry_v1.py",
+      "sha256": "7E8CE3E98B9FC17F1BBB781CEA40B1451E6CF088AF478348D5CA887E33C52772",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_repair_v2.py",
+      "sha256": "14BB2C542D7B0C897E7419569E04D757AFF6FC97EC938DBA7FADC32655C13C6A",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_source_defect_recovery_v1.py",
+      "sha256": "2C253B78013F52109547A5D44979E427BD9C0754A628A8771142F768FB483EA8",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_tester_diagnostic_v1.py",
+      "sha256": "015A11B2A9ADFAA0D67D49C55BCE2273178840D3B47AFE7749BB8B3CEF26291C",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage2_verify_v2.py",
+      "sha256": "85A3A0EA5B61A75463BD81CF66D93A30E864B5E6E0EF5CF9779CB4889A4CA68F",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_stage3_prepare_v2.py",
+      "sha256": "6157D38B2D57BAC70A4DE98182DF8B4ADE9996CB02C4EB01E4396901711C2337",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_supervisor_v2.py",
+      "sha256": "2D1DD024B7EAE77A90804F684F4D7BBA9F976ED0F70C06E6CF8A7F2425AA682D",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/kcos_tester_config_v2.py",
+      "sha256": "122A9770B14E4B6FFF2B255B68F7130B1FF9F79AF8635FEBFCD01B5F4032B1B2",
+      "role": "authenticated_stage2_runtime"
+    },
+    {
+      "path": "state/test_kcos_stage2_compile_history_v2.py",
+      "sha256": "B14C6C0BB0E8ACD6FFA0245C90A455911A93A0DC95D663F9F46FB4AD4B7F647C",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_creation_prompt.py",
+      "sha256": "EC9FA34B9153228B0F79F9031E751330AF5D8F7E9A5AC609B0E6D2A9F4161CF5",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_dcc_admission_route_v1.py",
+      "sha256": "0E4399DC16E9677AB7231004D1871DBBABE6D3496CCD04EF3A35BFE6DA697E7C",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_dcc_builder_v1.py",
+      "sha256": "29AD2368E734410DD75AFBB4173FABCB482241080864CE29BD45B96236C36CDD",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_executor_reconciliation_v1.py",
+      "sha256": "15F0BACF9FFED472C214F778B7641970BDAB521377EAB1310FA15417EE0183C8",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_executor_safety.py",
+      "sha256": "817F82905C514AB19A5D4D6F948630C14984FD930DDDC97CD4EBF4F4D0023576",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_implementation_brief_v1.py",
+      "sha256": "AC1ED68FC4808EE064D38AB3E98E5B4A1AA549B1E0C53321DCFF481FB86BE6DD",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_learning_v1.py",
+      "sha256": "AE279B8DFD810C8537CE8E36A4B6D92C9F9BA372FC41D7CAAB9D9179B18B6FFD",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_obv_reconcile_v1.py",
+      "sha256": "370DB5A1FC9BD9AA289D16CE8E7803101C26643A2E23B4E364F1701B5E0B9280",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_protected_contract_v1.py",
+      "sha256": "780BA05304FBE4DFBD90C9545856A37408BC34154C0348EF680CD3A56DE395F2",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_reconcile_v1.py",
+      "sha256": "778344540B2A331BE1B938AC32A8C03AB5DA29579518E073FBCD8753B98A54C6",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_repair_loop_v1.py",
+      "sha256": "850A11A68C72A94AB808F28310974F2945F42BBC739227BC4F1748FF2FCBF8B9",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_repair_registry_v1.py",
+      "sha256": "C3FE16158884085B6B23F1C9CAAC4003C0BCC22B2F98B72C4012D381C6A59791",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_repair_v2.py",
+      "sha256": "6777B3E4CABED82B96E58F1BDB07D924995453DCFDADE65622DDC15101FB1903",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/test_kcos_stage2_v2.py",
+      "sha256": "038DFFC4F2741C2A69940376B4B73F7114F8D5777F2CC23FA51C3F0FA47E9700",
+      "role": "stage2_regression_test"
+    },
+    {
+      "path": "state/tests/fixtures/obv_stage2_before_safety_repair_20260918.mq5",
+      "sha256": "C3B8DEB706E956808CB16A34CD837DC45E00F5B6C7F6FE2AED0332F961032766",
+      "role": "obv_regression_fixture"
+    },
+    {
+      "path": "state/tests/fixtures/obv_stage2_reconciliation_20261023.mq5",
+      "sha256": "1079879F6D9EE22643DD8168EC706BC268473DA49E00A554057B48FC5DA00EB7",
+      "role": "obv_regression_fixture"
+    },
+    {
+      "path": "ea/B1_1_OBV_Divergence_v1.mq5",
+      "sha256": "755043356D24FFA51B1DF4F8BD2E4B5103A95A0F4C95E01510C803DD3B806C52",
+      "role": "published_stage2_ea_source"
+    }
+  ]
+}
