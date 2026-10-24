@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "contract_id": "kcos-stage2-strategy-math-correction-v1",
+  "status": "authorized_candidate_verified_isolated",
+  "publication_status": "not_published",
+  "cycle_id": "kcos-20261023T154721Z-b1-1-quantileregression-volatilityregimegate-v1-rotation",
+  "ea": "B1_1_QuantileRegression_VolatilityRegimeGate_v1",
+  "authorization": "User-authorized surgical correction of the two identified dimensional inconsistencies; exact scope bound by before/after source hashes.",
+  "parent_stage1_spec": {
+    "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\specs\\kcos-20261023T154721Z-b1-1-quantileregression-volatilityregimegate-v1-rotation.stage1.spec.json",
+    "sha256": "B6C72B93C862AC040AC93FC3EBE6E0971E48AF9B8F4786A88F68035F3029E45D"
+  },
+  "parent_protected_behavior_contract": {
+    "path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\contracts\\kcos_stage2_protected_behavior_v1.json",
+    "sha256": "677D1E653C948AEE3B86D1DA4472A3023A041D5DCD0C81FC7FDDBE381ECF28B3",
+    "contract_id": "kcos-stage2-protected-behavior-v1"
+  },
+  "source": {
+    "before_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\mt5_stage45_portable\\MQL5\\Experts\\Kiyosaki\\B1_1_QuantileRegression_VolatilityRegimeGate_v1.mq5",
+    "before_sha256": "6FFEE16ECA5BCFCDBEBE6F1B0E365DDD21CA6723EBB8D0F40BCB8E1D1FB652ED",
+    "candidate_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\repairs\\kcos-20261023T154721Z-stage2-math-correction-v1\\B1_1_QuantileRegression_VolatilityRegimeGate_v1.mq5",
+    "candidate_sha256": "FE180F045FDABABA782EEA97812156A4ACF0FB1A00806E989231476BED5C7EB3",
+    "compiler_output_ex5": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\repairs\\kcos-20261023T154721Z-stage2-math-correction-v1\\B1_1_QuantileRegression_VolatilityRegimeGate_v1.ex5",
+    "ex5_sha256": "3AA8D02CB68B4285393EB3D8BE099B3E9A1BB7825D6CEE1AA6DA0764244E2D46",
+    "scope": "Only the log-return/ATR signal comparison, the volatility-quantile sample and required warmup, and removal of duplicate signal declarations in favor of shared predicates."
+  },
+  "corrections": [
+    {
+      "id": "signal_units_v1",
+      "before": "Compare dimensionless log return with ATR in symbol-price units.",
+      "after": "Compare closed-bar price_change = close_t1 - close_t2 with +/- InpEntryZ * ATR; share the exact same long/short predicates between entry and opposite-signal exit.",
+      "preserved": [
+        "closed bars shifts 1 and 2",
+        "InpEntryZ semantics as ATR multiples",
+        "mean-reversion direction",
+        "regime-side allowlists",
+        "strict threshold comparisons",
+        "one-position and no-same-bar-reopen behavior"
+      ]
+    },
+    {
+      "id": "regime_volatility_units_v1",
+      "before": "Compare current RMS of log returns with quantiles of squared log returns.",
+      "after": "Compare current RMS log-return volatility with type-7 quantiles of InpRegimeLookback prior rolling RMS values; each uses the same InpRegimeLookback return window; exclude current RV from its reference sample.",
+      "sampling": {
+        "reference_observations": "n prior rolling windows, with n=InpRegimeLookback",
+        "closed_bar_return_indices": "current 0..n-1; prior RV sample windows j..j+n-1 for j=1..n in a single 2*n squared-log-return buffer",
+        "maximum_close_shift": "2*n+1",
+        "minimum_bars": "max(2*n+2, InpATRPeriod+2)",
+        "complexity": "O(n) sliding sums plus existing quantile sort",
+        "quantile_method": "existing type-7 interpolation",
+        "boundary": "existing equality selects higher regime"
+      },
+      "preserved": [
+        "RMS formula",
+        "regime labels and ordering",
+        "quantile input names, values and domains",
+        "regime multipliers and tracker",
+        "completed-bar gate"
+      ]
+    }
+  ],
+  "protected_unchanged": {
+    "regime_include_sha256": "82B01A4E1742BFA00320317BFFC49EE3BE69309B73CB308AC6F9E5D96200072E",
+    "minato_include_sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF",
+    "twelve_regime_inputs": "byte-for-byte identical declarations",
+    "sizing_and_minato_quantity": "unchanged; no volume upsize/clamp; broker minimum was not available in source evidence and remains a feasibility diagnosis only",
+    "margin_order_stops_take_profit": "unchanged",
+    "tester_grid": "unchanged"
+  },
+  "trigger_evidence": {
+    "stage3_decision": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\decisions\\kcos-20261023T154721Z-b1-1-quantileregression-volatilityregimegate-v1-rotation.stage3.decision.json",
+    "stage3_decision_sha256": "D37EE97BD0D3525D56C44BD47BDF4E823ADDC6BC4ED49D099C26D0071013F468",
+    "zero_trade_observation": "M5 completed 8,468 rows over 11.992 months; 0 trades; repair_trigger=completed_timeframe_zero_trades",
+    "stage1_spec_behavior": "Original Stage 1 spec explicitly recorded both mixed-unit formulas and said preserve-and-flag; original evidence remains untouched."
+  },
+  "validation": {
+    "regression_test": "state/test_kcos_strategy_math_correction_v1.py",
+    "regression_test_result": "5 passed",
+    "compiler": "C:\\Program Files\\EightCap MetaTrader 5\\MetaEditor64.exe",
+    "compile_log": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\repairs\\kcos-20261023T154721Z-stage2-math-correction-v1\\MetaEditor.compile.log",
+    "compile_log_sha256": "85A1896129280D0603E682A67DB272A3661B6812BE2EB3013A8AEC92AD9BFBE2",
+    "compile_result": "0 errors, 0 warnings; MetaEditor process returned wrapper exit code 1 after reporting successful generation.",
+    "runtime_status": "not tested; Stage 3 remains the runtime owner and has not been launched."
+  },
+  "learning_state": "diagnosed; do not mark reusable until a committed Stage 2 transaction passes verification and a fresh authenticated Stage 3 run confirms runtime behavior."
+}

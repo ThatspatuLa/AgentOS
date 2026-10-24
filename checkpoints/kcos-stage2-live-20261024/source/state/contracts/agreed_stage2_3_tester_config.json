@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "name": "agreed_stage2_3_tester_config",
+  "applies_to": ["stage2", "stage3", "stage4", "rotation"],
+  "required_fields": {
+    "Model": "1",
+    "ProfitInPips": "0",
+    "Optimization": "2",
+    "ExecutionMode": "100",
+    "Leverage": "25",
+    "ProfitInPips": "0"
+  },
+  "rationale": {
+    "Model": "1 minute OHLC modelling — fast, deterministic, regime-aligned. No tick model.",
+    "ProfitInPips": "Profit in pips disabled — keeps calculations in currency, faster.",
+    "Optimization": "Fast genetic algorithm (mode 2).",
+    "ExecutionMode": "100ms execution delay — realistic fast-fill model, regime-aligned.",
+    "Leverage": "1:25 leverage — required by the spec (KCOS default)."
+  },
+  "approved_utc": "2026-09-14",
+  "approved_by": "user (Project Zen / #kiyosaki-chat)",
+  "enforced_by": [
+    "state/normalize_opt_ini.py",
+    "state/kcos_stage2_verify_v2.py",
+    "state/kcos_stage3_launch_v2.py"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "contract_id": "kcos-stage2-protected-behavior-v1",
+  "purpose": "Protect the existing Stage 2 build, repair and verification intent and proven runtime integrations. Changes require an explicit reviewed contract revision.",
+  "created_from": "canonical Kiyosaki Stage 2 source and shared MQL5 includes; 2026-10-23",
+  "protected_behavior": {
+    "regime": {
+      "include": "MQL5/Include/kiyosaki_regime.mqh",
+      "sha256": "82B01A4E1742BFA00320317BFFC49EE3BE69309B73CB308AC6F9E5D96200072E",
+      "enum_values": {
+        "REGIME_EXTREME_FEAR": -2,
+        "REGIME_FEAR": -1,
+        "REGIME_NEUTRAL": 0,
+        "REGIME_GREED": 1
+      },
+      "api_signatures": {
+        "regime_class": "class CKiyosakiRegime",
+        "regime_init": "bool Init(string symbol, ENUM_TIMEFRAMES tf)",
+        "regime_reset": "void Reset()",
+        "regime_calc": "ENUM_REGIME Calc(const double &high[], const double &low[], const double &close[], int totalBars)",
+        "regime_deinit": "void Deinit()"
+      },
+      "requirements": [
+        "preserve CKiyosakiRegime state update semantics",
+        "classify using completed bars according to the authenticated EA contract",
+        "preserve the existing 12 regime input declarations and their spec-bound values"
+      ]
+    },
+    "minato": {
+      "include": "MQL5/Include/minato_base_score_v2.mqh",
+      "sha256": "B6FB9035D6DFE0B34B79219E1B0EFC2870D7CC1B5477CD819FC7F30D158468EF",
+      "score_version": "MINATO_BASE_SCORE_V2.0",
+      "api_signatures": {
+        "minato_projected_margin": "bool MinatoAllowsProjectedMargin(",
+        "minato_quantity": "double MinatoRegimeQuantity(double base_quantity, double regime_multiplier)",
+        "minato_take_profit": "double MinatoTakeProfit(",
+        "minato_reset": "void MinatoV2ResetCapture()",
+        "minato_observe": "void MinatoV2ObserveTick()",
+        "minato_score": "double MinatoV2ScoreFromTester()"
+      },
+      "requirements": [
+        "preserve observation and reset hooks",
+        "OnTester returns MinatoV2ScoreFromTester()",
+        "preserve score formula, scoring window, margin capture and margin penalty",
+        "preserve quantity, projected margin and take-profit helper semantics"
+      ]
+    },
+    "strategy_and_execution": [
+      "preserve authenticated Stage1 signal and exit logic",
+      "closed-bar only signals and reads per the active execution contract",
+      "preserve input names, types, defaults, domains and strategy-specific ranges",
+      "preserve margin guards, order refusal and emergency protection",
+      "preserve cycle lineage, source and binary hash binding",
+      "only publisher advances Stage2 state",
+      "Stage2 does not launch MT5; Stage3 owns execution"
+    ]
+  },
+  "change_policy": {
+    "candidate_integration_repairs": "permitted only for a named failed check; require committed transaction and all protected checks pass",
+    "shared_contract_change": "requires an explicit new contract version, regression evidence and code review",
+    "historical_receipt": "does not override a current contract version"
+  }
+}

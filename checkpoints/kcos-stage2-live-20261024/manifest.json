@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "captured_utc": "2026-10-24T06:48:15Z",
+  "snapshot_scope": "Current live KCOS Stage 2 implementation, its direct supervisor integration, related tests/contracts, and installed Hermes Stage 2 shims",
+  "source_root": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state",
+  "zennew_base_commit": "4a8edd5ff41e0ee41fdb88bec30421f6812e889b",
+  "stage2_hermes_job": {
+    "id": "278b06a5a2a7",
+    "name": "kcos_stage2_v2_build_verify",
+    "enabled": false,
+    "schedule": {
+      "kind": "interval",
+      "minutes": 2,
+      "display": "every 2m"
+    }
+  },
+  "included_file_count": 55,
+  "files": [
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_autonomous_executor.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_autonomous_executor.py",
+      "sha256": "4071E5975BAB54D9B2D87B5165F55A343749799E7A21DD369AFE59B7E87A3A3F",
+      "bytes": 766
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_build_ea_v1.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_build_ea_v1.py",
+      "sha256": "D8E31A899CEDB93F6268ABD16142C4D4FABBBFB849F60AA1D787AFA6D637F967",
+      "bytes": 19791
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_compile_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_compile_v2.py",
+      "sha256": "7CC4314FF1188F7337019C2078C31DA537902708DD914AF35F8A29C8D5DB3D6B",
+      "bytes": 6889
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_context_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_context_v2.py",
+      "sha256": "DBE25DCD0C9B99AC14F6EAC9E3BBA891D5DE8D9F6D2EA474E62AFD11A3EB1EF0",
+      "bytes": 344
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_generate_source_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_generate_source_v2.py",
+      "sha256": "8AA2F33445430430CE6284007C8BC5D24187D38A59835F104195EF477397E546",
+      "bytes": 860
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_prepare_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_prepare_v2.py",
+      "sha256": "4A9BD568EE9F0E516B1934EB34325EC1FA4ABD3F9C9DA13971A0FDBEF1DF2877",
+      "bytes": 11645
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_publish_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_publish_v2.py",
+      "sha256": "874B1131F87F7CB2AB09D94885B80774830F62B6758DCEE206D552C9DE98F060",
+      "bytes": 7330
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_reconcile_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_reconcile_v2.py",
+      "sha256": "31506EC6D2E99E1BA341F037A8B76A1BE03C2B28E19702AD0B1A9B02C233626D",
+      "bytes": 5108
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_repair_loop_v1.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_repair_loop_v1.py",
+      "sha256": "4C23126744EE13E4731C7A9405CB1E7B74034BC326C1E879A51FDC9422C94242",
+      "bytes": 158536
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_repair_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_repair_v2.py",
+      "sha256": "FC7C87C7D4CD8E011C8A6C18B0A427815A1B35C95354D32BD2C20AA569C17D37",
+      "bytes": 27742
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\AppData\\Local\\hermes\\scripts\\kcos_stage2_verify_v2.py",
+      "snapshot_path": "hermes\\scripts\\kcos_stage2_verify_v2.py",
+      "sha256": "0033651C02C1E02760CC68905C563243A340C54F18C5C3FC10C5B2667EBA715B",
+      "bytes": 59203
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\contracts\\agreed_stage2_3_tester_config.json",
+      "snapshot_path": "source\\state\\contracts\\agreed_stage2_3_tester_config.json",
+      "sha256": "553AE0B159340552CB1E71639104111002A5FD47CE653758039CA0A6327402FA",
+      "bytes": 951
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\contracts\\kcos_stage2_protected_behavior_v1.json",
+      "snapshot_path": "source\\state\\contracts\\kcos_stage2_protected_behavior_v1.json",
+      "sha256": "677D1E653C948AEE3B86D1DA4472A3023A041D5DCD0C81FC7FDDBE381ECF28B3",
+      "bytes": 3177
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\contracts\\kcos_stage2_strategy_math_correction_v1.json",
+      "snapshot_path": "source\\state\\contracts\\kcos_stage2_strategy_math_correction_v1.json",
+      "sha256": "E8BAB0A52C82D7EF3FB5AD9BCF4AC0E1BE77C04391DF61AD0B6D6A4E171A0FC6",
+      "bytes": 5967
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\contracts\\kcos_stage2_v2.md",
+      "snapshot_path": "source\\state\\contracts\\kcos_stage2_v2.md",
+      "sha256": "358258B317A337A5AF34C793A52217D7FE344F6A9181B8A0F73F25509FACAA98",
+      "bytes": 7397
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_adapters_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_adapters_v1.py",
+      "sha256": "6BE04E9207C4FAB898D39B2210E99FA6A75C1986D90A2F0DEF666A2E65C8CB41",
+      "bytes": 3595
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_autonomous_executor.py",
+      "snapshot_path": "source\\state\\kcos_stage2_autonomous_executor.py",
+      "sha256": "EB5146481BFFE4F9F98EF55AE4E4EFAFA9E8A8840C68A995050603BB58E0C2BF",
+      "bytes": 134640
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_build_ea_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_build_ea_v1.py",
+      "sha256": "3BF0A19A38B2F12791AB9B1A5776CA207058D0FB6C0E4F568B89F263D35A78D1",
+      "bytes": 41020
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_compile_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_compile_v2.py",
+      "sha256": "EE067405F382C1B7BBD2F82EA7FA4B1332C90540609EA0F6DEFADA71C3545393",
+      "bytes": 10351
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_failure_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_failure_v2.py",
+      "sha256": "17E3AC2EBC3DCC8DD6AD7F5E661C9DF58DF7351D0CCA653C0852B495D6A71C7D",
+      "bytes": 2663
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_generate_source_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_generate_source_v2.py",
+      "sha256": "49069A7B95B34901F56CC475A67C3E66537A7181E7ED58008542AAE82713A261",
+      "bytes": 125409
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_implementation_brief_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_implementation_brief_v1.py",
+      "sha256": "806C2170656B5A1AEF137DC7AD7FB814DD90D8F18C76E36E6A9DBC8862F9F408",
+      "bytes": 8936
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_learning_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_learning_v1.py",
+      "sha256": "984E3B01ED1A5C374BCA856FD10FB468473E97EAA30A2563FC72F13653734649",
+      "bytes": 45117
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_obv_reconcile_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_obv_reconcile_v1.py",
+      "sha256": "FCF452B8C801EA0D1180A41A4CA68CC3D9BE1E3AD9E45F050BB9F2A01997A082",
+      "bytes": 11897
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_prepare_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_prepare_v2.py",
+      "sha256": "6A4ABF116932FC77A3B0A8BD08BEB85BDFF74FF8AB5AD15E683687FDCB04896D",
+      "bytes": 29546
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_promote_runtime_lesson_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_promote_runtime_lesson_v1.py",
+      "sha256": "EB771462A73042A448EFE348AA7F7BA2C7BA71BE06833674730EC3A5A1B380BF",
+      "bytes": 1013
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_protected_contract_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_protected_contract_v1.py",
+      "sha256": "007C4980160EC01827F389A85827741BBA37246E7E50C980D00CAED0E7C9C680",
+      "bytes": 2980
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_publish_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_publish_v2.py",
+      "sha256": "A42915848B1CCF4004E1C2788481D80A2583457249BE7AF89ED30EDE916703E8",
+      "bytes": 18144
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_reconcile_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_reconcile_v1.py",
+      "sha256": "F966BA5A99716A43B369BCECAC4E5A624ADC56ECC895B0E49B1B797EF18EBAB1",
+      "bytes": 22374
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_reconcile_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_reconcile_v2.py",
+      "sha256": "31506EC6D2E99E1BA341F037A8B76A1BE03C2B28E19702AD0B1A9B02C233626D",
+      "bytes": 5108
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_repair_loop_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_repair_loop_v1.py",
+      "sha256": "E62677F523318E8CB9CFCBE9616FAB8A13003A989852D05A5BEE2A054452F6B3",
+      "bytes": 400119
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_repair_registry_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_repair_registry_v1.py",
+      "sha256": "48C5BE6C4B4CE153FB5D0F35E836E16D4D24BB23AE83E76575BE14ADAD3B4A00",
+      "bytes": 7074
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_repair_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_repair_v2.py",
+      "sha256": "34C70CEFF6E804F271E3A0562C7FE09EE6E0DB46B3C63E436FE30C326277C3EC",
+      "bytes": 46321
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_source_defect_recovery_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_source_defect_recovery_v1.py",
+      "sha256": "2C253B78013F52109547A5D44979E427BD9C0754A628A8771142F768FB483EA8",
+      "bytes": 50014
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_strategy_math_correction_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_strategy_math_correction_v1.py",
+      "sha256": "DA0262A77EC37941322841D045F3FEA8F5BCE67BF51F3500333217BA835DF0BF",
+      "bytes": 14813
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_tester_diagnostic_v1.py",
+      "snapshot_path": "source\\state\\kcos_stage2_tester_diagnostic_v1.py",
+      "sha256": "015A11B2A9ADFAA0D67D49C55BCE2273178840D3B47AFE7749BB8B3CEF26291C",
+      "bytes": 33679
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_stage2_verify_v2.py",
+      "snapshot_path": "source\\state\\kcos_stage2_verify_v2.py",
+      "sha256": "E770D4773E1D4D0F1E6229988FE237CBCB2D28F068D0336192242A14BC6CF0D9",
+      "bytes": 130745
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\kcos_supervisor_v2.py",
+      "snapshot_path": "source\\state\\kcos_supervisor_v2.py",
+      "sha256": "65CF95D481D5C6E9BA5C3C15F77F971AD7EC620C5AA664F46C0734E69679260D",
+      "bytes": 621875
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_compile_history_v2.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_compile_history_v2.py",
+      "sha256": "B14C6C0BB0E8ACD6FFA0245C90A455911A93A0DC95D663F9F46FB4AD4B7F647C",
+      "bytes": 2829
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_creation_prompt.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_creation_prompt.py",
+      "sha256": "EC9FA34B9153228B0F79F9031E751330AF5D8F7E9A5AC609B0E6D2A9F4161CF5",
+      "bytes": 4737
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_dcc_admission_route_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_dcc_admission_route_v1.py",
+      "sha256": "0E4399DC16E9677AB7231004D1871DBBABE6D3496CCD04EF3A35BFE6DA697E7C",
+      "bytes": 14624
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_dcc_builder_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_dcc_builder_v1.py",
+      "sha256": "29AD2368E734410DD75AFBB4173FABCB482241080864CE29BD45B96236C36CDD",
+      "bytes": 3019
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_executor_reconciliation_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_executor_reconciliation_v1.py",
+      "sha256": "15F0BACF9FFED472C214F778B7641970BDAB521377EAB1310FA15417EE0183C8",
+      "bytes": 2424
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_executor_safety.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_executor_safety.py",
+      "sha256": "761B19E080A9989ECF3C3391DC9E87A9BCD8B4423F099B3EC8DB89266E7C882C",
+      "bytes": 36557
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_implementation_brief_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_implementation_brief_v1.py",
+      "sha256": "AC1ED68FC4808EE064D38AB3E98E5B4A1AA549B1E0C53321DCFF481FB86BE6DD",
+      "bytes": 10748
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_learning_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_learning_v1.py",
+      "sha256": "AE279B8DFD810C8537CE8E36A4B6D92C9F9BA372FC41D7CAAB9D9179B18B6FFD",
+      "bytes": 20889
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_math_correction_admission_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_math_correction_admission_v1.py",
+      "sha256": "4D29893606B171379350838658CF0B84939B27DACFB799434168770C0BBA8D51",
+      "bytes": 16353
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_obv_reconcile_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_obv_reconcile_v1.py",
+      "sha256": "370DB5A1FC9BD9AA289D16CE8E7803101C26643A2E23B4E364F1701B5E0B9280",
+      "bytes": 10683
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_protected_contract_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_protected_contract_v1.py",
+      "sha256": "780BA05304FBE4DFBD90C9545856A37408BC34154C0348EF680CD3A56DE395F2",
+      "bytes": 2863
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_reconcile_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_reconcile_v1.py",
+      "sha256": "EAA8A54CA570A053BB45A1DB68C817CA3524A1114E1E6A19D837E7ED7151DCF6",
+      "bytes": 13696
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_repair_loop_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_repair_loop_v1.py",
+      "sha256": "1DE7C97EB9387C513DCD5663ACA38461B8E7B53EDB39B90338CFA2D98E204F83",
+      "bytes": 130073
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_repair_registry_v1.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_repair_registry_v1.py",
+      "sha256": "C3FE16158884085B6B23F1C9CAAC4003C0BCC22B2F98B72C4012D381C6A59791",
+      "bytes": 969
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_repair_v2.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_repair_v2.py",
+      "sha256": "6777B3E4CABED82B96E58F1BDB07D924995453DCFDADE65622DDC15101FB1903",
+      "bytes": 6958
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_stage2_v2.py",
+      "snapshot_path": "tests\\state\\test_kcos_stage2_v2.py",
+      "sha256": "17AE1FF6F1435020F2ACD197A9054401C52B9156675EDF43284B8071781C7685",
+      "bytes": 99546
+    },
+    {
+      "source_path": "C:\\Users\\Tyson\\Projects\\kiyosaki_stage2b\\state\\test_kcos_supervisor_v2.py",
+      "snapshot_path": "tests\\state\\test_kcos_supervisor_v2.py",
+      "sha256": "9352AF0F5B74204EF10A5543F7B9D0678E2ADFF9240CC4B30DA2AC4DCEA2147B",
+      "bytes": 179285
+    }
+  ],
+  "exclusions": [
+    "cycle and market state",
+    "logs, tester caches, optimization output, and MT5 binaries",
+    "secrets and credentials",
+    "historical backups and superseded source copies",
+    "historical lesson/event payloads and prior tick records",
+    "unrelated worktree staging"
+  ]
+}
